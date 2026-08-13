@@ -1,0 +1,42 @@
+[
+    {
+        "id": "12414",
+        "name": "Advanced Blood Pressure Support",
+        "price": 32.95,
+        "image": "/images/products/advanced-blood-pressure-support-id1233-hmherbs-primary.jpg",
+        "inventory": 300,
+        "lowStockThreshold": 10,
+        "featured": true,
+        "url": "products.html"
+    },
+    {
+        "id": "27967",
+        "name": "3 in 1 Nitric Oxide Booster",
+        "price": 32.95,
+        "image": "/images/products/3-in-1-nitric-oxide-booster-id1237-hmherbs-primary.jpg",
+        "inventory": 300,
+        "lowStockThreshold": 10,
+        "featured": true,
+        "url": "products.html"
+    },
+    {
+        "id": "00060",
+        "name": "Cardio Amaze Nitric Oxide",
+        "price": 32.95,
+        "image": "/images/products/cardio-amaze-nitric-oxide-id1253-hmherbs-primary.jpg",
+        "inventory": 300,
+        "lowStockThreshold": 10,
+        "featured": true,
+        "url": "products.html"
+    },
+    {
+        "id": "02966",
+        "name": "Organic Beetroot Powder",
+        "price": 32.95,
+        "image": "/images/products/organic-beetroot-powder-id1527-hmherbs-primary.jpg",
+        "inventory": 600,
+        "lowStockThreshold": 10,
+        "featured": true,
+        "url": "products.html"
+    }
+]

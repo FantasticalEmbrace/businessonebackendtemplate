@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1f82ff">
+    <title>Business One - Menu Management</title>
+    <link rel="stylesheet" href="menu-admin.css">
+    <link rel="stylesheet" href="css/hm-close-controls.css">
+    <link rel="stylesheet" href="css/password-toggle.css?v=4">
+</head>
+<body>
+    <div id="menu-admin-login" class="login-overlay">
+        <div class="login-card">
+            <h2>Menu Admin Sign In</h2>
+            <p>Use your store admin account (manager role or higher).</p>
+            <div class="form-group">
+                <label for="menu-admin-email">Email</label>
+                <input type="email" id="menu-admin-email" autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label for="menu-admin-password">Password</label>
+                <input type="password" id="menu-admin-password" autocomplete="current-password">
+            </div>
+            <p id="menu-admin-login-error" class="login-error"></p>
+            <button type="button" class="btn btn-primary" id="menu-admin-login-btn">Sign in</button>
+        </div>
+    </div>
+
+    <div class="admin-container" id="menu-admin-app" hidden>
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="header-content">
+                <h1>Business One Menu Management</h1>
+                <p>Manage your digital menu items and API keys</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="menu">Menu Items</button>
+                <button class="tab-btn" data-tab="api-keys">API Keys</button>
+            </div>
+
+            <!-- Menu Items Tab -->
+            <div class="tab-content active" id="menu-tab">
+                <div class="section-header">
+                    <h2>Menu Items</h2>
+                    <button class="btn btn-primary" id="addMenuItemBtn">+ Add Menu Item</button>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Order</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="menuItemsTableBody">
+                            <tr>
+                                <td colspan="6" class="loading">Loading menu items...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- API Keys Tab -->
+            <div class="tab-content" id="api-keys-tab">
+                <div class="section-header">
+                    <h2>API Keys</h2>
+                    <button class="btn btn-primary" id="addApiKeyBtn">+ Generate API Key</button>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>API Key</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Last Used</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="apiKeysTableBody">
+                            <tr>
+                                <td colspan="6" class="loading">Loading API keys...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Menu Item Modal -->
+    <div class="modal" id="menuItemModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="menuItemModalTitle">Add Menu Item</h2>
+                <button type="button" class="modal-close" id="closeMenuItemModal" aria-label="Close"><svg class="cart-close-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12 5.7 16.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4z"/></svg></button>
+            </div>
+            <div class="modal-body">
+                <form id="menuItemForm">
+                    <input type="hidden" id="menuItemId">
+                    
+                    <div class="form-group">
+                        <label for="itemId">Item ID *</label>
+                        <input type="text" id="itemId" required placeholder="e.g., pos, payment, phone">
+                        <small>Unique identifier (lowercase, no spaces)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="itemName">Name *</label>
+                        <input type="text" id="itemName" required placeholder="Service Name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="itemDescription">Short description</label>
+                        <textarea id="itemDescription" rows="3" placeholder="Shown on the service card"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="itemOverview">Overview</label>
+                        <textarea id="itemOverview" rows="4" placeholder="Longer overview shown in the service modal"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="itemFeatures">Features (one per line)</label>
+                        <textarea id="itemFeatures" rows="5" placeholder="Real-time inventory tracking&#10;Sales reporting and analytics"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="itemIconClass">Icon class</label>
+                        <input type="text" id="itemIconClass" placeholder="fas fa-cash-register">
+                        <small>Font Awesome class, e.g. fas fa-credit-card</small>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="itemCategory">Category</label>
+                            <input type="text" id="itemCategory" placeholder="e.g., pos, payment, phone, website">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="itemPrice">Price</label>
+                            <input type="number" id="itemPrice" step="0.01" placeholder="0.00">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="itemImageUrl">Image URL</label>
+                        <input type="url" id="itemImageUrl" placeholder="https://example.com/image.jpg">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="itemDisplayOrder">Display Order</label>
+                            <input type="number" id="itemDisplayOrder" value="0" min="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="itemIsActive" checked>
+                                Active
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="cancelMenuItemBtn">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- API Key Modal -->
+    <div class="modal" id="apiKeyModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Generate API Key</h2>
+                <button type="button" class="modal-close" id="closeApiKeyModal" aria-label="Close"><svg class="cart-close-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12 5.7 16.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4z"/></svg></button>
+            </div>
+            <div class="modal-body">
+                <form id="apiKeyForm">
+                    <div class="form-group">
+                        <label for="apiKeyName">Name/Description *</label>
+                        <input type="text" id="apiKeyName" required placeholder="e.g., Android App, Website Integration">
+                        <small>Give this API key a descriptive name</small>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="cancelApiKeyBtn">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Generate</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- API Key Display Modal -->
+    <div class="modal" id="apiKeyDisplayModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>API Key Generated</h2>
+                <button type="button" class="modal-close" id="closeApiKeyDisplayModal" aria-label="Close"><svg class="cart-close-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12 5.7 16.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4z"/></svg></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <strong>Important:</strong> Copy this API key now. You won't be able to see it again!
+                </div>
+                <div class="form-group">
+                    <div class="static-field-label">API Key</div>
+                    <div class="api-key-display">
+                        <code id="generatedApiKey"></code>
+                        <button class="btn btn-sm" id="copyApiKeyBtn">Copy</button>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-primary" id="closeApiKeyDisplayBtn">Done</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/password-toggle.js?v=4"></script>
+    <script src="menu-admin.js"></script>
+</body>
+</html>
+

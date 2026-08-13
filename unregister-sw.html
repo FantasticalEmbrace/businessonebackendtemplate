@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Unregister Service Worker</title>
+</head>
+
+<body>
+    <h1>Service Worker Unregistration</h1>
+    <button onclick="unregisterSW()">Unregister Service Worker</button>
+    <div id="status"></div>
+
+    <script>
+        async function unregisterSW() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = '<p>Starting...</p>';
+
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+
+                    if (registrations.length === 0) {
+                        statusDiv.innerHTML = '<p style="color: green;">✅ No service workers registered.</p>';
+                        return;
+                    }
+
+                    statusDiv.innerHTML += `<p>📋 Found ${registrations.length} service worker(s)</p>`;
+
+                    for (let registration of registrations) {
+                        const unregistered = await registration.unregister();
+                        if (unregistered) {
+                            statusDiv.innerHTML += `<p style="color: green;">✅ Service worker unregistered successfully!</p>`;
+                        } else {
+                            statusDiv.innerHTML += `<p style="color: orange;">⚠️ Service worker unregistration returned false.</p>`;
+                        }
+                    }
+
+                    // Clear all caches
+                    if ('caches' in window) {
+                        statusDiv.innerHTML += '<p>🗑️ Clearing caches...</p>';
+                        const cacheNames = await caches.keys();
+                        statusDiv.innerHTML += `<p>📋 Found ${cacheNames.length} cache(s)</p>`;
+
+                        for (let cacheName of cacheNames) {
+                            await caches.delete(cacheName);
+                            statusDiv.innerHTML += `<p style="color: green;">✅ Cache deleted: ${cacheName}</p>`;
+                        }
+
+                        if (cacheNames.length === 0) {
+                            statusDiv.innerHTML += '<p style="color: green;">✅ No caches to delete.</p>';
+                        }
+                    }
+
+                    statusDiv.innerHTML += '<p style="color: green; font-weight: bold; font-size: 18px;">🎉 All done! Refresh the page to register the new service worker.</p>';
+                    statusDiv.innerHTML += '<p style="color: blue;">💡 Press Ctrl+Shift+R (or Cmd+Shift+R on Mac) for a hard refresh.</p>';
+                } catch (error) {
+                    statusDiv.innerHTML = `<p style="color: red;">❌ Error: ${error.message}</p>`;
+                }
+            } else {
+                statusDiv.innerHTML = '<p style="color: orange;">⚠️ Service workers are not supported in this browser.</p>';
+            }
+        }
+
+        // Auto-run on load
+        window.addEventListener('load', () => {
+            setTimeout(unregisterSW, 500);
+        });
+    </script>
+</body>
+
+</html>

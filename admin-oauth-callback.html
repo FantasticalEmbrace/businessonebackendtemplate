@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin sign-in — HM Herbs</title>
+    <link rel="stylesheet" href="css/brand-tokens.css?v=admin-sync-5">
+    <style>
+        body {
+            font-family: Inter, system-ui, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, var(--brand-sidebar-from) 0%, var(--brand-sidebar-to) 100%);
+            color: #fff;
+        }
+        .box {
+            background: #fff;
+            color: #374151;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            max-width: 420px;
+            text-align: center;
+        }
+        .error { color: #dc2626; }
+        a { color: var(--brand-primary); }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <p id="status">Completing admin sign-in…</p>
+    </div>
+    <script>
+        (function () {
+            const params = new URLSearchParams(window.location.search);
+            const status = document.getElementById('status');
+            const error = params.get('error');
+            if (error) {
+                status.innerHTML =
+                    '<span class="error">' +
+                    error.replace(/</g, '&lt;') +
+                    '</span><p style="margin-top:1rem"><a href="admin.html?fresh_login=1">Back to admin login</a></p>';
+                return;
+            }
+            const token = params.get('token');
+            if (!token) {
+                status.textContent = 'Missing sign-in token. Please try again.';
+                return;
+            }
+            localStorage.setItem('adminToken', token);
+            const returnTo = params.get('returnTo') || 'admin.html';
+            window.location.replace(returnTo.replace(/^\/+/, '') || 'admin.html');
+        })();
+    </script>
+</body>
+</html>

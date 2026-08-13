@@ -1,0 +1,186 @@
+/* Browser Compatibility Enhancement for HM Herbs */
+/* Adds vendor prefixes for older browser support */
+
+/* CSS Variables fallbacks for IE11 */
+:root {
+  /* Fallback colors for browsers that don't support CSS variables */
+  --primary-green-fallback: #ff9b1f;
+  --white-fallback: #ffffff;
+  --gray-100-fallback: #f3f4f6;
+  --transition-fast-fallback: 0.15s ease;
+  --transition-normal-fallback: 0.3s ease;
+}
+
+/* Transform vendor prefixes */
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-secondary:hover,
+.btn-secondary:focus,
+.btn-outline:hover,
+.btn-outline:focus {
+  -webkit-transform: translateY(-1px);
+  -moz-transform: translateY(-1px);
+  -ms-transform: translateY(-1px);
+  -o-transform: translateY(-1px);
+  transform: translateY(-1px);
+}
+
+/* Transition vendor prefixes for buttons */
+.btn {
+  -webkit-transition: all 0.15s ease;
+  -moz-transition: all 0.15s ease;
+  -ms-transition: all 0.15s ease;
+  -o-transition: all 0.15s ease;
+  transition: all var(--transition-fast);
+}
+
+/* Transition vendor prefixes for navigation */
+.navbar-nav a {
+  -webkit-transition: color 0.15s ease;
+  -moz-transition: color 0.15s ease;
+  -ms-transition: color 0.15s ease;
+  -o-transition: color 0.15s ease;
+  transition: color var(--transition-fast);
+}
+
+/* Transform vendor prefixes for product cards */
+.product-card:hover {
+  -webkit-transform: translateY(-4px);
+  -moz-transform: translateY(-4px);
+  -ms-transform: translateY(-4px);
+  -o-transform: translateY(-4px);
+  transform: translateY(-4px);
+}
+
+.product-card {
+  -webkit-transition: all 0.3s ease;
+  -moz-transition: all 0.3s ease;
+  -ms-transition: all 0.3s ease;
+  -o-transition: all 0.3s ease;
+  transition: all var(--transition-normal);
+}
+
+/* Flexbox vendor prefixes for older browsers */
+.navbar-nav,
+.product-grid,
+.cart-items,
+.form-group {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+/* Border radius vendor prefixes */
+.btn,
+.form-control,
+.product-card,
+.modal-content {
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  border-radius: 8px;
+}
+
+/* Box shadow vendor prefixes */
+.product-card:hover,
+.btn-primary:hover,
+.modal-content {
+  -webkit-box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  -moz-box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* CSS Grid fallback for older browsers */
+@supports not (display: grid) {
+  .product-grid {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-wrap: wrap;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+  }
+  
+  .product-card {
+    width: calc(33.333% - 1rem);
+    margin: 0.5rem;
+  }
+  
+  @media (max-width: 768px) {
+    .product-card {
+      width: calc(50% - 1rem);
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .product-card {
+      width: calc(100% - 1rem);
+    }
+  }
+}
+
+/* CSS Variables fallback for IE11 */
+@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+  /* IE11 specific styles */
+  .btn-primary {
+    background-color: #ff9b1f;
+    border-color: #ff9b1f;
+  }
+  
+  .btn-primary:hover {
+    background-color: #065f46;
+    border-color: #065f46;
+  }
+  
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #ffffff;
+    color: #111827;
+  }
+  
+  .navbar {
+    background-color: #ffffff;
+  }
+  
+  .form-control {
+    border: 1px solid #d1d5db;
+    background-color: #ffffff;
+  }
+}
+
+/* Safari specific fixes */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  /* Safari-specific styles */
+  .btn {
+    -webkit-appearance: none;
+  }
+  
+  .form-control {
+    -webkit-appearance: none;
+  }
+}
+
+/* Firefox specific fixes */
+@-moz-document url-prefix() {
+  /* Firefox-specific styles */
+  .btn {
+    -moz-appearance: none;
+  }
+  
+  .form-control {
+    -moz-appearance: none;
+  }
+}
+
+/* Edge specific fixes */
+@supports (-ms-ime-align: auto) {
+  /* Edge-specific styles */
+  .product-grid {
+    display: -ms-grid;
+    -ms-grid-columns: 1fr 1fr 1fr;
+    -ms-grid-rows: auto;
+  }
+}

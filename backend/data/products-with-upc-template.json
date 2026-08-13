@@ -1,0 +1,20 @@
+{
+  "products": [
+    {
+      "upc": "123456789012",
+      "sku": "12414",
+      "name": "Advanced Blood Pressure Support"
+    },
+    {
+      "upc": "987654321098",
+      "sku": "HS-03",
+      "name": "Healing Antiseptic Salve"
+    },
+    {
+      "upc": "555555555555",
+      "sku": "ABC-123",
+      "name": "Example Product Name"
+    }
+  ]
+}
+

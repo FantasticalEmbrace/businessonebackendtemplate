@@ -1,0 +1,88 @@
+{
+  "total_count": 9,
+  "generated_at": "2025-12-23T18:53:43.378Z",
+  "products_by_brand": {
+    "Buried Treasure": {
+      "brand_name": "Buried Treasure",
+      "brand_slug": "buried-treasure",
+      "website_url": null,
+      "products": [
+        {
+          "id": 1249,
+          "sku": "28711",
+          "name": "BURIED TREASURE ACF EXT STRENGTH PM",
+          "slug": "buried-treasure-acf-ext-strength-pm"
+        },
+        {
+          "id": 1250,
+          "sku": "28710",
+          "name": "BURIED TREASURE ACF PM",
+          "slug": "buried-treasure-acf-pm"
+        }
+      ]
+    },
+    "Life-Flo": {
+      "brand_name": "Life-Flo",
+      "brand_slug": "life-flo",
+      "website_url": null,
+      "products": [
+        {
+          "id": 1339,
+          "sku": "28698",
+          "name": "LIFE-FLO MAGNESIUM OIL SPRAY With aloe vera",
+          "slug": "life-flo-magnesium-oil-spray-with-aloe-vera"
+        },
+        {
+          "id": 1340,
+          "sku": "28697",
+          "name": "LIFE-FLO PURE MAGNESIUM OIL SPRAY",
+          "slug": "life-flo-pure-magnesium-oil-spray"
+        }
+      ]
+    },
+    "Nature's Plus": {
+      "brand_name": "Nature's Plus",
+      "brand_slug": "nature-s-plus",
+      "website_url": null,
+      "products": [
+        {
+          "id": 1366,
+          "sku": "18103",
+          "name": "NATURE'S PLUS AGELOSS FIRST DAY INFLAMMATION RESPONSE",
+          "slug": "nature-s-plus-ageloss-first-day-inflammation-response"
+        },
+        {
+          "id": 1368,
+          "sku": "18491",
+          "name": "NATURE'S PLUS AGELOSS KIDNEY SUPPORT",
+          "slug": "nature-s-plus-ageloss-kidney-support"
+        },
+        {
+          "id": 1377,
+          "sku": "23519",
+          "name": "NATURE'S PULS PROBIOTIC MEGA",
+          "slug": "nature-s-puls-probiotic-mega"
+        }
+      ]
+    },
+    "Terry Naturally": {
+      "brand_name": "Terry Naturally",
+      "brand_slug": "terry-naturally",
+      "website_url": null,
+      "products": [
+        {
+          "id": 1957,
+          "sku": "24494",
+          "name": "TERRY NAT. ANXIOCALM",
+          "slug": "terry-nat-anxiocalm"
+        },
+        {
+          "id": 1960,
+          "sku": "28676",
+          "name": "Terry Naturally Urinary Tract Intensive Support",
+          "slug": "terry-naturally-urinary-tract-intensive-support"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,289 @@
+/* Performance Optimizations for HM Herbs */
+/* Critical rendering path optimizations and performance enhancements */
+
+/* Critical CSS - Above the fold content */
+/* This should be inlined in HTML head for fastest rendering */
+
+/* Performance-optimized font loading */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  /* Improves font loading performance */
+  src: local('Inter Regular'), local('Inter-Regular'),
+    url('https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiA.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* GPU acceleration — exclude product cards (translateZ breaks <img> painting on mobile WebKit) */
+.btn {
+  will-change: transform;
+}
+
+/* EDSA booking modal must stay transform-free or fixed centering breaks */
+#edsa-booking-modal,
+#edsa-booking-modal *,
+.edsa-modal,
+.edsa-modal * {
+  will-change: auto !important;
+  transform: none !important;
+  -webkit-transform: none !important;
+}
+
+/* Optimize expensive CSS properties */
+.product-card {
+  /* Use transform instead of changing top/left for animations */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-4px) translateZ(0);
+}
+
+/* Do not use contain:paint on .navbar — it clips header account/cart hit targets */
+
+.product-grid {
+  contain: layout;
+}
+
+/* Optimize images for performance — avoid content-visibility:auto (skips paint on mobile) */
+.product-image,
+.logo {
+  object-fit: cover;
+  image-rendering: auto;
+}
+
+/* Critical path CSS - inline these styles */
+.critical-above-fold {
+
+  /* Navbar */
+  .navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: var(--white);
+    z-index: 1000;
+    height: 70px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Hero section */
+  .hero {
+    padding-top: 70px;
+    min-height: 60vh;
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-sage) 100%);
+  }
+
+  /* Primary button */
+  .btn-primary {
+    background: var(--primary-green);
+    color: var(--white);
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+  }
+}
+
+/* Defer non-critical animations */
+@media (prefers-reduced-motion: no-preference) {
+  .fade-in {
+    animation: fadeIn 0.6s ease-out;
+  }
+
+  .slide-up {
+    animation: slideUp 0.8s ease-out;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Optimize for Core Web Vitals */
+
+/* Largest Contentful Paint (LCP) optimization */
+.hero-content,
+.product-featured {
+  /* Prioritize loading of LCP elements */
+  content-visibility: visible;
+}
+
+/* First Input Delay (FID) optimization */
+.interactive-element {
+  /* Ensure interactive elements are ready quickly */
+  pointer-events: auto;
+}
+
+/* Cumulative Layout Shift (CLS) prevention */
+.skeleton-loader {
+  /* Placeholder dimensions to prevent layout shift */
+  width: 100%;
+  height: 200px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Resource hints for performance */
+/* Add these to HTML head:
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="dns-prefetch" href="https://api.hmherbs.com">
+<link rel="preload" href="/styles.css" as="style">
+<link rel="preload" href="/script.js" as="script">
+*/
+
+/* Optimize for mobile performance */
+@media (max-width: 768px) {
+
+  /* Reduce complexity on mobile */
+  .product-card {
+    will-change: auto;
+    /* Disable GPU layers on mobile to save memory */
+  }
+
+  /* Simplify animations on mobile */
+  .product-card:hover {
+    transform: none;
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Optimize touch targets */
+  .btn,
+  .nav-link,
+  .product-card {
+    min-height: 44px;
+    /* iOS recommended touch target */
+    min-width: 44px;
+  }
+}
+
+/* Print optimizations */
+@media print {
+
+  /* Hide non-essential elements when printing */
+  .navbar,
+  .footer,
+  .btn,
+  .modal {
+    display: none !important;
+  }
+
+  /* Optimize for print */
+  body {
+    font-size: 12pt;
+    line-height: 1.4;
+    color: black;
+    background: white;
+  }
+
+  .product-card {
+    break-inside: avoid;
+    margin-bottom: 1rem;
+  }
+}
+
+/* Accessibility performance optimizations */
+@media (prefers-reduced-motion: reduce) {
+
+  /* Disable animations for users who prefer reduced motion */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* High contrast mode optimizations */
+@media (prefers-contrast: high) {
+  .btn-primary {
+    border: 2px solid currentColor;
+  }
+
+  .product-card {
+    border: 1px solid currentColor;
+  }
+}
+
+/* Dark mode performance (if implemented) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Dark mode colors - only if dark mode is supported */
+    /* Keep primary-green consistent with main theme */
+    --primary-green: var(--brand-primary);
+    --background: #111827;
+    --text: #f9fafb;
+  }
+}
+
+/* Container queries for better responsive design */
+@container (min-width: 768px) {
+  .product-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+}
+
+/* Optimize for different connection speeds */
+@media (prefers-reduced-data: reduce) {
+
+  /* Reduce data usage for users on slow connections */
+  .hero {
+    background-image: none;
+    background-color: var(--primary-green);
+  }
+
+  .product-image {
+    /* Use lower quality images */
+    filter: contrast(1.1) brightness(1.1);
+  }
+}
+
+/* Performance monitoring helpers */
+.perf-mark {
+  /* Add performance marks for monitoring */
+  /* Use with: performance.mark('hero-loaded') */
+}
+
+/* Critical resource loading optimization */
+.resource-priority-high {
+  /* For critical resources */
+  importance: high;
+}
+
+.resource-priority-low {
+  /* For non-critical resources */
+  importance: low;
+}

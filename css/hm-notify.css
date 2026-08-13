@@ -1,0 +1,133 @@
+/* Storefront toasts — bottom-center for cart, top-right for other messages */
+
+#hm-toast-region,
+#hm-toast-region *,
+.hm-toast-region,
+.hm-toast-region *,
+.hm-toast,
+.hm-toast * {
+  -webkit-backface-visibility: visible !important;
+  backface-visibility: visible !important;
+}
+
+#hm-toast-region,
+.hm-toast-region {
+  position: fixed;
+  z-index: 2147483647;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+  max-width: min(420px, calc(100vw - 2rem));
+  transform: none;
+}
+
+.hm-toast-region:not(.hm-toast-region--cart) {
+  top: calc(var(--hm-header-offset, 4.75rem) + 12px);
+  right: 16px;
+  left: auto;
+  bottom: auto;
+  align-items: stretch;
+}
+
+/* Cart confirmations: centered above bottom safe area — stays in the customer viewport */
+.hm-toast-region--cart {
+  left: 50%;
+  right: auto;
+  top: auto;
+  bottom: max(20px, env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%) !important;
+  -webkit-transform: translateX(-50%) !important;
+  align-items: stretch;
+  width: min(420px, calc(100vw - 2rem));
+}
+
+.hm-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  box-sizing: border-box;
+  padding: 0.9rem 1rem;
+  border-radius: 0.65rem;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.35;
+  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.hm-toast--visible {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.hm-toast--success {
+  background: var(--brand-primary-dark);
+}
+
+.hm-toast--error {
+  background: #dc2626;
+}
+
+.hm-toast--warning {
+  background: #d97706;
+}
+
+.hm-toast--info {
+  background: #2563eb;
+}
+
+.hm-toast__row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.hm-toast__cart-icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.65rem;
+  height: 1.65rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.22);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.hm-toast__message {
+  flex: 1;
+  min-width: 0;
+}
+
+.hm-toast__close {
+  flex-shrink: 0;
+  appearance: none;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  font-size: 1.15rem;
+  line-height: 1;
+  padding: 0;
+}
+
+.hm-toast__close:hover {
+  background: rgba(255, 255, 255, 0.32);
+}
+
+body.auth-modal-open #hm-toast-region {
+  z-index: 2147483647 !important;
+  filter: none !important;
+}

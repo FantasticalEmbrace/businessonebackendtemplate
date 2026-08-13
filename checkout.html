@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="description"
+        content="Complete your order at H&M Herbs & Vitamins - Secure checkout for natural health products">
+    <title>Checkout - H&M Herbs & Vitamins</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/emergency-fixes.css?v=mobile-nav-4">
+    <link rel="stylesheet" href="css/hm-notify.css">
+    <link rel="stylesheet" href="styles.css?v=brand-sync-5">
+    <link rel="stylesheet" href="css/accessibility-enhancements.css?v=a11y-1">
+    <link rel="stylesheet" href="css/password-toggle.css?v=4">
+    <link rel="stylesheet" href="css/hm-accent-links.css">
+    <link rel="stylesheet" href="css/mobile-enhancements.css">
+    <link rel="stylesheet" href="css/mobile-nav.css?v=brand-sync-5">
+    <link rel="stylesheet" href="css/customer-auth.css">
+    <link rel="stylesheet" href="css/hm-close-controls.css">
+    <link rel="stylesheet" href="css/site-promo-banner.css?v=brand-sync-5">
+    <link rel="stylesheet" href="css/age-gate.css?v=brand-sync-5">
+    <link rel="stylesheet" href="css/hm-popups-brand.css?v=brand-sync-5">
+    <link rel="stylesheet" href="css/hm-gift-card.css">
+    <link rel="stylesheet" href="css/hm-choice-toggles.css">
+
+    <script src="js/mobile-menu.js?v=mobile-nav-4"></script>
+
+    <style>
+        .checkout-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--space-6) var(--space-4);
+        }
+
+        .checkout-header {
+            text-align: center;
+            margin-bottom: var(--space-8);
+        }
+
+        .checkout-header h1 {
+            font-size: var(--text-3xl);
+            color: var(--gray-900);
+            margin-bottom: var(--space-2);
+        }
+
+        .checkout-header p {
+            color: var(--gray-600);
+        }
+
+        .checkout-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--space-8);
+        }
+
+        @media (min-width: 1024px) {
+            .checkout-content {
+                grid-template-columns: 2fr 1fr;
+            }
+        }
+
+        .checkout-form-section {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .checkout-form-section h2 {
+            font-size: var(--text-xl);
+            color: var(--gray-900);
+            margin-bottom: var(--space-6);
+            padding-bottom: var(--space-4);
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--space-4);
+            margin-bottom: var(--space-4);
+        }
+
+        @media (min-width: 640px) {
+            .form-row {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .form-group {
+            margin-bottom: var(--space-4);
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            color: var(--gray-700);
+            margin-bottom: var(--space-2);
+            font-size: var(--text-sm);
+        }
+
+        .form-group label .required {
+            color: var(--error);
+            margin-left: var(--space-1);
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: var(--space-3) var(--space-4);
+            border: 2px solid var(--gray-300);
+            border-radius: var(--radius-lg);
+            font-size: var(--text-base);
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.1);
+        }
+
+        .form-input:disabled,
+        .form-input[readonly] {
+            background-color: var(--gray-100);
+            cursor: not-allowed;
+        }
+
+        #epi-payment-fields,
+        #bank-account-fields,
+        #gift-card-fields {
+            margin-top: var(--space-4);
+            padding-top: var(--space-4);
+            border-top: 1px solid var(--gray-200);
+        }
+
+        #gift-card-balance-result {
+            margin-top: var(--space-3);
+            padding: var(--space-3) var(--space-4);
+            border-radius: var(--radius-md);
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            color: #166534;
+            font-size: 0.95rem;
+        }
+
+        #gift-card-balance-result.is-error {
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: #991b1b;
+        }
+
+        .gift-card-help {
+            margin: 0 0 var(--space-4);
+            font-size: 0.95rem;
+            color: var(--gray-600);
+            line-height: 1.5;
+        }
+
+        #gift-card-account-section {
+            margin-bottom: var(--space-4);
+        }
+
+        .gift-card-manual-toggle {
+            margin: var(--space-3) 0 var(--space-4);
+            padding: 0;
+            border: none;
+            background: none;
+            color: var(--primary-green);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .gift-card-manual-toggle:hover {
+            color: var(--secondary-sage, #6ee7b7);
+        }
+
+        /* NMI Collect.js: one outer border on .nmi-field-host; iframes stay borderless inside */
+        .checkout-nmi-collect {
+            width: 100%;
+        }
+
+        .checkout-nmi-collect .nmi-field-host {
+            display: flex;
+            align-items: stretch;
+            width: 100%;
+            min-height: 52px;
+            border: 2px solid var(--gray-300);
+            border-radius: var(--radius-lg);
+            padding: 0;
+            overflow: hidden;
+            box-sizing: border-box;
+            background: var(--white);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .checkout-nmi-collect .nmi-field-host:focus-within {
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.1);
+        }
+
+        .checkout-nmi-collect .nmi-field-host > div,
+        .checkout-nmi-collect .nmi-field-host > span {
+            flex: 1 1 auto;
+            width: 100% !important;
+            min-width: 0;
+            min-height: 48px;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: none !important;
+            background: transparent !important;
+            box-shadow: none !important;
+        }
+
+        .checkout-nmi-collect .nmi-field-host iframe {
+            display: block;
+            width: 100% !important;
+            height: 48px !important;
+            min-height: 48px;
+            border: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: transparent !important;
+            box-shadow: none !important;
+        }
+
+        .checkout-nmi-collect .form-row {
+            margin-bottom: 0;
+        }
+
+        .checkout-nmi-collect .form-row .form-group {
+            min-width: 0;
+        }
+
+        #nmi-test-card-hint.form-help {
+            font-size: var(--text-sm);
+            color: var(--gray-600);
+            line-height: 1.5;
+        }
+
+        body.checkout-nmi-active #legacy-card-fields {
+            display: none !important;
+        }
+
+        body.checkout-nmi-active #nmi-collect-fields {
+            display: block !important;
+        }
+
+        #epi-payment-fields .form-input,
+        #bank-account-fields .form-input,
+        #bank-account-fields .form-select {
+            background-color: var(--white);
+            cursor: text;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: var(--space-4);
+        }
+
+        .checkbox-group input[type="checkbox"]:not(.hm-choice-input) {
+            width: auto;
+            margin-right: var(--space-2);
+        }
+
+        .checkout-shipping-option input[type="radio"] {
+            width: 1.125rem;
+            height: 1.125rem;
+            margin-top: 0.2rem;
+            accent-color: var(--primary-green);
+            flex-shrink: 0;
+        }
+
+        .checkout-shipping-option:has(input:checked) {
+            border-color: var(--primary-green);
+            background: var(--brand-surface-subtle);
+        }
+
+        .order-summary {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: var(--space-6);
+            height: fit-content;
+        }
+
+        .order-summary h2 {
+            font-size: var(--text-xl);
+            color: var(--gray-900);
+            margin-bottom: var(--space-6);
+            padding-bottom: var(--space-4);
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .order-items {
+            margin-bottom: var(--space-6);
+        }
+
+        .order-item {
+            display: flex;
+            gap: var(--space-4);
+            padding: var(--space-4) 0;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .order-item-image {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: var(--radius-md);
+        }
+
+        .order-item-details {
+            flex: 1;
+        }
+
+        .order-item-name {
+            font-weight: 500;
+            color: var(--gray-900);
+            margin-bottom: var(--space-1);
+        }
+
+        .order-item-gift-meta {
+            font-size: var(--text-sm);
+            color: var(--gray-600);
+            margin-bottom: var(--space-1);
+        }
+
+        .order-item-price {
+            color: var(--gray-600);
+            font-size: var(--text-sm);
+        }
+
+        .order-item-quantity {
+            color: var(--gray-600);
+            font-size: var(--text-sm);
+        }
+
+        .checkout-line-qty {
+            display: inline-flex;
+            align-items: center;
+            gap: 0;
+            margin: var(--space-2) 0;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            background: var(--white);
+            max-width: 11rem;
+        }
+
+        .checkout-qty-btn {
+            width: 2.25rem;
+            min-height: 2.25rem;
+            border: none;
+            background: var(--gray-100);
+            color: var(--gray-800);
+            font-size: 1.1rem;
+            font-weight: 600;
+            line-height: 1;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .checkout-qty-btn:hover:not(:disabled) {
+            background: var(--gray-200);
+        }
+
+        .checkout-qty-btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .checkout-qty-input {
+            width: 3rem;
+            min-height: 2.25rem;
+            border: none;
+            border-left: 1px solid var(--gray-300);
+            border-right: 1px solid var(--gray-300);
+            text-align: center;
+            font-size: var(--text-sm);
+            font-weight: 600;
+            color: var(--gray-900);
+            -moz-appearance: textfield;
+        }
+
+        .checkout-qty-input::-webkit-outer-spin-button,
+        .checkout-qty-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .checkout-qty-input:focus {
+            outline: none;
+            background: rgba(4, 120, 87, 0.06);
+        }
+
+        .order-item-remove {
+            background: #ef5350;
+            border: 1px solid #e53935;
+            color: #ffffff;
+            cursor: pointer;
+            width: auto;
+            height: 2.25rem;
+            padding: 0.5rem 0.85rem;
+            border-radius: 0.35rem;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            margin-top: var(--space-2);
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        .order-item-remove .cart-item-delete-icon {
+            display: block;
+            flex-shrink: 0;
+        }
+
+        .order-item-remove:hover {
+            background: #e53935;
+            border-color: #c62828;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(229, 57, 53, 0.4);
+        }
+
+        .order-item-remove:active {
+            transform: translateY(0) scale(0.98);
+            box-shadow: 0 3px 8px rgba(127, 29, 29, 0.22);
+        }
+
+        .order-item-remove:focus-visible {
+            outline: 3px solid rgba(229, 57, 53, 0.35);
+            outline-offset: 2px;
+        }
+
+        .order-totals {
+            border-top: 2px solid var(--gray-200);
+            padding-top: var(--space-4);
+        }
+
+        .order-total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: var(--space-2);
+            color: var(--gray-700);
+        }
+
+        .order-total-row.final {
+            font-size: var(--text-xl);
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-top: var(--space-4);
+            padding-top: var(--space-4);
+            border-top: 2px solid var(--gray-200);
+        }
+
+        .empty-cart-message {
+            text-align: center;
+            padding: var(--space-12);
+            color: var(--gray-600);
+        }
+
+        .empty-cart-message i {
+            font-size: var(--text-5xl);
+            color: var(--gray-400);
+            margin-bottom: var(--space-4);
+        }
+
+        .btn-checkout {
+            width: 100%;
+            padding: var(--space-4);
+            background: var(--primary-green);
+            color: var(--white);
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: var(--text-lg);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: var(--space-6);
+        }
+
+        .btn-checkout:hover {
+            background: var(--primary-green-dark);
+        }
+
+        .btn-checkout:disabled {
+            background: var(--gray-400);
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            color: var(--error);
+            font-size: var(--text-sm);
+            margin-top: var(--space-1);
+            display: none;
+        }
+
+        .form-group.error .form-input,
+        .form-group.error .form-select {
+            border-color: var(--error);
+        }
+
+        .form-group.error .error-message {
+            display: block;
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-spinner {
+            background: var(--white);
+            padding: var(--space-8);
+            border-radius: var(--radius-xl);
+            text-align: center;
+        }
+
+        .loading-spinner i {
+            font-size: var(--text-4xl);
+            color: var(--primary-green);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header" role="banner">
+        <div class="main-header">
+            <div class="container">
+                <nav class="navbar" role="navigation" aria-label="Main navigation">
+                    <a href="index.html" class="logo" aria-label="H&M Herbs & Vitamins - Home">
+                        <img src="images/HM%20Herb%20Logo.png" alt="H&M Herbs & Vitamins" class="logo-wordmark" loading="eager">
+                    </a>
+
+                    <button class="mobile-menu-toggle" aria-expanded="false" aria-controls="nav-menu"
+                        aria-label="Toggle navigation menu">
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                    </button>
+
+                    <ul class="nav-menu" id="nav-menu" role="menubar">
+                        <li role="none"><a href="index.html" class="nav-link" role="menuitem">Home</a></li>
+                        <li role="none"><a href="products.html" class="nav-link" role="menuitem">Products</a></li>
+                        <li role="none"><a href="index.html#edsa-service" class="nav-link edsa-nav-link" role="menuitem">EDSA Service</a></li>
+                        <li role="none"><a href="index.html#about" class="nav-link" role="menuitem">About</a></li>
+                        <li role="none"><a href="index.html#contact" class="nav-link" role="menuitem">Contact</a></li>
+                    </ul>
+
+                    <div class="header-actions">
+                    <!-- Customer Account/Login -->
+                    <div class="customer-auth-container">
+                        <div id="customer-auth-guest" class="auth-state-panel">
+                            <button type="button" class="auth-btn" id="customer-login-btn" aria-label="Sign in">
+                                <svg class="auth-icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17 15 12 10 7"/><path d="M15 12H3"/></svg>
+                                <span class="auth-btn-text">Sign In</span>
+                            </button>
+                            <button type="button" class="auth-btn" id="customer-register-btn" aria-label="Create account">
+                                <svg class="auth-icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></svg>
+                                <span class="auth-btn-text">Register</span>
+                            </button>
+                        </div>
+                        <div id="customer-auth-user" class="auth-state-panel" hidden>
+                            <div class="account-dropdown" id="customer-account-btn">
+                                <a href="account.html" class="auth-btn account-link" aria-label="My Account">
+                                    <svg class="auth-icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                    <span class="auth-btn-text" id="customer-name-display">My Account</span>
+                                </a>
+                                <button type="button" class="auth-btn auth-btn-signout" id="customer-logout-btn"
+                                    aria-label="Sign out">
+                                    <svg class="auth-icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+                                    <span class="auth-btn-text">Sign Out</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="checkout-container">
+            <div class="checkout-header">
+                <h1>Checkout</h1>
+                <p>Complete your order below</p>
+            </div>
+
+            <div class="checkout-content" id="checkout-content">
+                <!-- Checkout Form -->
+                <div class="checkout-form-section">
+                    <form id="checkout-form">
+                        <!-- Customer Information -->
+                        <h2>Customer Information</h2>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="first-name">First Name <span class="required">*</span></label>
+                                <input type="text" id="first-name" name="first_name" class="form-input" required
+                                    autocomplete="given-name">
+                                <span class="error-message">Please enter your first name</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="last-name">Last Name <span class="required">*</span></label>
+                                <input type="text" id="last-name" name="last_name" class="form-input" required
+                                    autocomplete="family-name">
+                                <span class="error-message">Please enter your last name</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email <span class="required">*</span></label>
+                            <input type="email" id="email" name="email" class="form-input" required
+                                autocomplete="email">
+                            <span class="error-message">Please enter a valid email address</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone <span class="required">*</span></label>
+                            <input type="tel" id="phone" name="phone" class="form-input" required autocomplete="tel"
+                                placeholder="(555) 555-0100" maxlength="14" inputmode="numeric">
+                            <span class="error-message">Phone must be formatted as (555) 123-4567</span>
+                        </div>
+
+                        <!-- Shipping Address -->
+                        <h2 style="margin-top: var(--space-8);">Shipping Address</h2>
+                        <div class="form-group">
+                            <label for="shipping-address-1">Address Line 1 <span class="required">*</span></label>
+                            <input type="text" id="shipping-address-1" name="shipping_address_1" class="form-input"
+                                required autocomplete="off">
+                            <p class="form-help" style="margin-top:-0.5rem;font-size:0.85rem;color:var(--gray-600);">Start typing for address suggestions, or enter manually.</p>
+                            <span class="error-message">Please enter your address</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="shipping-address-2">Address Line 2</label>
+                            <input type="text" id="shipping-address-2" name="shipping_address_2" class="form-input"
+                                autocomplete="address-line2">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="shipping-city">City <span class="required">*</span></label>
+                                <input type="text" id="shipping-city" name="shipping_city" class="form-input" required
+                                    autocomplete="address-level2">
+                                <span class="error-message">Please enter your city</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="shipping-state">State <span class="required">*</span></label>
+                                <input type="text" id="shipping-state" name="shipping_state" class="form-input" required
+                                    autocomplete="address-level1">
+                                <span class="error-message">Please enter your state</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="shipping-zip">ZIP Code <span class="required">*</span></label>
+                                <input type="text" id="shipping-zip" name="shipping_zip" class="form-input" required
+                                    autocomplete="postal-code">
+                                <span class="error-message">Please enter your ZIP code</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="shipping-country">Country <span class="required">*</span></label>
+                                <select id="shipping-country" name="shipping_country" class="form-select" required
+                                    autocomplete="country-name">
+                                    <option value="United States" selected>United States</option>
+                                    <option value="Canada">Canada</option>
+                                    <option value="Mexico">Mexico</option>
+                                </select>
+                                <span class="error-message">Please select your country</span>
+                            </div>
+                        </div>
+
+                        <!-- Billing Address -->
+                        <h2 style="margin-top: var(--space-8);">Billing Address</h2>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="same-as-shipping" checked>
+                            <label for="same-as-shipping">Same as shipping address</label>
+                        </div>
+                        <div id="billing-address-fields" style="display: none;">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="billing-address-1">Address Line 1 <span
+                                            class="required">*</span></label>
+                                    <input type="text" id="billing-address-1" name="billing_address_1"
+                                        class="form-input" autocomplete="billing street-address">
+                                    <span class="error-message">Please enter your billing address</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="billing-address-2">Address Line 2</label>
+                                <input type="text" id="billing-address-2" name="billing_address_2" class="form-input"
+                                    autocomplete="billing address-line2">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="billing-city">City <span class="required">*</span></label>
+                                    <input type="text" id="billing-city" name="billing_city" class="form-input"
+                                        autocomplete="billing address-level2">
+                                    <span class="error-message">Please enter your billing city</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="billing-state">State <span class="required">*</span></label>
+                                    <input type="text" id="billing-state" name="billing_state" class="form-input"
+                                        autocomplete="billing address-level1">
+                                    <span class="error-message">Please enter your billing state</span>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="billing-zip">ZIP Code <span class="required">*</span></label>
+                                    <input type="text" id="billing-zip" name="billing_zip" class="form-input"
+                                        autocomplete="billing postal-code">
+                                    <span class="error-message">Please enter your billing ZIP code</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="billing-country">Country <span class="required">*</span></label>
+                                    <select id="billing-country" name="billing_country" class="form-select"
+                                        autocomplete="billing country-name">
+                                        <option value="United States" selected>United States</option>
+                                        <option value="Canada">Canada</option>
+                                        <option value="Mexico">Mexico</option>
+                                    </select>
+                                    <span class="error-message">Please select your billing country</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Rewards & gift cards (signed-in customers — same balances as POS) -->
+                        <div id="checkout-rewards-panel" class="checkout-rewards-panel" style="display:none;margin-top:var(--space-8);">
+                            <h2>Rewards &amp; gift cards</h2>
+                            <p class="form-help" style="margin-bottom:var(--space-4);">
+                                Use store credit, points, or gift cards from your account. Pay any remainder with card below.
+                            </p>
+                            <div class="form-group" id="checkout-store-credit-group" style="display:none;">
+                                <label for="checkout-loyalty-cash">Store credit ($)</label>
+                                <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+                                    <input type="number" id="checkout-loyalty-cash" class="form-input" min="0" step="0.01" inputmode="decimal" style="max-width:8rem">
+                                    <button type="button" class="btn btn-secondary btn-sm" id="checkout-loyalty-cash-max">Use max</button>
+                                    <span id="checkout-loyalty-cash-available" class="form-help"></span>
+                                </div>
+                            </div>
+                            <div class="form-group" id="checkout-points-group" style="display:none;">
+                                <label for="checkout-loyalty-points">Loyalty points</label>
+                                <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+                                    <input type="number" id="checkout-loyalty-points" class="form-input" min="0" step="1" inputmode="numeric" style="max-width:8rem">
+                                    <button type="button" class="btn btn-secondary btn-sm" id="checkout-loyalty-max">Use max</button>
+                                    <span id="checkout-loyalty-worth" class="form-help"></span>
+                                </div>
+                            </div>
+                            <div class="form-group" id="checkout-gc-account-group" style="display:none;">
+                                <label for="checkout-giftcard-select">Gift card</label>
+                                <select id="checkout-giftcard-select" class="form-select">
+                                    <option value="">Select a gift card (optional)</option>
+                                </select>
+                                <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;margin-top:0.5rem;">
+                                    <input type="number" id="checkout-giftcard-amount" class="form-input" min="0" step="0.01" inputmode="decimal" style="max-width:8rem" placeholder="Amount">
+                                    <button type="button" class="btn btn-secondary btn-sm" id="checkout-giftcard-max">Use max</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Method -->
+                        <h2 style="margin-top: var(--space-8);">Payment Method</h2>
+                        <div class="form-group">
+                            <label for="payment-method">Payment Method <span class="required">*</span></label>
+                            <select id="payment-method" name="payment_method" class="form-select" required>
+                                <option value="">Select payment method</option>
+                                <option value="credit_card">Credit Card (via EPI)</option>
+                                <option value="debit_card">Debit Card (via EPI)</option>
+                                <option value="gift_card">Gift card only</option>
+                            </select>
+                            <span class="error-message">Please select a payment method</span>
+                        </div>
+                        
+                        <!-- EPI / NMI: legacy raw card fields OR NMI Collect.js iframes (#ccnumber, #ccexp, #cvv) -->
+                        <div id="epi-payment-fields" style="display: none;">
+                            <p id="nmi-test-card-hint" class="form-help" style="display: none; margin-bottom: var(--space-3);">
+                                Sandbox: use test card <strong>4000 0000 0000 2701</strong> (or 4000000000002701), any future expiry, any CVV.
+                            </p>
+                            <div id="nmi-collect-fields" class="checkout-nmi-collect" style="display: none;">
+                                <div id="saved-cards-block" style="display:none;margin-bottom:var(--space-4);">
+                                    <label for="saved-card-select" class="form-label">Saved payment methods</label>
+                                    <select id="saved-card-select" class="form-select">
+                                        <option value="">Use a new card</option>
+                                    </select>
+                                    <label style="display:flex;align-items:center;gap:0.5rem;margin-top:var(--space-3);cursor:pointer;">
+                                        <input type="checkbox" id="save-card-checkbox" checked>
+                                        Save this card for next time
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <span id="ccnumber-label" class="form-label">Card number <span class="required">*</span></span>
+                                    <div id="ccnumber" class="nmi-field-host" role="group" aria-labelledby="ccnumber-label"></div>
+                                    <span class="error-message">Card number is required</span>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <span id="ccexp-label" class="form-label">Expiry <span class="required">*</span></span>
+                                        <div id="ccexp" class="nmi-field-host" role="group" aria-labelledby="ccexp-label"></div>
+                                        <span class="error-message">Expiry is required</span>
+                                    </div>
+                                    <div class="form-group">
+                                        <span id="cvv-label" class="form-label">CVV <span class="required">*</span></span>
+                                        <div id="cvv" class="nmi-field-host" role="group" aria-labelledby="cvv-label"></div>
+                                        <span class="error-message">CVV is required</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="legacy-card-fields">
+                                <div class="form-group">
+                                    <label for="card-number">Card Number <span class="required">*</span></label>
+                                    <input type="text" id="card-number" name="card_number" class="form-input" 
+                                        placeholder="1234 5678 9012 3456" maxlength="19" autocomplete="cc-number">
+                                    <span class="error-message">Please enter a valid card number</span>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="card-expiry">Expiry Date <span class="required">*</span></label>
+                                        <input type="text" id="card-expiry" name="card_expiry" class="form-input" 
+                                            placeholder="MM/YY" maxlength="5" autocomplete="cc-exp">
+                                        <span class="error-message">Please enter expiry date (MM/YY)</span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="card-cvv">CVV <span class="required">*</span></label>
+                                        <input type="text" id="card-cvv" name="card_cvv" class="form-input" 
+                                            placeholder="123" maxlength="4" autocomplete="cc-csc">
+                                        <span class="error-message">Please enter CVV</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="cardholder-name">Cardholder Name <span class="required">*</span></label>
+                                <input type="text" id="cardholder-name" name="cardholder_name" class="form-input" 
+                                    placeholder="Name as it appears on card" autocomplete="cc-name">
+                                <span class="error-message">Please enter cardholder name</span>
+                            </div>
+                        </div>
+
+                        <!-- Gift Card (not credit/debit — uses code + PIN from store-issued card) -->
+                        <div id="gift-card-fields" style="display: none;">
+                            <p class="gift-card-help">
+                                <strong>Gift cards are not credit or debit cards.</strong>
+                                Choose a card on your account or enter a code and PIN manually.
+                                Your card must cover the full order total.
+                            </p>
+                            <div id="gift-card-account-section" style="display: none;">
+                                <div class="form-group">
+                                    <label for="gift-card-account-select">Your gift cards</label>
+                                    <select id="gift-card-account-select" class="form-select" aria-describedby="gift-card-account-hint">
+                                        <option value="">Select a gift card on your account</option>
+                                    </select>
+                                    <small id="gift-card-account-hint" class="form-help" style="display:block; margin-top:0.35rem;">
+                                        Active cards linked to your account appear here when you are signed in.
+                                    </small>
+                                </div>
+                                <button type="button" class="gift-card-manual-toggle" id="gift-card-show-manual" style="display: none;">
+                                    Enter a different gift card manually
+                                </button>
+                            </div>
+                            <div id="gift-card-manual-section">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="gift-card-code">Gift Card Code <span class="required">*</span></label>
+                                    <input type="text" id="gift-card-code" name="gift_card_code" class="form-input"
+                                        placeholder="e.g. HMGC-XXXX-XXXX" autocomplete="off" autocapitalize="characters">
+                                    <span class="error-message">Please enter your gift card code</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="gift-card-pin">PIN (if on your card)</label>
+                                    <input type="password" id="gift-card-pin" name="gift_card_pin" class="form-input"
+                                        placeholder="4-digit PIN" maxlength="10" autocomplete="off" inputmode="numeric">
+                                    <span class="error-message">Please enter your gift card PIN</span>
+                                </div>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <button type="button" class="btn btn-secondary" id="gift-card-check-balance">
+                                    Check balance
+                                </button>
+                            </div>
+                            <div id="gift-card-balance-result" style="display: none;" role="status" aria-live="polite"></div>
+                            </div>
+                        </div>
+
+                        <!-- Bank Account Fields (shown when bank account is selected) -->
+                        <div id="bank-account-fields" style="display: none;">
+                            <div class="form-group">
+                                <label for="account-holder-name">Account Holder Name <span class="required">*</span></label>
+                                <input type="text" id="account-holder-name" name="account_holder_name" class="form-input" 
+                                    placeholder="Name as it appears on bank account" autocomplete="name">
+                                <span class="error-message">Please enter account holder name</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="account-type">Account Type <span class="required">*</span></label>
+                                <select id="account-type" name="account_type" class="form-select">
+                                    <option value="">Select account type</option>
+                                    <option value="checking">Checking</option>
+                                    <option value="savings">Savings</option>
+                                </select>
+                                <span class="error-message">Please select account type</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="routing-number">Routing Number <span class="required">*</span></label>
+                                <input type="text" id="routing-number" name="routing_number" class="form-input" 
+                                    placeholder="123456789" maxlength="9" autocomplete="off">
+                                <span class="error-message">Please enter a valid routing number (9 digits)</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="account-number">Account Number <span class="required">*</span></label>
+                                <input type="text" id="account-number" name="account_number" class="form-input" 
+                                    placeholder="Account number" autocomplete="off">
+                                <span class="error-message">Please enter account number</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="confirm-account-number">Confirm Account Number <span class="required">*</span></label>
+                                <input type="text" id="confirm-account-number" name="confirm_account_number" class="form-input" 
+                                    placeholder="Re-enter account number" autocomplete="off">
+                                <span class="error-message">Account numbers do not match</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="order-notes">Order Notes (Optional)</label>
+                            <textarea id="order-notes" name="order_notes" class="form-input" rows="4"
+                                placeholder="Special instructions or notes for your order..."></textarea>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Order Summary -->
+                <div class="order-summary">
+                    <h2>Order Summary</h2>
+                    <div id="order-items-container">
+                        <div class="empty-cart-message">
+                            <svg class="cart-icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                            <p>Your cart is empty</p>
+                            <a href="products.html" class="btn btn-primary" style="margin-top: var(--space-4);">Continue
+                                Shopping</a>
+                        </div>
+                    </div>
+                    <div id="order-totals-container" style="display: none;">
+                        <div class="form-group" style="margin-bottom: var(--space-4);">
+                            <label for="checkout-promo-code">Promo code (optional)</label>
+                            <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                                <input id="checkout-promo-code" name="promo_code" type="text"
+                                    class="form-input" maxlength="64" placeholder="Enter code"
+                                    style="flex:1; min-width:140px;" autocomplete="off" spellcheck="false">
+                                <button type="button" class="btn btn-secondary" id="checkout-apply-promo" style="white-space:nowrap;">Apply</button>
+                            </div>
+                            <small id="checkout-promo-feedback" style="display:block; margin-top:0.35rem; min-height:1.1rem; color: var(--gray-600);"></small>
+                        </div>
+                        <div id="checkout-shipping-methods" class="checkout-shipping-methods" style="display:none;margin-bottom:var(--space-4);">
+                            <h3 style="font-size:1rem;margin:0 0 0.75rem;color:var(--gray-800);">Shipping method</h3>
+                            <div id="checkout-shipping-options" class="checkout-shipping-options" role="radiogroup" aria-label="Shipping method"></div>
+                            <small id="checkout-shipping-note" style="display:block;margin-top:0.5rem;color:var(--gray-500);"></small>
+                        </div>
+                        <div class="order-totals">
+                            <div class="order-total-row">
+                                <span>Subtotal</span>
+                                <span id="subtotal">$0.00</span>
+                            </div>
+                            <div class="order-total-row order-total-promo" id="checkout-promo-discount-row" style="display:none; color: #166534;">
+                                <span>Discount</span>
+                                <span id="checkout-promo-discount-value">-$0.00</span>
+                            </div>
+                            <div class="order-total-row">
+                                <span>Shipping</span>
+                                <span id="shipping">$0.00</span>
+                            </div>
+                            <div class="order-total-row">
+                                <span>Tax</span>
+                                <span id="tax">$0.00</span>
+                            </div>
+                            <div class="order-total-row" id="checkout-rewards-applied-row" style="display:none;color:#166534;">
+                                <span>Rewards &amp; gift cards</span>
+                                <span id="checkout-rewards-applied-value">−$0.00</span>
+                            </div>
+                            <div class="order-total-row final">
+                                <span id="checkout-total-label">Total</span>
+                                <span id="total">$0.00</span>
+                            </div>
+                            <div class="order-total-row final" id="checkout-card-due-row" style="display:none;">
+                                <span>Card payment due</span>
+                                <span id="checkout-card-due-value">$0.00</span>
+                            </div>
+                        </div>
+                        <div id="tax-status-note" style="display:none;margin-top:0.75rem;padding:0.65rem 0.75rem;border-radius:8px;font-size:0.9rem;line-height:1.35;"></div>
+                        <div class="checkout-age-attestation" id="checkout-age-attestation">
+                            <label for="checkout-age-confirm">
+                                <input type="checkbox" id="checkout-age-confirm" name="age_confirm" required>
+                                <span>I confirm I am at least <strong>21 years of age</strong> and agree to purchase hemp/CBD products in compliance with applicable laws.</span>
+                            </label>
+                        </div>
+                        <button type="submit" form="checkout-form" class="btn-checkout" id="submit-order-btn">
+                            <i class="fas fa-lock" aria-hidden="true"></i> Place Order
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner"></i>
+            <p>Processing your order...</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+        <div class="container">
+            <div class="footer-content">
+                <!-- Company Info & Social -->
+                <div class="footer-section">
+                    <h3>H&M Herbs & Vitamins</h3>
+                    <p>Your trusted source for premium natural health products. We're committed to providing
+                        the highest quality herbs, vitamins, and supplements to support your wellness journey.</p>
+                    <div class="social-links">
+                        <a href="https://facebook.com/hmherbs" target="_blank" rel="noopener noreferrer"
+                            aria-label="Follow us on Facebook">
+                            <span class="social-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                                </svg></span>
+                        </a>
+                        <a href="https://instagram.com/hmherbs" target="_blank" rel="noopener noreferrer"
+                            aria-label="Follow us on Instagram">
+                            <span class="social-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 11-2.881 0 1.44 1.44 0 012.881 0z" />
+                                </svg></span>
+                        </a>
+                        <a href="https://twitter.com/hmherbs" target="_blank" rel="noopener noreferrer"
+                            aria-label="Follow us on X">
+                            <span class="social-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                                </svg></span>
+                        </a>
+                        <a href="https://youtube.com/@hmherbs" target="_blank" rel="noopener noreferrer"
+                            aria-label="Subscribe to our YouTube channel">
+                            <span class="social-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M23.498 6.186A3.016 3.016 0 0021.376 4.05C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                                </svg></span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Visit Us -->
+                <div class="footer-section">
+                    <h4>Visit Us</h4>
+                    <div class="footer-contact">
+                        <div class="footer-address">
+                            <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                            <div class="address-text">
+                                <p>1140 Battlefield Pkwy</p>
+                                <p>Fort Oglethorpe, GA 30742</p>
+                                <p>United States</p>
+                            </div>
+                        </div>
+                        <p class="footer-link">
+                            <a href="https://maps.google.com/?q=1140+Battlefield+Pkwy,+Fort+Oglethorpe,+GA+30742"
+                                target="_blank" rel="noopener noreferrer">
+                                Get Directions <svg class="external-link-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="14" height="14" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5 4.75A2.25 2.25 0 0 0 2.75 7v8A2.25 2.25 0 0 0 5 17.25h8A2.25 2.25 0 0 0 15.25 15V11a.75.75 0 0 1 1.5 0v4A3.75 3.75 0 0 1 13 18.75H5A3.75 3.75 0 0 1 1.25 15V7A3.75 3.75 0 0 1 5 3.25h4a.75.75 0 0 1 0 1.5H5Z" clip-rule="evenodd"/><path fill-rule="evenodd" d="M10.5 1.25a.75.75 0 0 0 0 1.5h5.69l-8.97 8.97a.75.75 0 1 0 1.06 1.06l8.97-8.97V9.5a.75.75 0 0 0 1.5 0v-7a.75.75 0 0 0-.75-.75h-7Z" clip-rule="evenodd"/></svg>
+                            </a>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Get in Touch -->
+                <div class="footer-section">
+                    <h4>Get in Touch</h4>
+                    <div class="footer-get-in-touch">
+                        <div class="footer-get-in-touch__row">
+                            <i class="fas fa-phone footer-get-in-touch__icon" aria-hidden="true"></i>
+                            <a class="footer-get-in-touch__link" href="tel:+17068619454">706-861-9454</a>
+                        </div>
+                        <div class="footer-get-in-touch__row">
+                            <i class="fas fa-envelope footer-get-in-touch__icon" aria-hidden="true"></i>
+                            <a class="footer-get-in-touch__link" href="mailto:hmherbs1@gmail.com">hmherbs1@gmail.com</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Information -->
+                <div class="footer-section footer-info-section">
+                    <h4>Information</h4>
+                    <ul>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                        <li><a href="terms-and-conditions.html">Terms &amp; Conditions</a></li>
+                        <li><a href="shipping-returns.html#shipping-policy">Shipping Policy</a></li>
+                        <li><a href="shipping-returns.html#refund-policy">Refund Policy</a></li>
+                        <li><a href="coa.html">Lab Results (COA)</a></li>
+                        <li><a href="index.html#contact">Contact Us</a></li>
+                    </ul>
+                </div>
+
+                <!-- Operating Hours -->
+                <div class="footer-section">
+                    <h4 class="footer-hours-title">Operating Hours</h4>
+                    <div class="footer-hours">
+                        <p>Mon-Fri: 10am-5pm</p>
+                        <p>Sat: 10am-1pm</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Bottom -->
+            <div class="footer-compliance-disclaimers">
+                <p class="footer-thc-disclaimer"><strong>Hemp / THC Notice:</strong> Hemp-derived products offered on this site contain no more than 0.3% &Delta;9-THC on a dry weight basis, or as stated on each product&rsquo;s Certificate of Analysis.</p>
+                <p class="footer-fda-disclaimer"><strong>FDA Disclaimer:</strong> The statements made regarding these products have not been evaluated by the Food and Drug Administration. The efficacy of these products has not been confirmed by FDA-approved research. These products are not intended to diagnose, treat, cure or prevent any disease. All information presented here is not meant as a substitute for or alternative to information from health care practitioners. Please consult your health care professional about potential interactions or other possible complications before using any product. The Federal Food, Drug, and Cosmetic Act require this notice.</p>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-card-logos" aria-label="Accepted payment methods">
+                    <ul class="footer-card-logos-list" role="list">
+                        <li><img class="footer-card-logo" src="images/payment/visa.svg" width="48" height="16"
+                                alt="Visa"></li>
+                        <li><img class="footer-card-logo" src="images/payment/mastercard.svg" width="40" height="24"
+                                alt="Mastercard"></li>
+                        <li><img class="footer-card-logo" src="images/payment/amex.svg" width="40" height="24"
+                                alt="American Express"></li>
+                        <li><img class="footer-card-logo" src="images/payment/discover.svg" width="48" height="16"
+                                alt="Discover"></li>
+                    </ul>
+                </div>
+                <div class="footer-bottom-content">
+                    <p>&copy; 2024 H&M Herbs & Vitamins. All rights reserved.</p>
+                    <div class="footer-bottom-links">
+                        <a href="privacy-policy.html">Privacy Policy</a>
+                        <span class="separator">|</span>
+                        <a href="terms-and-conditions.html">Terms &amp; Conditions</a>
+                        <span class="separator">|</span>
+                        <a href="shipping-returns.html#shipping-policy">Shipping Policy</a>
+                        <span class="separator">|</span>
+                        <a href="shipping-returns.html#refund-policy">Refund Policy</a>
+                        <span class="separator">|</span>
+                        <a href="coa.html">Lab Results (COA)</a>
+                        <span class="separator">|</span>
+                        <a href="index.html#contact">Contact Us</a>
+                        <span class="separator">|</span>
+                        <a href="ccpa-privacy-rights.html">Do Not Sell My Personal Information</a>
+                        <span class="separator">|</span>
+                        <button id="cookie-preferences" class="link-button">Cookie Preferences</button>
+                        <span class="separator">|</span>
+                        <a href="admin.html" class="admin-link">Admin</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div id="customer-login-modal" class="auth-modal" aria-hidden="true" role="dialog" aria-modal="true"
+        aria-labelledby="login-modal-title">
+        <div class="auth-modal-content">
+            <div class="auth-modal-header">
+                <h2 id="login-modal-title">Sign In</h2>
+                <button type="button" class="auth-modal-close" aria-label="Close login form">
+                    <svg class="cart-close-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12 5.7 16.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4z"/></svg>
+                </button>
+            </div>
+            <div class="auth-modal-body">
+                <form id="customer-login-form" action="#" method="get">
+                    <div class="form-group">
+                        <input type="email" id="login-email" class="form-input" placeholder="Email address" required
+                            autocomplete="username">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="login-password" class="form-input" placeholder="Password" required
+                            autocomplete="current-password">
+                    </div>
+                    <p class="auth-switch-text auth-forgot-line">
+                        <a href="#" id="customer-forgot-password-link">Forgot password?</a>
+                    </p>
+                    <div class="auth-error hidden"></div>
+                    <button type="submit" class="btn btn-primary btn-full-width">Sign In</button>
+                    <p class="auth-switch-text">
+                        Don't have an account? <a href="#" id="show-register-link">Create one here</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot password (customer) -->
+    <div id="customer-forgot-password-modal" class="auth-modal" aria-hidden="true" role="dialog" aria-modal="true"
+        aria-labelledby="forgot-password-modal-title">
+        <div class="auth-modal-content">
+            <div class="auth-modal-header">
+                <h2 id="forgot-password-modal-title">Reset password</h2>
+                <button type="button" class="auth-modal-close" aria-label="Close password reset form">
+                    <svg class="cart-close-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12 5.7 16.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4z"/></svg>
+                </button>
+            </div>
+            <div class="auth-modal-body">
+                <p class="form-help" style="margin-bottom: 1rem;">Enter your account email. If it matches an active account, we will email a link to choose a new password.</p>
+                <form id="customer-forgot-password-form" action="#" method="get">
+                    <div class="form-group">
+                        <input type="email" id="forgot-password-email" class="form-input" placeholder="Email address" required autocomplete="email">
+                    </div>
+                    <div class="auth-error hidden" id="forgot-password-error"></div>
+                    <button type="submit" class="btn btn-primary btn-full-width" id="customer-forgot-password-submit">Send reset link</button>
+                    <p class="auth-switch-text">
+                        <a href="#" id="forgot-password-back-to-login">Back to sign in</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="customer-register-modal" class="auth-modal" aria-hidden="true" role="dialog" aria-modal="true"
+        aria-labelledby="register-modal-title">
+        <div class="auth-modal-content">
+            <div class="auth-modal-header">
+                <h2 id="register-modal-title">Create Account</h2>
+                <button type="button" class="auth-modal-close" aria-label="Close registration form">
+                    <svg class="cart-close-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12 5.7 16.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4z"/></svg>
+                </button>
+            </div>
+            <div class="auth-modal-body">
+                <form id="customer-register-form" action="#" method="get">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <input type="text" id="register-first-name" class="form-input" placeholder="First name"
+                                required autocomplete="given-name">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="register-last-name" class="form-input" placeholder="Last name"
+                                required autocomplete="family-name">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" id="register-email" class="form-input" placeholder="Email address" required
+                            autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="register-date-of-birth">Date of birth <span class="text-required"
+                                aria-hidden="true">*</span></label>
+                        <input type="date" id="register-date-of-birth" class="form-input" autocomplete="bday" required
+                            title="Required. You must be 21 or older."
+                            aria-describedby="register-dob-help">
+                        <small id="register-dob-help" class="form-help">Required — must match our 21+ age policy.</small>
+                    </div>
+                    <div class="register-optional-contact" id="register-optional-contact">
+                        <button type="button" class="register-optional-toggle" id="register-contact-toggle"
+                            aria-expanded="false" aria-controls="register-contact-panel">
+                            <span class="register-optional-toggle-label">Add phone &amp; mailing address</span>
+                            <span class="register-optional-toggle-hint">(optional)</span>
+                        </button>
+                        <div id="register-contact-panel" class="register-optional-panel" hidden>
+                            <div class="form-group">
+                                <label for="register-phone">Phone</label>
+                                <input type="tel" id="register-phone" class="form-input"
+                                    placeholder="(555) 555-0100" maxlength="14" inputmode="numeric"
+                                    autocomplete="tel">
+                            </div>
+                            <p class="form-help register-address-intro">Start typing your street address for suggestions, or enter it manually.</p>
+                            <div class="form-group">
+                                <label for="register-address-line1">Street address</label>
+                                <input type="text" id="register-address-line1" class="form-input"
+                                    placeholder="123 Main St" autocomplete="address-line1">
+                            </div>
+                            <div class="form-group">
+                                <label for="register-address-line2">Apt / suite <span class="form-optional">(optional)</span></label>
+                                <input type="text" id="register-address-line2" class="form-input"
+                                    placeholder="Apt 4B" autocomplete="address-line2">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="register-address-city">City</label>
+                                    <input type="text" id="register-address-city" class="form-input"
+                                        placeholder="City" autocomplete="address-level2">
+                                </div>
+                                <div class="form-group">
+                                    <label for="register-address-state">State</label>
+                                    <input type="text" id="register-address-state" class="form-input"
+                                        placeholder="MS" maxlength="2" autocapitalize="characters"
+                                        autocomplete="address-level1" aria-describedby="register-state-help">
+                                    <small id="register-state-help" class="form-help">2-letter code</small>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="register-address-zip">ZIP code</label>
+                                <input type="text" id="register-address-zip" class="form-input"
+                                    placeholder="39401" inputmode="numeric" maxlength="10"
+                                    autocomplete="postal-code">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="register-password" class="form-input" placeholder="Password" required
+                            autocomplete="new-password">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="register-confirm-password" class="form-input"
+                            placeholder="Confirm password" required autocomplete="off">
+                        <small class="form-help">Must be 8+ characters with uppercase, lowercase, number, and special
+                            character</small>
+                    </div>
+                    <div class="auth-error hidden"></div>
+                    <button type="submit" class="btn btn-primary btn-full-width">Create Account</button>
+                    <p class="auth-switch-text">
+                        Already have an account? <a href="#" id="show-login-link">Sign in here</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/age-gate.js" defer></script>
+    <script src="js/site-promo-banner.js" defer></script>
+    <script src="js/site-store-info.js" defer></script>
+    <script src="js/nav-current-page.js"></script>
+    <script src="js/section-nav.js?v=mobile-nav-4"></script>
+    <script src="js/hm-notify.js"></script>
+    <script src="js/visual-bug-fixes.js"></script>
+    <script src="js/phone-us-format.js"></script>
+    <script src="js/address-autocomplete.js"></script>
+    <script src="js/password-toggle.js?v=4"></script>
+    <script src="js/customer-auth.js?v=20260515" defer></script>
+    <!-- Optional NMI public key fallback (see file header). Primary: backend .env → /api/payments/nmi-client-config -->
+    <script src="js/nmi-public-token.js" defer></script>
+    <script src="js/hm-gift-card.js"></script>
+    <script src="js/mxmerchant-checkout.js?v=20260708" defer></script>
+    <script src="js/checkout.js?v=20260708" defer></script>
+    <script src="script.js" defer></script>
+    <script src="js/hm-choice-toggles.js"></script>
+    <script src="js/accessibility.js?v=a11y-1" defer></script>
+    <script src="gdpr-compliance.js?v=20260617a" defer></script>
+</body>
+
+</html>

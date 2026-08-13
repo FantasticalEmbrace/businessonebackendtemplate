@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 240" role="img" aria-label="Physical Gift Card">
+  <defs>
+    <linearGradient id="physical-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#047857"/>
+      <stop offset="55%" stop-color="#065f46"/>
+      <stop offset="100%" stop-color="#064e3b"/>
+    </linearGradient>
+  </defs>
+  <rect width="420" height="240" rx="16" fill="url(#physical-bg)"/>
+  <circle cx="360" cy="36" r="70" fill="rgba(255,255,255,0.1)"/>
+  <circle cx="40" cy="204" r="52" fill="rgba(255,255,255,0.06)"/>
+  <text x="24" y="34" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">H&amp;M Herbs &amp; Vitamins</text>
+  <rect x="288" y="22" width="108" height="28" rx="14" fill="rgba(255,255,255,0.18)" stroke="rgba(255,255,255,0.28)"/>
+  <text x="342" y="41" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" text-anchor="middle">Physical</text>
+  <text x="24" y="118" fill="rgba(255,255,255,0.72)" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" letter-spacing="0.08em">GIFT CARD VALUE</text>
+  <text x="24" y="158" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="700">Choose amount</text>
+  <text x="24" y="214" fill="rgba(255,255,255,0.88)" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="600">Premium natural health since 1995</text>
+</svg>

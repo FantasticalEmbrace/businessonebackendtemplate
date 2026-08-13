@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Verification - HM Herbs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .check-item {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #ccc;
+        }
+
+        .check-item.success {
+            border-left-color: #047857;
+        }
+
+        .check-item.error {
+            border-left-color: #ef4444;
+        }
+
+        .check-item.loading {
+            border-left-color: #3b82f6;
+        }
+
+        h1 {
+            color: #047857;
+        }
+
+        .status {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .url {
+            font-family: monospace;
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔍 Deploy Upload Verification</h1>
+    <p>This page checks if all CSS files are accessible on your production server.</p>
+
+    <div id="results"></div>
+
+    <script>
+        const cssFiles = [
+            'css/mobile-enhancements.css',
+            'css/customer-auth.css',
+            'css/performance-optimizations.css',
+            'css/browser-compatibility.css',
+            'css/emergency-fixes.css',
+            'css/edsa-booking.css',
+            'css/accessibility-enhancements.css',
+            'css/products.css',
+            'css/brands-categories.css',
+            'styles.css?v=brand-sync-5'
+        ];
+
+        const resultsDiv = document.getElementById('results');
+        let successCount = 0;
+        let errorCount = 0;
+
+        function checkFile(file) {
+            return new Promise((resolve) => {
+                const checkItem = document.createElement('div');
+                checkItem.className = 'check-item loading';
+                checkItem.innerHTML = `
+                    <div>Checking: <span class="url">${file}</span></div>
+                    <div class="status">Loading...</div>
+                `;
+                resultsDiv.appendChild(checkItem);
+
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = file;
+
+                link.onload = () => {
+                    checkItem.className = 'check-item success';
+                    checkItem.innerHTML = `
+                        <div>✅ Found: <span class="url">${file}</span></div>
+                        <div class="status" style="color: #047857;">SUCCESS</div>
+                    `;
+                    successCount++;
+                    updateSummary();
+                    resolve(true);
+                };
+
+                link.onerror = () => {
+                    checkItem.className = 'check-item error';
+                    checkItem.innerHTML = `
+                        <div>❌ Missing: <span class="url">${file}</span></div>
+                        <div class="status" style="color: #ef4444;">404 NOT FOUND</div>
+                        <div style="margin-top: 5px; font-size: 0.9em; color: #666;">
+                            Expected location: <span class="url">/${file}</span>
+                        </div>
+                    `;
+                    errorCount++;
+                    updateSummary();
+                    resolve(false);
+                };
+
+                // Add to page to trigger load
+                document.head.appendChild(link);
+
+                // Timeout after 3 seconds
+                setTimeout(() => {
+                    if (checkItem.className.includes('loading')) {
+                        checkItem.className = 'check-item error';
+                        checkItem.innerHTML = `
+                            <div>⏱️ Timeout: <span class="url">${file}</span></div>
+                            <div class="status" style="color: #ef4444;">TIMEOUT</div>
+                        `;
+                        errorCount++;
+                        updateSummary();
+                        resolve(false);
+                    }
+                }, 3000);
+            });
+        }
+
+        function updateSummary() {
+            const summary = document.getElementById('summary');
+            if (!summary) {
+                const summaryDiv = document.createElement('div');
+                summaryDiv.id = 'summary';
+                summaryDiv.style.cssText = 'margin-top: 30px; padding: 20px; background: white; border-radius: 5px;';
+                resultsDiv.insertBefore(summaryDiv, resultsDiv.firstChild);
+            }
+
+            const summaryDiv = document.getElementById('summary');
+            const total = successCount + errorCount;
+            const percentage = total > 0 ? Math.round((successCount / total) * 100) : 0;
+
+            summaryDiv.innerHTML = `
+                <h2>Summary</h2>
+                <p><strong>Total Files:</strong> ${cssFiles.length}</p>
+                <p><strong>Found:</strong> <span style="color: #047857;">${successCount}</span></p>
+                <p><strong>Missing:</strong> <span style="color: #ef4444;">${errorCount}</span></p>
+                <p><strong>Progress:</strong> ${percentage}%</p>
+                ${errorCount > 0 ? `
+                    <div style="margin-top: 15px; padding: 15px; background: #fef2f2; border-radius: 5px; border-left: 4px solid #ef4444;">
+                        <strong>⚠️ Action Required:</strong>
+                        <p>Some CSS files are missing. Please verify:</p>
+                        <ul>
+                            <li>The <code>css</code> folder exists in your domain root</li>
+                            <li>All CSS files are uploaded to the <code>css</code> folder</li>
+                            <li>Folder name is lowercase: <code>css</code> (not <code>CSS</code> or <code>Css</code>)</li>
+                            <li>File permissions are set to 644</li>
+                        </ul>
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        // Check all files
+        async function checkAll() {
+            for (const file of cssFiles) {
+                await checkFile(file);
+                // Small delay between checks
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+        }
+
+        // Start checking when page loads
+        checkAll();
+    </script>
+</body>
+
+</html>

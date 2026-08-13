@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse by Category - H&M Herbs & Vitamins</title>
+    <meta name="description" content="Browse our natural health products organized by health condition categories">
+    <link rel="stylesheet" href="css/emergency-fixes.css?v=mobile-nav-4">
+    <link rel="stylesheet" href="css/hm-notify.css">
+    <link rel="stylesheet" href="styles.css?v=brand-sync-5">
+    <link rel="stylesheet" href="css/accessibility-enhancements.css?v=a11y-1">
+    <link rel="stylesheet" href="css/products.css">
+    <link rel="stylesheet" href="css/brands-categories.css">
+    <link rel="stylesheet" href="css/mobile-enhancements.css">
+    <link rel="stylesheet" href="css/mobile-nav.css?v=brand-sync-5">
+    <link rel="stylesheet" href="css/hm-close-controls.css">
+    <link rel="stylesheet" href="css/site-promo-banner.css?v=brand-sync-5">
+    <link rel="stylesheet" href="css/age-gate.css?v=brand-sync-5">
+    <link rel="stylesheet" href="css/hm-popups-brand.css?v=brand-sync-5">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="js/mobile-menu.js?v=mobile-nav-4"></script>
+    <script src="js/nav-current-page.js"></script>
+    <script src="js/section-nav.js?v=mobile-nav-4"></script>
+</head>
+
+<body>
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="container">
+            <div class="top-bar-content">
+                <div class="shipping-notice">
+                    <i class="fas fa-truck" aria-hidden="true"></i>
+                    <span>Free shipping on orders over $50</span>
+                </div>
+                <div class="top-links">
+                    <a href="tel:+17068619454" class="top-link">
+                        <i class="fas fa-phone" aria-hidden="true"></i>
+                        <span>706-861-9454</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header" role="banner">
+    <!-- Main Header -->
+    <div class="main-header">
+        <div class="container">
+            <nav class="navbar" role="navigation" aria-label="Main navigation">
+                <!-- Logo -->
+                <div class="logo">
+                    <a href="index.html" aria-label="H&M Herbs & Vitamins - Home">
+                        <i class="fas fa-leaf" aria-hidden="true"></i>
+                        <span class="logo-text">
+                            <span class="brand-name">H&M Herbs</span>
+                            <span class="brand-tagline">& Vitamins</span>
+                        </span>
+                    </a>
+                </div>
+
+                <!-- Mobile Menu Toggle -->
+                <button class="mobile-menu-toggle" aria-expanded="false" aria-controls="nav-menu"
+                    aria-label="Toggle navigation menu">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </button>
+
+                <!-- Navigation Menu -->
+                <ul class="nav-menu" id="nav-menu" role="menubar">
+                    <li role="none"><a href="index.html" role="menuitem">Home</a></li>
+                    <li role="none"><a href="products.html" role="menuitem">Products</a></li>
+                    <li role="none"><a href="index.html#edsa-service" role="menuitem" class="edsa-nav-link">EDSA
+                            Service</a></li>
+                    <li role="none"><a href="index.html#about" role="menuitem">About</a></li>
+                    <li role="none"><a href="index.html#contact" role="menuitem">Contact</a></li>
+                </ul>
+
+                <!-- Header Actions -->
+                <div class="header-actions">
+                    <!-- Cart -->
+                    <button type="button" class="cart-toggle" aria-label="Shopping cart" aria-expanded="false"
+                        aria-controls="cart-sidebar">
+                        <i class="fas fa-shopping-cart" aria-hidden="true"></i>
+                        <span class="cart-count" id="cart-count">0</span>
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="main-content" role="main">
+        <!-- Page Header -->
+        <section class="landing-header">
+            <div class="container">
+                <div class="landing-header-content">
+                    <h1 class="landing-title">Browse by Category</h1>
+                    <p class="landing-subtitle">Find products specifically for your health needs - organized by
+                        condition</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Categories Grid -->
+        <section class="brands-categories-grid">
+            <div class="container">
+                <div class="grid-wrapper" id="categories-grid">
+                    <!-- Categories will be dynamically loaded here -->
+                    <div class="loading-state">
+                        <div class="loading-spinner">
+                            <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+                        </div>
+                        <p>Loading categories...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+        <div class="container">
+            <div class="footer-content">
+                <!-- Company Info & Social -->
+                <div class="footer-section">
+                    <h3>H&M Herbs & Vitamins</h3>
+                    <p>Your trusted source for premium natural health products. We're committed to providing
+                        the highest quality herbs, vitamins, and supplements to support your wellness journey.</p>
+                    <div class="social-links">
+                        <a href="https://facebook.com/hmherbs" target="_blank" rel="noopener noreferrer"
+                            aria-label="Follow us on Facebook">
+                            <span class="social-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                                </svg></span>
+                        </a>
+                        <a href="https://instagram.com/hmherbs" target="_blank" rel="noopener noreferrer"
+                            aria-label="Follow us on Instagram">
+                            <span class="social-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 11-2.881 0 1.44 1.44 0 012.881 0z" />
+                                </svg></span>
+                        </a>
+                        <a href="https://twitter.com/hmherbs" target="_blank" rel="noopener noreferrer"
+                            aria-label="Follow us on X">
+                            <span class="social-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                                </svg></span>
+                        </a>
+                        <a href="https://youtube.com/@hmherbs" target="_blank" rel="noopener noreferrer"
+                            aria-label="Subscribe to our YouTube channel">
+                            <span class="social-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M23.498 6.186A3.016 3.016 0 0021.376 4.05C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                                </svg></span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Visit Us -->
+                <div class="footer-section">
+                    <h4>Visit Us</h4>
+                    <div class="footer-contact">
+                        <div class="footer-address">
+                            <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                            <div class="address-text">
+                                <p>1140 Battlefield Pkwy</p>
+                                <p>Fort Oglethorpe, GA 30742</p>
+                                <p>United States</p>
+                            </div>
+                        </div>
+                        <p class="footer-link">
+                            <a href="https://maps.google.com/?q=1140+Battlefield+Pkwy,+Fort+Oglethorpe,+GA+30742"
+                                target="_blank" rel="noopener noreferrer">
+                                Get Directions <svg class="external-link-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="14" height="14" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5 4.75A2.25 2.25 0 0 0 2.75 7v8A2.25 2.25 0 0 0 5 17.25h8A2.25 2.25 0 0 0 15.25 15V11a.75.75 0 0 1 1.5 0v4A3.75 3.75 0 0 1 13 18.75H5A3.75 3.75 0 0 1 1.25 15V7A3.75 3.75 0 0 1 5 3.25h4a.75.75 0 0 1 0 1.5H5Z" clip-rule="evenodd"/><path fill-rule="evenodd" d="M10.5 1.25a.75.75 0 0 0 0 1.5h5.69l-8.97 8.97a.75.75 0 1 0 1.06 1.06l8.97-8.97V9.5a.75.75 0 0 0 1.5 0v-7a.75.75 0 0 0-.75-.75h-7Z" clip-rule="evenodd"/></svg>
+                            </a>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Get in Touch -->
+                <div class="footer-section">
+                    <h4>Get in Touch</h4>
+                    <div class="footer-get-in-touch">
+                        <div class="footer-get-in-touch__row">
+                            <i class="fas fa-phone footer-get-in-touch__icon" aria-hidden="true"></i>
+                            <a class="footer-get-in-touch__link" href="tel:+17068619454">706-861-9454</a>
+                        </div>
+                        <div class="footer-get-in-touch__row">
+                            <i class="fas fa-envelope footer-get-in-touch__icon" aria-hidden="true"></i>
+                            <a class="footer-get-in-touch__link" href="mailto:hmherbs1@gmail.com">hmherbs1@gmail.com</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Information -->
+                <div class="footer-section footer-info-section">
+                    <h4>Information</h4>
+                    <ul>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                        <li><a href="terms-and-conditions.html">Terms &amp; Conditions</a></li>
+                        <li><a href="shipping-returns.html#shipping-policy">Shipping Policy</a></li>
+                        <li><a href="shipping-returns.html#refund-policy">Refund Policy</a></li>
+                        <li><a href="coa.html">Lab Results (COA)</a></li>
+                        <li><a href="index.html#contact">Contact Us</a></li>
+                    </ul>
+                </div>
+
+                <!-- Operating Hours -->
+                <div class="footer-section">
+                    <h4 class="footer-hours-title">Operating Hours</h4>
+                    <div class="footer-hours">
+                        <p>Mon-Fri: 10am-5pm</p>
+                        <p>Sat: 10am-1pm</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Bottom -->
+            <div class="footer-compliance-disclaimers">
+                <p class="footer-thc-disclaimer"><strong>Hemp / THC Notice:</strong> Hemp-derived products offered on this site contain no more than 0.3% &Delta;9-THC on a dry weight basis, or as stated on each product&rsquo;s Certificate of Analysis.</p>
+                <p class="footer-fda-disclaimer"><strong>FDA Disclaimer:</strong> The statements made regarding these products have not been evaluated by the Food and Drug Administration. The efficacy of these products has not been confirmed by FDA-approved research. These products are not intended to diagnose, treat, cure or prevent any disease. All information presented here is not meant as a substitute for or alternative to information from health care practitioners. Please consult your health care professional about potential interactions or other possible complications before using any product. The Federal Food, Drug, and Cosmetic Act require this notice.</p>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-card-logos" aria-label="Accepted payment methods">
+                    <ul class="footer-card-logos-list" role="list">
+                        <li><img class="footer-card-logo" src="images/payment/visa.svg" width="48" height="16"
+                                alt="Visa"></li>
+                        <li><img class="footer-card-logo" src="images/payment/mastercard.svg" width="40" height="24"
+                                alt="Mastercard"></li>
+                        <li><img class="footer-card-logo" src="images/payment/amex.svg" width="40" height="24"
+                                alt="American Express"></li>
+                        <li><img class="footer-card-logo" src="images/payment/discover.svg" width="48" height="16"
+                                alt="Discover"></li>
+                    </ul>
+                </div>
+                <div class="footer-bottom-content">
+                    <p>&copy; 2024 H&M Herbs & Vitamins. All rights reserved.</p>
+                    <div class="footer-bottom-links">
+                        <a href="privacy-policy.html">Privacy Policy</a>
+                        <span class="separator">|</span>
+                        <a href="terms-and-conditions.html">Terms &amp; Conditions</a>
+                        <span class="separator">|</span>
+                        <a href="shipping-returns.html#shipping-policy">Shipping Policy</a>
+                        <span class="separator">|</span>
+                        <a href="shipping-returns.html#refund-policy">Refund Policy</a>
+                        <span class="separator">|</span>
+                        <a href="coa.html">Lab Results (COA)</a>
+                        <span class="separator">|</span>
+                        <a href="index.html#contact">Contact Us</a>
+                        <span class="separator">|</span>
+                        <a href="ccpa-privacy-rights.html">Do Not Sell My Personal Information</a>
+                        <span class="separator">|</span>
+                        <button id="cookie-preferences" class="link-button">Cookie Preferences</button>
+                        <span class="separator">|</span>
+                        <a href="admin.html" class="admin-link">Admin</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Shopping Cart Sidebar -->
+    <aside class="cart-sidebar" id="cart-sidebar" aria-label="Shopping cart" aria-hidden="true">
+        <div class="cart-header">
+            <h2 class="cart-title">Shopping Cart</h2>
+            <button type="button" class="cart-close" aria-label="Close cart">
+                <svg class="cart-close-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12 5.7 16.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4z"/></svg>
+            </button>
+        </div>
+
+        <div class="cart-content">
+            <div class="cart-items" id="cart-items">
+                <!-- Cart items will be dynamically loaded here -->
+            </div>
+
+            <div class="cart-empty" id="cart-empty">
+                <svg class="cart-icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                <p>Your cart is empty</p>
+                <a href="products.html" class="btn btn-primary">Continue Shopping</a>
+            </div>
+        </div>
+
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span class="total-label">Total: </span>
+                <span class="total-amount" id="cart-total">$0.00</span>
+            </div>
+            <button type="button" class="btn btn-primary btn-block checkout-btn" id="checkout-btn"
+                onclick="if(window.hmHerbsApp && window.hmHerbsApp.proceedToCheckout) { window.hmHerbsApp.proceedToCheckout(); return false; } else if(window.productsPage && window.productsPage.proceedToCheckout) { window.productsPage.proceedToCheckout(); return false; } else { console.error('Checkout handler not available'); } return false;">
+                <i class="fas fa-credit-card" aria-hidden="true"></i>
+                Proceed to Checkout
+            </button>
+        </div>
+    </aside>
+
+    <div class="cart-overlay" id="cart-overlay"></div>
+
+    <!-- Scripts -->
+    <script src="js/age-gate.js" defer></script>
+    <script src="js/site-promo-banner.js" defer></script>
+    <script src="js/site-store-info.js" defer></script>
+    <script src="js/hm-notify.js"></script>
+    <script src="js/visual-bug-fixes.js"></script>
+    <script src="js/brands-categories.js?v=gender-cats-1"></script>
+    <script src="script.js" defer></script>
+    <script src="js/accessibility.js?v=a11y-1" defer></script>
+    <script src="gdpr-compliance.js?v=20260617a" defer></script>
+</body>
+
+</html>

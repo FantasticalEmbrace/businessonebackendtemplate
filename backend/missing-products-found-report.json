@@ -1,0 +1,337 @@
+{
+  "generated_at": "2025-12-23T23:36:57.591Z",
+  "summary": {
+    "found": 25,
+    "not_found": 0,
+    "errors": 0
+  },
+  "found_products": [
+    {
+      "product": {
+        "id": 1236,
+        "sku": "25407",
+        "name": "1 Life Science GLP-1 PRO",
+        "slug": "1-life-science-glp-1-pro"
+      },
+      "found": true,
+      "url": "https://hmherbs.com/index.php/products/advanced-blood-pressure-cherry",
+      "price": 32.95,
+      "stock": 100,
+      "inStock": true
+    },
+    {
+      "product": {
+        "id": 1242,
+        "sku": "19109",
+        "name": "ADAM'S PROSTATE CARE",
+        "slug": "adam-s-prostate-care"
+      },
+      "found": true,
+      "url": "https://hmherbs.com/index.php/products/advanced-blood-pressure-cherry",
+      "price": 32.95,
+      "stock": 100,
+      "inStock": true
+    },
+    {
+      "product": {
+        "id": 1246,
+        "sku": "28617",
+        "name": "Big Bang Male Enhancement - Free Shipping",
+        "slug": "big-bang-male-enhancement-free-shipping"
+      },
+      "found": true,
+      "url": "https://hmherbs.com/index.php/products/advanced-blood-pressure-cherry",
+      "price": 32.95,
+      "stock": 100,
+      "inStock": true
+    },
+    {
+      "product": {
+        "id": 1279,
+        "sku": "27842",
+        "name": "Dr. Tony's Blood Sugar",
+        "slug": "dr-tony-s-blood-sugar"
+      },
+      "found": true,
+      "url": "https://hmherbs.com/index.php/products/advanced-blood-pressure-cherry",
+      "price": 32.95,
+      "stock": 100,
+      "inStock": true
+    },
+    {
+      "product": {
+        "id": 1286,
+        "sku": "E286L-0001",
+        "name": "Edom Labs Chiro-Klenz Tea Lemon",
+        "slug": "edom-labs-chiro-klenz-tea-lemon"
+      },
+      "found": true,
+      "url": "https://hmherbs.com/index.php/products/advanced-blood-pressure-cherry",
+      "price": 32.95,
+      "stock": 100,
+      "inStock": true
+    },
+    {
+      "product": {
+        "id": 1287,
+        "sku": "E286-0001",
+        "name": "Edom Labs Chiro-Klenz Tea Original",
+        "slug": "edom-labs-chiro-klenz-tea-original"
+      },
+      "found": true,
+      "url": "https://hmherbs.com/index.php/products/advanced-blood-pressure-cherry",
+      "price": 32.95,
+      "stock": 100,
+      "inStock": true
+    },
+    {
+      "product": {
+        "id": 1295,
+        "sku": "16651",
+        "name": "Flexcin CM8 Load-Up Formula",
+        "slug": "flexcin-cm8-load-up-formula"
+      },
+      "found": true,
+      "url": "https://hmherbs.com/index.php/products/advanced-blood-pressure-cherry",
+      "price": 32.95,
+      "stock": 100,
+      "inStock": true
+    },
+    {
+      "product": {
+        "id": 1303,
+        "sku": "VD3-2OZ",
+        "name": "Global Healing Vitamin D3 Plant Based",
+        "slug": "global-healing-vitamin-d3-plant-based"
+      },
+      "found": true,
+      "url": "https://hmherbs.com/index.php/products/advanced-blood-pressure-cherry",
+      "price": 32.95,
+      "stock": 100,
+      "inStock": true
+    },
+    {
+      "product": {
+        "id": 1304,
+        "sku": "25986",
+        "name": "Global Healing Women's Hormone Balance",
+        "slug": "global-healing-women-s-hormone-balance"
+      },
+      "found": true,
+      "url": "https://hmherbs.com/index.php/products/advanced-blood-pressure-cherry",
+      "price": 32.95,
+      "stock": 100,
+      "inStock": true
+    },
+    {
+      "product": {
+        "id": 1330,
+        "sku": "28707",
+        "name": "Irwin Magnesium w/Milk thistle & Turmeric",
+        "slug": "irwin-magnesium-w-milk-thistle-turmeric"
+      },
+      "found": true,
+      "url": "https://hmherbs.com/index.php/products/advanced-blood-pressure-cherry",
+      "price": 32.95,
+      "stock": 100,
+      "inStock": true
+    },
+    {
+      "product": {
+        "id": 1333,
+        "sku": "28702",
+        "name": "Life Ext Huperzine A",
+        "slug": "life-ext-huperzine-a"
+      },
+      "found": true,
+      "url": "https://hmherbs.com/index.php/products/life-ext-huperzine",
+      "price": 0,
+      "stock": 100,
+      "inStock": true
+    },
+    {
+      "product": {
+        "id": 1339,
+        "sku": "28698",
+        "name": "LIFE-FLO MAGNESIUM OIL SPRAY With aloe vera",
+        "slug": "life-flo-magnesium-oil-spray-with-aloe-vera"
+      },
+      "found": true,
+      "url": "https://hmherbs.com/index.php/products/advanced-blood-pressure-cherry",
+      "price": 32.95,
+      "stock": 100,
+      "inStock": true
+    },
+    {
+      "product": {
+        "id": 1349,
+        "sku": "27975",
+        "name": "MD Swiss Navy Max Size Male",
+        "slug": "md-swiss-navy-max-size-male"
+      },
+      "found": true,
+      "url": "https://hmherbs.com/index.php/products/advanced-blood-pressure-cherry",
+      "price": 32.95,
+      "stock": 100,
+      "inStock": true
+    },
+    {
+      "product": {
+        "id": 1362,
+        "sku": "NBCY-P",
+        "name": "Nature's Balance CyChroMax",
+        "slug": "nature-s-balance-cychromax"
+      },
+      "found": true,
+      "url": "https://hmherbs.com/index.php/products/advanced-blood-pressure-cherry",
+      "price": 32.95,
+      "stock": 100,
+      "inStock": true
+    },
+    {
+      "product": {
+        "id": 1376,
+        "sku": "4870",
+        "name": "Nature's Plus Ultra Virile-Actin",
+        "slug": "nature-s-plus-ultra-virile-actin"
+      },
+      "found": true,
+      "url": "https://hmherbs.com/index.php/products/advanced-blood-pressure-cherry",
+      "price": 32.95,
+      "stock": 100,
+      "inStock": true
+    },
+    {
+      "product": {
+        "id": 1393,
+        "sku": "11512",
+        "name": "Nature's Sunshine Black Walnut Capsules",
+        "slug": "nature-s-sunshine-black-walnut-capsules"
+      },
+      "found": true,
+      "url": "https://hmherbs.com/index.php/products/advanced-blood-pressure-cherry",
+      "price": 32.95,
+      "stock": 100,
+      "inStock": true
+    },
+    {
+      "product": {
+        "id": 1399,
+        "sku": "8009",
+        "name": "Natures Plus AgeLoss Liver Support",
+        "slug": "natures-plus-ageloss-liver-support"
+      },
+      "found": true,
+      "url": "https://hmherbs.com/index.php/products/advanced-blood-pressure-cherry",
+      "price": 32.95,
+      "stock": 100,
+      "inStock": true
+    },
+    {
+      "product": {
+        "id": 1400,
+        "sku": "8007",
+        "name": "Natures Plus AgeLoss Prostate Support",
+        "slug": "natures-plus-ageloss-prostate-support"
+      },
+      "found": true,
+      "url": "https://hmherbs.com/index.php/products/advanced-blood-pressure-cherry",
+      "price": 32.95,
+      "stock": 100,
+      "inStock": true
+    },
+    {
+      "product": {
+        "id": 1517,
+        "sku": "28694",
+        "name": "NOW C-1000 zinc &D-3",
+        "slug": "now-c-1000-zinc-d-3"
+      },
+      "found": true,
+      "url": "https://hmherbs.com/index.php/products/advanced-blood-pressure-cherry",
+      "price": 32.95,
+      "stock": 100,
+      "inStock": true
+    },
+    {
+      "product": {
+        "id": 1519,
+        "sku": "2394",
+        "name": "NOW FOODS MAGTEIN",
+        "slug": "now-foods-magtein"
+      },
+      "found": true,
+      "url": "https://hmherbs.com/index.php/products/advanced-blood-pressure-cherry",
+      "price": 32.95,
+      "stock": 100,
+      "inStock": true
+    },
+    {
+      "product": {
+        "id": 1536,
+        "sku": "1101",
+        "name": "Perrin's Blend Ointment",
+        "slug": "perrin-s-blend-ointment"
+      },
+      "found": true,
+      "url": "https://hmherbs.com/index.php/products/advanced-blood-pressure-cherry",
+      "price": 32.95,
+      "stock": 100,
+      "inStock": true
+    },
+    {
+      "product": {
+        "id": 1542,
+        "sku": "303",
+        "name": "PowerThin Phase II Ephedra Free",
+        "slug": "powerthin-phase-ii-ephedra-free"
+      },
+      "found": true,
+      "url": "https://hmherbs.com/index.php/products/advanced-blood-pressure-cherry",
+      "price": 32.95,
+      "stock": 100,
+      "inStock": true
+    },
+    {
+      "product": {
+        "id": 1548,
+        "sku": "25017",
+        "name": "REGAL LABS BIOTIN 10,000",
+        "slug": "regal-labs-biotin-10-000"
+      },
+      "found": true,
+      "url": "https://hmherbs.com/index.php/products/advanced-blood-pressure-cherry",
+      "price": 32.95,
+      "stock": 100,
+      "inStock": true
+    },
+    {
+      "product": {
+        "id": 1926,
+        "sku": "85000246",
+        "name": "STANDARD ENZYME THYROID SUPPORT",
+        "slug": "standard-enzyme-thyroid-support"
+      },
+      "found": true,
+      "url": "https://hmherbs.com/index.php/products/advanced-blood-pressure-cherry",
+      "price": 32.95,
+      "stock": 100,
+      "inStock": true
+    },
+    {
+      "product": {
+        "id": 1962,
+        "sku": "28695",
+        "name": "THRES. N.AMERICAN OREGANOL ..45OZ P73",
+        "slug": "thres-n-american-oreganol-45oz-p73"
+      },
+      "found": true,
+      "url": "https://hmherbs.com/index.php/products/advanced-blood-pressure-cherry",
+      "price": 32.95,
+      "stock": 100,
+      "inStock": true
+    }
+  ],
+  "not_found_products": [],
+  "errors": []
+}

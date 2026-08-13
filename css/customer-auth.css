@@ -1,0 +1,1052 @@
+/* Customer Authentication Styles */
+
+/* Auth Buttons in Header */
+.customer-auth-container {
+    display: grid;
+    grid-template-columns: auto;
+    align-items: center;
+    gap: var(--space-4);
+    position: relative;
+    z-index: 3;
+    flex-shrink: 0;
+    pointer-events: auto;
+}
+
+/* Stack guest/user panels in one cell so an inactive panel cannot sit on top */
+#customer-auth-guest,
+#customer-auth-user {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+/* When one panel is active, the other must not intercept clicks (children default to auto) */
+.customer-auth-container:has(#customer-auth-user:not([hidden])) #customer-auth-guest,
+.customer-auth-container:has(#customer-auth-user:not([hidden])) #customer-auth-guest * {
+    display: none !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+}
+
+.customer-auth-container:has(#customer-auth-guest:not([hidden])) #customer-auth-user,
+.customer-auth-container:has(#customer-auth-guest:not([hidden])) #customer-auth-user * {
+    display: none !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+}
+
+/* Keep clear spacing between Sign In and Register */
+#customer-auth-guest {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+/* Logged-in header: same row layout as guest (account link + Sign Out); scoped so
+   checkout/about dropdowns (toggle + menu) are unchanged */
+#customer-auth-user {
+    display: flex;
+    align-items: center;
+}
+
+#customer-auth-user .account-dropdown {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-4);
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+    min-width: min-content;
+}
+
+/* Only the [hidden] attribute disables a panel — avoid class-only pointer-events:none,
+   which left "Donald Rankin / Sign Out" visible but dead when the signed-in class lagged. */
+#customer-auth-guest[hidden],
+#customer-auth-guest[inert],
+.customer-auth-container.customer-auth--signed-in #customer-auth-guest {
+    display: none !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+}
+
+#customer-auth-user[hidden],
+#customer-auth-user[inert] {
+    display: none !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+}
+
+/* Signed-in panel and controls must stay above any stale guest layer */
+#customer-auth-user:not([hidden]) {
+    position: relative;
+    z-index: 2;
+    pointer-events: auto !important;
+}
+
+#customer-auth-user:not([hidden]) .auth-btn,
+#customer-auth-user:not([hidden]) .account-dropdown {
+    position: relative;
+    z-index: 2;
+    pointer-events: auto !important;
+}
+
+/* Prevent flex squeeze: name text was painting outside a too-narrow <a> (hover only on icon/left) */
+#customer-auth-user .account-dropdown .auth-btn {
+    flex-shrink: 0;
+}
+
+.header-actions .customer-auth-container {
+    flex-shrink: 0;
+}
+
+/* Header toolbar: stay above nav chrome and remain fully clickable */
+.navbar .header-actions,
+.header .header-actions {
+    position: relative;
+    z-index: 20;
+    isolation: isolate;
+    pointer-events: auto;
+}
+
+.navbar .header-actions .auth-btn,
+.navbar .header-actions .cart-toggle,
+.navbar .header-actions .search-toggle,
+.navbar .header-actions a.auth-btn,
+.navbar .header-actions button {
+    position: relative;
+    z-index: 2;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    box-sizing: border-box;
+    touch-action: manipulation;
+}
+
+/* mobile-enhancements.css pads all buttons — reset header tools so cart is not a double box */
+.header-actions .auth-btn,
+.header-actions .cart-toggle,
+.header-actions .search-toggle {
+    padding: var(--space-2) var(--space-3) !important;
+}
+
+.navbar .header-actions .cart-toggle {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--gray-700);
+}
+
+.navbar .header-actions .cart-toggle:hover,
+.navbar .header-actions .cart-toggle:focus-visible {
+    color: var(--white) !important;
+    background-color: var(--primary-green) !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(var(--brand-primary-rgb), 0.35) !important;
+    outline: none;
+}
+
+#customer-auth-user .account-dropdown a.account-link.auth-btn {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    max-width: none;
+    width: max-content;
+    min-width: fit-content;
+    overflow: visible;
+    box-sizing: border-box;
+}
+
+#customer-auth-user .account-dropdown .auth-btn-text {
+    pointer-events: none;
+}
+
+#customer-auth-user .account-dropdown .auth-btn-signout {
+    flex-shrink: 0;
+}
+
+.auth-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: transparent;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-md);
+    color: var(--gray-700);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+}
+
+a.auth-btn,
+a.auth-btn:hover,
+a.auth-btn:focus,
+a.auth-btn:focus-visible {
+    text-decoration: none;
+}
+
+.auth-btn:hover,
+.auth-btn:focus-visible {
+    background: var(--primary-green);
+    border-color: var(--primary-green);
+    color: var(--white);
+}
+
+.auth-btn:hover i,
+.auth-btn:focus-visible i {
+    color: var(--white);
+}
+
+.auth-btn i {
+    font-size: var(--text-base);
+}
+
+/* Inline SVG auth icons (see customer-auth.js _installAuthHeaderSvgs) — reliable when FA webfont fails */
+.auth-icon-svg {
+    display: block;
+    flex-shrink: 0;
+    width: 1.125rem;
+    height: 1.125rem;
+    pointer-events: none;
+    color: currentColor;
+}
+
+.customer-auth-container .auth-btn > i[class*="fa-"] {
+    display: none !important;
+}
+
+.auth-btn:hover .auth-icon-svg,
+.auth-btn:focus-visible .auth-icon-svg {
+    color: inherit;
+}
+
+@media (max-width: 1199px) {
+    #customer-auth-user .auth-btn .auth-icon-svg,
+    #customer-auth-guest .auth-btn .auth-icon-svg {
+        width: 1.35em;
+        height: 1.35em;
+    }
+}
+
+.auth-btn-text {
+    display: none;
+    text-decoration: none;
+}
+
+/* Guest: show Sign In / Register labels from tablet up */
+@media (min-width: 768px) {
+    #customer-auth-guest .auth-btn-text {
+        display: inline;
+    }
+}
+
+/* Logged-in: keep icon-only compact header until large desktops (name + Sign Out text only at 1200px+) */
+@media (min-width: 1200px) {
+    #customer-auth-user .auth-btn-text {
+        display: inline;
+    }
+}
+
+/* Account Dropdown */
+.account-dropdown {
+    position: relative;
+}
+
+.account-toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: transparent;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-md);
+    color: var(--gray-700);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+}
+
+.account-toggle:hover,
+.account-toggle:focus-visible {
+    background: var(--primary-green);
+    border-color: var(--primary-green);
+    color: var(--white);
+}
+
+.account-toggle i:first-child {
+    font-size: var(--text-lg);
+    color: var(--primary-green);
+}
+
+.account-toggle:hover i:first-child,
+.account-toggle:focus-visible i:first-child {
+    color: var(--white);
+}
+
+.account-name {
+    display: none;
+    font-weight: 500;
+}
+
+@media (min-width: 768px) {
+    .account-name {
+        display: inline;
+    }
+}
+
+.account-menu {
+    position: absolute;
+    top: calc(100% + var(--space-2));
+    right: 0;
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    min-width: 200px;
+    z-index: var(--z-dropdown);
+    overflow: hidden;
+}
+
+.account-menu-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    background: none;
+    border: none;
+    text-align: left;
+    color: var(--gray-700);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+    text-decoration: none;
+}
+
+.account-menu-item:hover {
+    background: var(--gray-50);
+    color: var(--primary-green);
+}
+
+.account-menu-item i {
+    width: 20px;
+    text-align: center;
+    color: var(--gray-500);
+}
+
+.account-menu-item:hover i {
+    color: var(--primary-green);
+}
+
+/* Authentication Modals */
+/* Overlay must stay viewport-anchored: no transform/backdrop-filter on this layer
+   (see emergency-fixes global translateZ + engines that treat filter as a fixed-CB). */
+.auth-modal {
+    display: none;
+    position: fixed !important;
+    z-index: var(--z-auth-overlay, 999999) !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
+    box-sizing: border-box;
+    padding: max(var(--space-4), env(safe-area-inset-top))
+        max(var(--space-4), env(safe-area-inset-right))
+        max(var(--space-4), env(safe-area-inset-bottom))
+        max(var(--space-4), env(safe-area-inset-left));
+    margin: 0 !important;
+    transform: none !important;
+    -webkit-transform: none !important;
+    filter: none;
+    -webkit-filter: none;
+    overflow: hidden;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    background: transparent;
+    align-items: flex-start;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+    isolation: isolate;
+    pointer-events: none;
+}
+
+/* Dim + blur on a non-fixed child so the shell can use pure viewport fixed geometry */
+.auth-modal::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    pointer-events: none;
+    flex: none;
+}
+
+.auth-modal.show {
+    display: flex;
+    opacity: 1;
+    min-height: 100dvh;
+    pointer-events: auto;
+}
+
+.auth-modal-content {
+    background-color: var(--white);
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: auto;
+    margin-bottom: auto;
+    padding: 0;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+    width: 90%;
+    max-width: 500px;
+    max-height: calc(
+        100dvh
+        - max(var(--space-4), env(safe-area-inset-top, 0px))
+        - max(var(--space-4), env(safe-area-inset-bottom, 0px))
+    );
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+    transform: translateY(-20px);
+    transition: transform var(--transition-normal);
+}
+
+/* Registration has more fields — tighter spacing so the card fits without clipping */
+#customer-register-modal .auth-modal-content {
+    padding: 0;
+}
+
+#customer-register-modal .auth-modal-header {
+    padding: var(--space-5) var(--space-6) var(--space-3);
+    margin-bottom: 0;
+}
+
+#customer-register-modal .auth-modal-body {
+    padding: var(--space-2) var(--space-6) var(--space-5);
+}
+
+#customer-register-modal .auth-modal-body .form-group {
+    margin-bottom: var(--space-3);
+}
+
+#customer-register-modal .oauth-signin-block {
+    margin-bottom: var(--space-2);
+}
+
+#customer-register-modal .auth-divider {
+    margin: 0.625rem 0;
+}
+
+.register-optional-contact {
+    margin-bottom: var(--space-3);
+}
+
+.register-optional-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    border: 1px dashed var(--gray-300);
+    border-radius: var(--radius-md);
+    background: var(--gray-50);
+    color: var(--primary-green);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.register-optional-toggle:hover,
+.register-optional-toggle:focus {
+    background: #eef5ec;
+    border-color: var(--primary-green);
+    outline: none;
+}
+
+.register-optional-toggle:focus-visible {
+    box-shadow: 0 0 0 3px rgba(var(--brand-primary-rgb), 0.15);
+}
+
+.register-optional-toggle[aria-expanded='true'] {
+    border-style: solid;
+    background: #f3faf1;
+}
+
+.register-optional-toggle-hint {
+    color: var(--gray-500);
+    font-weight: 500;
+}
+
+.register-optional-panel {
+    margin-top: var(--space-3);
+    padding-top: var(--space-1);
+}
+
+.register-optional-panel[hidden] {
+    display: none !important;
+}
+
+.register-address-intro {
+    margin-bottom: var(--space-3);
+}
+
+.form-optional {
+    color: var(--gray-500);
+    font-weight: 400;
+}
+
+#register-address-state {
+    text-transform: uppercase;
+}
+
+.auth-modal.show .auth-modal-content {
+    transform: translateY(0);
+}
+
+.auth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--gray-200);
+    padding: var(--space-5) var(--space-6) var(--space-4);
+    margin: 0;
+    position: relative;
+    z-index: 3;
+    background-color: var(--white);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+}
+
+.auth-modal-header h2 {
+    color: var(--primary-green);
+    font-size: var(--text-2xl);
+    font-family: var(--font-display);
+    margin: 0;
+}
+
+.auth-modal-header h2:focus {
+    outline: none;
+}
+
+.auth-modal-header h2:focus-visible {
+    outline: 2px solid var(--primary-green);
+    outline-offset: 3px;
+    border-radius: var(--radius-sm);
+}
+
+.auth-modal-close {
+    box-sizing: border-box;
+    width: 2.75rem;
+    height: 2.75rem;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    padding: 0;
+    border: none;
+    border-radius: 0.65rem;
+    background: var(--hm-close-fill, #e75b4f);
+    color: var(--white);
+    font-size: var(--text-xl);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(231, 91, 79, 0.35);
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.auth-modal-close:hover {
+    background: var(--hm-close-fill-hover, #f0786d);
+    transform: scale(1.06);
+    box-shadow: 0 4px 14px rgba(231, 91, 79, 0.45);
+}
+
+.auth-modal-close:active {
+    background: var(--hm-close-fill-active, #cf4a40);
+    transform: scale(0.94);
+}
+
+.auth-modal-close:focus-visible {
+    outline: 2px solid var(--white);
+    outline-offset: 2px;
+}
+
+.auth-modal-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: var(--space-4) var(--space-6) var(--space-6);
+}
+
+/* Form Styles */
+.form-group {
+    margin-bottom: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.auth-modal-body .form-group > label {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: var(--space-2);
+}
+
+.text-required {
+    color: var(--error);
+    font-weight: 700;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+}
+
+.form-input {
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-md);
+    font-size: var(--text-base);
+    transition: all var(--transition-fast);
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary-green);
+    box-shadow: var(--brand-focus-ring);
+}
+
+.form-input::placeholder {
+    color: var(--gray-400);
+}
+
+/* Help text spacing - only applies when directly after an input */
+.form-input + .form-help {
+    display: block;
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+    font-size: var(--text-xs);
+    color: var(--gray-500);
+    line-height: 1.5;
+    width: 100%;
+}
+
+/* Ensure help text only appears after confirm password field */
+#register-password + .form-help {
+    display: none !important;
+}
+
+#register-confirm-password + .form-help {
+    display: block !important;
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+}
+
+.form-help {
+    display: block;
+    font-size: var(--text-xs);
+    color: var(--gray-500);
+    line-height: 1.5;
+}
+
+.auth-error {
+    padding: var(--space-3);
+    background-color: rgba(220, 38, 38, 0.1);
+    border: 1px solid var(--error);
+    border-radius: var(--radius-md);
+    color: var(--error);
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-4);
+    display: none;
+}
+
+.auth-switch-text {
+    text-align: center;
+    margin-top: var(--space-4);
+    font-size: var(--text-sm);
+    color: var(--gray-600);
+}
+
+.auth-switch-text a {
+    color: var(--primary-green);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.auth-switch-text a:hover {
+    text-decoration: underline;
+}
+
+.auth-switch-text a.auth-link--prompt {
+    text-decoration: underline;
+    font-weight: 700;
+    color: var(--brand-primary-dark, #047857);
+}
+
+.btn-full-width {
+    width: 100%;
+    margin-top: var(--space-2);
+}
+
+/* Mobile Responsive */
+@media (max-width: 1199px) {
+    #customer-auth-user .account-dropdown .auth-btn {
+        padding: var(--space-2);
+        min-width: 44px;
+        min-height: 44px;
+        justify-content: center;
+        box-sizing: border-box;
+    }
+
+    #customer-auth-user .account-dropdown {
+        gap: var(--space-3);
+    }
+}
+
+@media (max-width: 767px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .auth-modal-content {
+        max-width: 95%;
+    }
+
+    .auth-modal-header {
+        padding: var(--space-4) var(--space-5) var(--space-3);
+    }
+
+    .auth-modal-body {
+        padding: var(--space-3) var(--space-5) var(--space-5);
+    }
+
+    .header-actions .customer-auth-container {
+        gap: var(--space-3);
+    }
+
+    #customer-auth-user .account-dropdown {
+        gap: var(--space-3);
+    }
+
+    .auth-btn {
+        padding: var(--space-2);
+        min-width: 44px;
+    }
+}
+
+/* -------------------------------------------------------------------------
+   Account overlays (js/account.js): viewport-fixed shell + centered card.
+   Blur lives on ::before (not the fixed layer) so centering stays viewport-anchored.
+   ------------------------------------------------------------------------- */
+.acct-modal-backdrop {
+    position: fixed;
+    z-index: 999998;
+    inset: 0;
+    box-sizing: border-box;
+    padding: max(var(--space-4), env(safe-area-inset-top))
+        max(var(--space-4), env(safe-area-inset-right))
+        max(var(--space-4), env(safe-area-inset-bottom))
+        max(var(--space-4), env(safe-area-inset-left));
+    margin: 0;
+    transform: none !important;
+    -webkit-transform: none !important;
+    filter: none;
+    -webkit-filter: none;
+    overflow: hidden;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+}
+
+.acct-modal-backdrop::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-color: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    pointer-events: none;
+}
+
+.acct-modal-backdrop.is-open {
+    display: flex;
+}
+
+/* Wishlist picker: top-third of viewport (avoids sitting below fold on long product pages). */
+.acct-modal-backdrop.hm-wl-picker-backdrop {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    padding-top: max(72px, 10vh, env(safe-area-inset-top, 0px)) !important;
+    padding-bottom: max(var(--space-4), env(safe-area-inset-bottom, 0px)) !important;
+}
+
+/* --- Wishlist picker (see wishlist-add.js) — audit notes in block before .wishlist-modal .btn --- */
+
+.hm-wl-picker-dim,
+.acct-modal-dim {
+    position: fixed;
+    inset: 0;
+    z-index: 999998;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    transform: none !important;
+    -webkit-transform: none !important;
+    filter: none;
+    -webkit-filter: none;
+    overflow: hidden;
+    overscroll-behavior: contain;
+    pointer-events: auto;
+    background-color: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.acct-modal-backdrop .wishlist-modal,
+.acct-modal-backdrop .acct-modal.wishlist-modal {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: min(520px, calc(100vw - 32px)) !important;
+    max-width: min(520px, calc(100vw - 32px)) !important;
+    max-height: min(75dvh, calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 120px)) !important;
+    transform: none !important;
+    -webkit-transform: none !important;
+    margin: 0 auto !important;
+    z-index: 1 !important;
+}
+
+/* Legacy floating panel (account.js) — wishlist picker uses .acct-modal-backdrop instead */
+.acct-modal.acct-modal-floating {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    width: min(520px, calc(100vw - 32px)) !important;
+    max-width: min(520px, calc(100vw - 32px)) !important;
+    max-height: min(90dvh, calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 32px)) !important;
+    overflow-x: hidden;
+    overflow-y: auto;
+    box-sizing: border-box;
+    transform: translate(-50%, -50%) translateZ(0) !important;
+    -webkit-transform: translate(-50%, -50%) translateZ(0) !important;
+    z-index: 999999 !important;
+    margin: 0 !important;
+}
+
+.wishlist-modal .hm-wl-picker-lede {
+    margin: 0 0 1rem;
+    color: var(--gray-600, #6b7280);
+    font-size: 0.92rem;
+    line-height: 1.45;
+}
+
+.wishlist-modal .hm-wl-picker-field {
+    margin-bottom: 0.5rem;
+}
+
+.wishlist-modal .hm-wl-picker-label {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: var(--gray-800, #1f2937);
+}
+
+.wishlist-modal .hm-wl-picker-foot {
+    margin: 0.5rem 0 0;
+    font-size: 0.82rem;
+    color: var(--gray-500, #9ca3af);
+}
+
+.wishlist-modal .hm-wl-picker-account-link {
+    color: var(--primary-green);
+    font-weight: 500;
+}
+
+/* Wishlist picker — full audit (HTML/CSS/JS):
+   - product.html: loads emergency-fixes, customer-auth, hm-close-controls; scripts include visual-bug-fixes.js + wishlist-add.js (no static modal markup).
+   - wishlist-add.js: appends .hm-wl-picker-dim then .acct-modal.wishlist-modal to document.body (siblings; dim has backdrop-filter so the card must NOT be nested inside it).
+   - account.js: .acct-modal-backdrop.is-open > .acct-modal (centered popup).
+   - emergency-fixes.css + visual-bug-fixes critical <style>: universal * translateZ excludes .wishlist-modal, .hm-wl-picker-dim, .acct-modal-dim.
+   - visual-bug-fixes optimizeTransitions(): injected ".btn { transform: translateZ(0) }" matched modal buttons — overridden in that same injected sheet (see JS).
+   - hm-close-controls.css: .acct-modal-close uses position: relative !important — pin rule below must use !important to win. */
+
+.wishlist-modal .btn,
+.acct-modal-backdrop .btn,
+.acct-modal-backdrop .btn-danger,
+.acct-modal.acct-modal-floating .btn {
+    transform: none !important;
+    -webkit-transform: none !important;
+    backface-visibility: visible !important;
+    -webkit-backface-visibility: visible !important;
+    perspective: none !important;
+    will-change: auto !important;
+}
+
+.wishlist-modal.acct-modal .acct-modal-close,
+.acct-modal.acct-modal-floating .acct-modal-close {
+    position: absolute !important;
+    top: max(var(--space-3), env(safe-area-inset-top));
+    right: max(var(--space-3), env(safe-area-inset-right));
+    z-index: 4;
+}
+
+@media (max-width: 767px) {
+    .wishlist-modal,
+    .acct-modal.acct-modal-floating {
+        width: calc(100vw - 24px) !important;
+        max-width: calc(100vw - 24px) !important;
+        padding: var(--space-5) var(--space-4);
+    }
+}
+
+.acct-modal {
+    position: relative;
+    z-index: 1;
+    box-sizing: border-box;
+    background: var(--white);
+    border-radius: var(--radius-xl, 12px);
+    box-shadow: var(--shadow-xl);
+    padding: var(--space-6) var(--space-6) var(--space-5);
+    flex-shrink: 1;
+    min-height: 0;
+}
+
+.acct-modal-backdrop .acct-modal {
+    width: 100%;
+    max-width: 520px;
+    max-height: calc(
+        100dvh
+        - max(var(--space-4), env(safe-area-inset-top, 0px))
+        - max(var(--space-4), env(safe-area-inset-bottom, 0px))
+    );
+    overflow-x: hidden;
+    overflow-y: auto;
+    margin: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Pin close control to the card corner (hm-close-controls uses position: relative). */
+.acct-modal-backdrop .acct-modal .acct-modal-close {
+    position: absolute !important;
+    top: max(var(--space-3), env(safe-area-inset-top));
+    right: max(var(--space-3), env(safe-area-inset-right));
+    z-index: 4;
+}
+
+.acct-modal h3 {
+    margin: 0 0 var(--space-4);
+    padding-right: 2.75rem;
+    font-family: var(--font-display);
+    color: var(--primary-green);
+    font-size: var(--text-xl, 1.25rem);
+    font-weight: 600;
+}
+
+.acct-modal .form-group {
+    margin-bottom: var(--space-4);
+}
+
+.acct-modal-actions {
+    display: flex;
+    gap: var(--space-3);
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    margin-top: var(--space-5);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--gray-200);
+}
+
+.acct-confirm-message {
+    margin: 0 0 var(--space-2);
+    color: var(--gray-700, #374151);
+    font-size: var(--text-base, 1rem);
+    line-height: 1.5;
+}
+
+.acct-modal .btn-danger {
+    background-color: var(--error, #dc2626);
+    color: var(--white, #fff);
+    border-color: var(--error, #dc2626);
+}
+
+.acct-modal .btn-danger:hover,
+.acct-modal .btn-danger:focus {
+    background-color: #b91c1c;
+    border-color: #b91c1c;
+    color: var(--white, #fff);
+}
+
+.acct-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+}
+
+body.auth-modal-open {
+    overflow: hidden;
+}
+
+/* Keep sticky header / promo below the full-screen auth overlay */
+body.auth-modal-open .header,
+body.auth-modal-open .site-promo-banner,
+body.auth-modal-open .nav-menu,
+body.auth-modal-open .navbar .header-actions {
+    z-index: 1 !important;
+}
+
+/* Error/success toasts must render above the auth overlay blur, not behind it */
+body.auth-modal-open .notification,
+body.auth-modal-open #error-notifications,
+body.auth-modal-open #hm-toast-region {
+    z-index: var(--z-notification, 1000000) !important;
+    filter: none !important;
+    -webkit-filter: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+@media (max-width: 767px) {
+    .acct-modal-backdrop .acct-modal,
+    .wishlist-modal.acct-modal {
+        max-width: 100%;
+        padding: var(--space-5) var(--space-4);
+    }
+
+    .acct-form-row {
+        grid-template-columns: 1fr;
+    }
+}

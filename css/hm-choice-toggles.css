@@ -1,0 +1,272 @@
+/**
+ * HM Herbs / Business One — red (off) / green (on) choice controls.
+ * Native checkboxes & radios are enhanced by js/hm-choice-toggles.js.
+ */
+:root {
+    --hm-choice-off: #dc2626;
+    --hm-choice-off-bg: rgba(220, 38, 38, 0.08);
+    --hm-choice-on: var(--brand-primary);
+    --hm-choice-on-dark: var(--brand-primary-dark);
+    --hm-choice-on-bg: var(--brand-surface-medium);
+    --hm-choice-knob: #ffffff;
+    --hm-choice-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
+}
+
+/* Protect toggle visuals from global translateZ / transform hacks in emergency-fixes.css */
+.hm-choice-row,
+.hm-choice-row *,
+.hm-choice-segment,
+.hm-choice-segment *,
+.toggle-switch,
+.toggle-switch * {
+    -webkit-transform: none !important;
+    transform: none !important;
+    -webkit-backface-visibility: visible !important;
+    backface-visibility: visible !important;
+}
+
+.hm-choice-row {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    cursor: pointer;
+    line-height: 1.45;
+}
+
+.hm-choice-row--sm { gap: 0.6rem; --hm-knob-size: 0.95rem; --hm-knob-gap: 0.18rem; --hm-pill-height: 1.65rem; }
+.hm-choice-row--md { gap: 0.75rem; --hm-knob-size: 1.1rem; --hm-knob-gap: 0.2rem; --hm-pill-height: 1.85rem; }
+.hm-choice-row--lg { gap: 0.85rem; align-items: center; --hm-knob-size: 1.3rem; --hm-knob-gap: 0.22rem; --hm-pill-height: 2.1rem; }
+
+.hm-choice-toggle {
+    position: relative;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    line-height: 0;
+}
+
+.hm-choice-input {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    padding: 0;
+    opacity: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+.hm-choice-pill {
+    position: relative;
+    flex-shrink: 0;
+    display: inline-block;
+    box-sizing: border-box;
+    border-radius: 999px;
+    background: linear-gradient(180deg, var(--hm-choice-off) 0%, #b91c1c 100%);
+    border: 2px solid #991b1b;
+    box-shadow: var(--hm-choice-shadow);
+    transition: background 0.2s ease, border-color 0.2s ease, width 0.2s ease;
+    cursor: pointer;
+    pointer-events: none;
+    overflow: hidden;
+    line-height: 0;
+    vertical-align: middle;
+}
+
+.hm-choice-row--sm .hm-choice-pill {
+    width: 2.85rem;
+    height: var(--hm-pill-height);
+}
+
+.hm-choice-row--md .hm-choice-pill {
+    width: 3.35rem;
+    height: var(--hm-pill-height);
+}
+
+.hm-choice-row--lg .hm-choice-pill {
+    width: 4.5rem;
+    height: var(--hm-pill-height);
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.15rem;
+}
+
+.hm-choice-knob {
+    position: absolute;
+    top: 50%;
+    left: var(--hm-knob-gap, 0.18rem);
+    width: var(--hm-knob-size, 1.05rem);
+    height: var(--hm-knob-size, 1.05rem);
+    margin-top: calc(var(--hm-knob-size, 1.05rem) / -2);
+    border-radius: 50%;
+    background: var(--hm-choice-knob);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.22);
+    transform: none !important;
+    -webkit-transform: none !important;
+    transition: left 0.2s ease;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.hm-choice-state {
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.95);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+    position: relative;
+    z-index: 1;
+}
+
+.hm-choice-row--lg .hm-choice-state { font-size: 0.68rem; }
+
+/* Off: label right (knob left). On: label left (knob right). */
+.hm-choice-state-on {
+    display: none;
+    margin-left: 0;
+    margin-right: auto;
+    padding-left: 0.38rem;
+    padding-right: 0;
+}
+
+.hm-choice-state-off {
+    margin-left: auto;
+    margin-right: 0;
+    padding-right: 0.38rem;
+    padding-left: 0;
+}
+
+.hm-choice-row--sm .hm-choice-state,
+.hm-choice-row--md .hm-choice-state {
+    display: none;
+}
+
+.hm-choice-row:has(.hm-choice-input:checked) .hm-choice-pill {
+    background: linear-gradient(180deg, var(--hm-choice-on) 0%, var(--hm-choice-on-dark) 100%);
+    border-color: var(--hm-choice-on-dark);
+    justify-content: flex-start;
+}
+
+.hm-choice-row:has(.hm-choice-input:checked) .hm-choice-knob {
+    left: calc(100% - var(--hm-knob-gap, 0.18rem) - var(--hm-knob-size, 1.05rem));
+    transform: none !important;
+    -webkit-transform: none !important;
+}
+
+.hm-choice-row:has(.hm-choice-input:checked) .hm-choice-state-off { display: none; }
+.hm-choice-row--lg:has(.hm-choice-input:checked) .hm-choice-state-on { display: inline; }
+.hm-choice-row--lg:has(.hm-choice-input:checked) .hm-choice-state-off { display: none; }
+
+.hm-choice-row:has(.hm-choice-input:focus-visible) .hm-choice-pill {
+    outline: 3px solid rgba(var(--brand-primary-rgb), 0.35);
+    outline-offset: 2px;
+}
+
+.hm-choice-row:has(.hm-choice-input:disabled) {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.hm-choice-text {
+    flex: 1;
+    min-width: 0;
+    color: inherit;
+}
+
+.hm-choice-text strong { color: inherit; }
+
+/* Radio groups — segmented option cards */
+.hm-choice-segmented {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+}
+
+.hm-choice-segment {
+    position: relative;
+    flex: 1 1 14rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    margin: 0;
+    padding: 0.8rem 1rem;
+    border: 2px solid var(--hm-choice-off);
+    border-radius: 10px;
+    background: var(--hm-choice-off-bg);
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    line-height: 1.45;
+}
+
+.hm-choice-segment--lg {
+    padding: 0.95rem 1.1rem;
+}
+
+.hm-choice-segment:has(.hm-choice-input:checked) {
+    border-color: var(--hm-choice-on);
+    background: var(--hm-choice-on-bg);
+    box-shadow: 0 0 0 1px rgba(var(--brand-primary-rgb), 0.2);
+}
+
+.hm-choice-segment:has(.hm-choice-input:focus-visible) {
+    outline: 3px solid rgba(var(--brand-primary-rgb), 0.3);
+    outline-offset: 2px;
+}
+
+.hm-choice-segment .hm-choice-input {
+    left: 0.75rem;
+    top: 0.85rem;
+}
+
+.hm-choice-segment > span,
+.hm-choice-segment > .hm-choice-text {
+    flex: 1;
+    min-width: 0;
+}
+
+/* GDPR / legacy toggle-switch — match site colors */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.toggle-switch .toggle-slider {
+    background: linear-gradient(180deg, var(--hm-choice-off) 0%, #b91c1c 100%);
+    border: 1px solid #991b1b;
+}
+
+.toggle-switch input {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    opacity: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background: linear-gradient(180deg, var(--hm-choice-on) 0%, var(--hm-choice-on-dark) 100%);
+    border-color: var(--hm-choice-on-dark);
+}
+
+/* POS tokens */
+.capacitor-android .hm-choice-pill,
+#register-screen .hm-choice-pill {
+    --hm-choice-on: #16a34a;
+    --hm-choice-on-dark: #15803d;
+}

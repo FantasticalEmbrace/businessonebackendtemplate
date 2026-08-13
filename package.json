@@ -1,0 +1,73 @@
+{
+  "name": "business-one-merchant-platform",
+  "version": "0.1.0",
+  "description": "Business One merchant template (admin + POS). Local only — do not deploy until ready. Copied from HM Herbs stack; do not edit hmherbs-main.",
+  "private": true,
+  "workspaces": [
+    "backend"
+  ],
+  "scripts": {
+    "start": "node start.js",
+    "start:backend": "cd backend && npm start",
+    "dev": "npm run dev:backend",
+    "dev:backend": "cd backend && npm run dev",
+    "install:backend": "cd backend && npm install",
+    "test:seo-redirects": "cd backend && node ../scripts/seo-migration/test-seo-redirects.js",
+    "seo:verify": "node scripts/seo-migration/verify-seo-migration.js",
+    "seo:verify:live": "node scripts/seo-migration/verify-seo-migration.js --live http://localhost:3001",
+    "seo:legacy-redirects": "node scripts/seo-migration/generate-legacy-sitemap-redirects.js",
+    "seo:product-redirects": "node scripts/seo-migration/generate-db-product-redirects.js",
+    "seo:slug-aliases": "node scripts/seo-migration/generate-slug-alias-redirects.js",
+    "seo:resolve-unmatched": "node scripts/seo-migration/resolve-unmatched-slugs.js",
+    "seo:audit-products": "node scripts/seo-migration/audit-product-redirects.js",
+    "build": "echo 'Frontend is static HTML/CSS/JS - no build step required'",
+    "serve": "python3 -m http.server 8000 || python -m SimpleHTTPServer 8000",
+    "serve:static": "node scripts/serve-static.js",
+    "setup": "node setup.js",
+    "reset-password": "cd backend && node scripts/reset-admin-password.js",
+    "set-customer-password": "cd backend && node scripts/set-customer-password.js",
+    "scrape": "cd backend && node scripts/scrape-hmherbs.js",
+    "download-images": "cd backend && node scripts/download-product-images.js",
+    "update-images": "cd backend && node scripts/update-product-images.js",
+    "report-image-gaps": "cd backend && npm run report-image-gaps",
+    "sync-catalog-images": "cd backend && npm run sync-catalog-images",
+    "heal-product-images": "cd backend && npm run heal-product-images",
+    "seo:generate-sitemap": "node scripts/seo-migration/generate-sitemap.js",
+    "seo:sitemap-inventory": "node scripts/seo-migration/build-sitemap-inventory.js --write",
+    "seo:html-metadata": "node scripts/seo-migration/extract-html-metadata.js --write",
+    "seo:concrete-stubs": "node scripts/seo-migration/from-concrete-url-export.js",
+    "seo:fill-from-concrete": "node scripts/seo-migration/fill-redirect-targets-from-concrete.js",
+    "db:build-staging": "node database/build-deploy-bundle.js",
+    "deploy:bundle": "node database/build-deploy-bundle.js",
+    "deploy:verify": "node deploy/verify-deploy-pack.js"
+  },
+  "keywords": [
+    "herbs",
+    "vitamins",
+    "supplements",
+    "ecommerce",
+    "health",
+    "wellness",
+    "fullstack",
+    "nodejs",
+    "express",
+    "mysql"
+  ],
+  "author": "H&M Herbs & Vitamins",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FantasticalEmbrace/HMHerbs.git"
+  },
+  "devDependencies": {
+    "accepts": "^1.3.8",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.55.0",
+    "negotiator": "^1.0.0",
+    "prettier": "^3.1.1"
+  }
+}

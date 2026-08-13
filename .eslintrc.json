@@ -1,0 +1,40 @@
+{
+  "root": true,
+  "env": { "browser": true, "node": true, "es2022": true },
+  "parserOptions": { "ecmaVersion": 2022, "sourceType": "script" },
+  "ignorePatterns": ["node_modules/", "backend/node_modules/"],
+  "overrides": [
+    {
+      "files": ["backend/__tests__/**/*.js"],
+      "env": { "jest": true }
+    },
+    {
+      "files": [
+        "backend/scripts/**/*.js",
+        "backend/auto-*.js",
+        "backend/cleanup-duplicates.js",
+        "backend/find-duplicates-v2.js",
+        "backend/find-similar.js",
+        "backend/fix-brands-dups.js",
+        "backend/master-cleanup.js",
+        "backend/thorough-brand-repair.js",
+        "backend/tmp-*.js"
+      ],
+      "rules": {
+        "no-unused-vars": "off"
+      }
+    }
+  ],
+  "rules": {
+    "no-unused-vars": [
+      "error",
+      {
+        "args": "after-used",
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_"
+      }
+    ],
+    "no-undef": "error"
+  }
+}

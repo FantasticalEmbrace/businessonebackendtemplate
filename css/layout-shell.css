@@ -1,0 +1,107 @@
+/**
+ * Page shell layout — keeps the document from growing past real content.
+ * Overlays/modals appended to body must never participate in document flow.
+ */
+
+html {
+  background-color: var(--brand-page-bg, #f9fafb);
+  height: auto;
+  min-height: 0;
+}
+
+body {
+  display: block;
+  min-height: 0;
+  height: auto;
+  margin: 0;
+  background-color: var(--brand-page-bg, #f9fafb);
+}
+
+main {
+  display: block;
+  width: 100%;
+  flex: unset;
+  min-height: 0;
+}
+
+.footer {
+  display: block;
+  flex-shrink: unset;
+  margin-top: 0;
+}
+
+/* Anything injected after </footer> must not extend scroll height. */
+body > :is(
+  .cart-sidebar,
+  .cart-overlay,
+  .cookie-popup,
+  .auth-modal,
+  .edsa-modal,
+  #edsa-booking-modal,
+  .newsletter-popup,
+  #newsletter-popup,
+  #hero-search-suggestions,
+  .hero-search-suggestions,
+  #error-notifications,
+  #hm-toast-region,
+  .hm-toast-region,
+  .hm-age-gate,
+  .ccpa-banner,
+  .gdpr-modal-overlay,
+  .update-banner,
+  .app-install-banner,
+  .pwa-notification,
+  #network-status,
+  .network-status,
+  #product-image-zoom-modal,
+  .product-image-zoom,
+  .acct-modal-backdrop,
+  .hm-wl-picker-backdrop,
+  #nav-menu,
+  .nav-menu,
+  #navbar-menu,
+  .hm-mobile-nav-portal,
+  .acct-modal,
+  .wishlist-modal,
+  .hm-wl-picker-dim,
+  .acct-modal-dim,
+  .site-promo-banner
+) {
+  position: fixed !important;
+}
+
+body > :is(#live-region, .sr-only, #edsa-nmi-wallet-stub) {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: -1px !important;
+}
+
+#hero-search-suggestions[hidden],
+.hero-search-suggestions[hidden] {
+  display: none !important;
+}
+
+/* Carousel transforms must not inflate page scroll height on wide screens. */
+.testimonials-carousel-container,
+.testimonials-carousel {
+  overflow: hidden;
+  contain: layout style;
+  isolation: isolate;
+}
+
+.testimonials-track {
+  will-change: transform;
+  transform: none;
+  -webkit-transform: none;
+}
+
+.testimonials-track .testimonial-card {
+  transform: none !important;
+  -webkit-transform: none !important;
+}

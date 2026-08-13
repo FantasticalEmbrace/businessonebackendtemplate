@@ -1,0 +1,27 @@
+/* Hero storefront image — must load last; overrides cached/clamp rules */
+.hero .hero-shell,
+.hero .hero-content {
+  align-items: stretch !important;
+}
+
+.hero .hero-visual,
+.hero .hero-image {
+  display: flex !important;
+  align-self: stretch !important;
+  align-items: stretch !important;
+  justify-content: stretch !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+.hero .hero-visual img,
+.hero .hero-image img {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  aspect-ratio: unset !important;
+  object-fit: cover !important;
+  object-position: center top !important;
+}

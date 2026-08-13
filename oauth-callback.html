@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signing in — H&amp;M Herbs</title>
+    <style>
+        body {
+            font-family: Inter, system-ui, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background: #f3f4f6;
+            color: #374151;
+        }
+        .box {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 12px rgb(0 0 0 / 0.08);
+            max-width: 420px;
+            text-align: center;
+        }
+        .error { color: #dc2626; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <p id="status">Completing sign-in…</p>
+    </div>
+    <script>
+        (function () {
+            const params = new URLSearchParams(window.location.search);
+            const status = document.getElementById('status');
+            const error = params.get('error');
+            if (error) {
+                status.innerHTML = '<span class="error">' + error.replace(/</g, '&lt;') + '</span><p style="margin-top:1rem"><a href="index.html">Back to home</a></p>';
+                return;
+            }
+            const token = params.get('token');
+            if (!token) {
+                status.textContent = 'Missing sign-in token. Please try again from the site.';
+                return;
+            }
+            localStorage.setItem('hmherbs_customer_token', token);
+            const userB64 = params.get('user');
+            if (userB64) {
+                try {
+                    const json = atob(userB64.replace(/-/g, '+').replace(/_/g, '/'));
+                    localStorage.setItem('hmherbs_customer_user', json);
+                } catch (_) { /* profile loads on next page */ }
+            }
+            const returnTo = params.get('returnTo') || 'index.html';
+            if (params.get('needsProfile') === '1' || params.get('needsDob') === '1') {
+                window.location.replace('oauth-complete-profile.html?returnTo=' + encodeURIComponent(returnTo));
+                return;
+            }
+            window.location.replace(returnTo.replace(/^\/+/, '') || 'index.html');
+        })();
+    </script>
+</body>
+</html>

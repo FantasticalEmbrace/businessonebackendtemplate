@@ -1,0 +1,103 @@
+# Dependencies
+node_modules/
+backend/node_modules/
+
+# Environment variables
+.env
+backend/.env
+.env.local
+.env.*.local
+backend/.env.procharge-test
+backend/.env.*.local
+deploy/db-connection.env
+deploy/miami-provision.state.json
+deploy/miami-mysql.state.json
+deploy/hmherbs-miami-ca-certificate.crt
+deploy/.linode-token
+deploy/db-connection-miami.server.env
+
+# Google Calendar credentials
+backend/config/google-credentials.json
+**/google-credentials.json
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Database
+*.sqlite
+*.db
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Build outputs
+dist/
+__pycache__/
+*.py[cod]
+build/
+*.min.js
+*.min.css
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Uploads
+uploads/
+public/uploads/
+
+# Cache
+.cache/
+.parcel-cache/
+
+# Testing
+coverage/
+.nyc_output/
+
+# Misc
+*.bak
+*.backup
+
+# Generated SEO migration exports (re-run npm scripts to recreate)
+scripts/seo-migration/output/
+
+# Separate project — lives at ../rankin-remodeling with its own repo
+rankin-remodeling/
+
+# Business One marketing — separate repo at ../businessone-marketing
+
+# One-off local debug scripts (not part of the product)
+backend/scripts/_*.js
+
+# POS register app — separate repo at ../business-one-pos
+business-one-pos/
+
+deploy/*.zip
+deploy/procharge-hub.env
+deploy/_env_key_report.txt
+deploy/_key_git.txt
+deploy/_miami_key_audit.txt
+
+.cursor/
+*.code-workspace
+commitmsg.txt
+
+
+# Never commit scraped ProCharge/EPI vendor dumps (may embed secrets)
+backend/tmp-procharge*
+backend/tmp-*.html
+backend/tmp-*.zip

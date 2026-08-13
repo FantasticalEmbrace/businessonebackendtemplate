@@ -1,0 +1,464 @@
+{
+  "total_count": 52,
+  "generated_at": "2025-12-23T19:28:58.907Z",
+  "products_by_brand": {
+    "BioNeurix": [
+      {
+        "id": 1247,
+        "sku": "13431",
+        "name": "BioNeurix Amoryn",
+        "slug": "bioneurix-amoryn",
+        "price": "34.95",
+        "inventory": 0
+      }
+    ],
+    "Buried Treasure": [
+      {
+        "id": 1249,
+        "sku": "28711",
+        "name": "BURIED TREASURE ACF EXT STRENGTH PM",
+        "slug": "buried-treasure-acf-ext-strength-pm",
+        "price": "0.00",
+        "inventory": 100
+      },
+      {
+        "id": 1250,
+        "sku": "28710",
+        "name": "BURIED TREASURE ACF PM",
+        "slug": "buried-treasure-acf-pm",
+        "price": "0.00",
+        "inventory": 100
+      }
+    ],
+    "Dr. Tony's": [
+      {
+        "id": 1279,
+        "sku": "27842",
+        "name": "Dr. Tony's Blood Sugar",
+        "slug": "dr-tony-s-blood-sugar",
+        "price": "32.95",
+        "inventory": 0
+      }
+    ],
+    "Edom Labs": [
+      {
+        "id": 1284,
+        "sku": "16627",
+        "name": "Edom Chiro Klenz W/Green Tea",
+        "slug": "edom-chiro-klenz-w-green-tea",
+        "price": "18.00",
+        "inventory": 0
+      },
+      {
+        "id": 1286,
+        "sku": "E286L-0001",
+        "name": "Edom Labs Chiro-Klenz Tea Lemon",
+        "slug": "edom-labs-chiro-klenz-tea-lemon",
+        "price": "18.00",
+        "inventory": 0
+      },
+      {
+        "id": 1287,
+        "sku": "E286-0001",
+        "name": "Edom Labs Chiro-Klenz Tea Original",
+        "slug": "edom-labs-chiro-klenz-tea-original",
+        "price": "18.00",
+        "inventory": 0
+      }
+    ],
+    "Flexcin": [
+      {
+        "id": 1295,
+        "sku": "16651",
+        "name": "Flexcin CM8 Load-Up Formula",
+        "slug": "flexcin-cm8-load-up-formula",
+        "price": "49.95",
+        "inventory": 0
+      }
+    ],
+    "Global Healing": [
+      {
+        "id": 1300,
+        "sku": "27244",
+        "name": "Global Healing Candida Balance",
+        "slug": "global-healing-candida-balance",
+        "price": "35.99",
+        "inventory": 0
+      },
+      {
+        "id": 1301,
+        "sku": "27120",
+        "name": "Global Healing Oxy-Powder",
+        "slug": "global-healing-oxy-powder",
+        "price": "49.95",
+        "inventory": 0
+      },
+      {
+        "id": 1302,
+        "sku": "27612",
+        "name": "Global Healing Toxin Binder",
+        "slug": "global-healing-toxin-binder",
+        "price": "34.95",
+        "inventory": 0
+      },
+      {
+        "id": 1303,
+        "sku": "VD3-2OZ",
+        "name": "Global Healing Vitamin D3 Plant Based",
+        "slug": "global-healing-vitamin-d3-plant-based",
+        "price": "19.99",
+        "inventory": 0
+      },
+      {
+        "id": 1304,
+        "sku": "25986",
+        "name": "Global Healing Women’s Hormone Balance",
+        "slug": "global-healing-women-s-hormone-balance",
+        "price": "44.99",
+        "inventory": 0
+      }
+    ],
+    "HM Enterprise": [
+      {
+        "id": 1242,
+        "sku": "19109",
+        "name": "ADAM'S PROSTATE CARE",
+        "slug": "adam-s-prostate-care",
+        "price": "19.99",
+        "inventory": 0
+      }
+    ],
+    "Irwin Naturals": [
+      {
+        "id": 1328,
+        "sku": "28706",
+        "name": "Irwin Libido Max Red",
+        "slug": "irwin-libido-max-red",
+        "price": "0.00",
+        "inventory": 100
+      },
+      {
+        "id": 1329,
+        "sku": "28708",
+        "name": "Irwin Magnesium PM",
+        "slug": "irwin-magnesium-pm",
+        "price": "0.00",
+        "inventory": 100
+      },
+      {
+        "id": 1330,
+        "sku": "28707",
+        "name": "Irwin Magnesium w/Milk thistle & Turmeric",
+        "slug": "irwin-magnesium-w-milk-thistle-turmeric",
+        "price": "0.00",
+        "inventory": 100
+      }
+    ],
+    "Life Extension": [
+      {
+        "id": 1332,
+        "sku": "28701",
+        "name": "Life Ext",
+        "slug": "life-ext",
+        "price": "0.00",
+        "inventory": 100
+      },
+      {
+        "id": 1334,
+        "sku": "28703",
+        "name": "LIfe Ext D L-Phenylalanine 500mg",
+        "slug": "life-ext-d-l-phenylalanine-500mg",
+        "price": "0.00",
+        "inventory": 100
+      },
+      {
+        "id": 1335,
+        "sku": "28704",
+        "name": "Life Ext Enhanced Sleep",
+        "slug": "life-ext-enhanced-sleep",
+        "price": "0.00",
+        "inventory": 100
+      },
+      {
+        "id": 1333,
+        "sku": "28702",
+        "name": "Life Ext Huperzine A",
+        "slug": "life-ext-huperzine-a",
+        "price": "0.00",
+        "inventory": 100
+      },
+      {
+        "id": 1336,
+        "sku": "28705",
+        "name": "Life Ext Immune Packs C D Zine Probiotic",
+        "slug": "life-ext-immune-packs-c-d-zine-probiotic",
+        "price": "0.00",
+        "inventory": 100
+      },
+      {
+        "id": 1337,
+        "sku": "28700",
+        "name": "Life Ext Vitamin B3 Niacin",
+        "slug": "life-ext-vitamin-b3-niacin",
+        "price": "0.00",
+        "inventory": 100
+      },
+      {
+        "id": 1338,
+        "sku": "28686",
+        "name": "Life Extension Vitamin C liposomal",
+        "slug": "life-extension-vitamin-c-liposomal",
+        "price": "0.00",
+        "inventory": 100
+      }
+    ],
+    "Life-Flo": [
+      {
+        "id": 1339,
+        "sku": "28698",
+        "name": "LIFE-FLO MAGNESIUM OIL SPRAY With aloe vera",
+        "slug": "life-flo-magnesium-oil-spray-with-aloe-vera",
+        "price": "0.00",
+        "inventory": 100
+      },
+      {
+        "id": 1340,
+        "sku": "28697",
+        "name": "LIFE-FLO PURE MAGNESIUM OIL SPRAY",
+        "slug": "life-flo-pure-magnesium-oil-spray",
+        "price": "0.00",
+        "inventory": 100
+      }
+    ],
+    "MD Science": [
+      {
+        "id": 1349,
+        "sku": "27975",
+        "name": "MD Swiss Navy Max Size Male",
+        "slug": "md-swiss-navy-max-size-male",
+        "price": "36.99",
+        "inventory": 0
+      }
+    ],
+    "Nature's Balance": [
+      {
+        "id": 1362,
+        "sku": "NBCY-P",
+        "name": "Nature's Balance CyChroMax",
+        "slug": "nature-s-balance-cychromax",
+        "price": "39.99",
+        "inventory": 0
+      }
+    ],
+    "Nature's Plus": [
+      {
+        "id": 1376,
+        "sku": "4870",
+        "name": "Nature's Plus Ultra Virile-Actin",
+        "slug": "nature-s-plus-ultra-virile-actin",
+        "price": "31.41",
+        "inventory": 0
+      },
+      {
+        "id": 1399,
+        "sku": "8009",
+        "name": "Natures Plus AgeLoss Liver Support",
+        "slug": "natures-plus-ageloss-liver-support",
+        "price": "36.93",
+        "inventory": 0
+      },
+      {
+        "id": 1400,
+        "sku": "8007",
+        "name": "Natures Plus AgeLoss Prostate Support",
+        "slug": "natures-plus-ageloss-prostate-support",
+        "price": "47.02",
+        "inventory": 0
+      },
+      {
+        "id": 1401,
+        "sku": "17757",
+        "name": "Natures Plus GHT Male",
+        "slug": "natures-plus-ght-male",
+        "price": "59.29",
+        "inventory": 0
+      }
+    ],
+    "Nature's Sunshine": [
+      {
+        "id": 1243,
+        "sku": "22995",
+        "name": "Aivia Carb Blocker",
+        "slug": "aivia-carb-blocker",
+        "price": "35.40",
+        "inventory": 0
+      },
+      {
+        "id": 1393,
+        "sku": "11512",
+        "name": "Nature's Sunshine Black Walnut Capsules",
+        "slug": "nature-s-sunshine-black-walnut-capsules",
+        "price": "23.95",
+        "inventory": 0
+      }
+    ],
+    "North American Herb & Spice": [
+      {
+        "id": 1962,
+        "sku": "28695",
+        "name": "THRES. N.AMERICAN OREGANOL ..45OZ P73",
+        "slug": "thres-n-american-oreganol-45oz-p73",
+        "price": "0.00",
+        "inventory": 100
+      }
+    ],
+    "Now Foods": [
+      {
+        "id": 1517,
+        "sku": "28694",
+        "name": "NOW C-1000 zinc &D-3",
+        "slug": "now-c-1000-zinc-d-3",
+        "price": "0.00",
+        "inventory": 100
+      },
+      {
+        "id": 1518,
+        "sku": "28693",
+        "name": "NOW FOODS CoQ10 - 100MG",
+        "slug": "now-foods-coq10-100mg",
+        "price": "0.00",
+        "inventory": 100
+      },
+      {
+        "id": 1519,
+        "sku": "2394",
+        "name": "NOW FOODS MAGTEIN",
+        "slug": "now-foods-magtein",
+        "price": "0.00",
+        "inventory": 100
+      },
+      {
+        "id": 1521,
+        "sku": "26671",
+        "name": "NOW FOODS MAGTEIN MAGNESIUM L-THREONATE",
+        "slug": "now-foods-magtein-magnesium-l-threonate",
+        "price": "0.00",
+        "inventory": 100
+      },
+      {
+        "id": 1524,
+        "sku": "28673",
+        "name": "Now Foods NutraFlora FOS",
+        "slug": "now-foods-nutraflora-fos",
+        "price": "0.00",
+        "inventory": 100
+      },
+      {
+        "id": 1525,
+        "sku": "28696",
+        "name": "NOW Glutathione 250mg",
+        "slug": "now-glutathione-250mg",
+        "price": "0.00",
+        "inventory": 100
+      },
+      {
+        "id": 1526,
+        "sku": "28709",
+        "name": "Now Liquid Chlorophyll mint 4oz",
+        "slug": "now-liquid-chlorophyll-mint-4oz",
+        "price": "0.00",
+        "inventory": 100
+      }
+    ],
+    "Perrin's Naturals": [
+      {
+        "id": 1536,
+        "sku": "1101",
+        "name": "Perrin's Blend Ointment",
+        "slug": "perrin-s-blend-ointment",
+        "price": "53.99",
+        "inventory": 0
+      }
+    ],
+    "Regal Labs": [
+      {
+        "id": 1548,
+        "sku": "25017",
+        "name": "REGAL LABS BIOTIN 10,000",
+        "slug": "regal-labs-biotin-10-000",
+        "price": "0.00",
+        "inventory": 100
+      },
+      {
+        "id": 1551,
+        "sku": "23231",
+        "name": "REGAL LABS VSEXTRA",
+        "slug": "regal-labs-vsextra",
+        "price": "0.00",
+        "inventory": 100
+      }
+    ],
+    "Standard Enzyme": [
+      {
+        "id": 1542,
+        "sku": "303",
+        "name": "PowerThin Phase II Ephedra Free",
+        "slug": "powerthin-phase-ii-ephedra-free",
+        "price": "33.95",
+        "inventory": 0
+      },
+      {
+        "id": 1830,
+        "sku": "12000723",
+        "name": "STANDARD ENZYME MORNING SICKNESS",
+        "slug": "standard-enzyme-morning-sickness",
+        "price": "29.50",
+        "inventory": 0
+      },
+      {
+        "id": 1925,
+        "sku": "85000248",
+        "name": "STANDARD ENZYME THYRO PLUS",
+        "slug": "standard-enzyme-thyro-plus",
+        "price": "41.00",
+        "inventory": 0
+      },
+      {
+        "id": 1926,
+        "sku": "85000246",
+        "name": "STANDARD ENZYME THYROID SUPPORT",
+        "slug": "standard-enzyme-thyroid-support",
+        "price": "47.00",
+        "inventory": 0
+      }
+    ],
+    "Terry Naturally": [
+      {
+        "id": 1960,
+        "sku": "28676",
+        "name": "Terry Naturally Urinary Tract Intensive Support",
+        "slug": "terry-naturally-urinary-tract-intensive-support",
+        "price": "0.00",
+        "inventory": 100
+      }
+    ],
+    "Unknown": [
+      {
+        "id": 1236,
+        "sku": "25407",
+        "name": "1 Life Science GLP-1 PRO",
+        "slug": "1-life-science-glp-1-pro",
+        "price": "44.99",
+        "inventory": 0
+      },
+      {
+        "id": 1246,
+        "sku": "28617",
+        "name": "Big Bang Male Enhancement - Free Shipping",
+        "slug": "big-bang-male-enhancement-free-shipping",
+        "price": "12.99",
+        "inventory": 0
+      }
+    ]
+  }
+}

@@ -1,0 +1,50 @@
+# H&M Herbs & Vitamins - robots.txt
+# Regenerate sitemaps: npm run seo:generate-sitemap
+
+User-agent: *
+Allow: /
+
+# Admin, API, and checkout (not for indexing)
+Disallow: /admin.html
+Disallow: /admin-reset-password.html
+Disallow: /menu-admin.html
+Disallow: /backend/
+Disallow: /api/
+Disallow: /checkout.html
+Disallow: /order-confirmation.html
+Disallow: /account.html
+Disallow: /reset-password.html
+
+# Utility / dev pages
+Disallow: /check-upload.html
+Disallow: /unregister-sw.html
+Disallow: /create-placeholder-images.html
+
+# Filtered catalog views — allow base listing, discourage duplicate param combos in crawl budget
+Disallow: /products.html?*sort=
+Disallow: /products.html?*page=
+Disallow: /products.html?*utm_
+Disallow: /*?utm_*
+Disallow: /*?ref=*
+Disallow: /*?email=*
+
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 2
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+Sitemap: https://hmherbs.com/sitemap.xml
+Sitemap: https://hmherbs.com/sitemap-pages.xml
+Sitemap: https://hmherbs.com/sitemap-products.xml

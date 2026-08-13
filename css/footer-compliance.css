@@ -1,0 +1,90 @@
+/* CBD / merchant compliance — footer disclaimers and policy links */
+.footer-compliance-disclaimers {
+  margin-top: var(--space-6);
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  font-size: var(--text-xs);
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 100%;
+}
+
+.footer-compliance-disclaimers p {
+  margin: 0 0 var(--space-3);
+}
+
+.footer-compliance-disclaimers p:last-child {
+  margin-bottom: 0;
+}
+
+.footer-thc-disclaimer strong,
+.footer-fda-disclaimer strong {
+  color: var(--white);
+}
+
+.product-coa-section {
+  margin-top: var(--space-6);
+  padding: var(--space-4);
+  background: var(--gray-50);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--gray-200);
+}
+
+.product-coa-section h2 {
+  font-size: var(--text-lg);
+  margin: 0 0 var(--space-2);
+  color: var(--primary-green);
+}
+
+.product-coa-missing {
+  color: var(--gray-600);
+  font-size: var(--text-sm);
+}
+
+.checkout-age-attestation {
+  margin: var(--space-4) 0;
+  padding: var(--space-3);
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--border-radius);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.checkout-age-attestation label {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  cursor: pointer;
+}
+
+.checkout-age-attestation input[type="checkbox"] {
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+}
+
+.coa-index-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.coa-index-list li {
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.coa-index-list li:last-child {
+  border-bottom: none;
+}
+
+.coa-index-list a {
+  color: var(--primary-green);
+  font-weight: 500;
+}
+
+.coa-index-meta {
+  font-size: var(--text-sm);
+  color: var(--gray-600);
+  margin-top: var(--space-1);
+}

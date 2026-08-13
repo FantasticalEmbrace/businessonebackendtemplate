@@ -1,0 +1,184 @@
+[
+  {
+    "id": 1249,
+    "sku": "28711",
+    "name": "BURIED TREASURE ACF EXT STRENGTH PM",
+    "brand": "Buried Treasure",
+    "slug": "buried-treasure-acf-ext-strength-pm"
+  },
+  {
+    "id": 1250,
+    "sku": "28710",
+    "name": "BURIED TREASURE ACF PM",
+    "brand": "Buried Treasure",
+    "slug": "buried-treasure-acf-pm"
+  },
+  {
+    "id": 1328,
+    "sku": "28706",
+    "name": "Irwin Libido Max Red",
+    "brand": "Irwin Naturals",
+    "slug": "irwin-libido-max-red"
+  },
+  {
+    "id": 1329,
+    "sku": "28708",
+    "name": "Irwin Magnesium PM",
+    "brand": "Irwin Naturals",
+    "slug": "irwin-magnesium-pm"
+  },
+  {
+    "id": 1330,
+    "sku": "28707",
+    "name": "Irwin Magnesium w/Milk thistle & Turmeric",
+    "brand": "Irwin Naturals",
+    "slug": "irwin-magnesium-w-milk-thistle-turmeric"
+  },
+  {
+    "id": 1332,
+    "sku": "28701",
+    "name": "Life Ext",
+    "brand": "Life Extension",
+    "slug": "life-ext"
+  },
+  {
+    "id": 1334,
+    "sku": "28703",
+    "name": "LIfe Ext D L-Phenylalanine 500mg",
+    "brand": "Life Extension",
+    "slug": "life-ext-d-l-phenylalanine-500mg"
+  },
+  {
+    "id": 1335,
+    "sku": "28704",
+    "name": "Life Ext Enhanced Sleep",
+    "brand": "Life Extension",
+    "slug": "life-ext-enhanced-sleep"
+  },
+  {
+    "id": 1333,
+    "sku": "28702",
+    "name": "Life Ext Huperzine A",
+    "brand": "Life Extension",
+    "slug": "life-ext-huperzine-a"
+  },
+  {
+    "id": 1336,
+    "sku": "28705",
+    "name": "Life Ext Immune Packs C D Zine Probiotic",
+    "brand": "Life Extension",
+    "slug": "life-ext-immune-packs-c-d-zine-probiotic"
+  },
+  {
+    "id": 1337,
+    "sku": "28700",
+    "name": "Life Ext Vitamin B3 Niacin",
+    "brand": "Life Extension",
+    "slug": "life-ext-vitamin-b3-niacin"
+  },
+  {
+    "id": 1338,
+    "sku": "28686",
+    "name": "Life Extension Vitamin C liposomal",
+    "brand": "Life Extension",
+    "slug": "life-extension-vitamin-c-liposomal"
+  },
+  {
+    "id": 1339,
+    "sku": "28698",
+    "name": "LIFE-FLO MAGNESIUM OIL SPRAY With aloe vera",
+    "brand": "Life-Flo",
+    "slug": "life-flo-magnesium-oil-spray-with-aloe-vera"
+  },
+  {
+    "id": 1340,
+    "sku": "28697",
+    "name": "LIFE-FLO PURE MAGNESIUM OIL SPRAY",
+    "brand": "Life-Flo",
+    "slug": "life-flo-pure-magnesium-oil-spray"
+  },
+  {
+    "id": 1366,
+    "sku": "18103",
+    "name": "NATURE'S PLUS AGELOSS FIRST DAY INFLAMMATION RESPONSE",
+    "brand": "Nature's Plus",
+    "slug": "nature-s-plus-ageloss-first-day-inflammation-response"
+  },
+  {
+    "id": 1368,
+    "sku": "18491",
+    "name": "NATURE'S PLUS AGELOSS KIDNEY SUPPORT",
+    "brand": "Nature's Plus",
+    "slug": "nature-s-plus-ageloss-kidney-support"
+  },
+  {
+    "id": 1377,
+    "sku": "23519",
+    "name": "NATURE'S PULS PROBIOTIC MEGA",
+    "brand": "Nature's Plus",
+    "slug": "nature-s-puls-probiotic-mega"
+  },
+  {
+    "id": 1517,
+    "sku": "28694",
+    "name": "NOW C-1000 zinc &D-3",
+    "brand": "Now Foods",
+    "slug": "now-c-1000-zinc-d-3"
+  },
+  {
+    "id": 1518,
+    "sku": "28693",
+    "name": "NOW FOODS CoQ10 - 100MG",
+    "brand": "Now Foods",
+    "slug": "now-foods-coq10-100mg"
+  },
+  {
+    "id": 1521,
+    "sku": "26671",
+    "name": "NOW FOODS MAGTEIN MAGNESIUM L-THREONATE",
+    "brand": "Now Foods",
+    "slug": "now-foods-magtein-magnesium-l-threonate"
+  },
+  {
+    "id": 1524,
+    "sku": "28673",
+    "name": "Now Foods NutraFlora FOS",
+    "brand": "Now Foods",
+    "slug": "now-foods-nutraflora-fos"
+  },
+  {
+    "id": 1525,
+    "sku": "28696",
+    "name": "NOW Glutathione 250mg",
+    "brand": "Now Foods",
+    "slug": "now-glutathione-250mg"
+  },
+  {
+    "id": 1526,
+    "sku": "28709",
+    "name": "Now Liquid Chlorophyll mint 4oz",
+    "brand": "Now Foods",
+    "slug": "now-liquid-chlorophyll-mint-4oz"
+  },
+  {
+    "id": 1957,
+    "sku": "24494",
+    "name": "TERRY NAT. ANXIOCALM",
+    "brand": "Terry Naturally",
+    "slug": "terry-nat-anxiocalm"
+  },
+  {
+    "id": 1960,
+    "sku": "28676",
+    "name": "Terry Naturally Urinary Tract Intensive Support",
+    "brand": "Terry Naturally",
+    "slug": "terry-naturally-urinary-tract-intensive-support"
+  },
+  {
+    "id": 1962,
+    "sku": "28695",
+    "name": "THRES. N.AMERICAN OREGANOL ..45OZ P73",
+    "brand": "North American Herb & Spice",
+    "slug": "thres-n-american-oreganol-45oz-p73"
+  }
+]

@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account - H&M Herbs & Vitamins</title>
+    <meta name="description" content="Manage your account, orders, and preferences at H&M Herbs & Vitamins">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/emergency-fixes.css?v=mobile-nav-4">
+    <link rel="stylesheet" href="css/hm-notify.css">
+    <link rel="stylesheet" href="styles.css?v=brand-sync-5">
+    <link rel="stylesheet" href="css/accessibility-enhancements.css?v=a11y-1">
+    <link rel="stylesheet" href="css/password-toggle.css?v=4">
+    <link rel="stylesheet" href="css/hm-choice-toggles.css">
+    <link rel="stylesheet" href="css/hm-accent-links.css">
+    <link rel="stylesheet" href="css/customer-auth.css">
+    <link rel="stylesheet" href="css/browser-compatibility.css">
+    <link rel="stylesheet" href="css/mobile-enhancements.css">
+    <link rel="stylesheet" href="css/mobile-nav.css?v=brand-sync-5">
+    <link rel="stylesheet" href="css/hm-close-controls.css">
+    <link rel="stylesheet" href="css/site-promo-banner.css?v=brand-sync-5">
+    <link rel="stylesheet" href="css/age-gate.css?v=brand-sync-5">
+    <link rel="stylesheet" href="css/hm-popups-brand.css?v=brand-sync-5">
+    <link rel="stylesheet" href="css/hm-gift-card.css">
+    <link rel="stylesheet" href="css/address-autocomplete.css">
+
+    <script src="js/mobile-menu.js?v=mobile-nav-4"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        .account-page {
+            min-height: 100vh;
+            background: var(--gray-50);
+            padding: var(--space-8) 0;
+        }
+
+        .account-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--space-4);
+        }
+
+        .account-header {
+            background: var(--white);
+            padding: var(--space-6);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: var(--space-6);
+        }
+
+        .account-header h1 {
+            color: var(--primary-green);
+            font-family: var(--font-display);
+            font-size: var(--text-3xl);
+            margin-bottom: var(--space-2);
+        }
+
+        .account-header p {
+            color: var(--gray-600);
+            font-size: var(--text-base);
+        }
+
+        .account-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: var(--space-6);
+        }
+
+        .account-sidebar {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            padding: var(--space-4);
+            height: fit-content;
+            position: sticky;
+            top: var(--space-8);
+        }
+
+        .account-nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .account-nav-item {
+            margin-bottom: var(--space-2);
+        }
+
+        .account-nav-link {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            padding: var(--space-3) var(--space-4);
+            color: var(--gray-700);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+
+        .account-nav-link:hover,
+        .account-nav-link.active {
+            background: var(--gray-50);
+            color: var(--primary-green);
+        }
+
+        .account-nav-link i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .account-content {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            padding: var(--space-6);
+        }
+
+        .account-section {
+            display: none;
+        }
+
+        .account-section.active {
+            display: block;
+        }
+
+        .section-title {
+            color: var(--primary-green);
+            font-family: var(--font-display);
+            font-size: var(--text-2xl);
+            margin-bottom: var(--space-6);
+            padding-bottom: var(--space-4);
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .profile-form {
+            max-width: 600px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: var(--space-2);
+            font-weight: 500;
+            color: var(--gray-700);
+            font-size: var(--text-sm);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: var(--space-3);
+            margin-top: var(--space-6);
+        }
+
+        .orders-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-4);
+        }
+
+        .order-card {
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            padding: var(--space-4);
+            transition: all var(--transition-fast);
+        }
+
+        .order-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-green);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: var(--space-4);
+        }
+
+        .order-number {
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .order-date {
+            color: var(--gray-600);
+            font-size: var(--text-sm);
+        }
+
+        .order-status {
+            display: inline-block;
+            padding: var(--space-1) var(--space-3);
+            border-radius: var(--radius-full);
+            font-size: var(--text-xs);
+            font-weight: 500;
+        }
+
+        .order-status.pending {
+            background: rgba(217, 119, 6, 0.1);
+            color: var(--warning);
+        }
+
+        .order-status.completed {
+            background: rgba(5, 150, 105, 0.1);
+            color: var(--success);
+        }
+
+        .order-status.cancelled {
+            background: rgba(220, 38, 38, 0.1);
+            color: var(--error);
+        }
+
+        .addresses-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--space-4);
+        }
+
+        .wishlists-layout {
+            display: grid;
+            grid-template-columns: minmax(200px, 260px) 1fr;
+            gap: var(--space-6);
+            align-items: start;
+        }
+
+        .wishlist-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            padding: var(--space-3);
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .wishlist-list-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            text-align: left;
+            padding: var(--space-3) var(--space-3);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            background: var(--gray-50);
+            color: var(--gray-800);
+            font-size: var(--text-sm);
+            cursor: pointer;
+            transition: background var(--transition-fast), border-color var(--transition-fast);
+        }
+
+        .wishlist-list-btn:hover {
+            background: var(--gray-100);
+            border-color: var(--gray-300);
+        }
+
+        .wishlist-list-btn.active {
+            background: var(--brand-surface-soft);
+            border-color: var(--primary-green);
+            color: var(--primary-green);
+        }
+
+        .wishlist-list-btn .badge {
+            font-size: var(--text-xs);
+            font-weight: 600;
+            background: var(--gray-200);
+            color: var(--gray-700);
+            padding: 2px 8px;
+            border-radius: var(--radius-full);
+        }
+
+        .wishlist-list-btn.active .badge {
+            background: var(--primary-green);
+            color: var(--white);
+        }
+
+        .wl-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: var(--space-4);
+        }
+
+        .wl-item {
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            padding: var(--space-3);
+            background: var(--white);
+        }
+
+        .wl-item img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: contain;
+            border-radius: var(--radius-sm);
+            background: var(--gray-50);
+        }
+
+        .wl-name {
+            font-weight: 600;
+            margin: var(--space-2) 0 var(--space-1);
+            font-size: var(--text-sm);
+        }
+
+        .wl-price {
+            color: var(--primary-green);
+            font-weight: 600;
+            margin-bottom: var(--space-2);
+        }
+
+        .wl-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-2);
+            margin-top: var(--space-2);
+        }
+
+        .address-card {
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            padding: var(--space-4);
+            position: relative;
+        }
+
+        .address-card.default {
+            border-color: var(--primary-green);
+            background: var(--brand-surface-muted);
+        }
+
+        .address-actions {
+            display: flex;
+            gap: var(--space-2);
+            margin-top: var(--space-4);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: var(--space-12);
+            color: var(--gray-500);
+        }
+
+        .empty-state i {
+            font-size: var(--text-5xl);
+            margin-bottom: var(--space-4);
+            color: var(--gray-300);
+        }
+
+        @media (max-width: 768px) {
+            .account-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .account-sidebar {
+                position: static;
+            }
+
+            .account-nav {
+                display: flex;
+                overflow-x: auto;
+                gap: var(--space-2);
+            }
+
+            .account-nav-item {
+                margin-bottom: 0;
+            }
+
+            .addresses-list {
+                grid-template-columns: 1fr;
+            }
+
+            .wishlists-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .wishlist-sidebar {
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header" role="banner">
+        <div class="main-header">
+            <div class="container">
+                <nav class="navbar" role="navigation" aria-label="Main navigation">
+                    <div class="logo">
+                        <a href="index.html" aria-label="H&M Herbs & Vitamins - Home">
+                            <img src="images/HM%20Herb%20Logo.png" alt="H&M Herbs & Vitamins" class="logo-wordmark" loading="eager">
+                        </a>
+                    </div>
+
+                    <button class="mobile-menu-toggle" aria-expanded="false" aria-controls="nav-menu"
+                        aria-label="Toggle navigation menu">
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                    </button>
+
+                    <ul class="nav-menu" id="nav-menu" role="menubar">
+                        <li role="none"><a href="index.html" role="menuitem">Home</a></li>
+                        <li role="none"><a href="products.html" role="menuitem">Products</a></li>
+                        <li role="none"><a href="index.html#edsa-service" role="menuitem" class="edsa-nav-link">EDSA Service</a></li>
+                        <li role="none"><a href="about.html" role="menuitem">About</a></li>
+                        <li role="none"><a href="index.html#contact" role="menuitem">Contact</a></li>
+                    </ul>
+
+                    <div class="header-actions">
+                        <div class="customer-auth-container">
+                            <div id="customer-auth-guest" class="auth-state-panel">
+                                <button type="button" class="auth-btn" id="customer-login-btn" aria-label="Sign in">
+                                    <svg class="auth-icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17 15 12 10 7"/><path d="M15 12H3"/></svg>
+                                    <span class="auth-btn-text">Sign In</span>
+                                </button>
+                                <button type="button" class="auth-btn" id="customer-register-btn" aria-label="Create account">
+                                    <svg class="auth-icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></svg>
+                                    <span class="auth-btn-text">Register</span>
+                                </button>
+                            </div>
+                            <div id="customer-auth-user" class="auth-state-panel" hidden>
+                                <div class="account-dropdown" id="customer-account-btn">
+                                    <a href="account.html" class="auth-btn account-link" aria-label="My Account">
+                                        <svg class="auth-icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                        <span class="auth-btn-text" id="customer-name-display">My Account</span>
+                                    </a>
+                                    <button type="button" class="auth-btn auth-btn-signout" id="customer-logout-btn"
+                                        aria-label="Sign out">
+                                        <svg class="auth-icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+                                        <span class="auth-btn-text">Sign Out</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Shopping Cart -->
+                        <button type="button" class="cart-toggle" aria-expanded="false" aria-controls="cart-sidebar"
+                            aria-label="Open shopping cart">
+                            <svg class="cart-icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                            <span class="cart-count" id="cart-count" aria-label="Items in cart">0</span>
+                        </button>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Account Page Content -->
+    <main class="account-page" id="main-content">
+        <div class="account-container">
+            <div class="account-header">
+                <h1>My Account</h1>
+                <p id="account-welcome-message">Welcome back!</p>
+            </div>
+
+            <div class="account-layout">
+                <!-- Sidebar Navigation -->
+                <aside class="account-sidebar">
+                    <ul class="account-nav">
+                        <li class="account-nav-item">
+                            <a href="#profile" class="account-nav-link active" data-section="profile">
+                                <i class="fas fa-user" aria-hidden="true"></i>
+                                Profile
+                            </a>
+                        </li>
+                        <li class="account-nav-item">
+                            <a href="#orders" class="account-nav-link" data-section="orders">
+                                <i class="fas fa-shopping-bag" aria-hidden="true"></i>
+                                Orders
+                            </a>
+                        </li>
+                        <li class="account-nav-item">
+                            <a href="#wishlists" class="account-nav-link" data-section="wishlists">
+                                <i class="fas fa-heart" aria-hidden="true"></i>
+                                Wishlists
+                            </a>
+                        </li>
+                        <li class="account-nav-item">
+                            <a href="#gift-cards" class="account-nav-link" data-section="gift-cards">
+                                <i class="fas fa-gift" aria-hidden="true"></i>
+                                Gift Cards
+                            </a>
+                        </li>
+                        <li class="account-nav-item">
+                            <a href="#loyalty" class="account-nav-link" data-section="loyalty">
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                Rewards
+                            </a>
+                        </li>
+                        <li class="account-nav-item">
+                            <a href="#addresses" class="account-nav-link" data-section="addresses">
+                                <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                                Addresses
+                            </a>
+                        </li>
+                    </ul>
+                </aside>
+
+                <!-- Main Content -->
+                <div class="account-content">
+                    <!-- Profile Section -->
+                    <section id="profile" class="account-section active">
+                        <h2 class="section-title">Profile Information</h2>
+                        <form id="profile-form" class="profile-form">
+                            <div class="form-group">
+                                <label for="profile-first-name">First Name</label>
+                                <input type="text" id="profile-first-name" class="form-input" required autocomplete="given-name">
+                            </div>
+                            <div class="form-group">
+                                <label for="profile-last-name">Last Name</label>
+                                <input type="text" id="profile-last-name" class="form-input" required autocomplete="family-name">
+                            </div>
+                            <div class="form-group">
+                                <label for="profile-email">Email</label>
+                                <input type="email" id="profile-email" class="form-input" required autocomplete="email">
+                            </div>
+                            <div class="form-group">
+                                <label for="profile-phone">Phone</label>
+                                <input type="tel" id="profile-phone" class="form-input" autocomplete="tel"
+                                    placeholder="(555) 555-0100" maxlength="14" inputmode="numeric">
+                            </div>
+                            <div class="form-group">
+                                <label for="profile-date-of-birth">Date of birth</label>
+                                <input type="date" id="profile-date-of-birth" class="form-input" autocomplete="off">
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                                <button type="button" class="btn btn-secondary" id="change-password-btn">Change Password</button>
+                            </div>
+                        </form>
+                    </section>
+
+                    <!-- Orders Section -->
+                    <section id="orders" class="account-section">
+                        <h2 class="section-title">My Orders</h2>
+                        <div id="orders-container" class="orders-list">
+                            <div class="empty-state">
+                                <i class="fas fa-shopping-bag" aria-hidden="true"></i>
+                                <p>No orders yet</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Wishlists (IDs wired in js/account.js) -->
+                    <section id="wishlists" class="account-section">
+                        <h2 class="section-title">Wishlists</h2>
+                        <p style="color: var(--gray-600); margin: 0 0 var(--space-4); max-width: 42rem;">
+                            Save products to lists and open them here. Use the heart on product pages to add items to your default list.
+                        </p>
+                        <div style="display: flex; flex-wrap: wrap; gap: var(--space-3); margin-bottom: var(--space-4);">
+                            <button type="button" class="btn btn-primary" id="new-wishlist-btn">
+                                <i class="fas fa-plus" aria-hidden="true"></i>
+                                New list
+                            </button>
+                        </div>
+                        <div class="wishlists-layout">
+                            <div id="wishlist-sidebar" class="wishlist-sidebar" aria-label="Your lists"></div>
+                            <div id="wishlist-detail" class="wishlist-detail"></div>
+                        </div>
+                    </section>
+
+                    <!-- Gift cards -->
+                    <section id="gift-cards" class="account-section">
+                        <h2 class="section-title">Gift Cards</h2>
+                        <p style="color: var(--gray-600); margin: 0 0 var(--space-4); max-width: 42rem;">
+                            Gift cards linked to your account appear below. You can also check the balance of any card.
+                        </p>
+                        <div id="gift-cards-container" class="addresses-list"></div>
+                        <div class="gift-card-lookup" style="margin-top: var(--space-6); max-width: 32rem;">
+                            <h3 style="font-size: var(--text-lg); margin-bottom: var(--space-3); color: var(--gray-800);">Check balance</h3>
+                            <form id="gift-card-balance-form" class="profile-form">
+                                <div class="form-group">
+                                    <label for="gc-code-input">Card code</label>
+                                    <input type="text" id="gc-code-input" class="form-input" autocomplete="off" placeholder="Enter code" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="gc-pin-input">PIN <span style="font-weight: 400; color: var(--gray-500);">(if required)</span></label>
+                                    <input type="text" id="gc-pin-input" class="form-input" autocomplete="off" placeholder="Optional">
+                                </div>
+                                <button type="submit" class="btn btn-secondary">Check balance</button>
+                                <div id="gc-balance-result" style="margin-top: var(--space-4);"></div>
+                            </form>
+                        </div>
+                    </section>
+
+                    <!-- Loyalty / rewards -->
+                    <section id="loyalty" class="account-section">
+                        <h2 class="section-title">Rewards</h2>
+                        <div class="loyalty-stats" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-4);">
+                            <div class="loyalty-stat-card" style="background: var(--gray-50); border-radius: var(--radius-md); padding: var(--space-4); border: 1px solid var(--gray-200);">
+                                <div style="font-size: var(--text-xs); color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.04em;">Store credit</div>
+                                <div id="loyalty-cash-balance" style="font-size: var(--text-2xl); font-weight: 700; color: var(--primary-green);">—</div>
+                            </div>
+                            <div class="loyalty-stat-card" style="background: var(--gray-50); border-radius: var(--radius-md); padding: var(--space-4); border: 1px solid var(--gray-200);">
+                                <div style="font-size: var(--text-xs); color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.04em;">Points</div>
+                                <div id="loyalty-points-balance" style="font-size: var(--text-2xl); font-weight: 700; color: var(--primary-green);">—</div>
+                            </div>
+                            <div class="loyalty-stat-card" style="background: var(--gray-50); border-radius: var(--radius-md); padding: var(--space-4); border: 1px solid var(--gray-200);">
+                                <div style="font-size: var(--text-xs); color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.04em;">Rewards type</div>
+                                <div id="loyalty-enrollment" style="font-size: var(--text-base); font-weight: 600;">—</div>
+                            </div>
+                            <div class="loyalty-stat-card" style="background: var(--gray-50); border-radius: var(--radius-md); padding: var(--space-4); border: 1px solid var(--gray-200);">
+                                <div style="font-size: var(--text-xs); color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.04em;">Member since</div>
+                                <div id="loyalty-member-since" style="font-size: var(--text-base); font-weight: 600;">—</div>
+                            </div>
+                        </div>
+                        <div id="loyalty-card-info" style="margin-bottom: var(--space-6); padding: var(--space-4); background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius-md); color: var(--gray-700); font-size: var(--text-sm);"></div>
+                        <h3 style="font-size: var(--text-lg); margin-bottom: var(--space-3); color: var(--gray-800);">Activity</h3>
+                        <div id="loyalty-history-container" class="orders-list"></div>
+                    </section>
+
+                    <!-- Addresses Section -->
+                    <section id="addresses" class="account-section">
+                        <h2 class="section-title">Saved Addresses</h2>
+                        <div id="addresses-container" class="addresses-list">
+                            <div class="empty-state">
+                                <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                                <p>No saved addresses</p>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" id="add-address-btn" style="margin-top: var(--space-4);">
+                            <i class="fas fa-plus" aria-hidden="true"></i>
+                            Add New Address
+                        </button>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Shopping Cart Sidebar -->
+    <aside class="cart-sidebar" id="cart-sidebar" aria-label="Shopping cart" aria-hidden="true">
+        <div class="cart-header">
+            <h2 class="cart-title">Shopping Cart</h2>
+            <button type="button" class="cart-close" aria-label="Close cart">
+                <svg class="cart-close-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12 5.7 16.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4z"/></svg>
+            </button>
+        </div>
+
+        <div class="cart-content">
+            <div class="cart-items" id="cart-items"></div>
+
+            <div class="cart-empty" id="cart-empty">
+                <svg class="cart-icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                <p>Your cart is empty</p>
+                <a href="products.html" class="btn btn-primary">Continue Shopping</a>
+            </div>
+        </div>
+
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span class="total-label">Total: </span>
+                <span class="total-amount" id="cart-total">$0.00</span>
+            </div>
+            <button type="button" class="btn btn-primary btn-block checkout-btn" id="checkout-btn"
+                onclick="if(window.hmHerbsApp && window.hmHerbsApp.proceedToCheckout) { window.hmHerbsApp.proceedToCheckout(); return false; } else if(window.productsPage && window.productsPage.proceedToCheckout) { window.productsPage.proceedToCheckout(); return false; } else { window.location.href='checkout.html'; } return false;">
+                <i class="fas fa-credit-card" aria-hidden="true"></i>
+                Proceed to Checkout
+            </button>
+        </div>
+    </aside>
+
+    <div class="cart-overlay" id="cart-overlay"></div>
+
+    <!-- Scripts -->
+    <script src="js/age-gate.js" defer></script>
+    <script src="js/site-promo-banner.js" defer></script>
+    <script src="js/site-store-info.js" defer></script>
+    <script src="js/visual-bug-fixes.js"></script>
+    <script src="js/nav-current-page.js"></script>
+    <script src="js/section-nav.js?v=mobile-nav-4"></script>
+    <script src="js/phone-us-format.js" defer></script>
+    <script src="js/address-autocomplete.js" defer></script>
+    <script src="js/password-toggle.js?v=4"></script>
+    <script src="js/customer-auth.js" defer></script>
+    <script src="js/tracking-link.js" defer></script>
+    <script src="js/order-progress.js" defer></script>
+    <script src="js/hm-gift-card.js"></script>
+    <script src="js/account.js" defer></script>
+    <script src="js/hm-notify.js"></script>
+    <script src="script.js" defer></script>
+    <script src="js/hm-choice-toggles.js"></script>
+    <script src="js/accessibility.js?v=a11y-1" defer></script>
+    <script src="gdpr-compliance.js?v=20260617a" defer></script>
+</body>
+</html>
+

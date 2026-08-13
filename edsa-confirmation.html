@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Appointment Confirmed — H&amp;M Herbs &amp; Vitamins</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/emergency-fixes.css?v=mobile-nav-4">
+    <link rel="stylesheet" href="styles.css?v=brand-sync-5">
+    <link rel="stylesheet" href="css/accessibility-enhancements.css?v=a11y-1">
+    <link rel="stylesheet" href="css/mobile-enhancements.css">
+    <link rel="stylesheet" href="css/mobile-nav.css?v=brand-sync-5">
+    <script src="js/mobile-menu.js?v=mobile-nav-4"></script>
+    <script src="js/section-nav.js?v=mobile-nav-4"></script>
+    <style>
+        .confirmation-page {
+            min-height: 70vh;
+            background: var(--gray-50, #f9fafb);
+            padding: var(--space-8, 2rem) var(--space-4, 1rem);
+        }
+
+        .confirmation-card {
+            max-width: 640px;
+            margin: 0 auto;
+            background: var(--white, #fff);
+            border-radius: var(--radius-xl, 12px);
+            padding: var(--space-8, 2rem);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.08);
+            text-align: center;
+        }
+
+        .confirmation-icon {
+            width: 4rem;
+            height: 4rem;
+            margin: 0 auto var(--space-4, 1rem);
+            border-radius: 50%;
+            background: #dcfce7;
+            color: var(--primary-green, #047857);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+        }
+
+        .confirmation-card h1 {
+            font-family: var(--font-display, Georgia, serif);
+            color: var(--primary-green, #047857);
+            font-size: var(--text-2xl, 1.5rem);
+            margin-bottom: var(--space-2, 0.5rem);
+        }
+
+        .confirmation-lead {
+            color: var(--gray-600, #4b5563);
+            margin-bottom: var(--space-6, 1.5rem);
+            line-height: 1.6;
+        }
+
+        .confirmation-details {
+            text-align: left;
+            background: var(--gray-50, #f9fafb);
+            border-radius: var(--radius-lg, 8px);
+            padding: var(--space-5, 1.25rem);
+            margin-bottom: var(--space-6, 1.5rem);
+        }
+
+        .confirmation-details dl {
+            display: grid;
+            grid-template-columns: 1fr 1.4fr;
+            gap: 0.5rem 1rem;
+            margin: 0;
+        }
+
+        .confirmation-details dt {
+            font-weight: 600;
+            color: var(--gray-700, #374151);
+            margin: 0;
+        }
+
+        .confirmation-details dd {
+            margin: 0;
+            color: var(--gray-900, #111827);
+            word-break: break-word;
+        }
+
+        .confirmation-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-3, 0.75rem);
+            justify-content: center;
+        }
+
+        .confirmation-actions .btn {
+            min-width: 10rem;
+        }
+
+        .confirmation-error {
+            color: var(--error, #dc2626);
+        }
+
+        .header .logo {
+            display: inline-block;
+            text-decoration: none;
+        }
+
+        .header .logo .logo-wordmark {
+            display: block;
+            max-height: 64px;
+            width: auto;
+            height: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header" role="banner">
+        <div class="container">
+            <div class="header-content">
+                <a href="index.html" class="logo" aria-label="H&amp;M Herbs &amp; Vitamins — Home">
+                    <img src="images/HM%20Herb%20Logo.png" alt="H&amp;M Herbs &amp; Vitamins" class="logo-wordmark" loading="eager" width="220" height="64">
+                </a>
+
+                <button type="button" class="mobile-menu-toggle" aria-expanded="false" aria-controls="nav-menu"
+                    aria-label="Toggle navigation menu">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </button>
+
+                <ul class="nav-menu" id="nav-menu" role="menubar" aria-hidden="true">
+                    <li role="none"><a href="index.html" role="menuitem">Home</a></li>
+                    <li role="none"><a href="products.html" role="menuitem">Products</a></li>
+                    <li role="none"><a href="index.html#edsa-service" role="menuitem" class="edsa-nav-link">EDSA Service</a></li>
+                    <li role="none"><a href="about.html" role="menuitem">About</a></li>
+                    <li role="none"><a href="index.html#contact" role="menuitem">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <main class="confirmation-page" id="main-content">
+        <div class="confirmation-card" id="confirmation-root" aria-live="polite">
+            <p>Loading your appointment confirmation…</p>
+        </div>
+    </main>
+
+    <script src="js/edsa-ui.js?v=1" defer></script>
+    <script src="script.js" defer></script>
+    <script src="js/edsa-confirmation.js?v=4" defer></script>
+    <script src="js/accessibility.js?v=a11y-1" defer></script>
+</body>
+
+</html>

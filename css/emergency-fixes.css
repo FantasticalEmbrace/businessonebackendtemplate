@@ -1,0 +1,280 @@
+/* Emergency Visual Bug Fixes for HM Herbs */
+/* These styles fix critical rendering issues and should load immediately */
+
+/* FLICKER PREVENTION - Hardware acceleration for smooth rendering */
+/* Exclude overlays: translateZ on them breaks viewport-fixed positioning
+   (dialog centers in document height instead of the visible viewport). */
+/* EDSA booking modal — must stay transform-free and viewport-fixed */
+#edsa-booking-modal,
+#edsa-booking-modal * {
+    -webkit-transform: none !important;
+    transform: none !important;
+    -webkit-backface-visibility: visible !important;
+    backface-visibility: visible !important;
+}
+
+#edsa-booking-modal {
+    will-change: auto !important;
+}
+
+/* Header chain must stay transform-free or mobile nav position:fixed anchors to navbar, not viewport */
+.header,
+.main-header,
+.navbar,
+.top-bar,
+.header-content,
+.header .container,
+.main-header .container {
+    transform: none !important;
+    -webkit-transform: none !important;
+    backface-visibility: visible !important;
+    -webkit-backface-visibility: visible !important;
+}
+
+/*
+ * Do NOT apply translateZ(0) to all elements � it inflates document scroll height
+ * and breaks position:fixed overlays (modals center in document height, not viewport).
+ */
+.btn,
+.carousel-btn,
+.carousel-indicator {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+
+/*
+ * Root must stay untransformed: transform on html/body creates a containing block for
+ * position:fixed, so full-viewport overlays (age gate, modals) center in document height
+ * instead of the visible viewport.
+ */
+html,
+body {
+    -webkit-transform: none !important;
+    transform: none !important;
+    -webkit-backface-visibility: visible !important;
+    backface-visibility: visible !important;
+}
+
+/* Header: ancestors must not create a fixed-position containing block (mobile full-screen nav uses position:fixed). */
+.header {
+    transform: none !important;
+    -webkit-transform: none !important;
+}
+
+/*
+ * Keep translateZ(0) off header descendants for fixed nav — but do NOT let this
+ * beat the Font Awesome icon fixes below (cart, close, etc.).
+ */
+.header *:not(.nav-menu):not(#navbar-menu):not(#nav-menu):not(i[class*="fa-"]):not(svg[class*="fa-"]) {
+    transform: none !important;
+    -webkit-transform: none !important;
+}
+
+/* Replaced elements: transforms on <img> break decoding/painting in WebKit/Blink for many product photos */
+img,
+picture,
+video,
+svg:not(.cart-icon-svg):not(.cart-close-svg):not(.auth-icon-svg),
+canvas {
+    backface-visibility: visible !important;
+    -webkit-backface-visibility: visible !important;
+    transform: none !important;
+    -webkit-transform: none !important;
+}
+
+.product-image-zoom,
+.product-image-zoom * {
+    backface-visibility: visible !important;
+    -webkit-backface-visibility: visible !important;
+}
+
+.product-image-zoom-nav {
+    transform: translateY(-50%) !important;
+    -webkit-transform: translateY(-50%) !important;
+}
+
+/* EXCEPTION: Products page menu - must allow translateY transforms */
+.navbar-menu {
+    transform: translateY(-10px) translateZ(0) !important;
+    -webkit-transform: translateY(-10px) translateZ(0) !important;
+}
+
+.navbar-menu.show {
+    transform: translateY(0) translateZ(0) !important;
+    -webkit-transform: translateY(0) translateZ(0) !important;
+}
+
+/* EXCEPTION: Index.html nav-menu links - remove transforms to fix visibility */
+.nav-menu.show a,
+.nav-menu.show li {
+    transform: none !important;
+    -webkit-transform: none !important;
+    backface-visibility: visible !important;
+    -webkit-backface-visibility: visible !important;
+}
+
+/* Mobile off-canvas nav — keep slide transform on the menu panel itself */
+@media (max-width: 1100px) {
+
+    #nav-menu,
+    .nav-menu,
+    #navbar-menu,
+    #nav-menu.hm-mobile-nav-portal,
+    .nav-menu.hm-mobile-nav-portal {
+        transform: translateX(-100%) !important;
+        -webkit-transform: translateX(-100%) !important;
+        backface-visibility: visible !important;
+        -webkit-backface-visibility: visible !important;
+    }
+
+    #nav-menu.show,
+    .nav-menu.show,
+    #navbar-menu.show,
+    #nav-menu.hm-mobile-nav-portal.show,
+    .nav-menu.hm-mobile-nav-portal.show {
+        transform: translateX(0) !important;
+        -webkit-transform: translateX(0) !important;
+    }
+}
+
+/* Testimonials carousel � keep cards transform-free; JS sets translateX on the track only */
+.testimonials-carousel-container,
+.testimonials-carousel {
+    overflow: hidden;
+    contain: layout style;
+    isolation: isolate;
+}
+
+.testimonials-track {
+    backface-visibility: visible !important;
+    -webkit-backface-visibility: visible !important;
+    transform: none;
+    -webkit-transform: none;
+}
+
+.testimonials-track .testimonial-card {
+    transform: none !important;
+    -webkit-transform: none !important;
+    backface-visibility: visible !important;
+    -webkit-backface-visibility: visible !important;
+}
+
+/* Do not put translate3d on spotlight cards or product photos — breaks <img> painting */
+.products-grid .product-card {
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
+    -webkit-transform: translate3d(0, 0, 0);
+}
+
+.product-spotlight .product-card,
+.product-spotlight .spotlight-grid {
+    will-change: auto;
+    transform: none;
+    -webkit-transform: none;
+}
+
+/* SCROLLBAR STABILITY - Prevent layout shifts; html is the sole vertical scroll container */
+html {
+    scrollbar-gutter: stable;
+    overflow-x: clip;
+    overflow-y: scroll;
+}
+
+body {
+    overflow-x: clip;
+    overflow-y: visible;
+}
+
+/* IMAGE LOADING — keep visible; hide-until-.loaded left carousel/catalog empty when .loaded lagged */
+img {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+    /* Prevent layout shift by reserving space */
+    max-width: 100%;
+    height: auto;
+    /* Prevent CLS - reserve space for images without dimensions */
+    display: block;
+}
+
+img.loaded,
+img.error,
+img[src*="data:"],
+.edsa-image img,
+img[data-skip-error-handling] {
+    opacity: 1;
+}
+
+/* CLS Prevention - Reserve space for images without explicit dimensions */
+img:not([width]):not([height]):not([style*="aspect-ratio"]):not(.logo-wordmark):not(.footer-card-logo):not(.brand-card-image):not(.hm-gift-card__logo):not(.product-image):not(.product-image-main):not(.gallery-thumbnail img):not(.hero-search-suggestion-img) {
+    /* Use a safe default aspect ratio to prevent layout shift */
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+}
+
+.hero-image img,
+.hero-visual img {
+    aspect-ratio: unset !important;
+    object-fit: cover !important;
+    object-position: center top !important;
+    max-height: none !important;
+    height: 100% !important;
+}
+
+/* FALLBACK FOR BROKEN IMAGES - Professional placeholder */
+img[src=""]:not(.hero-search-suggestion-img),
+img:not([src]):not(.hero-search-suggestion-img),
+img[alt*="unavailable"]:not(.hero-search-suggestion-img) {
+    background: #f8f9fa url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2Y4ZjlmYSIvPgo8cmVjdCB4PSI1MCIgeT0iNTAiIHdpZHRoPSIyMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjZTllY2VmIiByeD0iOCIvPgo8Y2lyY2xlIGN4PSIxMDAiIGN5PSI4MCIgcj0iMTUiIGZpbGw9IiNkZWUyZTYiLz4KPHJlY3QgeD0iMTMwIiB5PSI3MCIgd2lkdGg9IjgwIiBoZWlnaHQ9IjgiIGZpbGw9IiNkZWUyZTYiIHJ4PSI0Ii8+CjxyZWN0IHg9IjEzMCIgeT0iODUiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2IiBmaWxsPSIjZGVlMmU2IiByeD0iMyIvPgo8dGV4dCB4PSIxNTAiIHk9IjEzMCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEyIiBmaWxsPSIjNmM3NTdkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5JbWFnZSB1bmF2YWlsYWJsZTwvdGV4dD4KPC9zdmc+') center/contain no-repeat;
+    opacity: 1;
+    min-height: 200px;
+}
+
+.footer-contact a,
+.contact-links a,
+.footer .footer-info-section ul li a,
+.footer .footer-section:has(> h4 + ul) ul li a {
+    color: var(--white) !important;
+    text-decoration: none;
+}
+
+.footer-contact a:hover,
+.contact-links a:hover,
+.footer .footer-info-section ul li a:hover,
+.footer .footer-section:has(> h4 + ul) ul li a:hover {
+    color: var(--white) !important;
+    text-decoration: underline;
+}
+
+/* Font Awesome: global * translateZ + header transform fights can hide ::before glyphs */
+i[class*="fa-"],
+svg[class*="fa-"] {
+    transform: none !important;
+    -webkit-transform: none !important;
+    backface-visibility: visible !important;
+    -webkit-backface-visibility: visible !important;
+}
+
+/* Higher specificity: header + cart drawer (beats .header * and contain/paint quirks) */
+.header i[class*="fa-"],
+.header i.fas,
+.cart-sidebar i[class*="fa-"],
+.cart-sidebar i.fas,
+.cart-sidebar svg[class*="fa-"] {
+    font-family: "Font Awesome 6 Free" !important;
+    font-weight: 900 !important;
+}
+
+.fa-brands,
+.footer .fab,
+.footer .fa-brands,
+.footer-card-logos .fab,
+.footer-card-logos .fa-brands {
+    font-family: "Font Awesome 6 Brands" !important;
+    font-weight: 400 !important;
+}
+
+.cart-sidebar .fab,
+.cart-sidebar .fa-brands {
+    font-family: "Font Awesome 6 Brands" !important;
+    font-weight: 400 !important;
+}

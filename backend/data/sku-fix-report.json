@@ -1,0 +1,5989 @@
+{
+  "planned": [
+    {
+      "id": 39,
+      "brand": "Cardio Amaze ",
+      "name": "ADVANCED BLOOD PRESSURE SUPPORT",
+      "oldSku": "HM-ADVANCEDBLOODPRESSURECHERRY",
+      "newSku": "12414",
+      "slug": "advanced-blood-pressure-support-sku-12414"
+    },
+    {
+      "id": 40,
+      "brand": null,
+      "name": "Our Father's Healing Herbs Healing Antiseptic Salve 2oz SKU: HS-03",
+      "oldSku": "HM-OURFATHERSHEALINGHERBSHEALINGANTISEPTICSALVE2OZ",
+      "newSku": "HS-03",
+      "slug": "our-father-s-healing-herbs-healing-antiseptic-salve-2oz-sku-hs-03"
+    },
+    {
+      "id": 41,
+      "brand": "Perrin's Naturals",
+      "name": "Perrin's Creme Complete Scent of Rose",
+      "oldSku": "HM-PERRINSBUY2CREMECOMPLETE",
+      "newSku": "654",
+      "slug": "perrin-s-creme-complete-scent-of-rose-sku-654"
+    },
+    {
+      "id": 42,
+      "brand": "Life Extension",
+      "name": "1 Life Science GLP-1 PRO",
+      "oldSku": "HM-1LIFESCIENCEGLP1PRO",
+      "newSku": "25407",
+      "slug": "1-life-science-glp-1-pro-sku-25407"
+    },
+    {
+      "id": 43,
+      "brand": "Cardio Amaze ",
+      "name": "3 in 1 Nitric Oxide Booster",
+      "oldSku": "HM-31NITRICOXIDEBOOSTERPREWORKOUT1",
+      "newSku": "27967",
+      "slug": "3-in-1-nitric-oxide-booster-sku-27967"
+    },
+    {
+      "id": 44,
+      "brand": "Doctor's Blend",
+      "name": "5 Day Forecast 1600mg - Free Shipping",
+      "oldSku": "HM-5DAYFORECASTMEN",
+      "newSku": "5284",
+      "slug": "5-day-forecast-1600mg-free-shipping-sku-05284"
+    },
+    {
+      "id": 45,
+      "brand": "Cardio Amaze ",
+      "name": "5X Extra Strength L-Arginine L-citrulline",
+      "oldSku": "HM-31NITRICOXIDEBOOSTERWORKOUTCHERRY",
+      "newSku": "3215",
+      "slug": "5x-extra-strength-l-arginine-l-citrulline-sku-03215"
+    },
+    {
+      "id": 46,
+      "brand": "AC Grace",
+      "name": "Tocotrienol - Free Shipping",
+      "oldSku": "HM-CGRACEUNIQUEETOCOTRIENOL",
+      "newSku": "90TOC",
+      "slug": "a-c-grace-tocotrienol-free-shipping-sku-90toc"
+    },
+    {
+      "id": 47,
+      "brand": "AC Grace",
+      "name": "Unique E 180 SG - Free Shipping",
+      "oldSku": "HM-CGRACEUNIQUEE180SG",
+      "newSku": "28011",
+      "slug": "a-c-grace-unique-e-180-sg-free-shipping-sku-28011"
+    },
+    {
+      "id": 48,
+      "brand": "APS",
+      "name": "ADAM'S PROSTATE CARE",
+      "oldSku": "HM-ADAMSPROSTATECARE",
+      "newSku": "19109",
+      "slug": "adam-s-prostate-care-sku-19109"
+    },
+    {
+      "id": 49,
+      "brand": "Doctor's Blend",
+      "name": "Aivia Carb Blocker",
+      "oldSku": "HM-AIVIACARBBLOCKER",
+      "newSku": "22995",
+      "slug": "aivia-carb-blocker-sku-22995"
+    },
+    {
+      "id": 50,
+      "brand": "APS",
+      "name": "Mesomorph Rocket Pop",
+      "oldSku": "HM-APSMESOMORPHROCKETPOP",
+      "newSku": "APMESV3RP",
+      "slug": "aps-mesomorph-rocket-pop-sku-apmesv3rp"
+    },
+    {
+      "id": 51,
+      "brand": "AC Grace",
+      "name": "ASSOCIATION OF NATURAL HEALTH EDSA BIOFEEDBACK TESTING",
+      "oldSku": "HM-EDSATEST",
+      "newSku": "51302",
+      "slug": "association-of-natural-health-edsa-biofeedback-testing-sku-51302"
+    },
+    {
+      "id": 52,
+      "brand": "Doctor's Blend",
+      "name": "Big Bang Male Enhancement - Free Shipping",
+      "oldSku": "HM-BIGBANG",
+      "newSku": "28617",
+      "slug": "big-bang-male-enhancement-free-shipping-sku-28617"
+    },
+    {
+      "id": 53,
+      "brand": "Bio Neurix",
+      "name": "Amoryn",
+      "oldSku": "HM-BIONEURIXAMORYN",
+      "newSku": "13431",
+      "slug": "bioneurix-amoryn-sku-13431"
+    },
+    {
+      "id": 54,
+      "brand": "Bio Neurix",
+      "name": "Seredyn",
+      "oldSku": "HM-BIONEURIXSEREDYN",
+      "newSku": "13433",
+      "slug": "bioneurix-seredyn-sku-13433"
+    },
+    {
+      "id": 55,
+      "brand": "Go Out",
+      "name": "BURIED TREASURE ACF EXT STRENGTH PM SKU: 28711",
+      "oldSku": "HM-BURIEDTREASUREACFEXTSTRENGTHPM",
+      "newSku": "28711",
+      "slug": "buried-treasure-acf-ext-strength-pm-sku-28711"
+    },
+    {
+      "id": 56,
+      "brand": "Go Out",
+      "name": "BURIED TREASURE ACF PM SKU: 28710",
+      "oldSku": "HM-BURIEDTREASUREACFPM",
+      "newSku": "28710",
+      "slug": "buried-treasure-acf-pm-sku-28710"
+    },
+    {
+      "id": 57,
+      "brand": "APS",
+      "name": "Cardio 911 Beets Plus Capsules",
+      "oldSku": "HM-HERBSHOPCARDIO911BEETSPLUS",
+      "newSku": "17995",
+      "slug": "cardio-911-beets-plus-capsules-sku-17995"
+    },
+    {
+      "id": 58,
+      "brand": "High Tech Pharmaceuticals",
+      "name": "CARDIO 911 POWDER",
+      "oldSku": "HM-CARDIO911",
+      "newSku": "16196",
+      "slug": "cardio-911-powder-sku-16196"
+    },
+    {
+      "id": 59,
+      "brand": "Cardio Amaze ",
+      "name": "Cardio Amaze Nitric Oxide",
+      "oldSku": "HM-31NITRICOXIDEBOOSTERWORKOUTCHERRY1",
+      "newSku": "60",
+      "slug": "cardio-amaze-nitric-oxide-sku-00060"
+    },
+    {
+      "id": 67,
+      "brand": "Cardio Amaze ",
+      "name": "Cardio Amaze-EDTA Powder",
+      "oldSku": "HM-CARDIOAMAZEORGANICBEETROOTPOWDERMANGO",
+      "newSku": "27892",
+      "slug": "cardio-amaze-edta-powder-sku-27892"
+    },
+    {
+      "id": 68,
+      "brand": "Host Defence",
+      "name": "CARLSON SALMON OIL COMPLETE 700MG",
+      "oldSku": "HM-CARLSONSALMONOIL500MGOMEGA3",
+      "newSku": "28510",
+      "slug": "carlson-salmon-oil-complete-700mg-sku-28510"
+    },
+    {
+      "id": 69,
+      "brand": "Life Extension",
+      "name": "DMSO Rose Scented Cream",
+      "oldSku": "HM-DMSOROSESCENTEDCREAMALOE2OZ2",
+      "newSku": "28604",
+      "slug": "dmso-rose-scented-cream-sku-28604"
+    },
+    {
+      "id": 70,
+      "brand": "Life Extension",
+      "name": "DMSO Rose Scented Cream 4oz",
+      "oldSku": "HM-DMSOROSESCENTEDCREAMALOE2OZ1",
+      "newSku": "1147",
+      "slug": "dmso-rose-scented-cream-4oz-sku-1147"
+    },
+    {
+      "id": 71,
+      "brand": "Doctor's Blend",
+      "name": "5 in 1 Immune Booster",
+      "oldSku": "HM-DOCTORSBLEND51IMMUNEBO",
+      "newSku": "58532",
+      "slug": "doctor-s-blend-5-in-1-immune-booster-sku-58532"
+    },
+    {
+      "id": 72,
+      "brand": "Doctor's Blend",
+      "name": "Advanced Joint Relief",
+      "oldSku": "HM-DOCTORSBLENDADVANCEDJOINTRELIEF",
+      "newSku": "8564",
+      "slug": "doctor-s-blend-advanced-joint-relief-sku-8564"
+    },
+    {
+      "id": 73,
+      "brand": "Doctor's Blend",
+      "name": "Berberine",
+      "oldSku": "HM-DOCTORSBLENDBERBERINE",
+      "newSku": "8581",
+      "slug": "doctor-s-blend-berberine-sku-8581"
+    },
+    {
+      "id": 74,
+      "brand": "Doctor's Blend",
+      "name": "Blood Sugar Support",
+      "oldSku": "HM-DOCTORSBLENDBLOODSUGAR",
+      "newSku": "8075",
+      "slug": "doctor-s-blend-blood-sugar-support-sku-8075"
+    },
+    {
+      "id": 75,
+      "brand": "Doctor's Blend",
+      "name": "D3+K2",
+      "oldSku": "HM-DOCTORSBLENDD3PLUSK2",
+      "newSku": "58172",
+      "slug": "doctor-s-blend-d3-k2-sku-58172"
+    },
+    {
+      "id": 76,
+      "brand": "Doctor's Blend",
+      "name": "Irish Sea Moss",
+      "oldSku": "HM-DOCTORSBLENDIRISHSEAMOSS",
+      "newSku": "7210",
+      "slug": "doctor-s-blend-irish-sea-moss-sku-7210"
+    },
+    {
+      "id": 77,
+      "brand": "Doctor's Blend",
+      "name": "Liposomal Vitamin C",
+      "oldSku": "HM-DOCTORSBLENDLIPOSOMALVITAMI",
+      "newSku": "9850",
+      "slug": "doctor-s-blend-liposomal-vitamin-c-sku-9850"
+    },
+    {
+      "id": 78,
+      "brand": "Doctor's Blend",
+      "name": "Moringa",
+      "oldSku": "HM-DOCTORSBLENDRMORINGA",
+      "newSku": "5848",
+      "slug": "doctor-s-blend-moringa-sku-5848"
+    },
+    {
+      "id": 79,
+      "brand": "Doctor's Blend",
+      "name": "Nutri-Sorb",
+      "oldSku": "HM-DOCTORSBLENDNUTRISORB1",
+      "newSku": "8562",
+      "slug": "doctor-s-blend-nutri-sorb-sku-8562"
+    },
+    {
+      "id": 80,
+      "brand": "Doctor's Blend",
+      "name": "Omega 3 Fish Oil",
+      "oldSku": "HM-DOCTORSBLENDOMEGA3FISHOIL",
+      "newSku": "2405",
+      "slug": "doctor-s-blend-omega-3-fish-oil-sku-2405"
+    },
+    {
+      "id": 81,
+      "brand": "Doctor's Blend",
+      "name": "Prostate Care Formula",
+      "oldSku": "HM-DOCTORSBLENDPROSTATECARE",
+      "newSku": "6065",
+      "slug": "doctor-s-blend-prostate-care-formula-sku-6065"
+    },
+    {
+      "id": 82,
+      "brand": "Doctor's Blend",
+      "name": "Quercetin Plus",
+      "oldSku": "HM-DOCTORSBLENDQUERCETINPLUS",
+      "newSku": "2229",
+      "slug": "doctor-s-blend-quercetin-plus-sku-2229"
+    },
+    {
+      "id": 83,
+      "brand": "Doctor's Blend",
+      "name": "Reds & Greens Complete",
+      "oldSku": "HM-DOCTORSBLENDREDSANDGREENSCOMPLETE",
+      "newSku": "8513",
+      "slug": "doctor-s-blend-reds-greens-complete-sku-8513"
+    },
+    {
+      "id": 84,
+      "brand": "Doctor's Blend",
+      "name": "Resveratrol Plus",
+      "oldSku": "HM-DOCTORSBLENDRESVERATROLPLUS",
+      "newSku": "69875",
+      "slug": "doctor-s-blend-resveratrol-plus-sku-69875"
+    },
+    {
+      "id": 85,
+      "brand": "Doctor's Blend",
+      "name": "Shilajit",
+      "oldSku": "HM-DOCTORSBLENDSHILAJIT",
+      "newSku": "88553",
+      "slug": "doctor-s-blend-shilajit-sku-88553"
+    },
+    {
+      "id": 86,
+      "brand": "Doctor's Blend",
+      "name": "Turmeric Curcumin",
+      "oldSku": "HM-DOCTORSBLENDTURMERICCURCUMI",
+      "newSku": "17828",
+      "slug": "doctor-s-blend-turmeric-curcumin-sku-17828"
+    },
+    {
+      "id": 87,
+      "brand": "Doctor's Blend",
+      "name": "VidaThrive Multivitamin",
+      "oldSku": "HM-DOCTORSBLENDVIDATHRIVE",
+      "newSku": "50940",
+      "slug": "doctor-s-blend-vidathrive-multivitamin-sku-50940"
+    },
+    {
+      "id": 89,
+      "brand": "Doctor's Blend",
+      "name": "Vydrate Powder",
+      "oldSku": "HM-DOCTORSBLENDVYDRATE",
+      "newSku": "1396",
+      "slug": "doctor-s-blend-vydrate-powder-sku-1396"
+    },
+    {
+      "id": 90,
+      "brand": "Doctor's Blend",
+      "name": "DoctorΓÇÖs Blend Testo Accel 224",
+      "oldSku": "HM-DOCTORBLENDTESTOACCEL1",
+      "newSku": "27419",
+      "slug": "doctor-s-blend-testo-accel-224-sku-27419"
+    },
+    {
+      "id": 91,
+      "brand": "Doctor's Blend",
+      "name": "DoctorΓÇÖs Blend Total Brain Balance",
+      "oldSku": "HM-DOCTORSBLENDTOTALBRAINBALANCE",
+      "newSku": "28522",
+      "slug": "doctor-s-blend-total-brain-balance-sku-28522"
+    },
+    {
+      "id": 92,
+      "brand": "Natures Balance",
+      "name": "Dr. Tony's Adrenal Plus",
+      "oldSku": "HM-DRTONYSADRENALPLUS",
+      "newSku": "33430",
+      "slug": "dr-tony-s-adrenal-plus-sku-33430"
+    },
+    {
+      "id": 94,
+      "brand": "Natures Balance",
+      "name": "Dr. Tony's Blood Sugar",
+      "oldSku": "HM-DRTONYSBLOODSUGAR",
+      "newSku": "27842",
+      "slug": "dr-tony-s-blood-sugar-sku-27842"
+    },
+    {
+      "id": 95,
+      "brand": "Natures Balance",
+      "name": "Dr. Tony's Cholesterol Plus",
+      "oldSku": "HM-DRTONYSCHOLESTEROLPLUS",
+      "newSku": "25",
+      "slug": "dr-tony-s-cholesterol-plus-sku-00025"
+    },
+    {
+      "id": 96,
+      "brand": "Natures Balance",
+      "name": "Dr. Tony's Pomegranate Plus",
+      "oldSku": "HM-DRTONYSPOMEGRANATEPLUS1",
+      "newSku": "21516",
+      "slug": "dr-tony-s-pomegranate-plus-sku-21516"
+    },
+    {
+      "id": 97,
+      "brand": "Natures Balance",
+      "name": "Dr. Tony's Radiant Greens Natural",
+      "oldSku": "HM-DRTONYSRADIANTGREENSNATURAL",
+      "newSku": "21008",
+      "slug": "dr-tony-s-radiant-greens-natural-sku-21008"
+    },
+    {
+      "id": 98,
+      "brand": "Natures Balance",
+      "name": "Dr. Tony's Radiant Greens Tropical - Free Shipping",
+      "oldSku": "HM-DRTONYSRADIANTGREENSTROPICAL1",
+      "newSku": "21623",
+      "slug": "dr-tony-s-radiant-greens-tropical-free-shipping-sku-21623"
+    },
+    {
+      "id": 99,
+      "brand": "Edom Labs",
+      "name": "Edom Chiro Klenz W/Green Tea",
+      "oldSku": "HM-EDOMCHIROKLENZWGREENTEA",
+      "newSku": "16627",
+      "slug": "edom-chiro-klenz-w-green-tea-sku-16627"
+    },
+    {
+      "id": 100,
+      "brand": "Edom Labs",
+      "name": "Chiro Klenz Tea Cinnamon",
+      "oldSku": "HM-EDOMCHIROKLENZCINNAMON",
+      "newSku": "E286C-0001",
+      "slug": "edom-labs-chiro-klenz-tea-cinnamon-sku-e286c-0001"
+    },
+    {
+      "id": 101,
+      "brand": "Edom Labs",
+      "name": "Chiro-Klenz Tea Lemon",
+      "oldSku": "HM-EDOMCHIROKLENZLEMON",
+      "newSku": "E286L-0001",
+      "slug": "edom-labs-chiro-klenz-tea-lemon-sku-e286l-0001"
+    },
+    {
+      "id": 102,
+      "brand": "Edom Labs",
+      "name": "Chiro-Klenz Tea Original",
+      "oldSku": "HM-EDOMCHIROKLENZORIGINAL",
+      "newSku": "E286-0001",
+      "slug": "edom-labs-chiro-klenz-tea-original-sku-e286-0001"
+    },
+    {
+      "id": 103,
+      "brand": "HM Herbs",
+      "name": "Enzymedica Berberine",
+      "oldSku": "HM-ENZYMEDICABERBERINE",
+      "newSku": "10085",
+      "slug": "enzymedica-berberine-sku-10085"
+    },
+    {
+      "id": 104,
+      "brand": "Now Foods",
+      "name": "Enzymedica Defense Regular Strength",
+      "oldSku": "HM-ENZYMEDICAENZYMEDEFENSEVIRASTOP",
+      "newSku": "98140",
+      "slug": "enzymedica-defense-regular-strength-sku-98140"
+    },
+    {
+      "id": 105,
+      "brand": "Oxy Life",
+      "name": "Enzymedica's Immune Defense Extra Strength",
+      "oldSku": "HM-ENZYMEDICADEFENSEEXTSTR2",
+      "newSku": "29080",
+      "slug": "enzymedica-s-immune-defense-extra-strength-sku-29080"
+    },
+    {
+      "id": 106,
+      "brand": "Perrin's Naturals",
+      "name": "Enzymedica's Natto-K",
+      "oldSku": "HM-ENZYMEDICANATTOK1",
+      "newSku": "22090",
+      "slug": "enzymedica-s-natto-k-sku-22090"
+    },
+    {
+      "id": 107,
+      "brand": "Power Thin Phase",
+      "name": "Equalizer Plus Arthritis Relief Cream w/Peppermint",
+      "oldSku": "HM-EQUALIZERUNSCENTED",
+      "newSku": "28628",
+      "slug": "equalizer-plus-arthritis-relief-cream-w-peppermint-sku-28628"
+    },
+    {
+      "id": 108,
+      "brand": "Power Thin Phase",
+      "name": "Equalizer Plus Cream Original Unscented",
+      "oldSku": "HM-HMEQUALIZER",
+      "newSku": "9994",
+      "slug": "equalizer-plus-cream-original-unscented-sku-9994"
+    },
+    {
+      "id": 109,
+      "brand": "Purple Tiger",
+      "name": "EVE'S GENERATIONAL FORMULA",
+      "oldSku": "HM-HMEVESGENERATIONALFORMULA1",
+      "newSku": "EVE2OZ3",
+      "slug": "eve-s-generational-formula-sku-eve2oz3"
+    },
+    {
+      "id": 110,
+      "brand": "Flexcin",
+      "name": "CM8 Load-Up Formula",
+      "oldSku": "HM-FLEXCINCM8LOADFORMULA1",
+      "newSku": "16651",
+      "slug": "flexcin-cm8-load-up-formula-sku-16651"
+    },
+    {
+      "id": 111,
+      "brand": "Flexcin",
+      "name": "With CM8",
+      "oldSku": "HM-FLEXCINWCM8",
+      "newSku": "FL901",
+      "slug": "flexcin-with-cm8-sku-fl901"
+    },
+    {
+      "id": 112,
+      "brand": "Formor",
+      "name": "Cardio Cocktail 32 oz",
+      "oldSku": "HM-FORMORCARDIOCOCKTAIL32OZ",
+      "newSku": "612",
+      "slug": "formor-cardio-cocktail-32-oz-sku-612"
+    },
+    {
+      "id": 113,
+      "brand": "Unicity",
+      "name": "Foster Regal Relax AM-PM",
+      "oldSku": "HM-FOSTERREGALVALERINAMPM",
+      "newSku": "6062",
+      "slug": "foster-regal-relax-am-pm-sku-6062"
+    },
+    {
+      "id": 114,
+      "brand": "Global Healing",
+      "name": "Ashwagandha",
+      "oldSku": "HM-GLOBALHEALINGASHWAGANDHA",
+      "newSku": "ASH-2OZ",
+      "slug": "global-healing-ashwagandha-sku-ash-2oz"
+    },
+    {
+      "id": 115,
+      "brand": "Global Healing",
+      "name": "Candida Balance",
+      "oldSku": "HM-GLOBALHEALINGCANDIDABALANCE",
+      "newSku": "27244",
+      "slug": "global-healing-candida-balance-sku-27244"
+    },
+    {
+      "id": 116,
+      "brand": "Global Healing",
+      "name": "Oxy-Powder",
+      "oldSku": "HM-GLOBALHEALINGOXYPOWDER",
+      "newSku": "27120",
+      "slug": "global-healing-oxy-powder-sku-27120"
+    },
+    {
+      "id": 117,
+      "brand": "Global Healing",
+      "name": "Toxin Binder",
+      "oldSku": "HM-GLOBALHEALINGTOXINBINDER",
+      "newSku": "27612",
+      "slug": "global-healing-toxin-binder-sku-27612"
+    },
+    {
+      "id": 118,
+      "brand": "Global Healing",
+      "name": "Vitamin D3 Plant Based",
+      "oldSku": "HM-THRESGLOBALHEALINGVITAMINDPLANTBASED",
+      "newSku": "VD3-2OZ",
+      "slug": "global-healing-vitamin-d3-plant-based-sku-vd3-2oz"
+    },
+    {
+      "id": 119,
+      "brand": "Global Healing",
+      "name": "WomenΓÇÖs Hormone Balance",
+      "oldSku": "HM-THRESGLOBALHEALINGWOMENSHORMONEBALANCE",
+      "newSku": "25986",
+      "slug": "global-healing-women-s-hormone-balance-sku-25986"
+    },
+    {
+      "id": 120,
+      "brand": "Go Out",
+      "name": "Plex Go Out Extra Strength",
+      "oldSku": "HM-HIGHLANDLABSGOOUTPLEX",
+      "newSku": "1008",
+      "slug": "go-out-plex-go-out-extra-strength-sku-1008"
+    },
+    {
+      "id": 121,
+      "brand": null,
+      "name": "HAPPY PMS CREAM SKU: 14202",
+      "oldSku": "HM-HMHAPPYPMSCREAMJAR2",
+      "newSku": "14202",
+      "slug": "happy-pms-cream-sku-14202"
+    },
+    {
+      "id": 122,
+      "brand": null,
+      "name": "Happy PMS Jar SKU: 0036",
+      "oldSku": "HM-HMHAPPYPMSCREAMJAR1",
+      "newSku": "36",
+      "slug": "happy-pms-jar-sku-0036"
+    },
+    {
+      "id": 123,
+      "brand": null,
+      "name": "Hemp Bombs CBD Gummies W/Mushroom SKU: 51265",
+      "oldSku": "HM-HEMPBOMBSCBDGUMMIESMUSHROOM",
+      "newSku": "51265",
+      "slug": "hemp-bombs-cbd-gummies-w-mushroom-sku-51265"
+    },
+    {
+      "id": 124,
+      "brand": null,
+      "name": "Herbs For Life CBD Gummies 30mg SKU: 04592",
+      "oldSku": "HM-HERBSLIFECBDGUMMIES30MG",
+      "newSku": "4592",
+      "slug": "herbs-for-life-cbd-gummies-30mg-sku-04592"
+    },
+    {
+      "id": 125,
+      "brand": null,
+      "name": "Herbs For Life CBD Gummies Sleep SKU: 58172-CB",
+      "oldSku": "HM-HERBSLIFECBDGUMMIESSLEEP",
+      "newSku": "58172-CB",
+      "slug": "herbs-for-life-cbd-gummies-sleep-sku-58172-cb"
+    },
+    {
+      "id": 126,
+      "brand": null,
+      "name": "HERBS FOR LIFE DELTA 8 GUMMIES SKU: 4778",
+      "oldSku": "HM-REGALABSDELTA8GUMMIES",
+      "newSku": "4778",
+      "slug": "herbs-for-life-delta-8-gummies-sku-4778"
+    },
+    {
+      "id": 127,
+      "brand": null,
+      "name": "Herbs For Life Delta 9 Gummies 10mg Ea. SKU: 08851",
+      "oldSku": "HM-HERBSLIFEDELTA9GUMMIES",
+      "newSku": "8851",
+      "slug": "herbs-for-life-delta-9-gummies-10mg-ea-sku-08851"
+    },
+    {
+      "id": 128,
+      "brand": "High Tech Pharmaceuticals",
+      "name": "Hi Tech Black Widow w/Ephedra",
+      "oldSku": "HM-HITECHBLACKWIDOWWEPHEDRA",
+      "newSku": "57",
+      "slug": "hi-tech-black-widow-w-ephedra-sku-0057"
+    },
+    {
+      "id": 129,
+      "brand": "High Tech Pharmaceuticals",
+      "name": "Hi Tech Lipodrene W/Ephedra",
+      "oldSku": "HM-HITECHLIPODRENEWEPHEDRA",
+      "newSku": "13513",
+      "slug": "hi-tech-lipodrene-w-ephedra-sku-13513"
+    },
+    {
+      "id": 130,
+      "brand": "High Tech Pharmaceuticals",
+      "name": "HI TECH PHARMACEUTICAL BLACK WIDOW W/EPHEDRA",
+      "oldSku": "HM-HITECHPHARMACEUTICALBLACKWIDOWWEPHEDRA",
+      "newSku": "16461",
+      "slug": "hi-tech-pharmaceutical-black-widow-w-ephedra-sku-16461"
+    },
+    {
+      "id": 131,
+      "brand": "High Tech Pharmaceuticals",
+      "name": "Hi Tech Stimerex ES with Ephedra",
+      "oldSku": "HM-HITECHPHARMACEUTICALSTIMEREXESWEPHEDRA",
+      "newSku": "14209",
+      "slug": "hi-tech-stimerex-es-with-ephedra-sku-14209"
+    },
+    {
+      "id": 132,
+      "brand": "High Tech Pharmaceuticals",
+      "name": "Hi-Tech Pharmaceuticals Hellfire W/ Ephedra",
+      "oldSku": "HM-HITECHPHARMACEUTICALHELLFIREWEPHEDRAEXTRACT",
+      "newSku": "27894",
+      "slug": "hi-tech-pharmaceuticals-hellfire-w-ephedra-sku-27894"
+    },
+    {
+      "id": 133,
+      "brand": "Go Out",
+      "name": "Highland Labs Go Out Plex Daily Maintenance",
+      "oldSku": "HM-HIGHLANDLABSGOOUTDAILYMAINTENANCE",
+      "newSku": "A1008",
+      "slug": "highland-labs-go-out-plex-daily-maintenance-sku-a1008"
+    },
+    {
+      "id": 134,
+      "brand": null,
+      "name": "Hippie Jack's CBD Extreme 1000mg Pain Cream SKU: 2816",
+      "oldSku": "HM-HIPPIEJACKSCBDEXTREMECREAM",
+      "newSku": "2816",
+      "slug": "hippie-jack-s-cbd-extreme-1000mg-pain-cream-sku-2816"
+    },
+    {
+      "id": 135,
+      "brand": null,
+      "name": "HIPPIE JACK'S YUMMY HEMP GUMMIE SKU: 62813",
+      "oldSku": "HM-HIPPIEJACKSYUMMYHEMPGUMMIE",
+      "newSku": "62813",
+      "slug": "hippie-jack-s-yummy-hemp-gummie-sku-62813"
+    },
+    {
+      "id": 136,
+      "brand": "Host Defence",
+      "name": "Host Defense Chaga",
+      "oldSku": "HM-HOSTDEFENSECHAGA",
+      "newSku": "NCI060",
+      "slug": "host-defense-chaga-sku-nci060"
+    },
+    {
+      "id": 137,
+      "brand": "Host Defence",
+      "name": "Host Defense Cordyceps",
+      "oldSku": "HM-HOSTDEFENSECORDYCEPS1",
+      "newSku": "26449",
+      "slug": "host-defense-cordyceps-sku-26449"
+    },
+    {
+      "id": 138,
+      "brand": "Host Defence",
+      "name": "Host Defense Cordyceps NCCS60",
+      "oldSku": "HM-HOSTDEFENSECORDYCEPS",
+      "newSku": "NCCS60",
+      "slug": "host-defense-cordyceps-nccs60-sku-nccs60"
+    },
+    {
+      "id": 139,
+      "brand": "Host Defence",
+      "name": "Host Defense Reishi Capsules",
+      "oldSku": "HM-HOSTDEFENSEREISHI",
+      "newSku": "NCGL60",
+      "slug": "host-defense-reishi-capsules-sku-ncgl60"
+    },
+    {
+      "id": 140,
+      "brand": "Host Defence",
+      "name": "Host Defense Turkey Tail",
+      "oldSku": "HM-HOSTDEFENSETURKEYTAIL2",
+      "newSku": "26445",
+      "slug": "host-defense-turkey-tail-sku-26445"
+    },
+    {
+      "id": 141,
+      "brand": "Host Defence",
+      "name": "Host Defense Turkey Tail",
+      "oldSku": "HM-HOSTDEFENSETURKEYTAIL3",
+      "newSku": "26864",
+      "slug": "host-defense-turkey-tail-sku-26864"
+    },
+    {
+      "id": 142,
+      "brand": "Host Defence",
+      "name": "Host Defense Turkey Tail",
+      "oldSku": "HM-HOSTDEFENSETURKEYTAIL",
+      "newSku": "NXTV2",
+      "slug": "host-defense-turkey-tail-sku-nxtv2"
+    },
+    {
+      "id": 143,
+      "brand": null,
+      "name": "Irwin Libido Max Red SKU: 28706",
+      "oldSku": "HM-IRWINLIBIDOMAXRED",
+      "newSku": "28706",
+      "slug": "irwin-libido-max-red-sku-28706"
+    },
+    {
+      "id": 144,
+      "brand": null,
+      "name": "Irwin Magnesium PM SKU: 28708",
+      "oldSku": "HM-IRWINMAGNESIUMPM",
+      "newSku": "28708",
+      "slug": "irwin-magnesium-pm-sku-28708"
+    },
+    {
+      "id": 145,
+      "brand": null,
+      "name": "Irwin Magnesium w/Milk thistle & Turmeric SKU: 28707",
+      "oldSku": "HM-IRWINMAGNESIUMWMILKTHISTLEANDTURMERIC",
+      "newSku": "28707",
+      "slug": "irwin-magnesium-w-milk-thistle-turmeric-sku-28707"
+    },
+    {
+      "id": 146,
+      "brand": null,
+      "name": "Legend Male Enhancement - Free Shipping SKU: 5031",
+      "oldSku": "HM-REGALABSLEGENDBOTTLE",
+      "newSku": "5031",
+      "slug": "legend-male-enhancement-free-shipping-sku-5031"
+    },
+    {
+      "id": 147,
+      "brand": "Life Extension",
+      "name": "Life Ext",
+      "oldSku": "HM-LIFEEXT",
+      "newSku": "28701",
+      "slug": "life-ext-sku-28701"
+    },
+    {
+      "id": 148,
+      "brand": "Life Extension",
+      "name": "Life Ext Huperzine A",
+      "oldSku": "HM-LIFEEXTHUPERZINE",
+      "newSku": "28702",
+      "slug": "life-ext-huperzine-a-sku-28702"
+    },
+    {
+      "id": 149,
+      "brand": "Life Extension",
+      "name": "LIfe Ext D L-Phenylalanine 500mg",
+      "oldSku": "HM-LIFEEXTDLPHENYLALANINE500MG",
+      "newSku": "28703",
+      "slug": "life-ext-d-l-phenylalanine-500mg-sku-28703"
+    },
+    {
+      "id": 150,
+      "brand": "Life Extension",
+      "name": "Life Ext Enhanced Sleep",
+      "oldSku": "HM-LIFEEXTENHANCEDSLEEP",
+      "newSku": "28704",
+      "slug": "life-ext-enhanced-sleep-sku-28704"
+    },
+    {
+      "id": 152,
+      "brand": "Life Extension",
+      "name": "Life Ext Immune Packs C D Zine Probiotic",
+      "oldSku": "HM-LIFEEXTIMMUNEPACKSCDZINEPROBIOTIC",
+      "newSku": "28705",
+      "slug": "life-ext-immune-packs-c-d-zine-probiotic-sku-28705"
+    },
+    {
+      "id": 153,
+      "brand": "Life Extension",
+      "name": "Life Ext Vitamin B3 Niacin",
+      "oldSku": "HM-LIFEEXTVITAMINB3NIACIN",
+      "newSku": "28700",
+      "slug": "life-ext-vitamin-b3-niacin-sku-28700"
+    },
+    {
+      "id": 154,
+      "brand": "Life Extension",
+      "name": "Vitamin C liposomal",
+      "oldSku": "HM-LIFEEXTENSIONVITAMINCLIPOSOMAL",
+      "newSku": "28686",
+      "slug": "life-extension-vitamin-c-liposomal-sku-28686"
+    },
+    {
+      "id": 155,
+      "brand": "Life Extension",
+      "name": "LIFE-FLO MAGNESIUM OIL SPRAY With aloe vera",
+      "oldSku": "HM-LIFEFLOMAGNESIUMOILSPRAYALOEVERA",
+      "newSku": "28698",
+      "slug": "life-flo-magnesium-oil-spray-with-aloe-vera-sku-28698"
+    },
+    {
+      "id": 156,
+      "brand": "Life Extension",
+      "name": "LIFE-FLO PURE MAGNESIUM OIL SPRAY",
+      "oldSku": "HM-LIFEFLOPUREMAGNESIUMOILSPRAY",
+      "newSku": "28697",
+      "slug": "life-flo-pure-magnesium-oil-spray-sku-28697"
+    },
+    {
+      "id": 157,
+      "brand": "Life's Fortune",
+      "name": "Immune Pro-6",
+      "oldSku": "HM-LIFEFORTUNEIMMUNEPRO6",
+      "newSku": "30460",
+      "slug": "life-s-fortune-immune-pro-6-sku-30460"
+    },
+    {
+      "id": 158,
+      "brand": "Life's Fortune",
+      "name": "Liquid Vitamin",
+      "oldSku": "HM-LIFEFORTUNEVITAMINLIQUID",
+      "newSku": "99",
+      "slug": "life-s-fortune-liquid-vitamin-sku-99"
+    },
+    {
+      "id": 159,
+      "brand": "Life's Fortune",
+      "name": "Super Glucosamine",
+      "oldSku": "HM-LIFEFORTUNESUPERGLUCOSAMAX",
+      "newSku": "106",
+      "slug": "life-s-fortune-super-glucosamine-sku-000106"
+    },
+    {
+      "id": 160,
+      "brand": "Life's Fortune",
+      "name": "Ultra Pure Meg-3 Fish Oil",
+      "oldSku": "HM-LIFEFORTUNEULTRAPUREOMEGA31",
+      "newSku": "111",
+      "slug": "life-s-fortune-ultra-pure-meg-3-fish-oil-sku-111"
+    },
+    {
+      "id": 161,
+      "brand": "Life's Fortune",
+      "name": "Vitamins 180 Tablets",
+      "oldSku": "HM-LIFEFORTUNEVITAMINS2",
+      "newSku": "102",
+      "slug": "life-s-fortune-vitamins-180-tablets-sku-102"
+    },
+    {
+      "id": 162,
+      "brand": null,
+      "name": "Lite Burn Diet Pill SKU: 19817",
+      "oldSku": "HM-LITEBURNDIETPILLS",
+      "newSku": "19817",
+      "slug": "lite-burn-diet-pill-sku-19817"
+    },
+    {
+      "id": 163,
+      "brand": "Regal Labs",
+      "name": "M D Science Swiss Navy Max Load",
+      "oldSku": "HM-MDSCIENCEMAXLOAD1",
+      "newSku": "18507",
+      "slug": "m-d-science-swiss-navy-max-load-sku-18507"
+    },
+    {
+      "id": 164,
+      "brand": null,
+      "name": "M.D. Science Swiss Navy Max Hard SKU: 15343",
+      "oldSku": "HM-MDSCIENCESWISSNAVYMAXHARD",
+      "newSku": "15343",
+      "slug": "m-d-science-swiss-navy-max-hard-sku-15343"
+    },
+    {
+      "id": 165,
+      "brand": "Regal Labs",
+      "name": "MD Swiss Navy Max Size Male",
+      "oldSku": "HM-MDSCIENCESWISSNAVYMAXSIZE",
+      "newSku": "27975",
+      "slug": "md-swiss-navy-max-size-male-sku-27975"
+    },
+    {
+      "id": 166,
+      "brand": "Regal Labs",
+      "name": "Me 72 Extreme Male Enhancement - Free Shipping",
+      "oldSku": "HM-REGALABSME72",
+      "newSku": "6389",
+      "slug": "me-72-extreme-male-enhancement-free-shipping-sku-6389"
+    },
+    {
+      "id": 167,
+      "brand": null,
+      "name": "MICHAEL'S HEALTH FEMALE REPRODUCTIVE SKU: 01275",
+      "oldSku": "HM-MICHAELSFEMALEREPRODUCTIVE",
+      "newSku": "1275",
+      "slug": "michael-s-health-female-reproductive-sku-01275"
+    },
+    {
+      "id": 168,
+      "brand": null,
+      "name": "MICHAEL'S HEALTH LNG SKU: 01031",
+      "oldSku": "HM-MICHAELSLNG",
+      "newSku": "1031",
+      "slug": "michael-s-health-lng-sku-01031"
+    },
+    {
+      "id": 169,
+      "brand": null,
+      "name": "MICHAEL'S HEALTH LUNG FACTOR'S SKU: 10281",
+      "oldSku": "HM-MICHAELSLUNGFACTORS",
+      "newSku": "10281",
+      "slug": "michael-s-health-lung-factor-s-sku-10281"
+    },
+    {
+      "id": 170,
+      "brand": null,
+      "name": "MICHAEL'S HEALTH TESTOSTERONE FACTORS SKU: 31007",
+      "oldSku": "HM-MICHAELSTESTOSTERONEFACTORS",
+      "newSku": "31007",
+      "slug": "michael-s-health-testosterone-factors-sku-31007"
+    },
+    {
+      "id": 171,
+      "brand": null,
+      "name": "Michael's Health Women Change SKU: 01284",
+      "oldSku": "HM-MICHAELSWOMENCHANGE",
+      "newSku": "1284",
+      "slug": "michael-s-health-women-change-sku-01284"
+    },
+    {
+      "id": 172,
+      "brand": null,
+      "name": "MICHAEL'S KIDNEY FACTOR'S SKU: 15001",
+      "oldSku": "HM-MICHAELSKIDNEYFACTORS",
+      "newSku": "15001",
+      "slug": "michael-s-kidney-factor-s-sku-15001"
+    },
+    {
+      "id": 174,
+      "brand": null,
+      "name": "Morning Daily Powder Drink SKU: 02020",
+      "oldSku": "HM-CARDIOAMAZEMORINGVITAMINSDAILYPOWDERDRINKCHERRY1",
+      "newSku": "2020",
+      "slug": "morning-daily-powder-drink-sku-02020"
+    },
+    {
+      "id": 175,
+      "brand": null,
+      "name": "Natural Balance AlkaMax SKU: 0682",
+      "oldSku": "HM-NATURALBALANCEALKAMAX",
+      "newSku": "682",
+      "slug": "natural-balance-alkamax-sku-0682"
+    },
+    {
+      "id": 176,
+      "brand": null,
+      "name": "Natural Balance AlkaMax SKU: 0418",
+      "oldSku": "HM-NATURALBALANCEALKAMAX1",
+      "newSku": "418",
+      "slug": "natural-balance-alkamax-sku-0418"
+    },
+    {
+      "id": 177,
+      "brand": null,
+      "name": "NATURAL BALANCE HAPPY CAMPER SKU: 13148",
+      "oldSku": "HM-NATURALBALANCEHAPPYCAMPER2",
+      "newSku": "13148",
+      "slug": "natural-balance-happy-camper-sku-13148"
+    },
+    {
+      "id": 178,
+      "brand": null,
+      "name": "Nature's Balance Chlorella SKU: NBC20-P",
+      "oldSku": "HM-NATURESBALANCECHLORELLA",
+      "newSku": "NBC20-P",
+      "slug": "nature-s-balance-chlorella-sku-nbc20-p"
+    },
+    {
+      "id": 179,
+      "brand": null,
+      "name": "Nature's Balance CyChroMax SKU: NBCY-P",
+      "oldSku": "HM-NATURESBALANCECYCHROMAX",
+      "newSku": "NBCY-P",
+      "slug": "nature-s-balance-cychromax-sku-nbcy-p"
+    },
+    {
+      "id": 180,
+      "brand": null,
+      "name": "NATURE'S PLUS AGELOSS EYE SUPPORT SKU: 18615",
+      "oldSku": "HM-NATURESPLUSAGELOSSEYESUPPORT",
+      "newSku": "18615",
+      "slug": "nature-s-plus-ageloss-eye-support-sku-18615"
+    },
+    {
+      "id": 181,
+      "brand": null,
+      "name": "NATURE'S PLUS AGELOSS EYE SUPPORT SKU: 8010",
+      "oldSku": "HM-NATURESPAGELOSSEYESUPPORT",
+      "newSku": "8010",
+      "slug": "nature-s-plus-ageloss-eye-support-sku-8010"
+    },
+    {
+      "id": 182,
+      "brand": null,
+      "name": "Nature's Plus Ageloss First Day SKU: 8003",
+      "oldSku": "HM-NATURESPAGELOSSFIRSTDAY",
+      "newSku": "8003",
+      "slug": "nature-s-plus-ageloss-first-day-sku-8003"
+    },
+    {
+      "id": 183,
+      "brand": null,
+      "name": "NATURE'S PLUS AGELOSS FIRST DAY INFLAMMATION RESPONSE SKU: 18103",
+      "oldSku": "HM-NATURESPLUSAGELOSSFIRSTDAYINFLAMMATIONRESPONSE",
+      "newSku": "18103",
+      "slug": "nature-s-plus-ageloss-first-day-inflammation-response-sku-18103"
+    },
+    {
+      "id": 184,
+      "brand": null,
+      "name": "NATURE'S PLUS AGELOSS JOINT SUPPORT SKU: 8012",
+      "oldSku": "HM-NATURESPAGELOSSJOINT",
+      "newSku": "8012",
+      "slug": "nature-s-plus-ageloss-joint-support-sku-8012"
+    },
+    {
+      "id": 185,
+      "brand": null,
+      "name": "NATURE'S PLUS AGELOSS KIDNEY SUPPORT SKU: 18491",
+      "oldSku": "HM-NATURESPLUSAGELOSSKIDNEYSUPPORT",
+      "newSku": "18491",
+      "slug": "nature-s-plus-ageloss-kidney-support-sku-18491"
+    },
+    {
+      "id": 186,
+      "brand": null,
+      "name": "NATURE'S PLUS AGELOSS LUNG SUPPORT SKU: 8005",
+      "oldSku": "HM-NATURESPAGELOSSLUNG",
+      "newSku": "8005",
+      "slug": "nature-s-plus-ageloss-lung-support-sku-8005"
+    },
+    {
+      "id": 187,
+      "brand": null,
+      "name": "NATURE'S PLUS AGELOSS MEN'S MULTI SKU: 8001",
+      "oldSku": "HM-NATURESPAGELOSSMENSMULTI",
+      "newSku": "8001",
+      "slug": "nature-s-plus-ageloss-men-s-multi-sku-8001"
+    },
+    {
+      "id": 188,
+      "brand": null,
+      "name": "Nature's Plus Ageloss Rejuvabolic SKU: 8024",
+      "oldSku": "HM-NATURESPAGELOSSREJUVABOLIC",
+      "newSku": "8024",
+      "slug": "nature-s-plus-ageloss-rejuvabolic-sku-8024"
+    },
+    {
+      "id": 189,
+      "brand": null,
+      "name": "Nature's Plus Ageloss Sleep Support SKU: 8023",
+      "oldSku": "HM-NATURESPAGELOSSSLEEP",
+      "newSku": "8023",
+      "slug": "nature-s-plus-ageloss-sleep-support-sku-8023"
+    },
+    {
+      "id": 190,
+      "brand": null,
+      "name": "NATURE'S PLUS AGELOSS WOMEN'S MULTI SKU: 8002",
+      "oldSku": "HM-NATURESPAGELOSSWOMENSMUL",
+      "newSku": "8002",
+      "slug": "nature-s-plus-ageloss-women-s-multi-sku-8002"
+    },
+    {
+      "id": 191,
+      "brand": null,
+      "name": "NATURE'S PLUS GI NATURAL BI-LAYER SKU: 4386",
+      "oldSku": "HM-NATURESPGINATURALBILAYER",
+      "newSku": "4386",
+      "slug": "nature-s-plus-gi-natural-bi-layer-sku-4386"
+    },
+    {
+      "id": 192,
+      "brand": null,
+      "name": "NATURE'S PLUS IMMUNE SKU: 1068",
+      "oldSku": "HM-NATURESPIMMUNE",
+      "newSku": "1068",
+      "slug": "nature-s-plus-immune-sku-1068"
+    },
+    {
+      "id": 193,
+      "brand": null,
+      "name": "Nature's Plus Ultra Virile-Actin SKU: 4870",
+      "oldSku": "HM-NATURESPLUSULTRAVIRILEACTIN",
+      "newSku": "4870",
+      "slug": "nature-s-plus-ultra-virile-actin-sku-4870"
+    },
+    {
+      "id": 194,
+      "brand": null,
+      "name": "NATURE'S PULS PROBIOTIC MEGA SKU: 23519",
+      "oldSku": "HM-NATURESPULSPROBIOTICMEGA",
+      "newSku": "23519",
+      "slug": "nature-s-puls-probiotic-mega-sku-23519"
+    },
+    {
+      "id": 196,
+      "brand": null,
+      "name": "NATURE'S PULS PROBIOTIC MEN SKU: 43904",
+      "oldSku": "HM-NATURESPPROBIOTICMEN",
+      "newSku": "43904",
+      "slug": "nature-s-puls-probiotic-men-sku-43904"
+    },
+    {
+      "id": 197,
+      "brand": null,
+      "name": "Nature's Sunshine 5-HTP Power SKU: 2806",
+      "oldSku": "HM-NATURESSUNSHINE5HTPPOWER",
+      "newSku": "2806",
+      "slug": "nature-s-sunshine-5-htp-power-sku-2806"
+    },
+    {
+      "id": 198,
+      "brand": null,
+      "name": "Nature's Sunshine 5-W SKU: 1120",
+      "oldSku": "HM-NS5W",
+      "newSku": "1120",
+      "slug": "nature-s-sunshine-5-w-sku-1120"
+    },
+    {
+      "id": 199,
+      "brand": null,
+      "name": "Nature's Sunshine 7-Keto SKU: 15336",
+      "oldSku": "HM-NATURESSUNSHINE7KETO",
+      "newSku": "15336",
+      "slug": "nature-s-sunshine-7-keto-sku-15336"
+    },
+    {
+      "id": 200,
+      "brand": null,
+      "name": "Nature's Sunshine Adrenal SKU: 13382",
+      "oldSku": "HM-NATURESSUNSHINEADRENAL",
+      "newSku": "13382",
+      "slug": "nature-s-sunshine-adrenal-sku-13382"
+    },
+    {
+      "id": 201,
+      "brand": null,
+      "name": "Nature's Sunshine Algin SKU: 675",
+      "oldSku": "HM-NSALGIN",
+      "newSku": "675",
+      "slug": "nature-s-sunshine-algin-sku-675"
+    },
+    {
+      "id": 202,
+      "brand": null,
+      "name": "Nature's Sunshine Anti-Gas Chinese SKU: 1869",
+      "oldSku": "HM-NSANTIGASCHINESE",
+      "newSku": "1869",
+      "slug": "nature-s-sunshine-anti-gas-chinese-sku-1869"
+    },
+    {
+      "id": 203,
+      "brand": null,
+      "name": "Nature's Sunshine Anti-Gas Formula SKU: 1198",
+      "oldSku": "HM-NSANTIGASFORMULAWLOBELIA",
+      "newSku": "1198",
+      "slug": "nature-s-sunshine-anti-gas-formula-sku-1198"
+    },
+    {
+      "id": 204,
+      "brand": null,
+      "name": "Nature's Sunshine Anti-Gas TCM Concentrate SKU: 1018",
+      "oldSku": "HM-NATURESSUNSHINEANTIGASCHINESETCMCONCENTRATE",
+      "newSku": "1018",
+      "slug": "nature-s-sunshine-anti-gas-tcm-concentrate-sku-1018"
+    },
+    {
+      "id": 205,
+      "brand": "Natures Sunshine",
+      "name": "Nature's Sunshine APS II",
+      "oldSku": "HM-NSAPSII",
+      "newSku": "780",
+      "slug": "nature-s-sunshine-aps-ii-sku-780"
+    },
+    {
+      "id": 206,
+      "brand": null,
+      "name": "Nature's Sunshine Ashwagandha SKU: 22385",
+      "oldSku": "HM-NATURESSUNSHINEASHWAGANDHA",
+      "newSku": "22385",
+      "slug": "nature-s-sunshine-ashwagandha-sku-22385"
+    },
+    {
+      "id": 207,
+      "brand": null,
+      "name": "Nature's Sunshine Bacillus Coagulans SKU: 6109",
+      "oldSku": "HM-NSBACILLUSCOAGULANS",
+      "newSku": "6109",
+      "slug": "nature-s-sunshine-bacillus-coagulans-sku-6109"
+    },
+    {
+      "id": 209,
+      "brand": null,
+      "name": "Nature's Sunshine Bilberry Fruit Concentrate SKU: 74",
+      "oldSku": "HM-NATURESSUNSHINEBILLBERRYFRUITCONCENTRATE",
+      "newSku": "74",
+      "slug": "nature-s-sunshine-bilberry-fruit-concentrate-sku-74"
+    },
+    {
+      "id": 210,
+      "brand": null,
+      "name": "Nature's Sunshine Black Walnut ATC Concentrate SKU: 93",
+      "oldSku": "HM-NSBLACKWALNUTATCCON",
+      "newSku": "93",
+      "slug": "nature-s-sunshine-black-walnut-atc-concentrate-sku-93"
+    },
+    {
+      "id": 211,
+      "brand": "Natures Sunshine",
+      "name": "Nature's Sunshine Black Walnut Capsules",
+      "oldSku": "HM-NATURESSUNSHINEBLACKWALNUTCAPSULES",
+      "newSku": "11512",
+      "slug": "nature-s-sunshine-black-walnut-capsules-sku-11512"
+    },
+    {
+      "id": 212,
+      "brand": null,
+      "name": "Nature's Sunshine Blood Pressurex SKU: 554",
+      "oldSku": "HM-NSBLOODPRESSUREX",
+      "newSku": "554",
+      "slug": "nature-s-sunshine-blood-pressurex-sku-554"
+    },
+    {
+      "id": 213,
+      "brand": null,
+      "name": "NATURE'S SUNSHINE BLOOD PRESSUREX SKU: 25619",
+      "oldSku": "HM-NATURESSUNSHINEBLOODPRESSUREX",
+      "newSku": "25619",
+      "slug": "nature-s-sunshine-blood-pressurex-sku-25619"
+    },
+    {
+      "id": 214,
+      "brand": null,
+      "name": "Nature's Sunshine DHA SKU: 1513",
+      "oldSku": "HM-NSDHA",
+      "newSku": "1513",
+      "slug": "nature-s-sunshine-dha-sku-1513"
+    },
+    {
+      "id": 215,
+      "brand": null,
+      "name": "Nature's Sunshine Herbal Trace Minerals SKU: 980",
+      "oldSku": "HM-NSHERBALTRACEMINERALS",
+      "newSku": "980",
+      "slug": "nature-s-sunshine-herbal-trace-minerals-sku-980"
+    },
+    {
+      "id": 216,
+      "brand": null,
+      "name": "Nature's Sunshine Nutri-Calm SKU: 1617",
+      "oldSku": "HM-NSNUTRICALM",
+      "newSku": "1617",
+      "slug": "nature-s-sunshine-nutri-calm-sku-1617"
+    },
+    {
+      "id": 218,
+      "brand": "Natures Plus",
+      "name": "AgeLoss Liver Support",
+      "oldSku": "HM-NATURESPAGELOSSLIVER1",
+      "newSku": "8009",
+      "slug": "natures-plus-ageloss-liver-support-sku-8009"
+    },
+    {
+      "id": 219,
+      "brand": "Natures Plus",
+      "name": "AgeLoss Prostate Support",
+      "oldSku": "HM-NATURESPAGELOSSPROSTATE",
+      "newSku": "8007",
+      "slug": "natures-plus-ageloss-prostate-support-sku-8007"
+    },
+    {
+      "id": 220,
+      "brand": "Natures Plus",
+      "name": "GHT Male",
+      "oldSku": "HM-NATURESPLUSGHTMALE",
+      "newSku": "17757",
+      "slug": "natures-plus-ght-male-sku-17757"
+    },
+    {
+      "id": 221,
+      "brand": "Natures Plus",
+      "name": "NaturesPlus GI Natural Probiotic Women",
+      "oldSku": "HM-NATURESPPROBIOTICWOMEN",
+      "newSku": "43906",
+      "slug": "naturesplus-gi-natural-probiotic-women-sku-43906"
+    },
+    {
+      "id": 222,
+      "brand": "Newton Labs",
+      "name": "NEWTON HOMEOPATHIC PETS BLADDER & KIDNEYS P010 L01  ",
+      "oldSku": "HM-NEWTONLABSPETSBLADDERANDKIDNEY",
+      "newSku": "28361",
+      "slug": "newton-homeopathic-pets-bladder-kidneys-sku-28361"
+    },
+    {
+      "id": 223,
+      "brand": "Newton Labs",
+      "name": "NEWTON HOMEOPATHIC PETS BOWEL & DIGESTION CARE",
+      "oldSku": "HM-NEWTONLABSPETSBOWELANDDIGESTIVECARE",
+      "newSku": "28364",
+      "slug": "newton-homeopathic-pets-bowel-digestion-care-sku-28364"
+    },
+    {
+      "id": 224,
+      "brand": "Newton Labs",
+      "name": "NEWTON HOMEOPATHIC PETS COUGH & AIRWAY",
+      "oldSku": "HM-NEWTONLABSPETSCOUGHANDAIRWAY1OZLIQUIDDROPPER",
+      "newSku": "28367",
+      "slug": "newton-homeopathic-pets-cough-airway-sku-28367"
+    },
+    {
+      "id": 225,
+      "brand": "Newton Labs",
+      "name": "Newton Homeopathics Kids Airway Ease",
+      "oldSku": "HM-NEWTONLABSKIDSAIRWAYEASE",
+      "newSku": "28249",
+      "slug": "newton-homeopathics-kids-airway-ease-sku-28249"
+    },
+    {
+      "id": 226,
+      "brand": "Newton Labs",
+      "name": "Newton Homeopathics Kids Allergies F007 L01",
+      "oldSku": "HM-NEWTONLABSKIDSALLERGIES",
+      "newSku": "28267",
+      "slug": "newton-homeopathics-kids-allergies-sku-28267"
+    },
+    {
+      "id": 227,
+      "brand": "Newton Labs",
+      "name": "Newton Homeopathics Pets Detoxifier",
+      "oldSku": "HM-NEWTONLABSPETSDETOXIFIER",
+      "newSku": "28370",
+      "slug": "newton-homeopathics-pets-detoxifier-sku-28370"
+    },
+    {
+      "id": 228,
+      "brand": "Newton Labs",
+      "name": "Newton Homeopathics Pets Diarrhea & Gas",
+      "oldSku": "HM-NEWTONLABSPETSDIARRHEAANDGAS",
+      "newSku": "28373",
+      "slug": "newton-homeopathics-pets-diarrhea-gas-sku-28373"
+    },
+    {
+      "id": 229,
+      "brand": "Newton Labs",
+      "name": "Newton Homeopathics Pets Doggy Breath",
+      "oldSku": "HM-NEWTONLABSPETSDOGGYBREATH",
+      "newSku": "28376",
+      "slug": "newton-homeopathics-pets-doggy-breath-sku-28376"
+    },
+    {
+      "id": 230,
+      "brand": "Newton Labs",
+      "name": "Newton Homeopathics Pets Ear Care",
+      "oldSku": "HM-NEWTONLABSPETSEARCARE",
+      "newSku": "28379",
+      "slug": "newton-homeopathics-pets-ear-care-sku-28379"
+    },
+    {
+      "id": 231,
+      "brand": "Newton Labs",
+      "name": "Newton Homeopathics Pets Energy-Vitality",
+      "oldSku": "HM-NEWTONLABSPETSENERGYVITALITY",
+      "newSku": "28382",
+      "slug": "newton-homeopathics-pets-energy-vitality-sku-28382"
+    },
+    {
+      "id": 232,
+      "brand": "Newton Labs",
+      "name": "Newton Homeopathics Pets Eye Care",
+      "oldSku": "HM-NEWTONLABSPETSEYECARE",
+      "newSku": "28385",
+      "slug": "newton-homeopathics-pets-eye-care-sku-28385"
+    },
+    {
+      "id": 233,
+      "brand": "Newton Labs",
+      "name": "Newton Homeopathics Pets Flea & Bug Bites",
+      "oldSku": "HM-NEWTONLABSPETSFLEAANDBUGBITES",
+      "newSku": "28391",
+      "slug": "newton-homeopathics-pets-flea-bug-bites-sku-28391"
+    },
+    {
+      "id": 234,
+      "brand": "Newton Labs",
+      "name": "Newton Homeopathics Pets Inflammation",
+      "oldSku": "HM-NEWTONLABSPETSINFLAMMATION",
+      "newSku": "28394",
+      "slug": "newton-homeopathics-pets-inflammation-sku-28394"
+    },
+    {
+      "id": 235,
+      "brand": "Newton Labs",
+      "name": "Newton Homeopathics Pets Injury Rescue",
+      "oldSku": "HM-NEWTONLABSPETSINJURYRESCUE",
+      "newSku": "28397",
+      "slug": "newton-homeopathics-pets-injury-rescue-sku-28397"
+    },
+    {
+      "id": 236,
+      "brand": "Newton Labs",
+      "name": "Newton Homeopathics Pets Nervousness Fear",
+      "oldSku": "HM-NEWTONLABSPETSNERVOUSNESSFEAR",
+      "newSku": "28400",
+      "slug": "newton-homeopathics-pets-nervousness-fear-sku-28400"
+    },
+    {
+      "id": 237,
+      "brand": "Newton Labs",
+      "name": "Newton Homeopathics Pets Para Si",
+      "oldSku": "HM-NEWTONLABSPETSPARASI",
+      "newSku": "28403",
+      "slug": "newton-homeopathics-pets-para-si-sku-28403"
+    },
+    {
+      "id": 238,
+      "brand": "Newton Labs",
+      "name": "Newton Homeopathics Pets Rheumatic - Care",
+      "oldSku": "HM-NEWTONLABSPETSRHEUMATICCARE",
+      "newSku": "28406",
+      "slug": "newton-homeopathics-pets-rheumatic-care-sku-28406"
+    },
+    {
+      "id": 240,
+      "brand": "Newton Labs",
+      "name": "Newton Homeopathics Pets Scoot Stopper",
+      "oldSku": "HM-NEWTONLABSPETSSCOOTSTOPPER",
+      "newSku": "28409",
+      "slug": "newton-homeopathics-pets-scoot-stopper-sku-28409"
+    },
+    {
+      "id": 241,
+      "brand": "Newton Labs",
+      "name": "Newton Homeopathics Pets Skin Care",
+      "oldSku": "HM-NEWTONLABSPETSSKINCARE",
+      "newSku": "28412",
+      "slug": "newton-homeopathics-pets-skin-care-sku-28412"
+    },
+    {
+      "id": 242,
+      "brand": "Newton Labs",
+      "name": "Aches - Pain",
+      "oldSku": "HM-NEWTONLABSACHESPAIN",
+      "newSku": "28073",
+      "slug": "newton-lab-s-aches-pain-sku-28073"
+    },
+    {
+      "id": 243,
+      "brand": "Newton Labs",
+      "name": "Accident Rescue",
+      "oldSku": "HM-NEWTONHOMEOPATHICSACCIDENTRESCUE",
+      "newSku": "28082",
+      "slug": "newton-labs-accident-rescue-sku-28082"
+    },
+    {
+      "id": 244,
+      "brand": "Newton Labs",
+      "name": "Newton Labs Homeopathics Acne N015 L01 ",
+      "oldSku": "HM-NEWTONLABSACNE",
+      "newSku": "28085",
+      "slug": "newton-labs-acne-sku-28085"
+    },
+    {
+      "id": 245,
+      "brand": "Newton Labs",
+      "name": "Newton Labs Allergies N089 L01 ",
+      "oldSku": "HM-NEWTONLABSALLERGIES1",
+      "newSku": "28077",
+      "slug": "newton-labs-allergies-sku-28077"
+    },
+    {
+      "id": 246,
+      "brand": "Newton Labs",
+      "name": "Newton Labs Appetite Control N027 L01 ",
+      "oldSku": "HM-NEWTONLABSAPPETITECONTROL",
+      "newSku": "28089",
+      "slug": "newton-labs-appetite-control-sku-28089"
+    },
+    {
+      "id": 247,
+      "brand": "Newton Labs",
+      "name": "Newton Labs Bladder~Kidney N010 L01",
+      "oldSku": "HM-NEWTONLABSBLADDERKIDNEY",
+      "newSku": "28093",
+      "slug": "newton-labs-bladder-kidney-sku-28093"
+    },
+    {
+      "id": 248,
+      "brand": "Newton Labs",
+      "name": "Blues & Mood",
+      "oldSku": "HM-NEWTONLABSBLUESANDMOOD",
+      "newSku": "28098",
+      "slug": "newton-labs-blues-mood-sku-28098"
+    },
+    {
+      "id": 249,
+      "brand": "Newton Labs",
+      "name": "Bowel Digestive Care",
+      "oldSku": "HM-NEWTONLABSBOWELDIGESTIVECARE1",
+      "newSku": "28101",
+      "slug": "newton-labs-bowel-digestive-care-sku-28101"
+    },
+    {
+      "id": 250,
+      "brand": "Newton Labs",
+      "name": "Breast Help",
+      "oldSku": "HM-NEWTONLABSBREASTHELP",
+      "newSku": "28105",
+      "slug": "newton-labs-breast-help-sku-28105"
+    },
+    {
+      "id": 251,
+      "brand": "Newton Labs",
+      "name": "Bug Bites",
+      "oldSku": "HM-NEWTONLABSBUGBITES",
+      "newSku": "28109",
+      "slug": "newton-labs-bug-bites-sku-28109"
+    },
+    {
+      "id": 252,
+      "brand": "Newton Labs",
+      "name": "Candida-Y",
+      "oldSku": "HM-NEWTONLABSCANDIDAY",
+      "newSku": "28112",
+      "slug": "newton-labs-candida-y-sku-28112"
+    },
+    {
+      "id": 253,
+      "brand": "Newton Labs",
+      "name": "Cell Salts",
+      "oldSku": "HM-NEWTONLABSCELLSALTS",
+      "newSku": "28116",
+      "slug": "newton-labs-cell-salts-sku-28116"
+    },
+    {
+      "id": 254,
+      "brand": "Newton Labs",
+      "name": "Cold & Sinus",
+      "oldSku": "HM-NEWTONLABSCOLDANDSINUS",
+      "newSku": "28120",
+      "slug": "newton-labs-cold-sinus-sku-28120"
+    },
+    {
+      "id": 255,
+      "brand": "Newton Labs",
+      "name": "Cold Hands - Feet",
+      "oldSku": "HM-NEWTONLABSCOLDHANDSFEET",
+      "newSku": "28124",
+      "slug": "newton-labs-cold-hands-feet-sku-28124"
+    },
+    {
+      "id": 256,
+      "brand": "Newton Labs",
+      "name": "Cold Sores",
+      "oldSku": "HM-NEWTONLABSCOLDSORES",
+      "newSku": "28127",
+      "slug": "newton-labs-cold-sores-sku-28127"
+    },
+    {
+      "id": 257,
+      "brand": "Newton Labs",
+      "name": "Constipation",
+      "oldSku": "HM-NEWTONLABSCONSTIPATION",
+      "newSku": "28130",
+      "slug": "newton-labs-constipation-sku-28130"
+    },
+    {
+      "id": 258,
+      "brand": "Newton Labs",
+      "name": "Cough - Airway",
+      "oldSku": "HM-NEWTONLABSCOUGHASTHMA",
+      "newSku": "28134",
+      "slug": "newton-labs-cough-airway-sku-28134"
+    },
+    {
+      "id": 259,
+      "brand": "Newton Labs",
+      "name": "Dairy-Grain-Nightshades",
+      "oldSku": "HM-NEWTONLABSDAIRYGRAINNIGHTSHADES",
+      "newSku": "28138",
+      "slug": "newton-labs-dairy-grain-nightshades-sku-28138"
+    },
+    {
+      "id": 260,
+      "brand": "Newton Labs",
+      "name": "Detoxifier",
+      "oldSku": "HM-NEWTONLABSDETOXIFIER",
+      "newSku": "28143",
+      "slug": "newton-labs-detoxifier-sku-28143"
+    },
+    {
+      "id": 262,
+      "brand": "Newton Labs",
+      "name": "Diarrhea",
+      "oldSku": "HM-NEWTONLABSDIARRHEA",
+      "newSku": "28145",
+      "slug": "newton-labs-diarrhea-sku-28145"
+    },
+    {
+      "id": 263,
+      "brand": "Newton Labs",
+      "name": "Dust-Mold-Dander",
+      "oldSku": "HM-NEWTONLABSDUSTMOLDDANDER",
+      "newSku": "28148",
+      "slug": "newton-labs-dust-mold-dander-sku-28148"
+    },
+    {
+      "id": 264,
+      "brand": "Newton Labs",
+      "name": "Ear Care",
+      "oldSku": "HM-NEWTONLABSEARCARE",
+      "newSku": "28152",
+      "slug": "newton-labs-ear-care-sku-28152"
+    },
+    {
+      "id": 265,
+      "brand": "Newton Labs",
+      "name": "Ear Ringing",
+      "oldSku": "HM-NEWTONLABSEARRINGING",
+      "newSku": "28156",
+      "slug": "newton-labs-ear-ringing-sku-28156"
+    },
+    {
+      "id": 266,
+      "brand": "Newton Labs",
+      "name": "Ear Wax Build-Up",
+      "oldSku": "HM-NEWTONLABSEARWAXBUILD",
+      "newSku": "28161",
+      "slug": "newton-labs-ear-wax-build-up-sku-28161"
+    },
+    {
+      "id": 267,
+      "brand": "Newton Labs",
+      "name": "Eczema Skin Care",
+      "oldSku": "HM-NEWTONLABSECZEMASKINCARE",
+      "newSku": "28165",
+      "slug": "newton-labs-eczema-skin-care-sku-28165"
+    },
+    {
+      "id": 268,
+      "brand": "Newton Labs",
+      "name": "Edema-Fluid Retention",
+      "oldSku": "HM-NEWTONLABSEDEMAFLUIDRETENTION",
+      "newSku": "28168",
+      "slug": "newton-labs-edema-fluid-retention-sku-28168"
+    },
+    {
+      "id": 269,
+      "brand": "Newton Labs",
+      "name": "Eye Care",
+      "oldSku": "HM-NEWTONLABSEYECARE",
+      "newSku": "28171",
+      "slug": "newton-labs-eye-care-sku-28171"
+    },
+    {
+      "id": 270,
+      "brand": "Newton Labs",
+      "name": "Fatigue Fighter",
+      "oldSku": "HM-NEWTONLABSFATIGUEFIGHTER",
+      "newSku": "28175",
+      "slug": "newton-labs-fatigue-fighter-sku-28175"
+    },
+    {
+      "id": 271,
+      "brand": "Newton Labs",
+      "name": "Feminine Comfort",
+      "oldSku": "HM-NEWTONLABSFEMININECOMFORT",
+      "newSku": "28179",
+      "slug": "newton-labs-feminine-comfort-sku-28179"
+    },
+    {
+      "id": 272,
+      "brand": "Newton Labs",
+      "name": "Fever Infection",
+      "oldSku": "HM-NEWTONLABSFEVERINFECTION",
+      "newSku": "28182",
+      "slug": "newton-labs-fever-infection-sku-28182"
+    },
+    {
+      "id": 273,
+      "brand": "Newton Labs",
+      "name": "Flu Care",
+      "oldSku": "HM-NEWTONLABSFLUCARE",
+      "newSku": "28186",
+      "slug": "newton-labs-flu-care-sku-28186"
+    },
+    {
+      "id": 274,
+      "brand": "Newton Labs",
+      "name": "Food Allergy Additives",
+      "oldSku": "HM-NEWTONFOODADDITIVESLIQUID",
+      "newSku": "N058L01",
+      "slug": "newton-labs-food-allergy-additives-sku-n058l01"
+    },
+    {
+      "id": 275,
+      "brand": "Newton Labs",
+      "name": "Fungus Fighter",
+      "oldSku": "HM-NEWTONLABSFUNGUSFIGHTER",
+      "newSku": "28194",
+      "slug": "newton-labs-fungus-fighter-sku-28194"
+    },
+    {
+      "id": 276,
+      "brand": "Newton Labs",
+      "name": "Hair Scalp",
+      "oldSku": "HM-NEWTONLABSHAIRSCALP",
+      "newSku": "28199",
+      "slug": "newton-labs-hair-scalp-sku-28199"
+    },
+    {
+      "id": 277,
+      "brand": "Newton Labs",
+      "name": "Hangover Help",
+      "oldSku": "HM-NEWTONLABSHANGOVERHELP",
+      "newSku": "28201",
+      "slug": "newton-labs-hangover-help-sku-28201"
+    },
+    {
+      "id": 278,
+      "brand": "Newton Labs",
+      "name": "Hay Fever",
+      "oldSku": "HM-NEWTONLABSHAYFEVER",
+      "newSku": "28205",
+      "slug": "newton-labs-hay-fever-sku-28205"
+    },
+    {
+      "id": 279,
+      "brand": "Newton Labs",
+      "name": "Headache",
+      "oldSku": "HM-NEWTONLABSHEADACHE",
+      "newSku": "28207",
+      "slug": "newton-labs-headache-sku-28207"
+    },
+    {
+      "id": 280,
+      "brand": "Newton Labs",
+      "name": "Heavy Metal Detox",
+      "oldSku": "HM-NEWTONLABSHEAVYMETALDETOX",
+      "newSku": "28211",
+      "slug": "newton-labs-heavy-metal-detox-sku-28211"
+    },
+    {
+      "id": 281,
+      "brand": "Newton Labs",
+      "name": "Hemorrhoids",
+      "oldSku": "HM-NEWTONLABSHEMORRHOIDS",
+      "newSku": "28215",
+      "slug": "newton-labs-hemorrhoids-sku-28215"
+    },
+    {
+      "id": 282,
+      "brand": "Newton Labs",
+      "name": "Hives Rashes",
+      "oldSku": "HM-NEWTONLABSHIVESRASHES",
+      "newSku": "28219",
+      "slug": "newton-labs-hives-rashes-sku-28219"
+    },
+    {
+      "id": 284,
+      "brand": "Newton Labs",
+      "name": "Hyperactivity Mental Focus",
+      "oldSku": "HM-NEWTONLABSHYPERACTIVITYMENTALFOCUS",
+      "newSku": "28223",
+      "slug": "newton-labs-hyperactivity-mental-focus-sku-28223"
+    },
+    {
+      "id": 285,
+      "brand": "Newton Labs",
+      "name": "I-Sleep",
+      "oldSku": "HM-NEWTONLABSISLEEP",
+      "newSku": "28227",
+      "slug": "newton-labs-i-sleep-sku-28227"
+    },
+    {
+      "id": 286,
+      "brand": "Newton Labs",
+      "name": "I-Waker",
+      "oldSku": "HM-NEWTONLABSIWAKER",
+      "newSku": "N087L02",
+      "slug": "newton-labs-i-waker-sku-n087l02"
+    },
+    {
+      "id": 287,
+      "brand": "Newton Labs",
+      "name": "Incontinence",
+      "oldSku": "HM-NEWTONLABSINCONTINENCE",
+      "newSku": "28232",
+      "slug": "newton-labs-incontinence-sku-28232"
+    },
+    {
+      "id": 288,
+      "brand": "Newton Labs",
+      "name": "Indigestion Gas",
+      "oldSku": "HM-NEWTONLABSINDIGESTIONGAS",
+      "newSku": "28236",
+      "slug": "newton-labs-indigestion-gas-sku-28236"
+    },
+    {
+      "id": 289,
+      "brand": "Newton Labs",
+      "name": "Inflammation",
+      "oldSku": "HM-NEWTONLABSINFLAMMATION1",
+      "newSku": "28240",
+      "slug": "newton-labs-inflammation-sku-28240"
+    },
+    {
+      "id": 290,
+      "brand": "Newton Labs",
+      "name": "Jet Lag",
+      "oldSku": "HM-NEWTONLABSJETLAG",
+      "newSku": "28243",
+      "slug": "newton-labs-jet-lag-sku-28243"
+    },
+    {
+      "id": 291,
+      "brand": "Newton Labs",
+      "name": "Just In Case",
+      "oldSku": "HM-NEWTONLABSJUSTCASE",
+      "newSku": "28246",
+      "slug": "newton-labs-just-in-case-sku-28246"
+    },
+    {
+      "id": 292,
+      "brand": "Newton Labs",
+      "name": "Kids Bedwetting",
+      "oldSku": "HM-NEWTONLABSKIDSBEDWETTING",
+      "newSku": "28271",
+      "slug": "newton-labs-kids-bedwetting-sku-28271"
+    },
+    {
+      "id": 293,
+      "brand": "Newton Labs",
+      "name": "Kids Bowel - Digestive Care",
+      "oldSku": "HM-NEWTONLABSKIDSBOWELDIGESTIVECARE",
+      "newSku": "28275",
+      "slug": "newton-labs-kids-bowel-digestive-care-sku-28275"
+    },
+    {
+      "id": 294,
+      "brand": "Newton Labs",
+      "name": "Kids Constipation",
+      "oldSku": "HM-NEWTONLABSKIDSCONSTIPATION",
+      "newSku": "28278",
+      "slug": "newton-labs-kids-constipation-sku-28278"
+    },
+    {
+      "id": 295,
+      "brand": "Newton Labs",
+      "name": "Kids Detoxifier",
+      "oldSku": "HM-NEWTONLABSKIDSDETOXIFIER",
+      "newSku": "28282",
+      "slug": "newton-labs-kids-detoxifier-sku-28282"
+    },
+    {
+      "id": 296,
+      "brand": "Newton Labs",
+      "name": "Kids Diarrhea",
+      "oldSku": "HM-NEWTONLABSKIDSDIARRHEA",
+      "newSku": "28287",
+      "slug": "newton-labs-kids-diarrhea-sku-28287"
+    },
+    {
+      "id": 297,
+      "brand": "Newton Labs",
+      "name": "Kids Ear Care",
+      "oldSku": "HM-NEWTONLABSKIDSEARCARE",
+      "newSku": "28290",
+      "slug": "newton-labs-kids-ear-care-sku-28290"
+    },
+    {
+      "id": 298,
+      "brand": "Newton Labs",
+      "name": "Kids Fever Infection",
+      "oldSku": "HM-NEWTONLABSKIDSFEVERINFECTION",
+      "newSku": "28294",
+      "slug": "newton-labs-kids-fever-infection-sku-28294"
+    },
+    {
+      "id": 299,
+      "brand": "Newton Labs",
+      "name": "Kids Hypercalm Mental Focus",
+      "oldSku": "HM-NEWTONLABSKIDSHYPERCALMMENTALFOCUS",
+      "newSku": "28297",
+      "slug": "newton-labs-kids-hypercalm-mental-focus-sku-28297"
+    },
+    {
+      "id": 300,
+      "brand": "Newton Labs",
+      "name": "Kids Post Vaccination",
+      "oldSku": "HM-NEWTONLABSKIDSPOSTVACCINATION",
+      "newSku": "28301",
+      "slug": "newton-labs-kids-post-vaccination-sku-28301"
+    },
+    {
+      "id": 301,
+      "brand": "Newton Labs",
+      "name": "Kids Sniffles",
+      "oldSku": "HM-NEWTONLABSKIDSSNIFFLES",
+      "newSku": "28305",
+      "slug": "newton-labs-kids-sniffles-sku-28305"
+    },
+    {
+      "id": 302,
+      "brand": "Newton Labs",
+      "name": "Kids Teething Colic",
+      "oldSku": "HM-NEWTONLABSKIDSTEETHINGCOLIC",
+      "newSku": "28309",
+      "slug": "newton-labs-kids-teething-colic-sku-28309"
+    },
+    {
+      "id": 303,
+      "brand": "Newton Labs",
+      "name": "Kids Tummy Upset",
+      "oldSku": "HM-NEWTONLABSKIDSTUMMYUPSET",
+      "newSku": "28314",
+      "slug": "newton-labs-kids-tummy-upset-sku-28314"
+    },
+    {
+      "id": 304,
+      "brand": "Newton Labs",
+      "name": "Leg Cramps Swelling",
+      "oldSku": "HM-NEWTONLABSLEGCRAMPSSWELLING",
+      "newSku": "28319",
+      "slug": "newton-labs-leg-cramps-swelling-sku-28319"
+    },
+    {
+      "id": 306,
+      "brand": "Newton Labs",
+      "name": "Libido",
+      "oldSku": "HM-NEWTONLABSLIBIDO",
+      "newSku": "28322",
+      "slug": "newton-labs-libido-sku-28322"
+    },
+    {
+      "id": 307,
+      "brand": "Newton Labs",
+      "name": "Lymphatic Care",
+      "oldSku": "HM-NEWTONLABSLYMPHATICCARE",
+      "newSku": "28327",
+      "slug": "newton-labs-lymphatic-care-sku-28327"
+    },
+    {
+      "id": 308,
+      "brand": "Newton Labs",
+      "name": "Menopause",
+      "oldSku": "HM-NEWTONLABSMENOPAUSE",
+      "newSku": "28330",
+      "slug": "newton-labs-menopause-sku-28330"
+    },
+    {
+      "id": 309,
+      "brand": "Newton Labs",
+      "name": "Menstrual PMS",
+      "oldSku": "HM-NEWTONLABSMENSTRUALPMS",
+      "newSku": "28334",
+      "slug": "newton-labs-menstrual-pms-sku-28334"
+    },
+    {
+      "id": 310,
+      "brand": "Newton Labs",
+      "name": "Morning Sickness Nausea",
+      "oldSku": "HM-NEWTONLABSMORNINGSICKNESSNAUSEA",
+      "newSku": "28338",
+      "slug": "newton-labs-morning-sickness-nausea-sku-28338"
+    },
+    {
+      "id": 311,
+      "brand": "Newton Labs",
+      "name": "Motion Sickness",
+      "oldSku": "HM-NEWTONLABSMOTIONSICKNESS",
+      "newSku": "28341",
+      "slug": "newton-labs-motion-sickness-sku-28341"
+    },
+    {
+      "id": 312,
+      "brand": "Newton Labs",
+      "name": "Muscle Ease",
+      "oldSku": "HM-NEWTONLABSMUSCLEEASE",
+      "newSku": "28346",
+      "slug": "newton-labs-muscle-ease-sku-28346"
+    },
+    {
+      "id": 313,
+      "brand": "Newton Labs",
+      "name": "Nervousness Anxiety",
+      "oldSku": "HM-NEWTONLABSNERVOUSNESSANXIETY1",
+      "newSku": "28349",
+      "slug": "newton-labs-nervousness-anxiety-sku-28349"
+    },
+    {
+      "id": 314,
+      "brand": "Newton Labs",
+      "name": "Panic Button",
+      "oldSku": "HM-NEWTONLABSPANICBUTTON",
+      "newSku": "28354",
+      "slug": "newton-labs-panic-button-sku-28354"
+    },
+    {
+      "id": 315,
+      "brand": "Newton Labs",
+      "name": "Para Si",
+      "oldSku": "HM-NEWTONLABSPARASI",
+      "newSku": "28357",
+      "slug": "newton-labs-para-si-sku-28357"
+    },
+    {
+      "id": 316,
+      "brand": "Newton Labs",
+      "name": "Pollen Weeds",
+      "oldSku": "HM-NEWTONLABSPOLLENWEEDS",
+      "newSku": "28420",
+      "slug": "newton-labs-pollen-weeds-sku-28420"
+    },
+    {
+      "id": 317,
+      "brand": "Newton Labs",
+      "name": "Prime+",
+      "oldSku": "HM-NEWTONLABSPRIMEPLUS",
+      "newSku": "28427",
+      "slug": "newton-labs-prime-sku-28427"
+    },
+    {
+      "id": 318,
+      "brand": "Newton Labs",
+      "name": "Prostate",
+      "oldSku": "HM-NEWTONLABSPROSTATE",
+      "newSku": "28429",
+      "slug": "newton-labs-prostate-sku-28429"
+    },
+    {
+      "id": 319,
+      "brand": "Newton Labs",
+      "name": "Rheumatic Joint Care",
+      "oldSku": "HM-NEWTONLABSRHEUMATICJOINTCARE",
+      "newSku": "28437",
+      "slug": "newton-labs-rheumatic-joint-care-sku-28437"
+    },
+    {
+      "id": 320,
+      "brand": "Newton Labs",
+      "name": "Rosacea",
+      "oldSku": "HM-NEWTONLABSROSACEA",
+      "newSku": "28440",
+      "slug": "newton-labs-rosacea-sku-28440"
+    },
+    {
+      "id": 321,
+      "brand": "Newton Labs",
+      "name": "Sciatica Nerve Care",
+      "oldSku": "HM-NEWTONLABSSCIATICANERVECARE1OZLIQUIDORPELLETS",
+      "newSku": "28444",
+      "slug": "newton-labs-sciatica-nerve-care-sku-28444"
+    },
+    {
+      "id": 322,
+      "brand": "Newton Labs",
+      "name": "Shing-V",
+      "oldSku": "HM-NEWTONLABSSHINGLES",
+      "newSku": "28455",
+      "slug": "newton-labs-shing-v-sku-28455"
+    },
+    {
+      "id": 323,
+      "brand": "Newton Labs",
+      "name": "Sick Stopper",
+      "oldSku": "HM-NEWTONLABSSICKSTOPPER",
+      "newSku": "28459",
+      "slug": "newton-labs-sick-stopper-sku-28459"
+    },
+    {
+      "id": 324,
+      "brand": "Newton Labs",
+      "name": "Snore Soothe",
+      "oldSku": "HM-NEWTONLABSSNORESOOTHE",
+      "newSku": "28462",
+      "slug": "newton-labs-snore-soothe-sku-28462"
+    },
+    {
+      "id": 325,
+      "brand": "Newton Labs",
+      "name": "Snore Soothe",
+      "oldSku": "HM-NEWTONLABSSNORESOOTHE1",
+      "newSku": "28466",
+      "slug": "newton-labs-snore-soothe-sku-28466"
+    },
+    {
+      "id": 326,
+      "brand": "Newton Labs",
+      "name": "Sports Recovery",
+      "oldSku": "HM-NEWTONLABSSPORTSRECOVERY",
+      "newSku": "28468",
+      "slug": "newton-labs-sports-recovery-sku-28468"
+    },
+    {
+      "id": 328,
+      "brand": "Newton Labs",
+      "name": "Stage Fright Fear",
+      "oldSku": "HM-NEWTONLABSSTAGEFRIGHTFEAR",
+      "newSku": "28471",
+      "slug": "newton-labs-stage-fright-fear-sku-28471"
+    },
+    {
+      "id": 329,
+      "brand": "Newton Labs",
+      "name": "Stress Tension",
+      "oldSku": "HM-NEWTONLABSSTRESSTENSION",
+      "newSku": "28474",
+      "slug": "newton-labs-stress-tension-sku-28474"
+    },
+    {
+      "id": 330,
+      "brand": "Newton Labs",
+      "name": "Swimmers Friend",
+      "oldSku": "HM-NEWTONLABSSWIMMERSFRIEND",
+      "newSku": "28478",
+      "slug": "newton-labs-swimmers-friend-sku-28478"
+    },
+    {
+      "id": 331,
+      "brand": "Newton Labs",
+      "name": "Teeth~Gums",
+      "oldSku": "HM-NEWTONLABSTEETHGUMS",
+      "newSku": "28482",
+      "slug": "newton-labs-teeth-gums-sku-28482"
+    },
+    {
+      "id": 332,
+      "brand": "Newton Labs",
+      "name": "Throat Care",
+      "oldSku": "HM-NEWTONLABSTHROATCARE",
+      "newSku": "28485",
+      "slug": "newton-labs-throat-care-sku-28485"
+    },
+    {
+      "id": 333,
+      "brand": "Newton Labs",
+      "name": "Thyroid~Adrenal",
+      "oldSku": "HM-NEWTONLABSTHYROIDADRENAL",
+      "newSku": "28489",
+      "slug": "newton-labs-thyroid-adrenal-sku-28489"
+    },
+    {
+      "id": 334,
+      "brand": "Newton Labs",
+      "name": "Tobacco Withdrawal",
+      "oldSku": "HM-NEWTONLABSTOBACCOWITHDRAWAL",
+      "newSku": "28492",
+      "slug": "newton-labs-tobacco-withdrawal-sku-28492"
+    },
+    {
+      "id": 335,
+      "brand": "Newton Labs",
+      "name": "Varicose Veins",
+      "oldSku": "HM-NEWTONLABSVARICOSEVEINS",
+      "newSku": "28496",
+      "slug": "newton-labs-varicose-veins-sku-28496"
+    },
+    {
+      "id": 336,
+      "brand": "Newton Labs",
+      "name": "Vitality",
+      "oldSku": "HM-NEWTONLABSVITALITY",
+      "newSku": "28499",
+      "slug": "newton-labs-vitality-sku-28499"
+    },
+    {
+      "id": 337,
+      "brand": "Newton Labs",
+      "name": "VITILIGO",
+      "oldSku": "HM-NEWTONLABSVITILIGO1",
+      "newSku": "20815",
+      "slug": "newton-labs-vitiligo-sku-20815"
+    },
+    {
+      "id": 338,
+      "brand": "Newton Labs",
+      "name": "Warts Skin Tags",
+      "oldSku": "HM-NEWTONLABSWARTSSKINTAGS",
+      "newSku": "28502",
+      "slug": "newton-labs-warts-skin-tags-sku-28502"
+    },
+    {
+      "id": 339,
+      "brand": "Newton Labs",
+      "name": "NEWTON'S HOMEOPATHICS PETS FEVER-INFECTION",
+      "oldSku": "HM-NEWTONLABSPETSFEVERINFECTION1",
+      "newSku": "28388",
+      "slug": "newton-s-homeopathics-pets-fever-infection-sku-28388"
+    },
+    {
+      "id": 340,
+      "brand": "Newton Labs",
+      "name": "NEWTON'S HOMEOPATHICS RESTLESS LEG",
+      "oldSku": "HM-NEWTONLABSRESTLESSLEG",
+      "newSku": "28432",
+      "slug": "newton-s-homeopathics-restless-leg-sku-28432"
+    },
+    {
+      "id": 341,
+      "brand": "Now Foods",
+      "name": "NOW C-1000 zinc &D-3",
+      "oldSku": "HM-NOWC1000ZINCANDD3",
+      "newSku": "28694",
+      "slug": "now-c-1000-zinc-d-3-sku-28694"
+    },
+    {
+      "id": 342,
+      "brand": "Now Foods",
+      "name": "CoQ10 - 100MG",
+      "oldSku": "HM-NOWFOODSCOQ10100MG",
+      "newSku": "28693",
+      "slug": "now-foods-coq10-100mg-sku-28693"
+    },
+    {
+      "id": 343,
+      "brand": "Now Foods",
+      "name": "MAGTEIN",
+      "oldSku": "HM-NOWFOODSMAGTEINMAGNESIUMLTHREONATE",
+      "newSku": "2394",
+      "slug": "now-foods-magtein-sku-2394"
+    },
+    {
+      "id": 344,
+      "brand": "Now Foods",
+      "name": "MAGTEIN",
+      "oldSku": "HM-NOWFOODSMAGTEIN1",
+      "newSku": "28699",
+      "slug": "now-foods-magtein-sku-28699"
+    },
+    {
+      "id": 345,
+      "brand": "Now Foods",
+      "name": "MAGTEIN MAGNESIUM L-THREONATE",
+      "oldSku": "HM-NOWFOODSMAGTEINMAGNESIUMLTHREONATE1",
+      "newSku": "26671",
+      "slug": "now-foods-magtein-magnesium-l-threonate-sku-26671"
+    },
+    {
+      "id": 346,
+      "brand": "Now Foods",
+      "name": "Milk Thistle",
+      "oldSku": "HM-NOWFOODSMILKTHISTLEEXTRACT300MG",
+      "newSku": "74739",
+      "slug": "now-foods-milk-thistle-sku-74739"
+    },
+    {
+      "id": 347,
+      "brand": "Now Foods",
+      "name": "MK-7 PLUS",
+      "oldSku": "HM-NOWFOODSMK7PLUSK1ANDMK4",
+      "newSku": "997",
+      "slug": "now-foods-mk-7-plus-sku-0997"
+    },
+    {
+      "id": 348,
+      "brand": "Now Foods",
+      "name": "NutraFlora FOS",
+      "oldSku": "HM-NOWFOODSNUTRAFLORAFOS",
+      "newSku": "28673",
+      "slug": "now-foods-nutraflora-fos-sku-28673"
+    },
+    {
+      "id": 350,
+      "brand": "Now Foods",
+      "name": "NOW Glutathione 250mg",
+      "oldSku": "HM-NOWGLUTATHIONE250MG",
+      "newSku": "28696",
+      "slug": "now-glutathione-250mg-sku-28696"
+    },
+    {
+      "id": 351,
+      "brand": "Now Foods",
+      "name": "Now Liquid Chlorophyll mint 4oz",
+      "oldSku": "HM-NOWLIQUIDCHLOROPHYLLMINT4OZ",
+      "newSku": "28709",
+      "slug": "now-liquid-chlorophyll-mint-4oz-sku-28709"
+    },
+    {
+      "id": 352,
+      "brand": null,
+      "name": "Organic Beetroot Powder SKU: 02966",
+      "oldSku": "HM-CARDIOAMAZEHEARTHEALTHBLENDCHERRY",
+      "newSku": "2966",
+      "slug": "organic-beetroot-powder-sku-02966"
+    },
+    {
+      "id": 353,
+      "brand": null,
+      "name": "Our Father's Healing Herbs Anti Fungal Salve 2 oz SKU: HS-07",
+      "oldSku": "HM-OURFATHERSHEALINGHERBSANTIFUNGALSALVE2OZ",
+      "newSku": "HS-07",
+      "slug": "our-father-s-healing-herbs-anti-fungal-salve-2-oz-sku-hs-07"
+    },
+    {
+      "id": 355,
+      "brand": null,
+      "name": "Our Father's Healing Herbs Bone, Flesh & Cartilage Salve 2oz SKU: HS-01",
+      "oldSku": "HM-OURFATHERSHEALINGHERBSBONEFLESHANDCARTILAGESALVE2OZ",
+      "newSku": "HS-01",
+      "slug": "our-father-s-healing-herbs-bone-flesh-cartilage-salve-2oz-sku-hs-01"
+    },
+    {
+      "id": 356,
+      "brand": null,
+      "name": "Our Father's Healing Herbs Breathing Salve SKU: HS-04",
+      "oldSku": "HM-OURFATHERSHEALINGHERBSBREATHINGSALVE",
+      "newSku": "HS-04",
+      "slug": "our-father-s-healing-herbs-breathing-salve-sku-hs-04"
+    },
+    {
+      "id": 357,
+      "brand": null,
+      "name": "Our Father's Healing Herbs Cayenne Deep Heat Salve SKU: HS-06",
+      "oldSku": "HM-OURFATHERSHEALINGHERBSCAYENNEDEEPHEATSALVE",
+      "newSku": "HS-06",
+      "slug": "our-father-s-healing-herbs-cayenne-deep-heat-salve-sku-hs-06"
+    },
+    {
+      "id": 358,
+      "brand": null,
+      "name": "Our Father's Healing Herbs Face & Hand Conditioning Salve 2 oz SKU: HS-08",
+      "oldSku": "HM-OURFATHERSHEALINGHERBSFACEANDHANDCONDITIONINGSALVE2OZ",
+      "newSku": "HS-08",
+      "slug": "our-father-s-healing-herbs-face-hand-conditioning-salve-2-oz-sku-hs-08"
+    },
+    {
+      "id": 359,
+      "brand": "Oxy Life",
+      "name": "Oxylife Orachel",
+      "oldSku": "HM-OXYLIFEORACHEL",
+      "newSku": "1576",
+      "slug": "oxylife-orachel-sku-1576"
+    },
+    {
+      "id": 360,
+      "brand": "Oxy Life",
+      "name": "Oxylife Phenocane",
+      "oldSku": "HM-OXYLIFEPHENOCANE",
+      "newSku": "1901",
+      "slug": "oxylife-phenocane-sku-01901"
+    },
+    {
+      "id": 361,
+      "brand": null,
+      "name": "Passion Enhancement Pills - Free Shipping SKU: 00223",
+      "oldSku": "HM-REGALLABSPASSION",
+      "newSku": "223",
+      "slug": "passion-enhancement-pills-free-shipping-sku-00223"
+    },
+    {
+      "id": 362,
+      "brand": "Perrin's Naturals",
+      "name": "Perrin's Blend Ointment",
+      "oldSku": "HM-PERRINSBLENDOINTMENT",
+      "newSku": "1101",
+      "slug": "perrin-s-blend-ointment-sku-1101"
+    },
+    {
+      "id": 363,
+      "brand": "Perrin's Naturals",
+      "name": "Perrin's Creme Complete",
+      "oldSku": "HM-PERRINSCREMECOMPLETE",
+      "newSku": "202",
+      "slug": "perrin-s-creme-complete-sku-00202"
+    },
+    {
+      "id": 364,
+      "brand": "Perrin's Naturals",
+      "name": "Perrin's Creme Complete Refined",
+      "oldSku": "HM-PERRINSCREMECOMPLETEREFINED",
+      "newSku": "40100",
+      "slug": "perrin-s-creme-complete-refined-sku-40100"
+    },
+    {
+      "id": 365,
+      "brand": "Perrin's Naturals",
+      "name": "Perrin's Nutra Cream 2oz",
+      "oldSku": "HM-PERRINSNUTRACREAM1",
+      "newSku": "16427",
+      "slug": "perrin-s-nutra-cream-2oz-sku-16427"
+    },
+    {
+      "id": 366,
+      "brand": "Perrin's Naturals",
+      "name": "Perrin's Revive 2oz",
+      "oldSku": "HM-PERRINSREVIVE",
+      "newSku": "426",
+      "slug": "perrin-s-revive-2oz-sku-00426"
+    },
+    {
+      "id": 367,
+      "brand": null,
+      "name": "POSEIDON PLATINUM 3500 - FREE SHIPPING SKU: 28621",
+      "oldSku": "HM-POSEIDON6CAPSULES",
+      "newSku": "28621",
+      "slug": "poseidon-platinum-3500-free-shipping-sku-28621"
+    },
+    {
+      "id": 368,
+      "brand": "Power Thin Phase",
+      "name": "Phase II Ephedra Free",
+      "oldSku": "HM-GOLDSTARPOWERTHINPHASEII",
+      "newSku": "303",
+      "slug": "powerthin-phase-ii-ephedra-free-sku-303"
+    },
+    {
+      "id": 369,
+      "brand": "Purple Tiger",
+      "name": "Diet Pills",
+      "oldSku": "HM-PURPLETIGERDIET",
+      "newSku": "4663",
+      "slug": "purple-tiger-diet-pills-sku-4663"
+    },
+    {
+      "id": 370,
+      "brand": "Purple Tiger",
+      "name": "Going Green Diet Pill",
+      "oldSku": "HM-PURPLETIGERGOINGGREEN",
+      "newSku": "181",
+      "slug": "purple-tiger-going-green-diet-pill-sku-00181"
+    },
+    {
+      "id": 372,
+      "brand": "Purple Tiger",
+      "name": "Gold",
+      "oldSku": "HM-PURPLETIGERGOLD",
+      "newSku": "229",
+      "slug": "purple-tiger-gold-sku-00229"
+    },
+    {
+      "id": 373,
+      "brand": "Purple Tiger",
+      "name": "GONE WILD",
+      "oldSku": "HM-PURPLETIGERGONEWILD",
+      "newSku": "1021",
+      "slug": "purple-tiger-gone-wild-sku-1021"
+    },
+    {
+      "id": 374,
+      "brand": "Purple Tiger",
+      "name": "Ripped",
+      "oldSku": "HM-PURPLETIGERRIPPED",
+      "newSku": "123",
+      "slug": "purple-tiger-ripped-sku-00123"
+    },
+    {
+      "id": 375,
+      "brand": "Regal Labs",
+      "name": "BIOTIN 10,000",
+      "oldSku": "HM-REGALLABSBIOTIN10000",
+      "newSku": "25017",
+      "slug": "regal-labs-biotin-10-000-sku-25017"
+    },
+    {
+      "id": 376,
+      "brand": "Regal Labs",
+      "name": "BLACK SEED OIL",
+      "oldSku": "HM-REGALLABSBLACKSEEDOIL",
+      "newSku": "23958",
+      "slug": "regal-labs-black-seed-oil-sku-23958"
+    },
+    {
+      "id": 377,
+      "brand": "Regal Labs",
+      "name": "CANDIDA FORMULA",
+      "oldSku": "HM-REGALLABSCANDIDAFORMULA",
+      "newSku": "778",
+      "slug": "regal-labs-candida-formula-sku-0778"
+    },
+    {
+      "id": 378,
+      "brand": "Regal Labs",
+      "name": "VSEXTRA",
+      "oldSku": "HM-REGALLABSVSEXTRA",
+      "newSku": "23231",
+      "slug": "regal-labs-vsextra-sku-23231"
+    },
+    {
+      "id": 379,
+      "brand": "Regal Labs",
+      "name": "Regalabs Adaptogens",
+      "oldSku": "HM-REGALABSADAPTPGENS",
+      "newSku": "779",
+      "slug": "regalabs-adaptogens-sku-0779"
+    },
+    {
+      "id": 380,
+      "brand": "Regal Labs",
+      "name": "Regalabs Adult Multi-Vitamin Gummies",
+      "oldSku": "HM-REGALABSMULTIVITAMINS",
+      "newSku": "4006",
+      "slug": "regalabs-adult-multi-vitamin-gummies-sku-4006"
+    },
+    {
+      "id": 381,
+      "brand": "Regal Labs",
+      "name": "Regalabs Advanced Probiotic",
+      "oldSku": "HM-REGALABSADVANCEDPROBIOTIC",
+      "newSku": "6401",
+      "slug": "regalabs-advanced-probiotic-sku-6401"
+    },
+    {
+      "id": 382,
+      "brand": "Regal Labs",
+      "name": "Regalabs Apple Cider Vinegar Gummies",
+      "oldSku": "HM-REGALABSAPPLECIDERVINEGAR",
+      "newSku": "4891",
+      "slug": "regalabs-apple-cider-vinegar-gummies-sku-4891"
+    },
+    {
+      "id": 383,
+      "brand": "Regal Labs",
+      "name": "Regalabs Apple Cider Vinegar Gummies",
+      "oldSku": "HM-REGALABSAPPLECIDERVINEGARGUMMIES",
+      "newSku": "28003",
+      "slug": "regalabs-apple-cider-vinegar-gummies-sku-28003"
+    },
+    {
+      "id": 384,
+      "brand": "Regal Labs",
+      "name": "Regalabs Arthrita-Care",
+      "oldSku": "HM-REGALABSARTHRITACARE",
+      "newSku": "8811",
+      "slug": "regalabs-arthrita-care-sku-8811"
+    },
+    {
+      "id": 385,
+      "brand": "Regal Labs",
+      "name": "Regalabs Berberine",
+      "oldSku": "HM-REGALABSBERBERINE",
+      "newSku": "4990",
+      "slug": "regalabs-berberine-sku-4990"
+    },
+    {
+      "id": 386,
+      "brand": "Regal Labs",
+      "name": "Regalabs Cape Aloe 450mg",
+      "oldSku": "HM-REGALABSBIOTIN1000MCG",
+      "newSku": "5325",
+      "slug": "regalabs-cape-aloe-450mg-sku-5325"
+    },
+    {
+      "id": 387,
+      "brand": "Regal Labs",
+      "name": "Regalabs Black Seed Oil",
+      "oldSku": "HM-REGALABSBLACKSEEDOIL",
+      "newSku": "7192",
+      "slug": "regalabs-black-seed-oil-sku-7192"
+    },
+    {
+      "id": 388,
+      "brand": "Regal Labs",
+      "name": "Regalabs Blood Sugar Support",
+      "oldSku": "HM-REGALABSBERBERINE1",
+      "newSku": "18991",
+      "slug": "regalabs-blood-sugar-support-sku-18991"
+    },
+    {
+      "id": 390,
+      "brand": "Regal Labs",
+      "name": "Regalabs Cannabis Care Cream - Free Shipping",
+      "oldSku": "HM-REGALABSCANNABISCARECREAM",
+      "newSku": "4314",
+      "slug": "regalabs-cannabis-care-cream-free-shipping-sku-4314"
+    },
+    {
+      "id": 392,
+      "brand": "Regal Labs",
+      "name": "Regalabs Cannabis Care Roll-On",
+      "oldSku": "HM-REGALABSCANNABISCAREROLL",
+      "newSku": "5201",
+      "slug": "regalabs-cannabis-care-roll-on-sku-5201"
+    },
+    {
+      "id": 393,
+      "brand": "Regal Labs",
+      "name": "REGALABS CANNABIS OIL FOR PETS",
+      "oldSku": "HM-REGALABSCANNABISOILPETS",
+      "newSku": "27918",
+      "slug": "regalabs-cannabis-oil-for-pets-sku-27918"
+    },
+    {
+      "id": 394,
+      "brand": "Regal Labs",
+      "name": "Regalabs Choless Control",
+      "oldSku": "HM-REGALABSCANDIDACOMPLEXW500MGOREGANO",
+      "newSku": "946A",
+      "slug": "regalabs-choless-control-sku-946a"
+    },
+    {
+      "id": 395,
+      "brand": "Regal Labs",
+      "name": "Regalabs Collagen 750mg",
+      "oldSku": "HM-REGALABSCOLLAGEN750MG",
+      "newSku": "311A",
+      "slug": "regalabs-collagen-750mg-sku-311a"
+    },
+    {
+      "id": 396,
+      "brand": "Regal Labs",
+      "name": "Regalabs Collagen Peptide Bovine I & III",
+      "oldSku": "HM-REGALABSCOLLAGEN750MG1",
+      "newSku": "4914",
+      "slug": "regalabs-collagen-peptide-bovine-i-iii-sku-4914"
+    },
+    {
+      "id": 397,
+      "brand": "Regal Labs",
+      "name": "Regalabs Corydalis 1000MG",
+      "oldSku": "HM-REGALABSCORYDALIS1000MG",
+      "newSku": "754",
+      "slug": "regalabs-corydalis-1000mg-sku-0754"
+    },
+    {
+      "id": 398,
+      "brand": "Regal Labs",
+      "name": "Regalabs DHEA 50mg",
+      "oldSku": "HM-REGALABSDHEA50MG",
+      "newSku": "1110A",
+      "slug": "regalabs-dhea-50mg-sku-1110a"
+    },
+    {
+      "id": 399,
+      "brand": "Regal Labs",
+      "name": "Regalabs Digestive Matrix",
+      "oldSku": "HM-REGALABSDIGESTIVEMATRIX",
+      "newSku": "1403",
+      "slug": "regalabs-digestive-matrix-sku-1403"
+    },
+    {
+      "id": 400,
+      "brand": "Regal Labs",
+      "name": "Regalabs Full Spectrum CBD Gummies",
+      "oldSku": "HM-REGALABSCBDGUMMIES",
+      "newSku": "4242",
+      "slug": "regalabs-full-spectrum-cbd-gummies-sku-4242"
+    },
+    {
+      "id": 401,
+      "brand": "Regal Labs",
+      "name": "Regalabs GLP-1 Support",
+      "oldSku": "HM-REGALABSTRIACTIVEGLP1SUPPORT",
+      "newSku": "28639",
+      "slug": "regalabs-glp-1-support-sku-28639"
+    },
+    {
+      "id": 402,
+      "brand": "Regal Labs",
+      "name": "Regalabs Happy Feet Cream",
+      "oldSku": "HM-REGALABSCANNABISOIL3600MG1",
+      "newSku": "2070",
+      "slug": "regalabs-happy-feet-cream-sku-2070"
+    },
+    {
+      "id": 403,
+      "brand": "Regal Labs",
+      "name": "Regalabs Horny Goat Weed",
+      "oldSku": "HM-REGALLABSHORNYGOATWEED",
+      "newSku": "24576",
+      "slug": "regalabs-horny-goat-weed-sku-24576"
+    },
+    {
+      "id": 404,
+      "brand": "Regal Labs",
+      "name": "Regalabs Horny Goat Weed",
+      "oldSku": "HM-REGALABSDHEA50MG1",
+      "newSku": "1863",
+      "slug": "regalabs-horny-goat-weed-sku-1863"
+    },
+    {
+      "id": 405,
+      "brand": "Regal Labs",
+      "name": "Regalabs NMN",
+      "oldSku": "HM-REGALABSNMN",
+      "newSku": "27202",
+      "slug": "regalabs-nmn-sku-27202"
+    },
+    {
+      "id": 406,
+      "brand": "Regal Labs",
+      "name": "Regalabs NMN 500mg",
+      "oldSku": "HM-REGALABSNMN500MG",
+      "newSku": "5218",
+      "slug": "regalabs-nmn-500mg-sku-5218"
+    },
+    {
+      "id": 407,
+      "brand": "Regal Labs",
+      "name": "Regalabs Organic CBD Oils",
+      "oldSku": "HM-REGALLABSCANNABISOIL",
+      "newSku": "7260",
+      "slug": "regalabs-organic-cbd-oils-sku-7260"
+    },
+    {
+      "id": 408,
+      "brand": "Regal Labs",
+      "name": "Regalabs Vitamin C Cream 4oz",
+      "oldSku": "HM-REGALABSVITAMINCCREAM4OZ",
+      "newSku": "309",
+      "slug": "regalabs-vitamin-c-cream-4oz-sku-0309"
+    },
+    {
+      "id": 409,
+      "brand": "Regal Labs",
+      "name": "Regalabs Vitamin D-3",
+      "oldSku": "HM-REGALABSVITAMIND3",
+      "newSku": "4877",
+      "slug": "regalabs-vitamin-d-3-sku-4877"
+    },
+    {
+      "id": 410,
+      "brand": "Regal Labs",
+      "name": "Regalabs Vitamin D-3 + K2",
+      "oldSku": "HM-REGALABSVITAMIND3PLUSK2",
+      "newSku": "4433",
+      "slug": "regalabs-vitamin-d-3-k2-sku-4433"
+    },
+    {
+      "id": 412,
+      "brand": "Regal Labs",
+      "name": "Regalabs Vsextra",
+      "oldSku": "HM-REGALABSVSEXTRA",
+      "newSku": "732",
+      "slug": "regalabs-vsextra-sku-0732"
+    },
+    {
+      "id": 413,
+      "brand": "Regal Labs",
+      "name": "Regalabs WomenΓÇÖs Daily Packs",
+      "oldSku": "HM-REGALABSHORNYGOATWEED",
+      "newSku": "709",
+      "slug": "regalabs-women-s-daily-packs-sku-0709"
+    },
+    {
+      "id": 414,
+      "brand": "Skinny Magic",
+      "name": "Diet & Cleanse",
+      "oldSku": "HM-SKINNYMAGICCLEANSE",
+      "newSku": "18075",
+      "slug": "skinny-magic-diet-cleanse-sku-18075"
+    },
+    {
+      "id": 415,
+      "brand": "Skinny Magic",
+      "name": "Garcinia Cambogia Extract RX 3000",
+      "oldSku": "HM-SKINNYMAGICGARCINIACAMBOGIA",
+      "newSku": "64371",
+      "slug": "skinny-magic-garcinia-cambogia-extract-rx-3000-sku-64371"
+    },
+    {
+      "id": 416,
+      "brand": "Skinny Magic",
+      "name": "Keto Diet",
+      "oldSku": "HM-SKINNYMAGICKETODIET",
+      "newSku": "69882",
+      "slug": "skinny-magic-keto-diet-sku-69882"
+    },
+    {
+      "id": 417,
+      "brand": "Skinny Magic",
+      "name": "Keto Diet Extra Strength",
+      "oldSku": "HM-SKINNYMAGICKETODIETEXTRASTRENGTH",
+      "newSku": "69873",
+      "slug": "skinny-magic-keto-diet-extra-strength-sku-69873"
+    },
+    {
+      "id": 418,
+      "brand": "Skinny Magic",
+      "name": "Plum Skinny",
+      "oldSku": "HM-SKINNYMAGICPLUMSKINNY",
+      "newSku": "60-143",
+      "slug": "skinny-magic-plum-skinny-sku-60-143"
+    },
+    {
+      "id": 419,
+      "brand": "Skinny Magic",
+      "name": "Ultra",
+      "oldSku": "HM-HERBSHOPSKINNYMAGICULTRA",
+      "newSku": "5882",
+      "slug": "skinny-magic-ultra-sku-5882"
+    },
+    {
+      "id": 420,
+      "brand": "Standard Enzyme",
+      "name": "CHERRY PLUM",
+      "oldSku": "HM-STANDARDENZYMECHERRYPLUM",
+      "newSku": "10000412",
+      "slug": "standard-enzyme-cherry-plum-sku-10000412"
+    },
+    {
+      "id": 421,
+      "brand": "Standard Enzyme",
+      "name": "CHESTNUT BUD",
+      "oldSku": "HM-STANDARDENZYMECHESTNUTBUD",
+      "newSku": "10000414",
+      "slug": "standard-enzyme-chestnut-bud-sku-10000414"
+    },
+    {
+      "id": 422,
+      "brand": "Standard Enzyme",
+      "name": "ACC",
+      "oldSku": "HM-STANDARDENZYMEACC",
+      "newSku": "99000202",
+      "slug": "standard-enzyme-acc-sku-99000202"
+    },
+    {
+      "id": 423,
+      "brand": "Standard Enzyme",
+      "name": "ACETALDEHYDE",
+      "oldSku": "HM-STANDARDENZYMEACETALDEHYDE",
+      "newSku": "99000204",
+      "slug": "standard-enzyme-acetaldehyde-sku-99000204"
+    },
+    {
+      "id": 424,
+      "brand": "Standard Enzyme",
+      "name": "ACNE",
+      "oldSku": "HM-STANDARDENZYMEACNE",
+      "newSku": "12000602",
+      "slug": "standard-enzyme-acne-sku-12000602"
+    },
+    {
+      "id": 425,
+      "brand": "Standard Enzyme",
+      "name": "ADD/ADHD",
+      "oldSku": "HM-STANDARDENZYMEADDADHD",
+      "newSku": "12000603",
+      "slug": "standard-enzyme-add-adhd-sku-12000603"
+    },
+    {
+      "id": 426,
+      "brand": "Standard Enzyme",
+      "name": "ADRENAL MAX",
+      "oldSku": "HM-STANDARDENZYMEADRENAMAX",
+      "newSku": "85000325",
+      "slug": "standard-enzyme-adrenal-max-sku-85000325"
+    },
+    {
+      "id": 427,
+      "brand": "Standard Enzyme",
+      "name": "AGARICUS",
+      "oldSku": "HM-STANDARDENZYMEAGARICUS",
+      "newSku": "55000802",
+      "slug": "standard-enzyme-agaricus-sku-55000802"
+    },
+    {
+      "id": 428,
+      "brand": "Standard Enzyme",
+      "name": "AGRIMONY",
+      "oldSku": "HM-STANDARDENZYMEAGRIMONY",
+      "newSku": "10000402",
+      "slug": "standard-enzyme-agrimony-sku-10000402"
+    },
+    {
+      "id": 429,
+      "brand": "Standard Enzyme",
+      "name": "ALLERGY/SIN",
+      "oldSku": "HM-STANDARDENZYMEALRGYSIN",
+      "newSku": "12000607",
+      "slug": "standard-enzyme-allergy-sin-sku-12000607"
+    },
+    {
+      "id": 430,
+      "brand": "Standard Enzyme",
+      "name": "ALLERTOX I",
+      "oldSku": "HM-STANDARDENZYMEALLERTOXI",
+      "newSku": "12000604",
+      "slug": "standard-enzyme-allertox-i-sku-12000604"
+    },
+    {
+      "id": 431,
+      "brand": "Standard Enzyme",
+      "name": "ALLERTOX II",
+      "oldSku": "HM-STANDARDENZYMEALLERTOXII",
+      "newSku": "12000606",
+      "slug": "standard-enzyme-allertox-ii-sku-12000606"
+    },
+    {
+      "id": 432,
+      "brand": "Standard Enzyme",
+      "name": "ALPHA E SPLEEN",
+      "oldSku": "HM-STANDARDENZYMEALPHAESPLEEN",
+      "newSku": "85000108",
+      "slug": "standard-enzyme-alpha-e-spleen-sku-85000108"
+    },
+    {
+      "id": 434,
+      "brand": "Standard Enzyme",
+      "name": "ALPHA FLAVIN",
+      "oldSku": "HM-STANDARDENZYMEALPHAFLAVIN",
+      "newSku": "85000110",
+      "slug": "standard-enzyme-alpha-flavin-sku-85000110"
+    },
+    {
+      "id": 435,
+      "brand": "Standard Enzyme",
+      "name": "ALPHA GEST",
+      "oldSku": "HM-STANDARDENZYMEALPHAGEST",
+      "newSku": "85000112",
+      "slug": "standard-enzyme-alpha-gest-sku-85000112"
+    },
+    {
+      "id": 436,
+      "brand": "Standard Enzyme",
+      "name": "ALPHA GEST II",
+      "oldSku": "HM-STANDARDENZYMEALPHAGESTII1",
+      "newSku": "85000114",
+      "slug": "standard-enzyme-alpha-gest-ii-sku-85000114"
+    },
+    {
+      "id": 437,
+      "brand": "Standard Enzyme",
+      "name": "ALPHA GEST III",
+      "oldSku": "HM-STANDARDENZYMEALPHAGESTIII",
+      "newSku": "85000119",
+      "slug": "standard-enzyme-alpha-gest-iii-sku-85000119"
+    },
+    {
+      "id": 438,
+      "brand": "Standard Enzyme",
+      "name": "ALPHA GREEN",
+      "oldSku": "HM-STANDARDENZYMEALPHAGREEN",
+      "newSku": "85000118",
+      "slug": "standard-enzyme-alpha-green-sku-85000118"
+    },
+    {
+      "id": 439,
+      "brand": "Standard Enzyme",
+      "name": "ALPHA GREEN II",
+      "oldSku": "HM-STANDARDENZYMEALPHAGREENLL",
+      "newSku": "85000120",
+      "slug": "standard-enzyme-alpha-green-ii-sku-85000120"
+    },
+    {
+      "id": 440,
+      "brand": "Standard Enzyme",
+      "name": "ALPHA ORTHO PHOS",
+      "oldSku": "HM-STANDARDENZYMEALPHAORTHOPHOS",
+      "newSku": "85000103",
+      "slug": "standard-enzyme-alpha-ortho-phos-sku-85000103"
+    },
+    {
+      "id": 441,
+      "brand": "Standard Enzyme",
+      "name": "ALPHA ZYME II",
+      "oldSku": "HM-STANDARDENZYMEALPHAZYMEII",
+      "newSku": "85000132",
+      "slug": "standard-enzyme-alpha-zyme-ii-sku-85000132"
+    },
+    {
+      "id": 442,
+      "brand": "Standard Enzyme",
+      "name": "ALPHA ZYME III",
+      "oldSku": "HM-STANDARDENZYMEALPHAZYMEIII",
+      "newSku": "85000134",
+      "slug": "standard-enzyme-alpha-zyme-iii-sku-85000134"
+    },
+    {
+      "id": 443,
+      "brand": "Standard Enzyme",
+      "name": "AMALGATOX",
+      "oldSku": "HM-STANDARDENZYMEAMALGATOX",
+      "newSku": "12000608",
+      "slug": "standard-enzyme-amalgatox-sku-12000608"
+    },
+    {
+      "id": 444,
+      "brand": "Standard Enzyme",
+      "name": "AMYGDALIN",
+      "oldSku": "HM-STANDARDENZYMEAMYGDALIN",
+      "newSku": "55001091",
+      "slug": "standard-enzyme-amygdalin-sku-55001091"
+    },
+    {
+      "id": 445,
+      "brand": "Standard Enzyme",
+      "name": "ANTI-STRESS",
+      "oldSku": "HM-STANDARDENZYMEANTISTRESS",
+      "newSku": "12000612",
+      "slug": "standard-enzyme-anti-stress-sku-12000612"
+    },
+    {
+      "id": 446,
+      "brand": "Standard Enzyme",
+      "name": "APIOL",
+      "oldSku": "HM-STANDARDENZYMEAPIOL1",
+      "newSku": "27771",
+      "slug": "standard-enzyme-apiol-sku-27771"
+    },
+    {
+      "id": 447,
+      "brand": "Standard Enzyme",
+      "name": "APIZELEN PLUS",
+      "oldSku": "HM-STANDARDENZYMEAPIZELENPLUS",
+      "newSku": "55000804",
+      "slug": "standard-enzyme-apizelen-plus-sku-55000804"
+    },
+    {
+      "id": 448,
+      "brand": "Standard Enzyme",
+      "name": "APRICOT",
+      "oldSku": "HM-STANDARDENZYMEAPRICOT",
+      "newSku": "55000808",
+      "slug": "standard-enzyme-apricot-sku-55000808"
+    },
+    {
+      "id": 449,
+      "brand": "Standard Enzyme",
+      "name": "ARCO PLUS",
+      "oldSku": "HM-STANDARDENZYMEARCOPLUS",
+      "newSku": "55000809",
+      "slug": "standard-enzyme-arco-plus-sku-55000809"
+    },
+    {
+      "id": 450,
+      "brand": "Standard Enzyme",
+      "name": "ARNICA PLUS",
+      "oldSku": "HM-STANDARDENZYMEARNICAPLUS",
+      "newSku": "55000810",
+      "slug": "standard-enzyme-arnica-plus-sku-55000810"
+    },
+    {
+      "id": 451,
+      "brand": "Standard Enzyme",
+      "name": "ARTERIOSCLEROSIS",
+      "oldSku": "HM-STANDARDENZYMEARTERIOSCLEROSI",
+      "newSku": "12000614",
+      "slug": "standard-enzyme-arteriosclerosis-sku-12000614"
+    },
+    {
+      "id": 452,
+      "brand": "Standard Enzyme",
+      "name": "ASCORBIC ACID",
+      "oldSku": "HM-STANDARDENZYMEASCORBICACID",
+      "newSku": "99000208",
+      "slug": "standard-enzyme-ascorbic-acid-sku-99000208"
+    },
+    {
+      "id": 453,
+      "brand": "Standard Enzyme",
+      "name": "ASP",
+      "oldSku": "HM-STANDARDENZYMEASP",
+      "newSku": "12000616",
+      "slug": "standard-enzyme-asp-sku-12000616"
+    },
+    {
+      "id": 454,
+      "brand": "Standard Enzyme",
+      "name": "ASP II",
+      "oldSku": "HM-STANDARDENZYMEASPII",
+      "newSku": "12000617",
+      "slug": "standard-enzyme-asp-ii-sku-12000617"
+    },
+    {
+      "id": 456,
+      "brand": "Standard Enzyme",
+      "name": "ASPARTOX",
+      "oldSku": "HM-STANDARDENZYMEASPARTOX",
+      "newSku": "12000618",
+      "slug": "standard-enzyme-aspartox-sku-12000618"
+    },
+    {
+      "id": 457,
+      "brand": "Standard Enzyme",
+      "name": "ASPEN",
+      "oldSku": "HM-STANDARDENZYMEASPEN",
+      "newSku": "10000404",
+      "slug": "standard-enzyme-aspen-sku-10000404"
+    },
+    {
+      "id": 458,
+      "brand": "Standard Enzyme",
+      "name": "ASTHMA BRONCHITIS",
+      "oldSku": "HM-STANDARDENZYMEASTHMABRONCHIT",
+      "newSku": "12000620",
+      "slug": "standard-enzyme-asthma-bronchitis-sku-12000620"
+    },
+    {
+      "id": 459,
+      "brand": "Standard Enzyme",
+      "name": "ASTRAGALUS",
+      "oldSku": "HM-STANDARDENZYMEASTRAGALUS1",
+      "newSku": "27221",
+      "slug": "standard-enzyme-astragalus-sku-27221"
+    },
+    {
+      "id": 460,
+      "brand": "Standard Enzyme",
+      "name": "BARBERRY",
+      "oldSku": "HM-STANDARDENZYMEBARBERRY",
+      "newSku": "55000816",
+      "slug": "standard-enzyme-barberry-sku-55000816"
+    },
+    {
+      "id": 461,
+      "brand": "Standard Enzyme",
+      "name": "BEECH",
+      "oldSku": "HM-STANDARDENZYMEBEECH",
+      "newSku": "10000406",
+      "slug": "standard-enzyme-beech-sku-10000406"
+    },
+    {
+      "id": 462,
+      "brand": "Standard Enzyme",
+      "name": "BERGAMOT",
+      "oldSku": "HM-STANDARDENZYMEBERGAMOT",
+      "newSku": "21000102",
+      "slug": "standard-enzyme-bergamot-sku-21000102"
+    },
+    {
+      "id": 463,
+      "brand": "Standard Enzyme",
+      "name": "BETA PLUS",
+      "oldSku": "HM-STANDARDENZYMEBETAPLUS",
+      "newSku": "85000138",
+      "slug": "standard-enzyme-beta-plus-sku-85000138"
+    },
+    {
+      "id": 464,
+      "brand": "Standard Enzyme",
+      "name": "BHT",
+      "oldSku": "HM-STANDARDENZYMEBHT",
+      "newSku": "99000210",
+      "slug": "standard-enzyme-bht-sku-99000210"
+    },
+    {
+      "id": 465,
+      "brand": "Standard Enzyme",
+      "name": "BILBERRY PLUS",
+      "oldSku": "HM-STANDARDENZYMEBILBERRYPLUS",
+      "newSku": "55000819",
+      "slug": "standard-enzyme-bilberry-plus-sku-55000819"
+    },
+    {
+      "id": 466,
+      "brand": "Standard Enzyme",
+      "name": "BLACK RADISH COMPLEX",
+      "oldSku": "HM-STANDARDENZYMEBLACKRADISHCOMPLEX",
+      "newSku": "55000822",
+      "slug": "standard-enzyme-black-radish-complex-sku-55000822"
+    },
+    {
+      "id": 467,
+      "brand": "Standard Enzyme",
+      "name": "BLOODROOT",
+      "oldSku": "HM-STANDARDENZYMEBLOODROOT",
+      "newSku": "55000826",
+      "slug": "standard-enzyme-bloodroot-sku-55000826"
+    },
+    {
+      "id": 468,
+      "brand": "Standard Enzyme",
+      "name": "BLUE VIOLET",
+      "oldSku": "HM-STANDARDENZYMEBLUEVIOLET",
+      "newSku": "55000828",
+      "slug": "standard-enzyme-blue-violet-sku-55000828"
+    },
+    {
+      "id": 469,
+      "brand": "Standard Enzyme",
+      "name": "BR-SP PLUS",
+      "oldSku": "HM-STANDARDENZYMEBRSPPLUS",
+      "newSku": "85000144",
+      "slug": "standard-enzyme-br-sp-plus-sku-85000144"
+    },
+    {
+      "id": 470,
+      "brand": "Standard Enzyme",
+      "name": "BRAIN FORMULA",
+      "oldSku": "HM-STANDARDENZYMEBRAINFORMULA",
+      "newSku": "55000830",
+      "slug": "standard-enzyme-brain-formula-sku-55000830"
+    },
+    {
+      "id": 471,
+      "brand": "Standard Enzyme",
+      "name": "BURDOCK PLUS",
+      "oldSku": "HM-STANDARDENZYMEBURDOCKPLUS",
+      "newSku": "55000832",
+      "slug": "standard-enzyme-burdock-plus-sku-55000832"
+    },
+    {
+      "id": 472,
+      "brand": "Standard Enzyme",
+      "name": "CAFFEIC ACID",
+      "oldSku": "HM-STANDARDENZYMECAFFEICACID",
+      "newSku": "99000212",
+      "slug": "standard-enzyme-caffeic-acid-sku-99000212"
+    },
+    {
+      "id": 473,
+      "brand": "Standard Enzyme",
+      "name": "CAMU PLUS",
+      "oldSku": "HM-STANDARDENZYMECAMUPLUS",
+      "newSku": "55001070",
+      "slug": "standard-enzyme-camu-plus-sku-55001070"
+    },
+    {
+      "id": 474,
+      "brand": "Standard Enzyme",
+      "name": "CANDIDA",
+      "oldSku": "HM-STANDARDENZYMECANDIDA",
+      "newSku": "99000214",
+      "slug": "standard-enzyme-candida-sku-99000214"
+    },
+    {
+      "id": 475,
+      "brand": "Standard Enzyme",
+      "name": "CANDIDIASIS",
+      "oldSku": "HM-STANDARDENZYMECANDIDIASIS",
+      "newSku": "12000622",
+      "slug": "standard-enzyme-candidiasis-sku-12000622"
+    },
+    {
+      "id": 476,
+      "brand": "Standard Enzyme",
+      "name": "CAPE ALOE",
+      "oldSku": "HM-STANDARDENZYMECAPEALOE1",
+      "newSku": "23617",
+      "slug": "standard-enzyme-cape-aloe-sku-23617"
+    },
+    {
+      "id": 478,
+      "brand": "Standard Enzyme",
+      "name": "CAPSOL T",
+      "oldSku": "HM-STANDARDENZYMECAPSOLT",
+      "newSku": "85000189",
+      "slug": "standard-enzyme-capsol-t-sku-85000189"
+    },
+    {
+      "id": 479,
+      "brand": "Standard Enzyme",
+      "name": "CARCINOSII MIASM",
+      "oldSku": "HM-STANDARDENZYMECARCINOSIIMIASM",
+      "newSku": "12000624",
+      "slug": "standard-enzyme-carcinosii-miasm-sku-12000624"
+    },
+    {
+      "id": 480,
+      "brand": "Standard Enzyme",
+      "name": "CARDI PLUS",
+      "oldSku": "HM-STANDARDENZYMECARDIPLUS",
+      "newSku": "85000150",
+      "slug": "standard-enzyme-cardi-plus-sku-85000150"
+    },
+    {
+      "id": 481,
+      "brand": "Standard Enzyme",
+      "name": "CAT'S CLAW",
+      "oldSku": "HM-STANDARDENZYMECATSCLAW",
+      "newSku": "55000838",
+      "slug": "standard-enzyme-cat-s-claw-sku-55000838"
+    },
+    {
+      "id": 482,
+      "brand": "Standard Enzyme",
+      "name": "CEDARWOOD ATLAS",
+      "oldSku": "HM-STANDARDENZYMECEDARWOODATLAS",
+      "newSku": "21000105",
+      "slug": "standard-enzyme-cedarwood-atlas-sku-21000105"
+    },
+    {
+      "id": 483,
+      "brand": "Standard Enzyme",
+      "name": "CENTARY",
+      "oldSku": "HM-STANDARDENZYMECENTAURY",
+      "newSku": "10000408",
+      "slug": "standard-enzyme-centary-sku-10000408"
+    },
+    {
+      "id": 484,
+      "brand": "Standard Enzyme",
+      "name": "CERATO",
+      "oldSku": "HM-STANDARDENZYMECERATO",
+      "newSku": "10000410",
+      "slug": "standard-enzyme-cerato-sku-10000410"
+    },
+    {
+      "id": 485,
+      "brand": "Standard Enzyme",
+      "name": "CFS A PLUS",
+      "oldSku": "HM-STANDARDENZYMECFSPLUS",
+      "newSku": "12000625",
+      "slug": "standard-enzyme-cfs-a-plus-sku-12000625"
+    },
+    {
+      "id": 486,
+      "brand": "Standard Enzyme",
+      "name": "CFS-ADRENAL",
+      "oldSku": "HM-STANDARDENZYMECFSADRENAL",
+      "newSku": "12000626",
+      "slug": "standard-enzyme-cfs-adrenal-sku-12000626"
+    },
+    {
+      "id": 487,
+      "brand": "Standard Enzyme",
+      "name": "CFS-IMMUNE",
+      "oldSku": "HM-STANDARDENZYMECFSIMMUNE",
+      "newSku": "12000628",
+      "slug": "standard-enzyme-cfs-immune-sku-12000628"
+    },
+    {
+      "id": 488,
+      "brand": "Standard Enzyme",
+      "name": "CFS-THYROID",
+      "oldSku": "HM-STANDARDENZYMECFSTHYROID",
+      "newSku": "12000630",
+      "slug": "standard-enzyme-cfs-thyroid-sku-12000630"
+    },
+    {
+      "id": 489,
+      "brand": "Standard Enzyme",
+      "name": "CG COMLLEX",
+      "oldSku": "HM-STANDARDENZYMECGCOMPLEX",
+      "newSku": "12000631",
+      "slug": "standard-enzyme-cg-comllex-sku-12000631"
+    },
+    {
+      "id": 490,
+      "brand": "Standard Enzyme",
+      "name": "CHAGA",
+      "oldSku": "HM-STANDARDENZYMECHAGA",
+      "newSku": "85000151",
+      "slug": "standard-enzyme-chaga-sku-85000151"
+    },
+    {
+      "id": 491,
+      "brand": "Standard Enzyme",
+      "name": "CHAPARRAL",
+      "oldSku": "HM-STANDARDENZYMECHAPARRAL",
+      "newSku": "55000840",
+      "slug": "standard-enzyme-chaparral-sku-55000840"
+    },
+    {
+      "id": 492,
+      "brand": "Standard Enzyme",
+      "name": "CHEMTOX",
+      "oldSku": "HM-STANDARDENZYMECHEMTOX",
+      "newSku": "120006326",
+      "slug": "standard-enzyme-chemtox-sku-120006326"
+    },
+    {
+      "id": 493,
+      "brand": "Standard Enzyme",
+      "name": "CHESTNUT PLUS",
+      "oldSku": "HM-STANDARDENZYMECHESTNUTPLUS",
+      "newSku": "55000842",
+      "slug": "standard-enzyme-chestnut-plus-sku-55000842"
+    },
+    {
+      "id": 494,
+      "brand": "Standard Enzyme",
+      "name": "CHICORY",
+      "oldSku": "HM-STANDARDENZYMECHICORY",
+      "newSku": "10000416",
+      "slug": "standard-enzyme-chicory-sku-10000416"
+    },
+    {
+      "id": 495,
+      "brand": "Standard Enzyme",
+      "name": "CHLOROGENIC ACID",
+      "oldSku": "HM-STANDARDENZYMECHLOROGENICACID",
+      "newSku": "25591",
+      "slug": "standard-enzyme-chlorogenic-acid-sku-25591"
+    },
+    {
+      "id": 496,
+      "brand": "Standard Enzyme",
+      "name": "CHOLA PLUS",
+      "oldSku": "HM-STANDARDENZYMECHOLAPLUS",
+      "newSku": "85000152",
+      "slug": "standard-enzyme-chola-plus-sku-85000152"
+    },
+    {
+      "id": 497,
+      "brand": "Standard Enzyme",
+      "name": "CHRYSANTHEMUM COMPLEX",
+      "oldSku": "HM-STANDARDENZYMECHRYSANTHEMUMCOMPLEX",
+      "newSku": "55000848",
+      "slug": "standard-enzyme-chrysanthemum-complex-sku-55000848"
+    },
+    {
+      "id": 498,
+      "brand": "Standard Enzyme",
+      "name": "CINNAMIC ACID",
+      "oldSku": "HM-STANDARDENZYMECINNAMICACID",
+      "newSku": "99000218",
+      "slug": "standard-enzyme-cinnamic-acid-sku-99000218"
+    },
+    {
+      "id": 500,
+      "brand": "Standard Enzyme",
+      "name": "CINNAMON",
+      "oldSku": "HM-STANDARDENZYMECINNAMON",
+      "newSku": "21000108",
+      "slug": "standard-enzyme-cinnamon-sku-21000108"
+    },
+    {
+      "id": 501,
+      "brand": "Standard Enzyme",
+      "name": "CIRCU PLUS",
+      "oldSku": "HM-STANDARDENZYMECIRCUPLUS",
+      "newSku": "85000156",
+      "slug": "standard-enzyme-circu-plus-sku-85000156"
+    },
+    {
+      "id": 502,
+      "brand": "Standard Enzyme",
+      "name": "CLEAR MIND",
+      "oldSku": "HM-STANDARDENZYMECLEARMIND",
+      "newSku": "55001073",
+      "slug": "standard-enzyme-clear-mind-sku-55001073"
+    },
+    {
+      "id": 503,
+      "brand": "Standard Enzyme",
+      "name": "CLEMATIS",
+      "oldSku": "HM-STANDARDENZYMECLEMATIS",
+      "newSku": "10000418",
+      "slug": "standard-enzyme-clematis-sku-10000418"
+    },
+    {
+      "id": 504,
+      "brand": "Standard Enzyme",
+      "name": "CLOVE",
+      "oldSku": "HM-STANDARDENZYMECLOVER1",
+      "newSku": "27914",
+      "slug": "standard-enzyme-clove-sku-27914"
+    },
+    {
+      "id": 505,
+      "brand": "Standard Enzyme",
+      "name": "COHOSH PLUS",
+      "oldSku": "HM-STANDARDENZYMECOHOSHPLUS",
+      "newSku": "55000852",
+      "slug": "standard-enzyme-cohosh-plus-sku-55000852"
+    },
+    {
+      "id": 506,
+      "brand": "Standard Enzyme",
+      "name": "COLLAGEN COMPLETE",
+      "oldSku": "HM-STANDARDENZYMECOLLAGENCOMPLE",
+      "newSku": "85000305",
+      "slug": "standard-enzyme-collagen-complete-sku-85000305"
+    },
+    {
+      "id": 507,
+      "brand": "Standard Enzyme",
+      "name": "CONIFERYL ALCOHOL",
+      "oldSku": "HM-STANDARDENZYMECONIFERYLALCOHOL",
+      "newSku": "99000220",
+      "slug": "standard-enzyme-coniferyl-alcohol-sku-99000220"
+    },
+    {
+      "id": 508,
+      "brand": "Standard Enzyme",
+      "name": "CORIOLUS",
+      "oldSku": "HM-STANDARDENZYMECORIOLUS",
+      "newSku": "55001073-1",
+      "slug": "standard-enzyme-coriolus-sku-55001073-1"
+    },
+    {
+      "id": 509,
+      "brand": "Standard Enzyme",
+      "name": "COSMETOX",
+      "oldSku": "HM-STANDARDENZYMECOSMETOX",
+      "newSku": "12000634",
+      "slug": "standard-enzyme-cosmetox-sku-12000634"
+    },
+    {
+      "id": 510,
+      "brand": "Standard Enzyme",
+      "name": "COUGH",
+      "oldSku": "HM-STANDARDENZYMECOUGH1",
+      "newSku": "24849",
+      "slug": "standard-enzyme-cough-sku-24849"
+    },
+    {
+      "id": 511,
+      "brand": "Standard Enzyme",
+      "name": "COUGH SYRUP 4oz",
+      "oldSku": "HM-STANDARDENZYMECOUGHSYRUP",
+      "newSku": "55000858",
+      "slug": "standard-enzyme-cough-syrup-4oz-sku-55000858"
+    },
+    {
+      "id": 512,
+      "brand": "Standard Enzyme",
+      "name": "COUMARIN",
+      "oldSku": "HM-STANDARDENZYMECOUMARIN",
+      "newSku": "99000222",
+      "slug": "standard-enzyme-coumarin-sku-99000222"
+    },
+    {
+      "id": 513,
+      "brand": "Standard Enzyme",
+      "name": "CRAB APPLE",
+      "oldSku": "HM-STANDARDENZYMECRABAPPLE",
+      "newSku": "10000420",
+      "slug": "standard-enzyme-crab-apple-sku-10000420"
+    },
+    {
+      "id": 514,
+      "brand": "Standard Enzyme",
+      "name": "CT-PM ADVANCED",
+      "oldSku": "HM-STANDARDENZYMECTPMPATCH",
+      "newSku": "25011",
+      "slug": "standard-enzyme-ct-pm-advanced-sku-25011"
+    },
+    {
+      "id": 515,
+      "brand": "Standard Enzyme",
+      "name": "DANDI PLUS",
+      "oldSku": "HM-STANDARDENZYMEDANDIPLUS",
+      "newSku": "55000860",
+      "slug": "standard-enzyme-dandi-plus-sku-55000860"
+    },
+    {
+      "id": 516,
+      "brand": "Standard Enzyme",
+      "name": "DESPONDENCY AND DESPAIR",
+      "oldSku": "HM-STANDARDENZYMEDESPONDENCYDES",
+      "newSku": "10000422",
+      "slug": "standard-enzyme-despondency-and-despair-sku-10000422"
+    },
+    {
+      "id": 517,
+      "brand": "Standard Enzyme",
+      "name": "DHEA 25mg",
+      "oldSku": "HM-STANDARDENZYMEDHEA25MG1",
+      "newSku": "24170",
+      "slug": "standard-enzyme-dhea-25mg-sku-24170"
+    },
+    {
+      "id": 518,
+      "brand": "Standard Enzyme",
+      "name": "DIA PLUS",
+      "oldSku": "HM-STANDARDENZYMEDIAPLUS",
+      "newSku": "85000166",
+      "slug": "standard-enzyme-dia-plus-sku-85000166"
+    },
+    {
+      "id": 519,
+      "brand": "Standard Enzyme",
+      "name": "DIA ZYME",
+      "oldSku": "HM-STANDARDENZYMEDIAZYME",
+      "newSku": "85000168",
+      "slug": "standard-enzyme-dia-zyme-sku-85000168"
+    },
+    {
+      "id": 520,
+      "brand": "Standard Enzyme",
+      "name": "DIABETES",
+      "oldSku": "HM-STANDARDENZYMEDIABETES",
+      "newSku": "12000638",
+      "slug": "standard-enzyme-diabetes-sku-12000638"
+    },
+    {
+      "id": 522,
+      "brand": "Standard Enzyme",
+      "name": "DIADREN FORTE",
+      "oldSku": "HM-STANDARDENZYMEDIADRENFORTE",
+      "newSku": "85000161",
+      "slug": "standard-enzyme-diadren-forte-sku-85000161"
+    },
+    {
+      "id": 523,
+      "brand": "Standard Enzyme",
+      "name": "DOPAMINE",
+      "oldSku": "HM-STANDARDENZYMEDOPAMINE",
+      "newSku": "99000224",
+      "slug": "standard-enzyme-dopamine-sku-99000224"
+    },
+    {
+      "id": 524,
+      "brand": "Standard Enzyme",
+      "name": "DRAINAGE PLUS",
+      "oldSku": "HM-STANDARDENZYMEDRAINAGEPLUS",
+      "newSku": "12000642",
+      "slug": "standard-enzyme-drainage-plus-sku-12000642"
+    },
+    {
+      "id": 525,
+      "brand": "Standard Enzyme",
+      "name": "E PLUS",
+      "oldSku": "HM-STANDARDENZYMEEPLUS",
+      "newSku": "55000873",
+      "slug": "standard-enzyme-e-plus-sku-55000873"
+    },
+    {
+      "id": 526,
+      "brand": "Standard Enzyme",
+      "name": "EARACHE",
+      "oldSku": "HM-STANDARDENZYMEEARACHE",
+      "newSku": "12000644",
+      "slug": "standard-enzyme-earache-sku-12000644"
+    },
+    {
+      "id": 527,
+      "brand": "Standard Enzyme",
+      "name": "ECHINACEA COMPLEX",
+      "oldSku": "HM-STANDARDENZYMEECHINACEACOMPLEX",
+      "newSku": "55000866",
+      "slug": "standard-enzyme-echinacea-complex-sku-55000866"
+    },
+    {
+      "id": 528,
+      "brand": "Standard Enzyme",
+      "name": "ECHINACEA PLUS",
+      "oldSku": "HM-STANDARDENZYMEDIZZINESS",
+      "newSku": "27915",
+      "slug": "standard-enzyme-echinacea-plus-sku-27915"
+    },
+    {
+      "id": 529,
+      "brand": "Standard Enzyme",
+      "name": "ECZEMA",
+      "oldSku": "HM-STANDARDENZYMEECZEMA1",
+      "newSku": "27781",
+      "slug": "standard-enzyme-eczema-sku-27781"
+    },
+    {
+      "id": 530,
+      "brand": "Standard Enzyme",
+      "name": "ENDO GLAN PLUS",
+      "oldSku": "HM-STANDARDENZYMEENDOGLANPLUS1",
+      "newSku": "23580",
+      "slug": "standard-enzyme-endo-glan-plus-sku-23580"
+    },
+    {
+      "id": 531,
+      "brand": "Standard Enzyme",
+      "name": "ENDOMETRITIS",
+      "oldSku": "HM-STANDARDENZYMEENDOMETRITIS",
+      "newSku": "12000648",
+      "slug": "standard-enzyme-endometritis-sku-12000648"
+    },
+    {
+      "id": 532,
+      "brand": "Standard Enzyme",
+      "name": "EQUISTA PLUS",
+      "oldSku": "HM-STANDARDENZYMEEQUISTAPLUS",
+      "newSku": "55000874",
+      "slug": "standard-enzyme-equista-plus-sku-55000874"
+    },
+    {
+      "id": 533,
+      "brand": "Standard Enzyme",
+      "name": "ESTROGEN",
+      "oldSku": "HM-STANDARDENZYMEESTROGEN",
+      "newSku": "99000226",
+      "slug": "standard-enzyme-estrogen-sku-99000226"
+    },
+    {
+      "id": 534,
+      "brand": "Standard Enzyme",
+      "name": "EUCALYPTUS",
+      "oldSku": "HM-STANDARDENZYMEEUCALYPTUS",
+      "newSku": "27916",
+      "slug": "standard-enzyme-eucalyptus-sku-27916"
+    },
+    {
+      "id": 535,
+      "brand": "Standard Enzyme",
+      "name": "EXHAUSTION",
+      "oldSku": "HM-STANDARDENZYMEEXHAUSTION",
+      "newSku": "12000650",
+      "slug": "standard-enzyme-exhaustion-sku-12000650"
+    },
+    {
+      "id": 536,
+      "brand": "Standard Enzyme",
+      "name": "EYEBRIGHT PLUS",
+      "oldSku": "HM-STANDARDENZYMEEYEBRIGHTPLUS",
+      "newSku": "55000878",
+      "slug": "standard-enzyme-eyebright-plus-sku-55000878"
+    },
+    {
+      "id": 537,
+      "brand": "Standard Enzyme",
+      "name": "FEAR",
+      "oldSku": "HM-STANDARDENZYMEFEAR1",
+      "newSku": "24851",
+      "slug": "standard-enzyme-fear-sku-24851"
+    },
+    {
+      "id": 538,
+      "brand": "Standard Enzyme",
+      "name": "FEMALE BALANCE",
+      "oldSku": "HM-STANDARDENZYMEFEMALEBALANCE",
+      "newSku": "55000880",
+      "slug": "standard-enzyme-female-balance-sku-55000880"
+    },
+    {
+      "id": 539,
+      "brand": "Standard Enzyme",
+      "name": "FEMALE FORMULA",
+      "oldSku": "HM-STANDARDENZYMEFEMALEFORMULA1",
+      "newSku": "27739",
+      "slug": "standard-enzyme-female-formula-sku-27739"
+    },
+    {
+      "id": 540,
+      "brand": "Standard Enzyme",
+      "name": "FEMTOX",
+      "oldSku": "HM-STANDARDENZYMEFEMTOX",
+      "newSku": "12000652",
+      "slug": "standard-enzyme-femtox-sku-12000652"
+    },
+    {
+      "id": 541,
+      "brand": "Standard Enzyme",
+      "name": "FERRO B PLUS C",
+      "oldSku": "HM-STANDARDENZYMEFERROBPLUSC",
+      "newSku": "85000180",
+      "slug": "standard-enzyme-ferro-b-plus-c-sku-85000180"
+    },
+    {
+      "id": 543,
+      "brand": "Standard Enzyme",
+      "name": "FHS",
+      "oldSku": "HM-STANDARDENZYMEFHS",
+      "newSku": "12000773",
+      "slug": "standard-enzyme-fhs-sku-12000773"
+    },
+    {
+      "id": 544,
+      "brand": "Standard Enzyme",
+      "name": "FIBER BALANCE",
+      "oldSku": "HM-STANDARDENZYMEFIBERBALANCE",
+      "newSku": "85000182",
+      "slug": "standard-enzyme-fiber-balance-sku-85000182"
+    },
+    {
+      "id": 545,
+      "brand": "Standard Enzyme",
+      "name": "FIBER LIFE",
+      "oldSku": "HM-STANDARDENZYMEFIBERLIFE",
+      "newSku": "85000188",
+      "slug": "standard-enzyme-fiber-life-sku-85000188"
+    },
+    {
+      "id": 546,
+      "brand": "Standard Enzyme",
+      "name": "FLAX SEED OIL",
+      "oldSku": "HM-STANDARDENZYMEFLAXSEEDOIL",
+      "newSku": "850001905",
+      "slug": "standard-enzyme-flax-seed-oil-sku-850001905"
+    },
+    {
+      "id": 547,
+      "brand": "Standard Enzyme",
+      "name": "FLU STOP",
+      "oldSku": "HM-STANDARDENZYMEFLUSTOP",
+      "newSku": "12000653",
+      "slug": "standard-enzyme-flu-stop-sku-12000653"
+    },
+    {
+      "id": 548,
+      "brand": "Standard Enzyme",
+      "name": "FORMULA 100",
+      "oldSku": "HM-STANDARDENZYMEFORMULA100",
+      "newSku": "12000776",
+      "slug": "standard-enzyme-formula-100-sku-12000776"
+    },
+    {
+      "id": 549,
+      "brand": "Standard Enzyme",
+      "name": "FRANKINCENSE",
+      "oldSku": "HM-STANDARDENZYMEFRANKINCENSE",
+      "newSku": "21000114",
+      "slug": "standard-enzyme-frankincense-sku-21000114"
+    },
+    {
+      "id": 550,
+      "brand": "Standard Enzyme",
+      "name": "FREE RADICALS",
+      "oldSku": "HM-STANDARDENZYMEFREERADICALS",
+      "newSku": "12000654",
+      "slug": "standard-enzyme-free-radicals-sku-12000654"
+    },
+    {
+      "id": 551,
+      "brand": "Standard Enzyme",
+      "name": "GABA CAPS 500MG",
+      "oldSku": "HM-STANDARDENZYMEGABACAPS500MG",
+      "newSku": "850002643",
+      "slug": "standard-enzyme-gaba-caps-500mg-sku-850002643"
+    },
+    {
+      "id": 552,
+      "brand": "Standard Enzyme",
+      "name": "GABA LIQUID",
+      "oldSku": "HM-STANDARDENZYMEGABALIQUID",
+      "newSku": "85000264",
+      "slug": "standard-enzyme-gaba-liquid-sku-85000264"
+    },
+    {
+      "id": 553,
+      "brand": "Standard Enzyme",
+      "name": "GALLIC ACID",
+      "oldSku": "HM-STANDARDENZYMEGALLICACID",
+      "newSku": "99000230",
+      "slug": "standard-enzyme-gallic-acid-sku-99000230"
+    },
+    {
+      "id": 554,
+      "brand": "Standard Enzyme",
+      "name": "GENTIAN",
+      "oldSku": "HM-STANDARDENZYMEGENTIAN",
+      "newSku": "10000428",
+      "slug": "standard-enzyme-gentian-sku-10000428"
+    },
+    {
+      "id": 555,
+      "brand": "Standard Enzyme",
+      "name": "GEOTOX",
+      "oldSku": "HM-STANDARDENZYMEGEOTOX",
+      "newSku": "12000656",
+      "slug": "standard-enzyme-geotox-sku-12000656"
+    },
+    {
+      "id": 556,
+      "brand": "Standard Enzyme",
+      "name": "GI BIOTIC PRO",
+      "oldSku": "HM-STANDARDENZYMEGIBIOTICPRO",
+      "newSku": "85000319",
+      "slug": "standard-enzyme-gi-biotic-pro-sku-85000319"
+    },
+    {
+      "id": 557,
+      "brand": "Standard Enzyme",
+      "name": "GINGER",
+      "oldSku": "HM-STANDARDENZYMEGINGER",
+      "newSku": "21000117",
+      "slug": "standard-enzyme-ginger-sku-21000117"
+    },
+    {
+      "id": 558,
+      "brand": "Standard Enzyme",
+      "name": "GINGER PLUS I",
+      "oldSku": "HM-STANDARDENZYMEGINGERPLUSI",
+      "newSku": "55000884",
+      "slug": "standard-enzyme-ginger-plus-i-sku-55000884"
+    },
+    {
+      "id": 559,
+      "brand": "Standard Enzyme",
+      "name": "GINGER PLUS II",
+      "oldSku": "HM-STANDARDENZYMEGINGERPLUSII",
+      "newSku": "55000888",
+      "slug": "standard-enzyme-ginger-plus-ii-sku-55000888"
+    },
+    {
+      "id": 560,
+      "brand": "Standard Enzyme",
+      "name": "GINKGO COMPLEX",
+      "oldSku": "HM-STANDARDENZYMEGINKGOCOMPLEX",
+      "newSku": "55000892",
+      "slug": "standard-enzyme-ginkgo-complex-sku-55000892"
+    },
+    {
+      "id": 561,
+      "brand": "Standard Enzyme",
+      "name": "GINSENG PLUS",
+      "oldSku": "HM-STANDARDENZYMEGINSENGPLUSII",
+      "newSku": "55000896",
+      "slug": "standard-enzyme-ginseng-plus-sku-55000896"
+    },
+    {
+      "id": 562,
+      "brand": "Standard Enzyme",
+      "name": "GOLDENSEAL",
+      "oldSku": "HM-STANDARDENZYMEGOLDENSEAL",
+      "newSku": "55000900",
+      "slug": "standard-enzyme-goldenseal-sku-55000900"
+    },
+    {
+      "id": 563,
+      "brand": "Standard Enzyme",
+      "name": "GORSE",
+      "oldSku": "HM-STANDARDENZYMEGORSE",
+      "newSku": "10000430",
+      "slug": "standard-enzyme-gorse-sku-10000430"
+    },
+    {
+      "id": 565,
+      "brand": "Standard Enzyme",
+      "name": "GOTA PLUS",
+      "oldSku": "HM-STANDARDENZYMEGOTAPLUS",
+      "newSku": "55000902",
+      "slug": "standard-enzyme-gota-plus-sku-55000902"
+    },
+    {
+      "id": 566,
+      "brand": "Standard Enzyme",
+      "name": "GRAPEFRUIT HERBAL",
+      "oldSku": "HM-STANDARDENZYMEGRAPEFRUITHERBAL",
+      "newSku": "55000906",
+      "slug": "standard-enzyme-grapefruit-herbal-sku-55000906"
+    },
+    {
+      "id": 567,
+      "brand": "Standard Enzyme",
+      "name": "GRAVI PLUS",
+      "oldSku": "HM-STANDARDENZYMEGRAVIPLUS",
+      "newSku": "55000910",
+      "slug": "standard-enzyme-gravi-plus-sku-55000910"
+    },
+    {
+      "id": 568,
+      "brand": "Standard Enzyme",
+      "name": "GRAVIOLA",
+      "oldSku": "HM-STANDARDENZYMEGERVIOLA",
+      "newSku": "55000909",
+      "slug": "standard-enzyme-graviola-sku-55000909"
+    },
+    {
+      "id": 569,
+      "brand": "Standard Enzyme",
+      "name": "GRAVITOX",
+      "oldSku": "HM-STANDARDENZYMEGRAVITOX",
+      "newSku": "12000658",
+      "slug": "standard-enzyme-gravitox-sku-12000658"
+    },
+    {
+      "id": 570,
+      "brand": "Standard Enzyme",
+      "name": "GREEN TEA",
+      "oldSku": "HM-STANDARDENZYMEGREENTEA",
+      "newSku": "55000914",
+      "slug": "standard-enzyme-green-tea-sku-55000914"
+    },
+    {
+      "id": 571,
+      "brand": "Standard Enzyme",
+      "name": "GREEN TEA DECAF",
+      "oldSku": "HM-STANDARDENZYMEGREENTEADECAF",
+      "newSku": "55000864",
+      "slug": "standard-enzyme-green-tea-decaf-sku-55000864"
+    },
+    {
+      "id": 572,
+      "brand": "Standard Enzyme",
+      "name": "H & H FORMULA",
+      "oldSku": "HM-STANDARDENZYMEHANDHFORMULA",
+      "newSku": "55001092",
+      "slug": "standard-enzyme-h-h-formula-sku-55001092"
+    },
+    {
+      "id": 573,
+      "brand": "Standard Enzyme",
+      "name": "HAIR ENHANCMENT PLUS",
+      "oldSku": "HM-STANDARDENZYMEHAIRENHANCMENT",
+      "newSku": "85000321",
+      "slug": "standard-enzyme-hair-enhancment-plus-sku-85000321"
+    },
+    {
+      "id": 574,
+      "brand": "Standard Enzyme",
+      "name": "HAWTHORN PLUS",
+      "oldSku": "HM-STANDARDENZYMEHAWTHORNPLUS",
+      "newSku": "55000916",
+      "slug": "standard-enzyme-hawthorn-plus-sku-55000916"
+    },
+    {
+      "id": 575,
+      "brand": "Standard Enzyme",
+      "name": "HEADACHE",
+      "oldSku": "HM-STANDARDENZYMEHEADACHE",
+      "newSku": "12000664",
+      "slug": "standard-enzyme-headache-sku-12000664"
+    },
+    {
+      "id": 576,
+      "brand": "Standard Enzyme",
+      "name": "HEART FORMULA",
+      "oldSku": "HM-STANDARDENZYMEHEARTFORMULA",
+      "newSku": "55000920",
+      "slug": "standard-enzyme-heart-formula-sku-55000920"
+    },
+    {
+      "id": 577,
+      "brand": "Standard Enzyme",
+      "name": "HEATHER",
+      "oldSku": "HM-STANDARDENZYMEHEATHER",
+      "newSku": "10000432",
+      "slug": "standard-enzyme-heather-sku-10000432"
+    },
+    {
+      "id": 578,
+      "brand": "Standard Enzyme",
+      "name": "HEMORRHOIDS",
+      "oldSku": "HM-STANDARDENZYMEHEMORRHOIDS",
+      "newSku": "12000666",
+      "slug": "standard-enzyme-hemorrhoids-sku-12000666"
+    },
+    {
+      "id": 580,
+      "brand": "Standard Enzyme",
+      "name": "HER FORMULA",
+      "oldSku": "HM-STANDARDENZYMEHERFORMULA",
+      "newSku": "55001077",
+      "slug": "standard-enzyme-her-formula-sku-55001077"
+    },
+    {
+      "id": 581,
+      "brand": "Standard Enzyme",
+      "name": "HERBAL & MINERAL COMPLETE",
+      "oldSku": "HM-STANDARDENZYMEHERBALAND",
+      "newSku": "55000925",
+      "slug": "standard-enzyme-herbal-mineral-complete-sku-55000925"
+    },
+    {
+      "id": 582,
+      "brand": "Standard Enzyme",
+      "name": "HIBISCUS",
+      "oldSku": "HM-STANDARDENZYMEHIBISCUS",
+      "newSku": "10000434",
+      "slug": "standard-enzyme-hibiscus-sku-10000434"
+    },
+    {
+      "id": 583,
+      "brand": "Standard Enzyme",
+      "name": "HIS FORMULA",
+      "oldSku": "HM-STANDARDENZYMEHISFORMULA",
+      "newSku": "55001080",
+      "slug": "standard-enzyme-his-formula-sku-55001080"
+    },
+    {
+      "id": 585,
+      "brand": "Standard Enzyme",
+      "name": "HISTA PLUS",
+      "oldSku": "HM-STANDARDENZYMEHISTAPLUS",
+      "newSku": "85000196",
+      "slug": "standard-enzyme-hista-plus-sku-85000196"
+    },
+    {
+      "id": 586,
+      "brand": "Standard Enzyme",
+      "name": "HISTAMINE",
+      "oldSku": "HM-STANDARDENZYMEHISTAMINE",
+      "newSku": "99000232",
+      "slug": "standard-enzyme-histamine-sku-99000232"
+    },
+    {
+      "id": 587,
+      "brand": "Standard Enzyme",
+      "name": "HOLLY",
+      "oldSku": "HM-STANDARDENZYMEHOLLY",
+      "newSku": "10000436",
+      "slug": "standard-enzyme-holly-sku-10000436"
+    },
+    {
+      "id": 588,
+      "brand": "Standard Enzyme",
+      "name": "HONEYSUCKLE",
+      "oldSku": "HM-STANDARDENZYMEHONEYSUCKLE",
+      "newSku": "10000438",
+      "slug": "standard-enzyme-honeysuckle-sku-10000438"
+    },
+    {
+      "id": 589,
+      "brand": "Standard Enzyme",
+      "name": "HORNBEAM",
+      "oldSku": "HM-STANDARDENZYMEHORNBEAM",
+      "newSku": "10000440",
+      "slug": "standard-enzyme-hornbeam-sku-10000440"
+    },
+    {
+      "id": 590,
+      "brand": "Standard Enzyme",
+      "name": "HS FORMULA",
+      "oldSku": "HM-STANDARDENZYMEHSFORMULA",
+      "newSku": "12000660",
+      "slug": "standard-enzyme-hs-formula-sku-12000660"
+    },
+    {
+      "id": 591,
+      "brand": "Standard Enzyme",
+      "name": "HS FORMULA II",
+      "oldSku": "HM-STANDARDENZYMEHSFORMULAII",
+      "newSku": "12000662",
+      "slug": "standard-enzyme-hs-formula-ii-sku-12000662"
+    },
+    {
+      "id": 592,
+      "brand": "Standard Enzyme",
+      "name": "HYDRANGEA PLUS",
+      "oldSku": "HM-STANDARDENZYMEHYDRANGEAPLUS",
+      "newSku": "55000922",
+      "slug": "standard-enzyme-hydrangea-plus-sku-55000922"
+    },
+    {
+      "id": 593,
+      "brand": "Standard Enzyme",
+      "name": "HYPERTENSION",
+      "oldSku": "HM-STANDARDENZYMEHYPERTENSION",
+      "newSku": "12000668",
+      "slug": "standard-enzyme-hypertension-sku-12000668"
+    },
+    {
+      "id": 594,
+      "brand": "Standard Enzyme",
+      "name": "HYPOGLYCEMIA",
+      "oldSku": "HM-STANDARDENZYMEHYPOGLYCEMIA",
+      "newSku": "12000670",
+      "slug": "standard-enzyme-hypoglycemia-sku-12000670"
+    },
+    {
+      "id": 595,
+      "brand": "Standard Enzyme",
+      "name": "IFL",
+      "oldSku": "HM-STANDARDENZYMEIFL",
+      "newSku": "55000927",
+      "slug": "standard-enzyme-ifl-sku-55000927"
+    },
+    {
+      "id": 596,
+      "brand": "Standard Enzyme",
+      "name": "IMMU BOOST",
+      "oldSku": "HM-STANDARDENZYMEIMMUBOOST",
+      "newSku": "55000926",
+      "slug": "standard-enzyme-immu-boost-sku-55000926"
+    },
+    {
+      "id": 597,
+      "brand": "Standard Enzyme",
+      "name": "IMMU C",
+      "oldSku": "HM-STANDARDENZYMEIMMUC",
+      "newSku": "55000931",
+      "slug": "standard-enzyme-immu-c-sku-55000931"
+    },
+    {
+      "id": 598,
+      "brand": "Standard Enzyme",
+      "name": "IMMU C",
+      "oldSku": "HM-STANDARDENZYMEIMMUCCAPSULES",
+      "newSku": "85000199",
+      "slug": "standard-enzyme-immu-c-sku-85000199"
+    },
+    {
+      "id": 599,
+      "brand": "Standard Enzyme",
+      "name": "IMMU FLU",
+      "oldSku": "HM-STANDARDENZYMEIMMUFLU",
+      "newSku": "12000672",
+      "slug": "standard-enzyme-immu-flu-sku-12000672"
+    },
+    {
+      "id": 600,
+      "brand": "Standard Enzyme",
+      "name": "IMMUTOX",
+      "oldSku": "HM-STANDARDENZYMEIMMUTOX",
+      "newSku": "12000674",
+      "slug": "standard-enzyme-immutox-sku-12000674"
+    },
+    {
+      "id": 601,
+      "brand": "Standard Enzyme",
+      "name": "IMMUTOX II",
+      "oldSku": "HM-STANDARDENZYMEIMMUTOXLL",
+      "newSku": "12000676",
+      "slug": "standard-enzyme-immutox-ii-sku-12000676"
+    },
+    {
+      "id": 602,
+      "brand": "Standard Enzyme",
+      "name": "IMPATIENS",
+      "oldSku": "HM-STANDARDENZYMEIMPATIENS",
+      "newSku": "10000442",
+      "slug": "standard-enzyme-impatiens-sku-10000442"
+    },
+    {
+      "id": 603,
+      "brand": "Standard Enzyme",
+      "name": "INDOLE",
+      "oldSku": "HM-STANDARDENZYMEINDOLE",
+      "newSku": "99000234",
+      "slug": "standard-enzyme-indole-sku-99000234"
+    },
+    {
+      "id": 604,
+      "brand": "Standard Enzyme",
+      "name": "INFECTION",
+      "oldSku": "HM-STANDARDENZYMEINFECTION",
+      "newSku": "12000678",
+      "slug": "standard-enzyme-infection-sku-12000678"
+    },
+    {
+      "id": 605,
+      "brand": "Standard Enzyme",
+      "name": "INFECTION B",
+      "oldSku": "HM-STANDARDENZYMEINFECTIONB",
+      "newSku": "12000682",
+      "slug": "standard-enzyme-infection-b-sku-12000682"
+    },
+    {
+      "id": 607,
+      "brand": "Standard Enzyme",
+      "name": "INFECTION B II",
+      "oldSku": "HM-STANDARDENZYMEINFECTIONBII",
+      "newSku": "12000684",
+      "slug": "standard-enzyme-infection-b-ii-sku-12000684"
+    },
+    {
+      "id": 608,
+      "brand": "Standard Enzyme",
+      "name": "INFECTION EB",
+      "oldSku": "HM-STANDARDENZYMEINFECTIONEB",
+      "newSku": "12000686",
+      "slug": "standard-enzyme-infection-eb-sku-12000686"
+    },
+    {
+      "id": 609,
+      "brand": "Standard Enzyme",
+      "name": "INFECTION EB II",
+      "oldSku": "HM-STANDARDENZYMEINFECTIONEBII",
+      "newSku": "12000688",
+      "slug": "standard-enzyme-infection-eb-ii-sku-12000688"
+    },
+    {
+      "id": 610,
+      "brand": "Standard Enzyme",
+      "name": "INFECTION EGA",
+      "oldSku": "HM-STANDARDENZYMEINFECTIONEGA",
+      "newSku": "12000690",
+      "slug": "standard-enzyme-infection-ega-sku-12000690"
+    },
+    {
+      "id": 611,
+      "brand": "Standard Enzyme",
+      "name": "INFECTION EGA II",
+      "oldSku": "HM-STANDARDENZYMEINFECTIONEGA1",
+      "newSku": "12000692",
+      "slug": "standard-enzyme-infection-ega-ii-sku-12000692"
+    },
+    {
+      "id": 612,
+      "brand": "Standard Enzyme",
+      "name": "INFECTION EGA III",
+      "oldSku": "HM-STANDARDENZYMEINFECTIONEGAII",
+      "newSku": "12000693",
+      "slug": "standard-enzyme-infection-ega-iii-sku-12000693"
+    },
+    {
+      "id": 613,
+      "brand": "Standard Enzyme",
+      "name": "INFECTION II",
+      "oldSku": "HM-STANDARDENZYMEINFECTIONII",
+      "newSku": "12000680",
+      "slug": "standard-enzyme-infection-ii-sku-12000680"
+    },
+    {
+      "id": 614,
+      "brand": "Standard Enzyme",
+      "name": "INFECTION V",
+      "oldSku": "HM-STANDARDENZYMEINFECTIONV",
+      "newSku": "12000694",
+      "slug": "standard-enzyme-infection-v-sku-12000694"
+    },
+    {
+      "id": 615,
+      "brand": "Standard Enzyme",
+      "name": "INFECTION V II",
+      "oldSku": "HM-STANDARDENZYMEINFECTIONVII",
+      "newSku": "12000696",
+      "slug": "standard-enzyme-infection-v-ii-sku-12000696"
+    },
+    {
+      "id": 616,
+      "brand": "Standard Enzyme",
+      "name": "INFLUENZA",
+      "oldSku": "HM-STANDARDENZYMEINFLUENZA",
+      "newSku": "12000698",
+      "slug": "standard-enzyme-influenza-sku-12000698"
+    },
+    {
+      "id": 617,
+      "brand": "Standard Enzyme",
+      "name": "INJURY/PAIN",
+      "oldSku": "HM-STANDARDENZYMEINJURYPAIN",
+      "newSku": "12000700",
+      "slug": "standard-enzyme-injury-pain-sku-12000700"
+    },
+    {
+      "id": 618,
+      "brand": "Standard Enzyme",
+      "name": "INSECT BITES",
+      "oldSku": "HM-STANDARDENZYMEINSECTBITES",
+      "newSku": "12000702",
+      "slug": "standard-enzyme-insect-bites-sku-12000702"
+    },
+    {
+      "id": 619,
+      "brand": "Standard Enzyme",
+      "name": "INSOMNIA",
+      "oldSku": "HM-STANDARDENZYMEINSOMNIA",
+      "newSku": "12000704",
+      "slug": "standard-enzyme-insomnia-sku-12000704"
+    },
+    {
+      "id": 620,
+      "brand": "Standard Enzyme",
+      "name": "INTESTINAL FORMULA",
+      "oldSku": "HM-STANDARDENZYMEINTESTINALFORM",
+      "newSku": "85000200",
+      "slug": "standard-enzyme-intestinal-formula-sku-85000200"
+    },
+    {
+      "id": 621,
+      "brand": "Standard Enzyme",
+      "name": "IRIE",
+      "oldSku": "HM-STANDARDENZYMEIRIE",
+      "newSku": "12000705",
+      "slug": "standard-enzyme-irie-sku-12000705"
+    },
+    {
+      "id": 622,
+      "brand": "Standard Enzyme",
+      "name": "JUNI PLUS",
+      "oldSku": "HM-STANDARDENZYMEJUNIPLUS",
+      "newSku": "55000928",
+      "slug": "standard-enzyme-juni-plus-sku-55000928"
+    },
+    {
+      "id": 623,
+      "brand": "Standard Enzyme",
+      "name": "JUNIPER BERRY",
+      "oldSku": "HM-STANDARDENZYMEHELICHRYSUM",
+      "newSku": "21000126",
+      "slug": "standard-enzyme-juniper-berry-sku-21000126"
+    },
+    {
+      "id": 624,
+      "brand": "Standard Enzyme",
+      "name": "K-B PLUS",
+      "oldSku": "HM-STANDARDENZYMEKBPLUS",
+      "newSku": "55000932",
+      "slug": "standard-enzyme-k-b-plus-sku-55000932"
+    },
+    {
+      "id": 625,
+      "brand": "Standard Enzyme",
+      "name": "KAVA KALM",
+      "oldSku": "HM-STANDARDENZYMEKAVAKALM",
+      "newSku": "55001085",
+      "slug": "standard-enzyme-kava-kalm-sku-55001085"
+    },
+    {
+      "id": 626,
+      "brand": "Standard Enzyme",
+      "name": "KELK PLUS",
+      "oldSku": "HM-STANDARDENZYMEKELPPLUS",
+      "newSku": "85000202",
+      "slug": "standard-enzyme-kelk-plus-sku-85000202"
+    },
+    {
+      "id": 627,
+      "brand": "Standard Enzyme",
+      "name": "KELP COMPLEX",
+      "oldSku": "HM-STANDARDENZYMEKELPCOMPLEX",
+      "newSku": "55000936",
+      "slug": "standard-enzyme-kelp-complex-sku-55000936"
+    },
+    {
+      "id": 629,
+      "brand": "Standard Enzyme",
+      "name": "KIDNEY-BLADDER",
+      "oldSku": "HM-STANDARDENZYMEINFECTIONEGAII1",
+      "newSku": "12000706",
+      "slug": "standard-enzyme-kidney-bladder-sku-12000706"
+    },
+    {
+      "id": 630,
+      "brand": "Standard Enzyme",
+      "name": "KIRIN RED GINSENG",
+      "oldSku": "HM-STANDARDENZYMEKIRINREDGINSENG",
+      "newSku": "55000938",
+      "slug": "standard-enzyme-kirin-red-ginseng-sku-55000938"
+    },
+    {
+      "id": 631,
+      "brand": "Standard Enzyme",
+      "name": "KIRTA",
+      "oldSku": "HM-STANDARDENZYMEKIRTA",
+      "newSku": "55000940",
+      "slug": "standard-enzyme-kirta-sku-55000940"
+    },
+    {
+      "id": 632,
+      "brand": "Standard Enzyme",
+      "name": "KLS ENVIRO",
+      "oldSku": "HM-STANDARDENZYMEKLSENVIROPLUS",
+      "newSku": "55000943",
+      "slug": "standard-enzyme-kls-enviro-sku-55000943"
+    },
+    {
+      "id": 633,
+      "brand": "Standard Enzyme",
+      "name": "KLS PLUS",
+      "oldSku": "HM-STANDARDENZYMEKLSPLUS",
+      "newSku": "55000944",
+      "slug": "standard-enzyme-kls-plus-sku-55000944"
+    },
+    {
+      "id": 634,
+      "brand": "Standard Enzyme",
+      "name": "KOREAN RED GINSENG",
+      "oldSku": "HM-STANDARDENZYMEKOREANREDGINSENG",
+      "newSku": "55000947",
+      "slug": "standard-enzyme-korean-red-ginseng-sku-55000947"
+    },
+    {
+      "id": 635,
+      "brand": "Standard Enzyme",
+      "name": "KOREAN WHITE GINSENG",
+      "oldSku": "HM-STANDARDENZYMEKOREANWHITEGI",
+      "newSku": "55000948",
+      "slug": "standard-enzyme-korean-white-ginseng-sku-55000948"
+    },
+    {
+      "id": 636,
+      "brand": "Standard Enzyme",
+      "name": "L DOPA",
+      "oldSku": "HM-STANDARDENZYMELDOPA",
+      "newSku": "99000236",
+      "slug": "standard-enzyme-l-dopa-sku-99000236"
+    },
+    {
+      "id": 637,
+      "brand": "Standard Enzyme",
+      "name": "L-ARGININE",
+      "oldSku": "HM-STANDARDENZYMELARGININE",
+      "newSku": "85000268",
+      "slug": "standard-enzyme-l-arginine-sku-85000268"
+    },
+    {
+      "id": 638,
+      "brand": "Standard Enzyme",
+      "name": "L-GB",
+      "oldSku": "HM-STANDARDENZYMELGBAP",
+      "newSku": "55000951",
+      "slug": "standard-enzyme-l-gb-sku-55000951"
+    },
+    {
+      "id": 639,
+      "brand": "Standard Enzyme",
+      "name": "L-GLUTAMINE",
+      "oldSku": "HM-STANDARDENZYMELGLUTAMINE",
+      "newSku": "85000272",
+      "slug": "standard-enzyme-l-glutamine-sku-85000272"
+    },
+    {
+      "id": 640,
+      "brand": "Standard Enzyme",
+      "name": "L-TYROSINE",
+      "oldSku": "HM-STANDARDENZYMELTYROSINE",
+      "newSku": "85000292",
+      "slug": "standard-enzyme-l-tyrosine-sku-85000292"
+    },
+    {
+      "id": 641,
+      "brand": "Standard Enzyme",
+      "name": "LACK OF INTEREST",
+      "oldSku": "HM-STANDARDENZYMELACKINTERES",
+      "newSku": "10000444",
+      "slug": "standard-enzyme-lack-of-interest-sku-10000444"
+    },
+    {
+      "id": 642,
+      "brand": "Standard Enzyme",
+      "name": "LAPACHO PLUS",
+      "oldSku": "HM-STANDARDENZYMELAPACHOPLUS",
+      "newSku": "55000954",
+      "slug": "standard-enzyme-lapacho-plus-sku-55000954"
+    },
+    {
+      "id": 643,
+      "brand": "Standard Enzyme",
+      "name": "LARCH",
+      "oldSku": "HM-STANDARDENZYMELARCH",
+      "newSku": "10000446",
+      "slug": "standard-enzyme-larch-sku-10000446"
+    },
+    {
+      "id": 644,
+      "brand": "Standard Enzyme",
+      "name": "LAVENDER",
+      "oldSku": "HM-STANDARDENZYMEJUNIPERBERRY",
+      "newSku": "21000129",
+      "slug": "standard-enzyme-lavender-sku-21000129"
+    },
+    {
+      "id": 645,
+      "brand": "Standard Enzyme",
+      "name": "LEMON",
+      "oldSku": "HM-STANDARDENZYMEJUNIPERBERRY1",
+      "newSku": "21000132",
+      "slug": "standard-enzyme-lemon-sku-21000132"
+    },
+    {
+      "id": 646,
+      "brand": "Standard Enzyme",
+      "name": "LICRO PLUS",
+      "oldSku": "HM-STANDARDENZYMELICROPLUS",
+      "newSku": "55000965",
+      "slug": "standard-enzyme-licro-plus-sku-55000965"
+    },
+    {
+      "id": 647,
+      "brand": "Standard Enzyme",
+      "name": "LIGA PLUS",
+      "oldSku": "HM-STANDARDENZYMELIGAPLUS",
+      "newSku": "85000204",
+      "slug": "standard-enzyme-liga-plus-sku-85000204"
+    },
+    {
+      "id": 648,
+      "brand": "Standard Enzyme",
+      "name": "LITHIPLEX",
+      "oldSku": "HM-STANDARDENZYMELITHIPLEX",
+      "newSku": "12000708",
+      "slug": "standard-enzyme-lithiplex-sku-12000708"
+    },
+    {
+      "id": 649,
+      "brand": "Standard Enzyme",
+      "name": "LOBELIA",
+      "oldSku": "HM-STANDARDENZYMELOBELIA",
+      "newSku": "55000960",
+      "slug": "standard-enzyme-lobelia-sku-55000960"
+    },
+    {
+      "id": 651,
+      "brand": "Standard Enzyme",
+      "name": "LONELINESS",
+      "oldSku": "HM-STANDARDENZYMELONELINESS",
+      "newSku": "10000448",
+      "slug": "standard-enzyme-loneliness-sku-10000448"
+    },
+    {
+      "id": 652,
+      "brand": "Standard Enzyme",
+      "name": "LSK PLUS",
+      "oldSku": "HM-STANDARDENZYMELSKPLUS",
+      "newSku": "85000206",
+      "slug": "standard-enzyme-lsk-plus-sku-85000206"
+    },
+    {
+      "id": 653,
+      "brand": "Standard Enzyme",
+      "name": "LYME DISEASE",
+      "oldSku": "HM-STANDARDENZYMELYMEDISEASE",
+      "newSku": "12000710",
+      "slug": "standard-enzyme-lyme-disease-sku-12000710"
+    },
+    {
+      "id": 654,
+      "brand": "Standard Enzyme",
+      "name": "LYMPH MAMMARY",
+      "oldSku": "HM-STANDARDENZYMELYMPHMAMMARY",
+      "newSku": "12000713",
+      "slug": "standard-enzyme-lymph-mammary-sku-12000713"
+    },
+    {
+      "id": 655,
+      "brand": "Standard Enzyme",
+      "name": "LYMPHATIC DRAINER",
+      "oldSku": "HM-STANDARDENZYMELYMPHATICDRAI",
+      "newSku": "12000714",
+      "slug": "standard-enzyme-lymphatic-drainer-sku-12000714"
+    },
+    {
+      "id": 656,
+      "brand": "Standard Enzyme",
+      "name": "LYMPHATIC IMMUNE",
+      "oldSku": "HM-STANDARDENZYMELYMPHATICIMMUN",
+      "newSku": "12000716",
+      "slug": "standard-enzyme-lymphatic-immune-sku-12000716"
+    },
+    {
+      "id": 657,
+      "brand": "Standard Enzyme",
+      "name": "LYMPHATIC VASCULAR DRAINER",
+      "oldSku": "HM-STANDARDENZYMELYMPHATICVASCULARDRAINER",
+      "newSku": "12000718",
+      "slug": "standard-enzyme-lymphatic-vascular-drainer-sku-12000718"
+    },
+    {
+      "id": 658,
+      "brand": "Standard Enzyme",
+      "name": "MAITAKE",
+      "oldSku": "HM-STANDARDENZYMEMAITAKE",
+      "newSku": "55000962",
+      "slug": "standard-enzyme-maitake-sku-55000962"
+    },
+    {
+      "id": 659,
+      "brand": "Standard Enzyme",
+      "name": "MALVIN",
+      "oldSku": "HM-STANDARDENZYMEMALVIN",
+      "newSku": "99000238",
+      "slug": "standard-enzyme-malvin-sku-99000238"
+    },
+    {
+      "id": 660,
+      "brand": "Standard Enzyme",
+      "name": "MANNAN",
+      "oldSku": "HM-STANDARDENZYMEMANNAN",
+      "newSku": "99000240",
+      "slug": "standard-enzyme-mannan-sku-99000240"
+    },
+    {
+      "id": 661,
+      "brand": "Standard Enzyme",
+      "name": "MB BUILDER",
+      "oldSku": "HM-STANDARDENZYMEMBBUILDER",
+      "newSku": "55001090",
+      "slug": "standard-enzyme-mb-builder-sku-55001090"
+    },
+    {
+      "id": 662,
+      "brand": "Standard Enzyme",
+      "name": "MEGA PROTEIN VANILLA PLUS",
+      "oldSku": "HM-STANDARDENZYMEMEGAPROTEINVA",
+      "newSku": "8500025",
+      "slug": "standard-enzyme-mega-protein-vanilla-plus-sku-8500025"
+    },
+    {
+      "id": 663,
+      "brand": "Standard Enzyme",
+      "name": "MELATONIN",
+      "oldSku": "HM-STANDARDENZYMEMELATONIN",
+      "newSku": "99000242",
+      "slug": "standard-enzyme-melatonin-sku-99000242"
+    },
+    {
+      "id": 664,
+      "brand": "Standard Enzyme",
+      "name": "MENADIONE",
+      "oldSku": "HM-STANDARDENZYMEMENADIONE",
+      "newSku": "99000244",
+      "slug": "standard-enzyme-menadione-sku-99000244"
+    },
+    {
+      "id": 665,
+      "brand": "Standard Enzyme",
+      "name": "MENOPAUSE",
+      "oldSku": "HM-STANDARDENZYMEMENOPAUSE",
+      "newSku": "12000720",
+      "slug": "standard-enzyme-menopause-sku-12000720"
+    },
+    {
+      "id": 666,
+      "brand": "Standard Enzyme",
+      "name": "METABA PLUS",
+      "oldSku": "HM-STANDARDENZYMEMETABAPLUS",
+      "newSku": "55000967",
+      "slug": "standard-enzyme-metaba-plus-sku-55000967"
+    },
+    {
+      "id": 667,
+      "brand": "Standard Enzyme",
+      "name": "METATOX",
+      "oldSku": "HM-STANDARDENZYMEMETATOX",
+      "newSku": "12000722",
+      "slug": "standard-enzyme-metatox-sku-12000722"
+    },
+    {
+      "id": 668,
+      "brand": "Standard Enzyme",
+      "name": "MG-K ASPARTATE",
+      "oldSku": "HM-STANDARDENZYMEMGKASPARTATE",
+      "newSku": "85000210",
+      "slug": "standard-enzyme-mg-k-aspartate-sku-85000210"
+    },
+    {
+      "id": 669,
+      "brand": "Standard Enzyme",
+      "name": "MHS",
+      "oldSku": "HM-STANDARDENZYMEMHS",
+      "newSku": "12000774",
+      "slug": "standard-enzyme-mhs-sku-12000774"
+    },
+    {
+      "id": 670,
+      "brand": "Standard Enzyme",
+      "name": "MIMULUS",
+      "oldSku": "HM-STANDARDENZYMEMIMULUS",
+      "newSku": "10000450",
+      "slug": "standard-enzyme-mimulus-sku-10000450"
+    },
+    {
+      "id": 672,
+      "brand": "Standard Enzyme",
+      "name": "MOLD-X",
+      "oldSku": "HM-STANDARDENZYMEMOLDX",
+      "newSku": "85000213",
+      "slug": "standard-enzyme-mold-x-sku-85000213"
+    },
+    {
+      "id": 673,
+      "brand": "Standard Enzyme",
+      "name": "MORNING SICKNESS",
+      "oldSku": "HM-STANDARDENZYMEMORNINGSICKNESS",
+      "newSku": "12000723",
+      "slug": "standard-enzyme-morning-sickness-sku-12000723"
+    },
+    {
+      "id": 674,
+      "brand": "Standard Enzyme",
+      "name": "MORNING SICKNESS",
+      "oldSku": "HM-STANDARDENZYMEMORNINGSICKNESS1",
+      "newSku": "27803",
+      "slug": "standard-enzyme-morning-sickness-sku-27803"
+    },
+    {
+      "id": 675,
+      "brand": "Standard Enzyme",
+      "name": "MULLEIN PLUS",
+      "oldSku": "HM-STANDARDENZYMEMULLEINPLUS",
+      "newSku": "55000966",
+      "slug": "standard-enzyme-mullein-plus-sku-55000966"
+    },
+    {
+      "id": 676,
+      "brand": "Standard Enzyme",
+      "name": "MULTI-METHYL-B",
+      "oldSku": "HM-STANDARDENZYMEMULTIMETHYLB",
+      "newSku": "85000212",
+      "slug": "standard-enzyme-multi-methyl-b-sku-85000212"
+    },
+    {
+      "id": 677,
+      "brand": "Standard Enzyme",
+      "name": "MUSCLE RELAXER",
+      "oldSku": "HM-STANDARDENZYMEMUSCLERELAXER",
+      "newSku": "12000724",
+      "slug": "standard-enzyme-muscle-relaxer-sku-12000724"
+    },
+    {
+      "id": 678,
+      "brand": "Standard Enzyme",
+      "name": "MUSTARD",
+      "oldSku": "HM-STANDARDENZYMEMUSTARD",
+      "newSku": "10000452",
+      "slug": "standard-enzyme-mustard-sku-10000452"
+    },
+    {
+      "id": 679,
+      "brand": "Standard Enzyme",
+      "name": "MYRRH",
+      "oldSku": "HM-STANDARDENZYMEMYRRH",
+      "newSku": "21000135",
+      "slug": "standard-enzyme-myrrh-sku-21000135"
+    },
+    {
+      "id": 680,
+      "brand": "Standard Enzyme",
+      "name": "N-ACETYL L-CYSTEINE",
+      "oldSku": "HM-STANDARDENZYMENACETYLLCYSTEINE",
+      "newSku": "85000294",
+      "slug": "standard-enzyme-n-acetyl-l-cysteine-sku-85000294"
+    },
+    {
+      "id": 681,
+      "brand": "Standard Enzyme",
+      "name": "NAUSEA RELIEF",
+      "oldSku": "HM-STANDARDENZYMENAUSEARELIEF",
+      "newSku": "12000726",
+      "slug": "standard-enzyme-nausea-relief-sku-12000726"
+    },
+    {
+      "id": 682,
+      "brand": "Standard Enzyme",
+      "name": "NERVE FORMULA",
+      "oldSku": "HM-STANDARDENZYMENERVEFORMULA",
+      "newSku": "55000974",
+      "slug": "standard-enzyme-nerve-formula-sku-55000974"
+    },
+    {
+      "id": 683,
+      "brand": "Standard Enzyme",
+      "name": "NERVE INFLAMMATION",
+      "oldSku": "HM-STANDARDENZYMENERVEINFLAM",
+      "newSku": "12000728",
+      "slug": "standard-enzyme-nerve-inflammation-sku-12000728"
+    },
+    {
+      "id": 684,
+      "brand": "Standard Enzyme",
+      "name": "NETTLE PLUS",
+      "oldSku": "HM-STANDARDENZYMENETTLEPLUS",
+      "newSku": "55000976",
+      "slug": "standard-enzyme-nettle-plus-sku-55000976"
+    },
+    {
+      "id": 685,
+      "brand": "Standard Enzyme",
+      "name": "NEURO BALANCE",
+      "oldSku": "HM-STANDARDENZYMENEUROBALANCE",
+      "newSku": "12000729",
+      "slug": "standard-enzyme-neuro-balance-sku-12000729"
+    },
+    {
+      "id": 686,
+      "brand": "Standard Enzyme",
+      "name": "NICOTOX",
+      "oldSku": "HM-STANDARDENZYMENICOTOX",
+      "newSku": "12000730",
+      "slug": "standard-enzyme-nicotox-sku-12000730"
+    },
+    {
+      "id": 687,
+      "brand": "Standard Enzyme",
+      "name": "NOREPINEPHRINE",
+      "oldSku": "HM-STANDARDENZYMENOREPINEPHRINE",
+      "newSku": "99000246",
+      "slug": "standard-enzyme-norepinephrine-sku-99000246"
+    },
+    {
+      "id": 688,
+      "brand": "Standard Enzyme",
+      "name": "NUX NAUSEA",
+      "oldSku": "HM-STANDARDENZYMENUXNAUSEA",
+      "newSku": "12000732",
+      "slug": "standard-enzyme-nux-nausea-sku-12000732"
+    },
+    {
+      "id": 689,
+      "brand": "Standard Enzyme",
+      "name": "OAK",
+      "oldSku": "HM-STANDARDENZYMEOAK",
+      "newSku": "10000454",
+      "slug": "standard-enzyme-oak-sku-10000454"
+    },
+    {
+      "id": 690,
+      "brand": "Standard Enzyme",
+      "name": "OCTOPAMINE",
+      "oldSku": "HM-STANDARDENZYMEOCTOPAMINE",
+      "newSku": "99000248",
+      "slug": "standard-enzyme-octopamine-sku-99000248"
+    },
+    {
+      "id": 691,
+      "brand": "Standard Enzyme",
+      "name": "OLIVE",
+      "oldSku": "HM-STANDARDENZYMEOLIVE",
+      "newSku": "10000456",
+      "slug": "standard-enzyme-olive-sku-10000456"
+    },
+    {
+      "id": 693,
+      "brand": "Standard Enzyme",
+      "name": "OMEGA COMPLETE",
+      "oldSku": "HM-STANDARDENZYMEOMEGACOMPLETE",
+      "newSku": "85000214",
+      "slug": "standard-enzyme-omega-complete-sku-85000214"
+    },
+    {
+      "id": 694,
+      "brand": "Standard Enzyme",
+      "name": "OREGON GRAPE ROOT",
+      "oldSku": "HM-STANDARDENZYMEOREGONGRAPEROOT",
+      "newSku": "55000980",
+      "slug": "standard-enzyme-oregon-grape-root-sku-55000980"
+    },
+    {
+      "id": 695,
+      "brand": "Standard Enzyme",
+      "name": "OTALGE PLUS",
+      "oldSku": "HM-STANDARDENZYMEOTALGEPLUS",
+      "newSku": "55000992",
+      "slug": "standard-enzyme-otalge-plus-sku-55000992"
+    },
+    {
+      "id": 696,
+      "brand": "Standard Enzyme",
+      "name": "OVER-SENSITIVITY",
+      "oldSku": "HM-STANDARDENZYMEOVERSENSITIVIT",
+      "newSku": "10000460",
+      "slug": "standard-enzyme-over-sensitivity-sku-10000460"
+    },
+    {
+      "id": 697,
+      "brand": "Standard Enzyme",
+      "name": "PALMETTO PLUS",
+      "oldSku": "HM-STANDARDENZYMEPALMETTOPILUS",
+      "newSku": "55000996",
+      "slug": "standard-enzyme-palmetto-plus-sku-55000996"
+    },
+    {
+      "id": 698,
+      "brand": "Standard Enzyme",
+      "name": "PARA PLUS",
+      "oldSku": "HM-STANDARDENZYMEPARAPLUS",
+      "newSku": "85000218",
+      "slug": "standard-enzyme-para-plus-sku-85000218"
+    },
+    {
+      "id": 699,
+      "brand": "Standard Enzyme",
+      "name": "PARA TRAV",
+      "oldSku": "HM-STANDARDENZYMEPARATRAV",
+      "newSku": "12000733",
+      "slug": "standard-enzyme-para-trav-sku-12000733"
+    },
+    {
+      "id": 700,
+      "brand": "Standard Enzyme",
+      "name": "PARA-THY",
+      "oldSku": "HM-STANDARDENZYMEPARATHY",
+      "newSku": "85000219",
+      "slug": "standard-enzyme-para-thy-sku-85000219"
+    },
+    {
+      "id": 701,
+      "brand": "Standard Enzyme",
+      "name": "PAU DΓÇÖARCO",
+      "oldSku": "HM-STANDARDENZYMEPAUDARCO",
+      "newSku": "55000998",
+      "slug": "standard-enzyme-pau-d-arco-sku-55000998"
+    },
+    {
+      "id": 702,
+      "brand": "Standard Enzyme",
+      "name": "PEACH",
+      "oldSku": "HM-STANDARDENZYMEPEACH",
+      "newSku": "55001000",
+      "slug": "standard-enzyme-peach-sku-55001000"
+    },
+    {
+      "id": 703,
+      "brand": "Standard Enzyme",
+      "name": "PERIWINKLE",
+      "oldSku": "HM-STANDARDENZYMEPERIWINKLE",
+      "newSku": "55001002",
+      "slug": "standard-enzyme-periwinkle-sku-55001002"
+    },
+    {
+      "id": 704,
+      "brand": "Standard Enzyme",
+      "name": "PESTOX",
+      "oldSku": "HM-STANDARDENZYMEPESTOX",
+      "newSku": "12000734",
+      "slug": "standard-enzyme-pestox-sku-12000734"
+    },
+    {
+      "id": 705,
+      "brand": "Standard Enzyme",
+      "name": "PHENYLALANINE",
+      "oldSku": "HM-STANDARDENZYMEPHENYLALANINE",
+      "newSku": "99000250",
+      "slug": "standard-enzyme-phenylalanine-sku-99000250"
+    },
+    {
+      "id": 706,
+      "brand": "Standard Enzyme",
+      "name": "PHLORIDZIN",
+      "oldSku": "HM-STANDARDENZYMEPHLORIDZIN",
+      "newSku": "99000252",
+      "slug": "standard-enzyme-phloridzin-sku-99000252"
+    },
+    {
+      "id": 707,
+      "brand": "Standard Enzyme",
+      "name": "PINE",
+      "oldSku": "HM-STANDARDENZYMEPINE",
+      "newSku": "10000462",
+      "slug": "standard-enzyme-pine-sku-10000462"
+    },
+    {
+      "id": 708,
+      "brand": "Standard Enzyme",
+      "name": "PIPERINE",
+      "oldSku": "HM-STANDARDENZYMEPIPERINE",
+      "newSku": "99000254",
+      "slug": "standard-enzyme-piperine-sku-99000254"
+    },
+    {
+      "id": 709,
+      "brand": "Standard Enzyme",
+      "name": "PITC",
+      "oldSku": "HM-STANDARDENZYMEPITC",
+      "newSku": "99000256",
+      "slug": "standard-enzyme-pitc-sku-99000256"
+    },
+    {
+      "id": 710,
+      "brand": "Standard Enzyme",
+      "name": "PITUI PLUS",
+      "oldSku": "HM-STANDARDENZYMEPITUIPLUS",
+      "newSku": "85000222",
+      "slug": "standard-enzyme-pitui-plus-sku-85000222"
+    },
+    {
+      "id": 711,
+      "brand": "Standard Enzyme",
+      "name": "PLANTAGO PLUS",
+      "oldSku": "HM-STANDARDENZYMEPLANTAGOCOMPLE",
+      "newSku": "55001004",
+      "slug": "standard-enzyme-plantago-plus-sku-55001004"
+    },
+    {
+      "id": 713,
+      "brand": "Standard Enzyme",
+      "name": "PNEUMO PLUS",
+      "oldSku": "HM-STANDARDENZYMEPNEUMOPLUS",
+      "newSku": "85000224",
+      "slug": "standard-enzyme-pneumo-plus-sku-85000224"
+    },
+    {
+      "id": 714,
+      "brand": "Standard Enzyme",
+      "name": "POISON IVY",
+      "oldSku": "HM-STANDARDENZYMEPOISONIVY",
+      "newSku": "12000736",
+      "slug": "standard-enzyme-poison-ivy-sku-12000736"
+    },
+    {
+      "id": 715,
+      "brand": "Standard Enzyme",
+      "name": "POLYPORUS",
+      "oldSku": "HM-STANDARDENZYMEPOLYPORUS",
+      "newSku": "55001008",
+      "slug": "standard-enzyme-polyporus-sku-55001008"
+    },
+    {
+      "id": 716,
+      "brand": "Standard Enzyme",
+      "name": "PORIA",
+      "oldSku": "HM-STANDARDENZYMEPORIA",
+      "newSku": "55001010",
+      "slug": "standard-enzyme-poria-sku-55001010"
+    },
+    {
+      "id": 717,
+      "brand": "Standard Enzyme",
+      "name": "POTASSIUM CHELATE",
+      "oldSku": "HM-STANDARDENZYMEPOTASSIUM",
+      "newSku": "85000304",
+      "slug": "standard-enzyme-potassium-chelate-sku-85000304"
+    },
+    {
+      "id": 718,
+      "brand": "Standard Enzyme",
+      "name": "PROGESTERONE",
+      "oldSku": "HM-STANDARDENZYMEPROGESTERONE",
+      "newSku": "99000258",
+      "slug": "standard-enzyme-progesterone-sku-99000258"
+    },
+    {
+      "id": 719,
+      "brand": "Standard Enzyme",
+      "name": "PROSTA PLUS COMPLETE",
+      "oldSku": "HM-STANDARDENZYMEPROSTAPLUSCOMPLETE",
+      "newSku": "19582",
+      "slug": "standard-enzyme-prosta-plus-complete-sku-00019582"
+    },
+    {
+      "id": 720,
+      "brand": "Standard Enzyme",
+      "name": "PROSTATE",
+      "oldSku": "HM-STANDARDENZYMEPROSTATE",
+      "newSku": "12000738",
+      "slug": "standard-enzyme-prostate-sku-12000738"
+    },
+    {
+      "id": 721,
+      "brand": "Standard Enzyme",
+      "name": "PSORINUM",
+      "oldSku": "HM-STANDARDENZYMEPSORINUM",
+      "newSku": "12000740",
+      "slug": "standard-enzyme-psorinum-sku-12000740"
+    },
+    {
+      "id": 722,
+      "brand": "Standard Enzyme",
+      "name": "PYCNOGENOL",
+      "oldSku": "HM-STANDARDENZYMEHAIRENHANCMENTPLUS",
+      "newSku": "85000312",
+      "slug": "standard-enzyme-pycnogenol-sku-85000312"
+    },
+    {
+      "id": 723,
+      "brand": "Standard Enzyme",
+      "name": "PYROLE",
+      "oldSku": "HM-STANDARDENZYMEPYROLE",
+      "newSku": "99000260",
+      "slug": "standard-enzyme-pyrole-sku-99000260"
+    },
+    {
+      "id": 724,
+      "brand": "Standard Enzyme",
+      "name": "QUERCETIN",
+      "oldSku": "HM-STANDARDENZYMEQUERCETIN",
+      "newSku": "99000262",
+      "slug": "standard-enzyme-quercetin-sku-99000262"
+    },
+    {
+      "id": 725,
+      "brand": "Standard Enzyme",
+      "name": "R-PLUS",
+      "oldSku": "HM-STANDARDENZYMERPLUS",
+      "newSku": "55001011",
+      "slug": "standard-enzyme-r-plus-sku-55001011"
+    },
+    {
+      "id": 726,
+      "brand": "Standard Enzyme",
+      "name": "RADIATION",
+      "oldSku": "HM-STANDARDENZYMERADIATION",
+      "newSku": "12000742",
+      "slug": "standard-enzyme-radiation-sku-12000742"
+    },
+    {
+      "id": 727,
+      "brand": "Standard Enzyme",
+      "name": "RED CHESTNUT",
+      "oldSku": "HM-STANDARDENZYMEREDCHESTNUT",
+      "newSku": "10000464",
+      "slug": "standard-enzyme-red-chestnut-sku-10000464"
+    },
+    {
+      "id": 728,
+      "brand": "Standard Enzyme",
+      "name": "RED CLOVER",
+      "oldSku": "HM-STANDARDENZYMEREDCLOVER",
+      "newSku": "55000988",
+      "slug": "standard-enzyme-red-clover-sku-55000988"
+    },
+    {
+      "id": 729,
+      "brand": "Standard Enzyme",
+      "name": "RED RASPBERRY",
+      "oldSku": "HM-STANDARDENZYMEREDRASPBERRY",
+      "newSku": "55001012",
+      "slug": "standard-enzyme-red-raspberry-sku-55001012"
+    },
+    {
+      "id": 730,
+      "brand": "Standard Enzyme",
+      "name": "REISHI",
+      "oldSku": "HM-STANDARDENZYMEREISHI",
+      "newSku": "55000990",
+      "slug": "standard-enzyme-reishi-sku-55000990"
+    },
+    {
+      "id": 731,
+      "brand": "Standard Enzyme",
+      "name": "RENA PLUS",
+      "oldSku": "HM-STANDARDENZYMERENAPLUS",
+      "newSku": "85000230",
+      "slug": "standard-enzyme-rena-plus-sku-85000230"
+    },
+    {
+      "id": 732,
+      "brand": "Standard Enzyme",
+      "name": "RESCUE REMEDY",
+      "oldSku": "HM-STANDARDENZYMERESCUEREMEDY",
+      "newSku": "10000466",
+      "slug": "standard-enzyme-rescue-remedy-sku-10000466"
+    },
+    {
+      "id": 733,
+      "brand": "Standard Enzyme",
+      "name": "RHEUMATISM/ARTHRITIS",
+      "oldSku": "HM-STANDARDENZYMERHEUMATISMARTH",
+      "newSku": "12000744",
+      "slug": "standard-enzyme-rheumatism-arthritis-sku-12000744"
+    },
+    {
+      "id": 736,
+      "brand": "Standard Enzyme",
+      "name": "ROCK ROSE",
+      "oldSku": "HM-STANDARDENZYMEROCKROSE",
+      "newSku": "10000468",
+      "slug": "standard-enzyme-rock-rose-sku-10000468"
+    },
+    {
+      "id": 737,
+      "brand": "Standard Enzyme",
+      "name": "ROCK WATER",
+      "oldSku": "HM-STANDARDENZYMEROCKWATER",
+      "newSku": "10000470",
+      "slug": "standard-enzyme-rock-water-sku-10000470"
+    },
+    {
+      "id": 738,
+      "brand": "Standard Enzyme",
+      "name": "RUTIN",
+      "oldSku": "HM-STANDARDENZYMERUTIN",
+      "newSku": "99000264",
+      "slug": "standard-enzyme-rutin-sku-99000264"
+    },
+    {
+      "id": 739,
+      "brand": "Standard Enzyme",
+      "name": "SALSOLINOL",
+      "oldSku": "HM-STANDARDENZYMESALSOLINOL",
+      "newSku": "99000266",
+      "slug": "standard-enzyme-salsolinol-sku-99000266"
+    },
+    {
+      "id": 740,
+      "brand": "Standard Enzyme",
+      "name": "SAM E",
+      "oldSku": "HM-STANDARDENZYMESAME",
+      "newSku": "85000296",
+      "slug": "standard-enzyme-sam-e-sku-85000296"
+    },
+    {
+      "id": 741,
+      "brand": "Standard Enzyme",
+      "name": "SANGRE de DRAGO",
+      "oldSku": "HM-STANDARDENZYMESANGREDEDRAGO",
+      "newSku": "55001017",
+      "slug": "standard-enzyme-sangre-de-drago-sku-55001017"
+    },
+    {
+      "id": 742,
+      "brand": "Standard Enzyme",
+      "name": "SANGRETOX",
+      "oldSku": "HM-STANDARDENZYMESANGRETOX",
+      "newSku": "12000746",
+      "slug": "standard-enzyme-sangretox-sku-12000746"
+    },
+    {
+      "id": 743,
+      "brand": "Standard Enzyme",
+      "name": "SCIATICA",
+      "oldSku": "HM-STANDARDENZYMESCIATICA",
+      "newSku": "12000748",
+      "slug": "standard-enzyme-sciatica-sku-12000748"
+    },
+    {
+      "id": 744,
+      "brand": "Standard Enzyme",
+      "name": "SCLERANTHUS",
+      "oldSku": "HM-STANDARDENZYMESCLERANTHUS",
+      "newSku": "10000472",
+      "slug": "standard-enzyme-scleranthus-sku-10000472"
+    },
+    {
+      "id": 745,
+      "brand": "Standard Enzyme",
+      "name": "SCROFULARA PLUS",
+      "oldSku": "HM-STANDARDENZYMESCROFULARAPLUS1",
+      "newSku": "27748",
+      "slug": "standard-enzyme-scrofulara-plus-sku-27748"
+    },
+    {
+      "id": 746,
+      "brand": "Standard Enzyme",
+      "name": "SCROFULARA PLUS",
+      "oldSku": "HM-STANDARDENZYMESCROFULARAPLUS",
+      "newSku": "55001018",
+      "slug": "standard-enzyme-scrofulara-plus-sku-55001018"
+    },
+    {
+      "id": 747,
+      "brand": "Standard Enzyme",
+      "name": "SEC GREENS",
+      "oldSku": "HM-STANDARDENZYMESECGREENS",
+      "newSku": "85000295",
+      "slug": "standard-enzyme-sec-greens-sku-85000295"
+    },
+    {
+      "id": 748,
+      "brand": "Standard Enzyme",
+      "name": "SELENO METHIONINE",
+      "oldSku": "HM-STANDARDENZYMESELENOMETHIONI",
+      "newSku": "85000308",
+      "slug": "standard-enzyme-seleno-methionine-sku-85000308"
+    },
+    {
+      "id": 749,
+      "brand": "Standard Enzyme",
+      "name": "SEROTONIN",
+      "oldSku": "HM-STANDARDENZYMESEROTONIN",
+      "newSku": "99000268",
+      "slug": "standard-enzyme-serotonin-sku-99000268"
+    },
+    {
+      "id": 750,
+      "brand": "Standard Enzyme",
+      "name": "SHEEP SORREL",
+      "oldSku": "HM-STANDARDENZYMESHEEPSORREL",
+      "newSku": "55000982",
+      "slug": "standard-enzyme-sheep-sorrel-sku-55000982"
+    },
+    {
+      "id": 751,
+      "brand": "Standard Enzyme",
+      "name": "SHIITAKE",
+      "oldSku": "HM-STANDARDENZYMESHITAKE",
+      "newSku": "55001022",
+      "slug": "standard-enzyme-shiitake-sku-55001022"
+    },
+    {
+      "id": 752,
+      "brand": "Standard Enzyme",
+      "name": "SILICONE",
+      "oldSku": "HM-STANDARDENZYMESILICONE",
+      "newSku": "12000750",
+      "slug": "standard-enzyme-silicone-sku-12000750"
+    },
+    {
+      "id": 753,
+      "brand": "Standard Enzyme",
+      "name": "SINUSITIS",
+      "oldSku": "HM-STANDARDENZYMESINUSITIS",
+      "newSku": "12000752",
+      "slug": "standard-enzyme-sinusitis-sku-12000752"
+    },
+    {
+      "id": 754,
+      "brand": "Standard Enzyme",
+      "name": "SLIPPER ELM",
+      "oldSku": "HM-STANDARDENZYMESLIPPERELM",
+      "newSku": "55001024",
+      "slug": "standard-enzyme-slipper-elm-sku-55001024"
+    },
+    {
+      "id": 755,
+      "brand": "Standard Enzyme",
+      "name": "SLP",
+      "oldSku": "HM-STANDARDENZYMESLP",
+      "newSku": "12000753",
+      "slug": "standard-enzyme-slp-sku-12000753"
+    },
+    {
+      "id": 756,
+      "brand": "Standard Enzyme",
+      "name": "SOLIDAGO PLUS",
+      "oldSku": "HM-STANDARDENZYMESOLIDAGOPLUS",
+      "newSku": "55001028",
+      "slug": "standard-enzyme-solidago-plus-sku-55001028"
+    },
+    {
+      "id": 757,
+      "brand": "Standard Enzyme",
+      "name": "SORE THROAT",
+      "oldSku": "HM-STANDARDENZYMESORETHROAT",
+      "newSku": "12000754",
+      "slug": "standard-enzyme-sore-throat-sku-12000754"
+    },
+    {
+      "id": 758,
+      "brand": "Standard Enzyme",
+      "name": "SOYBEAN LECITHIN",
+      "oldSku": "HM-STANDARDENZYMESOYBEANLECITHI",
+      "newSku": "85000240",
+      "slug": "standard-enzyme-soybean-lecithin-sku-85000240"
+    },
+    {
+      "id": 759,
+      "brand": "Standard Enzyme",
+      "name": "ST. JOHN'S PLUS",
+      "oldSku": "HM-STANDARDENZYMESTJOHNSPLUS",
+      "newSku": "55001030",
+      "slug": "standard-enzyme-st-john-s-plus-sku-55001030"
+    },
+    {
+      "id": 760,
+      "brand": "Standard Enzyme",
+      "name": "STAR OF BETH",
+      "oldSku": "HM-STANDARDENZYMESTARBETH",
+      "newSku": "10000474",
+      "slug": "standard-enzyme-star-of-beth-sku-10000474"
+    },
+    {
+      "id": 761,
+      "brand": "Standard Enzyme",
+      "name": "STOM2",
+      "oldSku": "HM-STANDARDENZYMESTOM2",
+      "newSku": "12000757",
+      "slug": "standard-enzyme-stom2-sku-12000757"
+    },
+    {
+      "id": 762,
+      "brand": "Standard Enzyme",
+      "name": "STOMACH",
+      "oldSku": "HM-STANDARDENZYMESTOMACH",
+      "newSku": "12000756",
+      "slug": "standard-enzyme-stomach-sku-12000756"
+    },
+    {
+      "id": 763,
+      "brand": "Standard Enzyme",
+      "name": "STONE BREAKER PLUS",
+      "oldSku": "HM-STANDARDENZYMESTONEBREAKERP",
+      "newSku": "55001033",
+      "slug": "standard-enzyme-stone-breaker-plus-sku-55001033"
+    },
+    {
+      "id": 764,
+      "brand": "Standard Enzyme",
+      "name": "SUMA",
+      "oldSku": "HM-STANDARDENZYMESUMA",
+      "newSku": "55001034",
+      "slug": "standard-enzyme-suma-sku-55001034"
+    },
+    {
+      "id": 765,
+      "brand": "Standard Enzyme",
+      "name": "SWEET WORMWOOD",
+      "oldSku": "HM-STANDARDENZYMESWEETWORMWOOD",
+      "newSku": "55000846",
+      "slug": "standard-enzyme-sweet-wormwood-sku-55000846"
+    },
+    {
+      "id": 766,
+      "brand": "Standard Enzyme",
+      "name": "SYCOSIS",
+      "oldSku": "HM-STANDARDENZYMESYCOSIS",
+      "newSku": "12000758",
+      "slug": "standard-enzyme-sycosis-sku-12000758"
+    },
+    {
+      "id": 767,
+      "brand": "Standard Enzyme",
+      "name": "SYPHILINUM",
+      "oldSku": "HM-STANDARDENZYMESYPHILINUM",
+      "newSku": "12000760",
+      "slug": "standard-enzyme-syphilinum-sku-12000760"
+    },
+    {
+      "id": 768,
+      "brand": "Standard Enzyme",
+      "name": "SYSTEM COMPLETE",
+      "oldSku": "HM-STANDARDENZYMESYSTEMCOMPLETE",
+      "newSku": "12000763",
+      "slug": "standard-enzyme-system-complete-sku-12000763"
+    },
+    {
+      "id": 769,
+      "brand": "Standard Enzyme",
+      "name": "TAURINE",
+      "oldSku": "HM-STANDARDENZYMETAURINE",
+      "newSku": "99000270",
+      "slug": "standard-enzyme-taurine-sku-99000270"
+    },
+    {
+      "id": 770,
+      "brand": "Standard Enzyme",
+      "name": "TESTOSTERONE",
+      "oldSku": "HM-STANDARDENZYMETESTOSTERONE",
+      "newSku": "99000272",
+      "slug": "standard-enzyme-testosterone-sku-99000272"
+    },
+    {
+      "id": 771,
+      "brand": "Standard Enzyme",
+      "name": "THUJA",
+      "oldSku": "HM-STANDARDENZYMETHUJA",
+      "newSku": "55001040",
+      "slug": "standard-enzyme-thuja-sku-55001040"
+    },
+    {
+      "id": 772,
+      "brand": "Standard Enzyme",
+      "name": "THYRO PLUS",
+      "oldSku": "HM-STANDARDENZYMETHYROPLUS",
+      "newSku": "85000248",
+      "slug": "standard-enzyme-thyro-plus-sku-85000248"
+    },
+    {
+      "id": 773,
+      "brand": "Standard Enzyme",
+      "name": "THYROID SUPPORT",
+      "oldSku": "HM-STANDARDENZYMETHYROSUPPORT",
+      "newSku": "85000246",
+      "slug": "standard-enzyme-thyroid-support-sku-85000246"
+    },
+    {
+      "id": 774,
+      "brand": "Standard Enzyme",
+      "name": "TM PH ENHANCE",
+      "oldSku": "HM-STANDARDENZYMETMPHENHANCER",
+      "newSku": "85000221",
+      "slug": "standard-enzyme-tm-ph-enhance-sku-85000221"
+    },
+    {
+      "id": 775,
+      "brand": "Standard Enzyme",
+      "name": "TOPICAL R GEL",
+      "oldSku": "HM-STANDARDENZYMETOPICALRGEL",
+      "newSku": "55000995",
+      "slug": "standard-enzyme-topical-r-gel-sku-55000995"
+    },
+    {
+      "id": 776,
+      "brand": "Standard Enzyme",
+      "name": "TRIFOLO PLUS",
+      "oldSku": "HM-STANDARDENZYMETRIFOLOPLUS",
+      "newSku": "55001042",
+      "slug": "standard-enzyme-trifolo-plus-sku-55001042"
+    },
+    {
+      "id": 777,
+      "brand": "Standard Enzyme",
+      "name": "TURKEY RHUBARB",
+      "oldSku": "HM-STANDARDENZYMETURKEYRHUBARB",
+      "newSku": "55001046",
+      "slug": "standard-enzyme-turkey-rhubarb-sku-55001046"
+    },
+    {
+      "id": 778,
+      "brand": "Standard Enzyme",
+      "name": "TURMERIC",
+      "oldSku": "HM-STANDARDENZYMETURMERIC",
+      "newSku": "55000984",
+      "slug": "standard-enzyme-turmeric-sku-55000984"
+    },
+    {
+      "id": 779,
+      "brand": "Standard Enzyme",
+      "name": "ULTRA D VITAMIN D-3",
+      "oldSku": "HM-STANDARDENZYMEULTRADD3",
+      "newSku": "850003114",
+      "slug": "standard-enzyme-ultra-d-vitamin-d-3-sku-850003114"
+    },
+    {
+      "id": 780,
+      "brand": "Standard Enzyme",
+      "name": "UNCERTAINTY",
+      "oldSku": "HM-STANDARDENZYMEUNCERTAINTY",
+      "newSku": "10000478",
+      "slug": "standard-enzyme-uncertainty-sku-10000478"
+    },
+    {
+      "id": 781,
+      "brand": "Standard Enzyme",
+      "name": "UNIFLOWER",
+      "oldSku": "HM-STANDARDENZYMEUNIFLOWER",
+      "newSku": "10000480",
+      "slug": "standard-enzyme-uniflower-sku-10000480"
+    },
+    {
+      "id": 782,
+      "brand": "Standard Enzyme",
+      "name": "UNIPHENOL",
+      "oldSku": "HM-STANDARDENZYMEUNIPHENOL",
+      "newSku": "99000274",
+      "slug": "standard-enzyme-uniphenol-sku-99000274"
+    },
+    {
+      "id": 783,
+      "brand": "Standard Enzyme",
+      "name": "UNIVERSAL COMPLEX",
+      "oldSku": "HM-STANDARDENZYMEUNIVERSALCOMPL",
+      "newSku": "55001048",
+      "slug": "standard-enzyme-universal-complex-sku-55001048"
+    },
+    {
+      "id": 784,
+      "brand": "Standard Enzyme",
+      "name": "VACCINATION",
+      "oldSku": "HM-STANDARDENZYMEVACCINATION",
+      "newSku": "12000764",
+      "slug": "standard-enzyme-vaccination-sku-12000764"
+    },
+    {
+      "id": 785,
+      "brand": "Standard Enzyme",
+      "name": "VALERI PLUS",
+      "oldSku": "HM-STANDARDENZYMEVALERIPLUS",
+      "newSku": "55001052",
+      "slug": "standard-enzyme-valeri-plus-sku-55001052"
+    },
+    {
+      "id": 786,
+      "brand": "Standard Enzyme",
+      "name": "VARICOSE VEINS",
+      "oldSku": "HM-STANDARDENZYMEVARICOSEVEINS",
+      "newSku": "12000766",
+      "slug": "standard-enzyme-varicose-veins-sku-12000766"
+    },
+    {
+      "id": 787,
+      "brand": "Standard Enzyme",
+      "name": "VENO PLUS",
+      "oldSku": "HM-STANDARDENZYMEVENOPLUS",
+      "newSku": "85000252",
+      "slug": "standard-enzyme-veno-plus-sku-85000252"
+    },
+    {
+      "id": 788,
+      "brand": "Standard Enzyme",
+      "name": "VENUS FLY TRAP",
+      "oldSku": "HM-STANDARDENZYMEVENUSFLYTRAP",
+      "newSku": "55001056",
+      "slug": "standard-enzyme-venus-fly-trap-sku-55001056"
+    },
+    {
+      "id": 789,
+      "brand": "Standard Enzyme",
+      "name": "VERMA PLUS",
+      "oldSku": "HM-STANDARDENZYMEVERMAPLUS",
+      "newSku": "55001060",
+      "slug": "standard-enzyme-verma-plus-sku-55001060"
+    },
+    {
+      "id": 790,
+      "brand": "Standard Enzyme",
+      "name": "VERMATOX",
+      "oldSku": "HM-STANDARDENZYMEVERMATOX",
+      "newSku": "12000768",
+      "slug": "standard-enzyme-vermatox-sku-12000768"
+    },
+    {
+      "id": 791,
+      "brand": "Standard Enzyme",
+      "name": "VERMATOX II",
+      "oldSku": "HM-STANDARDENZYMEVERMATOXII",
+      "newSku": "12000770",
+      "slug": "standard-enzyme-vermatox-ii-sku-12000770"
+    },
+    {
+      "id": 792,
+      "brand": "Standard Enzyme",
+      "name": "VERMATOX III",
+      "oldSku": "HM-STANDARDENZYMEVERMATOXIII",
+      "newSku": "12000772",
+      "slug": "standard-enzyme-vermatox-iii-sku-12000772"
+    },
+    {
+      "id": 793,
+      "brand": "Standard Enzyme",
+      "name": "VERVAIN",
+      "oldSku": "HM-STANDARDENZYMEVERVAIN",
+      "newSku": "10000482",
+      "slug": "standard-enzyme-vervain-sku-10000482"
+    },
+    {
+      "id": 794,
+      "brand": "Standard Enzyme",
+      "name": "VINE",
+      "oldSku": "HM-STANDARDENZYMEVINE",
+      "newSku": "10000484",
+      "slug": "standard-enzyme-vine-sku-10000484"
+    },
+    {
+      "id": 795,
+      "brand": "Standard Enzyme",
+      "name": "VITA MIN COMPLETE",
+      "oldSku": "HM-STANDARDENZYMEVITAMINCOMPLE",
+      "newSku": "85000315",
+      "slug": "standard-enzyme-vita-min-complete-sku-85000315"
+    },
+    {
+      "id": 796,
+      "brand": "Standard Enzyme",
+      "name": "VITAMIN D3/K2",
+      "oldSku": "HM-STANDARDENZYMEVITAMIND3ANDK2",
+      "newSku": "850003176",
+      "slug": "standard-enzyme-vitamin-d3-k2-sku-850003176"
+    },
+    {
+      "id": 797,
+      "brand": "Standard Enzyme",
+      "name": "WALNUT",
+      "oldSku": "HM-STANDARDENZYMEWALNUT",
+      "newSku": "10000486",
+      "slug": "standard-enzyme-walnut-sku-10000486"
+    },
+    {
+      "id": 798,
+      "brand": "Standard Enzyme",
+      "name": "WATER VIOLET",
+      "oldSku": "HM-STANDARDENZYMEWATERVIOLET",
+      "newSku": "10000488",
+      "slug": "standard-enzyme-water-violet-sku-10000488"
+    },
+    {
+      "id": 799,
+      "brand": "Standard Enzyme",
+      "name": "WHITE CHESTNUT",
+      "oldSku": "HM-STANDARDENZYMEWHITECHESNUT",
+      "newSku": "10000490",
+      "slug": "standard-enzyme-white-chestnut-sku-10000490"
+    },
+    {
+      "id": 800,
+      "brand": "Standard Enzyme",
+      "name": "WILD OAT",
+      "oldSku": "HM-STANDARDENZYMEWILDOAT",
+      "newSku": "10000492",
+      "slug": "standard-enzyme-wild-oat-sku-10000492"
+    },
+    {
+      "id": 801,
+      "brand": "Standard Enzyme",
+      "name": "WILD ROSE",
+      "oldSku": "HM-STANDARDENZYMEWILDROSE",
+      "newSku": "10000494",
+      "slug": "standard-enzyme-wild-rose-sku-10000494"
+    },
+    {
+      "id": 802,
+      "brand": "Standard Enzyme",
+      "name": "WILLOW",
+      "oldSku": "HM-STANDARDENZYMEWILLOW",
+      "newSku": "10000496",
+      "slug": "standard-enzyme-willow-sku-10000496"
+    },
+    {
+      "id": 803,
+      "brand": "Standard Enzyme",
+      "name": "YARROW PLUS",
+      "oldSku": "HM-STANDARDENZYMEYARROWPLUS",
+      "newSku": "55001062",
+      "slug": "standard-enzyme-yarrow-plus-sku-55001062"
+    },
+    {
+      "id": 804,
+      "brand": "Terry Naturally",
+      "name": "ANXIOCALM",
+      "oldSku": "HM-TERRYNATANXIOCALM",
+      "newSku": "24494",
+      "slug": "terry-nat-anxiocalm-sku-24494"
+    },
+    {
+      "id": 805,
+      "brand": "Terry Naturally",
+      "name": "Cura Med 375mg 120SG",
+      "oldSku": "HM-TERRYNATURALLYCURAMINEXTRASTRENGTH1",
+      "newSku": "28594",
+      "slug": "terry-naturally-cura-med-375mg-120sg-sku-28594"
+    },
+    {
+      "id": 806,
+      "brand": "Terry Naturally",
+      "name": "Curamin Extra Strength",
+      "oldSku": "HM-TERRYNATURALLYCURAMINEXTRASTRENGTH",
+      "newSku": "28547",
+      "slug": "terry-naturally-curamin-extra-strength-sku-28547"
+    },
+    {
+      "id": 807,
+      "brand": "Terry Naturally",
+      "name": "Urinary Tract Intensive Support",
+      "oldSku": "HM-TERRYNATURALLYURINARYTRACTINTENSIVESUPPORT",
+      "newSku": "28676",
+      "slug": "terry-naturally-urinary-tract-intensive-support-sku-28676"
+    },
+    {
+      "id": 808,
+      "brand": "Terry Naturally",
+      "name": "Tertry Naturally Adaptra",
+      "oldSku": "HM-TERRYNATADAPTRA60CAP",
+      "newSku": "15949",
+      "slug": "tertry-naturally-adaptra-sku-15949"
+    },
+    {
+      "id": 809,
+      "brand": null,
+      "name": "THRES. N.AMERICAN OREGANOL ..45OZ P73 SKU: 28695",
+      "oldSku": "HM-THRESNAMERICANOREGANOL45OZP73",
+      "newSku": "28695",
+      "slug": "thres-n-american-oreganol-45oz-p73-sku-28695"
+    },
+    {
+      "id": 810,
+      "brand": "Unicity",
+      "name": "Aloe Vera",
+      "oldSku": "HM-UNICITYALOEVERA50CAPSULES",
+      "newSku": "26561",
+      "slug": "unicity-aloe-vera-sku-26561"
+    },
+    {
+      "id": 811,
+      "brand": "Unicity",
+      "name": "LiFiber Powder 1lbs",
+      "oldSku": "HM-UNICITYLIFIBERPOWDER1LBS",
+      "newSku": "26256",
+      "slug": "unicity-lifiber-powder-1lbs-sku-26256"
+    },
+    {
+      "id": 812,
+      "brand": "Unicity",
+      "name": "Paraway Plus",
+      "oldSku": "HM-UNICITYPARAWAYPLUS",
+      "newSku": "12223",
+      "slug": "unicity-paraway-plus-sku-12223"
+    },
+    {
+      "id": 813,
+      "brand": "AC Grace",
+      "name": "Unique E Tocotrienols TOC - Free Shipping",
+      "oldSku": "HM-CGRACEUNIQUEETOCOTRIENOL1",
+      "newSku": "28012",
+      "slug": "unique-e-tocotrienols-toc-free-shipping-sku-28012"
+    },
+    {
+      "id": 814,
+      "brand": "Vista Life",
+      "name": "Ascorba Gram",
+      "oldSku": "HM-VISTALIFEASCORBAGRAM",
+      "newSku": "28664",
+      "slug": "vista-life-ascorba-gram-sku-28664"
+    },
+    {
+      "id": 815,
+      "brand": "Vista Life",
+      "name": "CBD 25mg Capsules",
+      "oldSku": "HM-VISTALIFECBD25MGCAPSULES",
+      "newSku": "28659",
+      "slug": "vista-life-cbd-25mg-capsules-sku-28659"
+    },
+    {
+      "id": 816,
+      "brand": "Vista Life",
+      "name": "CBD 25mg Gummies",
+      "oldSku": "HM-VISTALIFECBD25MGGUMMIES",
+      "newSku": "28660",
+      "slug": "vista-life-cbd-25mg-gummies-sku-28660"
+    },
+    {
+      "id": 817,
+      "brand": "Vista Life",
+      "name": "CBD Dead Sea Mud Mask",
+      "oldSku": "HM-VISTALIFECBDDEADSEAMUDMASK",
+      "newSku": "10575",
+      "slug": "vista-life-cbd-dead-sea-mud-mask-sku-10575"
+    },
+    {
+      "id": 818,
+      "brand": "Vista Life",
+      "name": "CBD Oil Full Spectrum",
+      "oldSku": "HM-VISTALIFECBDOILFULLSPECTRUM",
+      "newSku": "HM-VISTALIFECBDOILFULLS",
+      "slug": "vista-life-cbd-oil-full-spectrum"
+    },
+    {
+      "id": 819,
+      "brand": "Vista Life",
+      "name": "Daily Spectrum",
+      "oldSku": "HM-VISTALIFEDAILYSPECTRUM",
+      "newSku": "28663",
+      "slug": "vista-life-daily-spectrum-sku-28663"
+    },
+    {
+      "id": 820,
+      "brand": "Vista Life",
+      "name": "Juice of Life Plus",
+      "oldSku": "HM-VISTALIFEJUICELIFEPLUS",
+      "newSku": "28662",
+      "slug": "vista-life-juice-of-life-plus-sku-28662"
+    },
+    {
+      "id": 821,
+      "brand": null,
+      "name": "Women's Touch Natural Progesterone Cream SKU: E1-7H2U-WDEC",
+      "oldSku": "HM-HMWOMENSTOUCHBODYCREAM",
+      "newSku": "E1-7H2U-WDEC",
+      "slug": "women-s-touch-natural-progesterone-cream-sku-e1-7h2u-wdec"
+    }
+  ],
+  "skipped": [
+    {
+      "id": 1,
+      "reason": "placeholder"
+    },
+    {
+      "id": 2,
+      "reason": "placeholder"
+    },
+    {
+      "id": 93,
+      "name": "Dr. Tony's Blood Pressure Support",
+      "reason": "no-catalog-sku-found"
+    },
+    {
+      "id": 208,
+      "name": "Nature's Sunshine Bayberry SKU: 60",
+      "reason": "sku-conflict",
+      "catalogSku": "60",
+      "conflictsWith": 59
+    },
+    {
+      "id": 354,
+      "name": "Our Father's Healing Herbs Anti-Inflammatory SKU: HS-03",
+      "reason": "sku-conflict",
+      "catalogSku": "HS-03",
+      "conflictsWith": 40
+    },
+    {
+      "id": 389,
+      "name": "Regalabs Candida Complex with 500mg Oregano",
+      "reason": "sku-conflict",
+      "catalogSku": "778",
+      "conflictsWith": 377
+    },
+    {
+      "id": 579,
+      "name": "HEPACHOL",
+      "reason": "sku-conflict",
+      "catalogSku": "85000120",
+      "conflictsWith": 439
+    },
+    {
+      "id": 822,
+      "name": "Search",
+      "reason": "no-catalog-sku-found"
+    },
+    {
+      "id": 905,
+      "reason": "gift-card"
+    },
+    {
+      "id": 906,
+      "reason": "gift-card"
+    }
+  ],
+  "generatedAt": "2026-06-30T23:56:18.777Z"
+}

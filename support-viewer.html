@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register screen share — Business One Support</title>
+    <link rel="stylesheet" href="css/platform-support.css">
+</head>
+<body>
+    <div class="viewer-shell">
+        <div class="viewer-toolbar">
+            <div>
+                <strong id="viewer-merchant">Remote register</strong>
+                <div id="status" class="hint">Connecting…</div>
+            </div>
+            <div class="desk-actions">
+                <button type="button" class="btn btn-secondary" id="reload-btn">Retry</button>
+                <button type="button" class="btn btn-primary" id="end-btn">End session</button>
+            </div>
+        </div>
+        <div class="viewer-video-wrap">
+            <video id="remote-video" autoplay playsinline muted></video>
+        </div>
+    </div>
+    <script src="support-viewer.js"></script>
+</body>
+</html>

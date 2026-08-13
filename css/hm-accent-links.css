@@ -1,0 +1,80 @@
+/**
+ * Accent link hover: site green fill + white text (nav, breadcrumbs, etc.)
+ * .edsa-manage-link and .contact-item links: no hover styling (see bottom)
+ */
+
+:is(
+  .nav-menu a,
+  .navbar .nav-menu a,
+  .navbar #nav-menu a,
+  .navbar #navbar-menu a,
+  .hm-accent-link,
+  .edsa-nav-link,
+  .breadcrumb-item a,
+  .contact-info-box a
+):hover {
+  background-color: var(--primary-green) !important;
+  background: var(--primary-green) !important;
+  color: var(--white) !important;
+  text-decoration: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  border-radius: var(--radius-md);
+}
+
+:is(
+  .hm-accent-link,
+  .breadcrumb-item a,
+  .contact-info-box a
+):hover {
+  display: inline-block;
+  padding: var(--space-1) var(--space-2);
+}
+
+:is(
+  .nav-menu a,
+  .navbar .nav-menu a,
+  .navbar #nav-menu a,
+  .navbar #navbar-menu a
+):hover::after {
+  width: 100% !important;
+  background-color: var(--white) !important;
+}
+
+@media (max-width: 1100px) {
+  .nav-menu.show a:hover,
+  :is(
+    .nav-menu a,
+    .navbar .nav-menu a,
+    .navbar #nav-menu a,
+    .navbar #navbar-menu a,
+    .hm-accent-link,
+    .edsa-nav-link
+  ):hover {
+    background-color: var(--primary-green) !important;
+    background: var(--primary-green) !important;
+    color: var(--white) !important;
+    text-decoration: none !important;
+  }
+}
+
+/* No hover change — keeps green text visible on white backgrounds */
+.edsa-manage-link a:hover,
+.edsa-manage-link a:focus,
+main .edsa-manage-link a:hover,
+#edsa-service .edsa-manage-link a:hover,
+a[href*="edsa-manage-appointment"]:hover,
+.contact-item a:hover,
+.contact-item a:focus,
+.contact .contact-item a:hover,
+#contact .contact-item a:hover {
+  color: var(--primary-green-dark) !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  text-decoration: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  display: inline !important;
+  border-radius: 0 !important;
+  transform: none !important;
+}

@@ -1,0 +1,164 @@
+/**
+ * HM Herbs — unified dismiss controls (red square + white X + hover/active).
+ * Load AFTER other site CSS (and before page inline <style> if any) so generic
+ * `button { padding }` rules and legacy overrides cannot flatten these controls.
+ */
+
+:root {
+  --hm-close-fill: #ef5350;
+  --hm-close-fill-hover: #d32f2f;
+}
+
+/* Apply the exact requested close-button pattern globally */
+.delete-btn,
+.cart-close,
+.auth-modal-close,
+.modal-close,
+.gdpr-modal-close,
+.ccpa-modal-close,
+.edsa-modal-close,
+.newsletter-popup-close,
+.acct-modal-close,
+.notification .notification-close {
+  width: 29px !important;
+  height: 29px !important;
+  min-width: 29px !important;
+  min-height: 29px !important;
+  background-color: var(--hm-close-fill) !important;
+  border-radius: 15px !important;
+  position: relative;
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  border: none !important;
+  padding: 0 !important;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  color: transparent !important;
+  overflow: hidden;
+}
+
+.delete-btn::before,
+.delete-btn::after,
+.cart-close::before,
+.cart-close::after,
+.auth-modal-close::before,
+.auth-modal-close::after,
+.modal-close::before,
+.modal-close::after,
+.gdpr-modal-close::before,
+.gdpr-modal-close::after,
+.ccpa-modal-close::before,
+.ccpa-modal-close::after,
+.edsa-modal-close::before,
+.edsa-modal-close::after,
+.newsletter-popup-close::before,
+.newsletter-popup-close::after,
+.acct-modal-close::before,
+.acct-modal-close::after,
+.notification .notification-close::before,
+.notification .notification-close::after {
+  content: '';
+  position: absolute;
+  width: 17px;
+  height: 4px;
+  background-color: #fff;
+  border-radius: 2px;
+}
+
+.delete-btn::before,
+.cart-close::before,
+.auth-modal-close::before,
+.modal-close::before,
+.gdpr-modal-close::before,
+.ccpa-modal-close::before,
+.edsa-modal-close::before,
+.newsletter-popup-close::before,
+.acct-modal-close::before,
+.notification .notification-close::before {
+  transform: rotate(45deg);
+}
+
+.delete-btn::after,
+.cart-close::after,
+.auth-modal-close::after,
+.modal-close::after,
+.gdpr-modal-close::after,
+.ccpa-modal-close::after,
+.edsa-modal-close::after,
+.newsletter-popup-close::after,
+.acct-modal-close::after,
+.notification .notification-close::after {
+  transform: rotate(-45deg);
+}
+
+.delete-btn:hover,
+.cart-close:hover,
+.auth-modal-close:hover,
+.modal-close:hover,
+.gdpr-modal-close:hover,
+.ccpa-modal-close:hover,
+.edsa-modal-close:hover,
+.newsletter-popup-close:hover,
+.acct-modal-close:hover,
+.notification .notification-close:hover {
+  background-color: var(--hm-close-fill-hover) !important;
+  transform: scale(1.05);
+}
+
+.delete-btn:focus-visible,
+.cart-close:focus-visible,
+.auth-modal-close:focus-visible,
+.modal-close:focus-visible,
+.gdpr-modal-close:focus-visible,
+.ccpa-modal-close:focus-visible,
+.edsa-modal-close:focus-visible,
+.newsletter-popup-close:focus-visible,
+.acct-modal-close:focus-visible,
+.notification .notification-close:focus-visible {
+  outline: 3px solid rgba(255, 255, 255, 0.85) !important;
+  outline-offset: 2px;
+}
+
+/* Keep toast close control separated from message text */
+.notification .notification-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+}
+
+.notification .notification-message {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification .notification-close {
+  margin-top: 0.15rem;
+  align-self: flex-start;
+}
+
+/* Hide legacy icon/text content and use pseudo-element X only */
+.cart-close .cart-close-svg,
+.auth-modal-close .cart-close-svg,
+.modal-close .cart-close-svg,
+.gdpr-modal-close .cart-close-svg,
+.ccpa-modal-close .cart-close-svg,
+.edsa-modal-close .cart-close-svg,
+.newsletter-popup-close .cart-close-svg,
+.acct-modal-close .cart-close-svg,
+.notification .notification-close .cart-close-svg,
+.cart-close i,
+.auth-modal-close i,
+.modal-close i,
+.gdpr-modal-close i,
+.ccpa-modal-close i,
+.edsa-modal-close i,
+.newsletter-popup-close i,
+.acct-modal-close i,
+.notification .notification-close i {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+

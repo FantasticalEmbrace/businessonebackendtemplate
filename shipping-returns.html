@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shipping & Returns - H&M Herbs & Vitamins</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/emergency-fixes.css?v=mobile-nav-4">
+    <link rel="stylesheet" href="styles.css?v=brand-sync-5">
+    <link rel="stylesheet" href="css/hm-accent-links.css">
+    <link rel="stylesheet" href="css/accessibility-enhancements.css?v=a11y-1">
+    <link rel="stylesheet" href="css/mobile-enhancements.css">
+    <link rel="stylesheet" href="css/mobile-nav.css?v=brand-sync-5">
+    <link rel="stylesheet" href="css/hm-close-controls.css">
+    <link rel="stylesheet" href="css/site-promo-banner.css?v=brand-sync-5">
+    <link rel="stylesheet" href="css/age-gate.css?v=brand-sync-5">
+    <link rel="stylesheet" href="css/hm-popups-brand.css?v=brand-sync-5">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="js/mobile-menu.js?v=mobile-nav-4"></script>
+    <script src="js/nav-current-page.js"></script>
+    
+    <style>
+        .shipping-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: var(--space-8) var(--space-4);
+            line-height: 1.6;
+        }
+        
+        .shipping-header {
+            text-align: center;
+            margin-bottom: var(--space-8);
+        }
+        
+        .shipping-section {
+            margin-bottom: var(--space-6);
+        }
+        
+        .shipping-section h2 {
+            color: var(--primary-green);
+            margin-bottom: var(--space-4);
+            border-bottom: 2px solid var(--gray-200);
+            padding-bottom: var(--space-2);
+        }
+        
+        .shipping-section h3 {
+            color: var(--primary-green-light);
+            margin-top: var(--space-4);
+            margin-bottom: var(--space-2);
+        }
+        
+        .shipping-section p {
+            margin-bottom: var(--space-3);
+        }
+        
+        .shipping-section ul {
+            margin-left: var(--space-4);
+            margin-bottom: var(--space-3);
+        }
+        
+        .shipping-section li {
+            margin-bottom: var(--space-1);
+        }
+        
+        .shipping-notice {
+            background-color: var(--primary-50);
+            border-left: 4px solid var(--primary-green);
+            padding: var(--space-4);
+            border-radius: var(--border-radius);
+            margin-bottom: var(--space-6);
+            text-align: center;
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            gap: var(--space-4) !important;
+            flex-wrap: wrap;
+        }
+        
+        .shipping-notice .ship-to-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .shipping-notice .phone-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .shipping-notice .shipping-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .shipping-notice > div {
+            margin-bottom: 0;
+            display: block !important;
+            line-height: 1.5;
+        }
+        
+        .shipping-notice strong {
+            color: var(--primary-green-dark);
+            display: block;
+        }
+        
+        .shipping-notice .phone-line {
+            display: block !important;
+            margin: 0;
+        }
+        
+        .shipping-notice .phone-line a {
+            color: var(--primary-green-dark);
+            text-decoration: underline;
+            margin-left: 0;
+        }
+        
+        .shipping-notice .shipping-text {
+            display: block !important;
+            margin: 0;
+            line-height: 1.6;
+        }
+        
+        .shipping-notice .ship-to-line {
+            margin-bottom: 0;
+        }
+        
+        .shipping-notice .usa-only-line {
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+        
+        .shipping-notice i,
+        .shipping-notice span {
+            display: none !important;
+        }
+        
+        .policy-contact-box {
+            background-color: var(--gray-50);
+            padding: var(--space-4);
+            border-radius: var(--border-radius);
+            margin-top: var(--space-2);
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: var(--space-4);
+            color: var(--primary-green);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <header class="header" role="banner">
+        <div class="main-header">
+            <div class="container">
+                <nav class="navbar" role="navigation" aria-label="Main navigation">
+                    <div class="logo">
+                        <a href="index.html" aria-label="H&M Herbs & Vitamins - Home">
+                            <img src="images/HM%20Herb%20Logo.png" alt="H&M Herbs & Vitamins" class="logo-wordmark" loading="eager">
+                        </a>
+                    </div>
+                    <button type="button" class="mobile-menu-toggle" aria-expanded="false" aria-controls="nav-menu"
+                        aria-label="Toggle navigation menu">
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                    </button>
+                    <ul class="nav-menu" id="nav-menu" role="menubar" aria-hidden="true">
+                        <li role="none"><a href="index.html" role="menuitem">Home</a></li>
+                        <li role="none"><a href="products.html" role="menuitem">Products</a></li>
+                        <li role="none"><a href="index.html#edsa-service" role="menuitem" class="edsa-nav-link">EDSA Service</a></li>
+                        <li role="none"><a href="about.html" role="menuitem">About</a></li>
+                        <li role="none"><a href="index.html#contact" role="menuitem">Contact</a></li>
+                    </ul>
+                    <div class="header-actions">
+                        <a href="products.html" class="auth-btn" aria-label="Shop products">
+                            <span class="auth-btn-text">Shop</span>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </header>
+    <main id="main-content">
+    <div class="shipping-container">
+        <a href="/" class="back-link">← Back to Home</a>
+        
+        <div class="shipping-header">
+            <h1>Shipping & Returns</h1>
+            <p><strong>H&M Herbs & Vitamins</strong></p>
+        </div>
+
+        <div class="shipping-notice">
+            <div class="ship-to-group">
+                <div class="ship-to-line"><strong>Ship To</strong></div>
+                <div class="usa-only-line"><strong>USA Only</strong></div>
+            </div>
+            <div class="phone-group">
+                <div class="phone-line">Call Toll Free</div>
+                <div class="phone-line"><a href="tel:+18664619454">1-866-461-9454</a></div>
+            </div>
+            <div class="shipping-group">
+                <div class="shipping-text">We can ship to virtually<br>any address in the US.</div>
+            </div>
+        </div>
+
+        <div class="shipping-section" id="shipping-policy">
+            <h2>Shipping Options</h2>
+            
+            <h3>Standard Shipping</h3>
+            <p><strong>All Orders Under $25.00:</strong> $4.95</p>
+            <p><strong>Free Shipping For Orders Over $25.00</strong> with USPS 3 to 7 Business Day Delivery</p>
+            <p><em>Excluding Weekends & Holidays</em></p>
+            
+            <h3>Priority Shipping</h3>
+            <p><strong>USPS Priority Delivery:</strong> 3 to 5 Business Days</p>
+            <p><strong>Cost:</strong> $9.99</p>
+            <p><em>Excluding Weekends & Holidays</em></p>
+        </div>
+
+        <div class="shipping-section" id="refund-policy">
+            <h2>Return Policy</h2>
+            <p>You may return most new, unopened items within 30 days of delivery for a full refund. We'll also pay the return shipping costs if the return is a result of our error (you received an incorrect or defective item, etc.).</p>
+            
+            <p>You should expect to receive a refund as soon as we receive the return package. The time period includes:</p>
+            <ul>
+                <li>The transit time for us to receive your return from the shipper (3 to 7 business days)</li>
+                <li>The time it takes us to process your return once we receive it (2 to 5 business days)</li>
+                <li>The time it takes your bank to process our refund request (3 to 7 business days)</li>
+            </ul>
+            
+            <p>If you need to return an item, simply login to your account, view the order using the "Complete Orders" link under the My Account menu and click the Return Item(s) button. We'll notify you via e-mail of your refund once we've received and processed the returned item.</p>
+        </div>
+
+        <div class="shipping-section">
+            <h2>Lost, Damaged, or Missing Item Policy</h2>
+            <p>You must notify us within 30 days if your order is lost, damaged, or missing items. We will review your order and arrange for a quick resolution, on a case-by-case basis, depending on the needs of the situation.</p>
+            
+            <div class="shipping-notice">
+                <p><strong>Please Note:</strong> Any orders over $150 are subject to require signature delivery unless waived by customer. If customer chooses to waive signature delivery, we will not be liable for lost or stolen packages IF delivery status says it has been delivered.</p>
+            </div>
+            
+            <div class="shipping-notice">
+                <p><strong>IMPORTANT NOTICE:</strong> If your order is flagged in our system as "manual verification required", we will call you to ensure you did place the order. We <strong>WILL NOT</strong> ship your order until we have spoke with you over the phone. Failure to communicate with us will result in delay of shipment.</p>
+            </div>
+        </div>
+
+        <div class="shipping-section">
+            <h2>Need Help?</h2>
+            <div class="policy-contact-box">
+                <p>If you have any questions about shipping or returns, please don't hesitate to contact us:</p>
+                <p>
+                    <strong>Phone:</strong> <a href="tel:+17068619454">706-861-9454</a><br>
+                    <strong>Toll Free:</strong> <a href="tel:+18664619454">1-866-461-9454</a><br>
+                    <strong>Email:</strong> <a href="mailto:hmherbs1@gmail.com">hmherbs1@gmail.com</a>
+                </p>
+            </div>
+        </div>
+    </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+        <div class="container">
+            <div class="footer-content">
+                <!-- Company Info & Social -->
+                <div class="footer-section">
+                    <h3>H&M Herbs & Vitamins</h3>
+                    <p>Your trusted source for premium natural health products. We're committed to providing
+                        the highest quality herbs, vitamins, and supplements to support your wellness journey.</p>
+                    <div class="social-links">
+                        <a href="https://facebook.com/hmherbs" target="_blank" rel="noopener noreferrer"
+                            aria-label="Follow us on Facebook">
+                            <span class="social-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                                </svg></span>
+                        </a>
+                        <a href="https://instagram.com/hmherbs" target="_blank" rel="noopener noreferrer"
+                            aria-label="Follow us on Instagram">
+                            <span class="social-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 11-2.881 0 1.44 1.44 0 012.881 0z" />
+                                </svg></span>
+                        </a>
+                        <a href="https://twitter.com/hmherbs" target="_blank" rel="noopener noreferrer"
+                            aria-label="Follow us on X">
+                            <span class="social-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                                </svg></span>
+                        </a>
+                        <a href="https://youtube.com/@hmherbs" target="_blank" rel="noopener noreferrer"
+                            aria-label="Subscribe to our YouTube channel">
+                            <span class="social-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M23.498 6.186A3.016 3.016 0 0021.376 4.05C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                                </svg></span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Visit Us -->
+                <div class="footer-section">
+                    <h4>Visit Us</h4>
+                    <div class="footer-contact">
+                        <div class="footer-address">
+                            <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                            <div class="address-text">
+                                <p>1140 Battlefield Pkwy</p>
+                                <p>Fort Oglethorpe, GA 30742</p>
+                                <p>United States</p>
+                            </div>
+                        </div>
+                        <p class="footer-link">
+                            <a href="https://maps.google.com/?q=1140+Battlefield+Pkwy,+Fort+Oglethorpe,+GA+30742"
+                                target="_blank" rel="noopener noreferrer">
+                                Get Directions <svg class="external-link-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="14" height="14" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5 4.75A2.25 2.25 0 0 0 2.75 7v8A2.25 2.25 0 0 0 5 17.25h8A2.25 2.25 0 0 0 15.25 15V11a.75.75 0 0 1 1.5 0v4A3.75 3.75 0 0 1 13 18.75H5A3.75 3.75 0 0 1 1.25 15V7A3.75 3.75 0 0 1 5 3.25h4a.75.75 0 0 1 0 1.5H5Z" clip-rule="evenodd"/><path fill-rule="evenodd" d="M10.5 1.25a.75.75 0 0 0 0 1.5h5.69l-8.97 8.97a.75.75 0 1 0 1.06 1.06l8.97-8.97V9.5a.75.75 0 0 0 1.5 0v-7a.75.75 0 0 0-.75-.75h-7Z" clip-rule="evenodd"/></svg>
+                            </a>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Get in Touch -->
+                <div class="footer-section">
+                    <h4>Get in Touch</h4>
+                    <div class="footer-get-in-touch">
+                        <div class="footer-get-in-touch__row">
+                            <i class="fas fa-phone footer-get-in-touch__icon" aria-hidden="true"></i>
+                            <a class="footer-get-in-touch__link" href="tel:+17068619454">706-861-9454</a>
+                        </div>
+                        <div class="footer-get-in-touch__row">
+                            <i class="fas fa-envelope footer-get-in-touch__icon" aria-hidden="true"></i>
+                            <a class="footer-get-in-touch__link" href="mailto:hmherbs1@gmail.com">hmherbs1@gmail.com</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Information -->
+                <div class="footer-section footer-info-section">
+                    <h4>Information</h4>
+                    <ul>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="shipping-returns.html">Shipping & Returns</a></li>
+                        <li><a href="index.html#contact">Contact Us</a></li>
+                    </ul>
+                </div>
+
+                <!-- Operating Hours -->
+                <div class="footer-section">
+                    <h4 class="footer-hours-title">Operating Hours</h4>
+                    <div class="footer-hours">
+                        <p>Mon-Fri: 10am-5pm</p>
+                        <p>Sat: 10am-1pm</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Bottom -->
+            <div class="footer-bottom">
+                <div class="footer-card-logos" aria-label="Accepted payment methods">
+                    <ul class="footer-card-logos-list" role="list">
+                        <li><img class="footer-card-logo" src="images/payment/visa.svg" width="48" height="16"
+                                alt="Visa"></li>
+                        <li><img class="footer-card-logo" src="images/payment/mastercard.svg" width="40" height="24"
+                                alt="Mastercard"></li>
+                        <li><img class="footer-card-logo" src="images/payment/amex.svg" width="40" height="24"
+                                alt="American Express"></li>
+                        <li><img class="footer-card-logo" src="images/payment/discover.svg" width="48" height="16"
+                                alt="Discover"></li>
+                    </ul>
+                </div>
+                <div class="footer-bottom-content">
+                    <p>&copy; 2024 H&M Herbs & Vitamins. All rights reserved.</p>
+                    <div class="footer-bottom-links">
+                        <a href="ccpa-privacy-rights.html">Do Not Sell My Personal Information</a>
+                        <span class="separator">|</span>
+                        <button id="cookie-preferences" class="link-button">Cookie Preferences</button>
+                        <span class="separator">|</span>
+                        <a href="admin.html" class="admin-link">Admin</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/age-gate.js" defer></script>
+    <script src="js/site-promo-banner.js" defer></script>
+    <script src="js/site-store-info.js" defer></script>
+    <script src="js/visual-bug-fixes.js"></script>
+    <script src="js/section-nav.js?v=mobile-nav-4"></script>
+    <script src="script.js" defer></script>
+    <script src="js/accessibility.js?v=a11y-1" defer></script>
+    <script src="gdpr-compliance.js?v=20260617a" defer></script>
+</body>
+</html>
+

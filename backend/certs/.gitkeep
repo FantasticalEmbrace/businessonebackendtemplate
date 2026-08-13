@@ -1,0 +1,2 @@
+# Place Linode Managed MySQL CA certificate here (ca-certificate.crt).
+# Download from: DO control panel → Databases → your cluster → Connection details → CA certificate

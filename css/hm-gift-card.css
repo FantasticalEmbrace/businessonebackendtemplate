@@ -1,0 +1,385 @@
+/**
+ * Branded HM Herbs gift card — shared by gift-cards page, account, checkout.
+ * Colors from css/brand-tokens.css
+ */
+
+.hm-gift-card {
+    --hm-gc-from: var(--brand-sidebar-from, #047857);
+    --hm-gc-to: var(--brand-sidebar-to, #065f46);
+    --hm-gc-accent: var(--brand-primary, var(--brand-primary));
+    --hm-gc-light: var(--light-green, #ecfdf5);
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    aspect-ratio: 1.75 / 1;
+    margin: 0 auto;
+    border-radius: 16px;
+    overflow: hidden;
+    color: #fff;
+    box-shadow:
+        0 4px 6px rgba(4, 120, 87, 0.12),
+        0 16px 40px rgba(6, 95, 70, 0.22);
+    background: linear-gradient(135deg, var(--hm-gc-from) 0%, var(--hm-gc-to) 55%, #064e3b 100%);
+}
+
+.hm-gift-card--digital {
+    --hm-gc-from: #4b5563;
+    --hm-gc-to: #111827;
+    background: linear-gradient(145deg, #9ca3af 0%, #4b5563 22%, #1f2937 58%, #0f172a 100%);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow:
+        0 4px 6px rgba(15, 23, 42, 0.18),
+        0 16px 40px rgba(15, 23, 42, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.hm-gift-card--digital .hm-gift-card__pattern {
+    opacity: 0.2;
+    background-image:
+        repeating-linear-gradient(
+            118deg,
+            transparent 0,
+            transparent 10px,
+            rgba(255, 255, 255, 0.035) 10px,
+            rgba(255, 255, 255, 0.035) 11px
+        ),
+        radial-gradient(circle at 82% 18%, rgba(255, 255, 255, 0.28) 0%, transparent 40%),
+        radial-gradient(circle at 12% 88%, rgba(212, 175, 55, 0.18) 0%, transparent 42%);
+}
+
+.hm-gift-card--digital:not(.hm-gift-card--compact)::before {
+    content: '';
+    position: absolute;
+    left: 1.25rem;
+    bottom: 1.05rem;
+    width: 2.15rem;
+    height: 1.55rem;
+    border-radius: 5px;
+    background: linear-gradient(145deg, #f5e6a8 0%, var(--brand-accent-gold, #d4af37) 45%, #9a7b1a 100%);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+    z-index: 2;
+    pointer-events: none;
+}
+
+.hm-gift-card--digital .hm-gift-card__badge {
+    background: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.34);
+    color: #fff;
+}
+
+.hm-gift-card--digital .hm-gift-card__footer {
+    padding-left: 3.35rem;
+}
+
+.hm-gift-card--digital.hm-gift-card--compact .hm-gift-card__footer {
+    padding-left: 0;
+}
+
+.hm-gift-card--digital.hm-gift-card--compact::before {
+    display: none;
+}
+
+.hm-gift-card--compact {
+    max-width: 120px;
+    aspect-ratio: 1.6 / 1;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(6, 95, 70, 0.18);
+}
+
+.hm-gift-card__pattern {
+    position: absolute;
+    inset: 0;
+    opacity: 0.14;
+    background-image:
+        radial-gradient(circle at 85% 15%, rgba(255, 255, 255, 0.45) 0%, transparent 42%),
+        radial-gradient(circle at 10% 90%, rgba(var(--brand-primary-rgb), 0.35) 0%, transparent 45%);
+    pointer-events: none;
+}
+
+.hm-gift-card__shine {
+    position: absolute;
+    top: -40%;
+    right: -20%;
+    width: 70%;
+    height: 140%;
+    background: linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, 0.08) 50%, transparent 60%);
+    transform: rotate(-8deg);
+    pointer-events: none;
+}
+
+.hm-gift-card__inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    padding: 1.15rem 1.25rem 1rem;
+    box-sizing: border-box;
+}
+
+.hm-gift-card--compact .hm-gift-card__inner {
+    padding: 0.45rem 0.5rem 0.4rem;
+}
+
+.hm-gift-card__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.hm-gift-card__logo {
+    display: block;
+    height: auto;
+    max-width: 130px;
+    width: 42%;
+}
+
+.hm-gift-card--digital .hm-gift-card__logo,
+.hm-gift-card--physical .hm-gift-card__logo {
+    filter: brightness(0) invert(1);
+    opacity: 0.95;
+}
+
+.hm-gift-card--compact .hm-gift-card__logo {
+    max-width: 100%;
+    width: 100%;
+}
+
+.hm-gift-card__badge {
+    flex-shrink: 0;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.55rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    backdrop-filter: blur(4px);
+}
+
+.hm-gift-card--compact .hm-gift-card__badge {
+    display: none;
+}
+
+.hm-gift-card__amount-wrap {
+    margin: 0.35rem 0 0.15rem;
+}
+
+.hm-gift-card__amount-label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.82;
+    margin-bottom: 0.15rem;
+}
+
+.hm-gift-card__amount {
+    display: block;
+    font-size: clamp(1.75rem, 6vw, 2.35rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.hm-gift-card--compact .hm-gift-card__amount {
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-align: center;
+    margin-top: 0.15rem;
+}
+
+.hm-gift-card--compact .hm-gift-card__amount-label {
+    display: none;
+}
+
+.hm-gift-card__recipient {
+    margin: 0;
+    font-size: 0.82rem;
+    opacity: 0.9;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hm-gift-card__code {
+    margin: 0.15rem 0 0;
+    font-family: ui-monospace, 'Cascadia Code', 'Segoe UI Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    opacity: 0.88;
+}
+
+.hm-gift-card__footer {
+    margin-top: auto;
+    padding-top: 0.35rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.hm-gift-card__brand {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.hm-gift-card__tagline {
+    display: block;
+    font-size: 0.65rem;
+    opacity: 0.75;
+    margin-top: 0.1rem;
+}
+
+.hm-gift-card--compact .hm-gift-card__footer {
+    display: none;
+}
+
+.hm-gift-card--compact .hm-gift-card__amount-wrap {
+    margin: 0;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Gift cards page layout */
+.gift-card-preview-wrap {
+    margin-bottom: 1.25rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--gray-200, #e5e7eb);
+}
+
+.gift-card-preview-label {
+    margin: 0 0 0.75rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gray-500, #6b7280);
+    text-align: center;
+}
+
+.gift-card-preview {
+    width: 100%;
+    min-height: 11rem;
+}
+
+.gift-card-preview .hm-gift-card {
+    display: block;
+    min-height: 10.5rem;
+}
+
+.gift-card-preview-wrap,
+.gift-card-preview-wrap .hm-gift-card,
+.gift-card-preview-wrap .hm-gift-card__inner,
+.gift-card-preview-wrap .hm-gift-card__pattern {
+    transform: none !important;
+    -webkit-transform: none !important;
+    backface-visibility: visible !important;
+    -webkit-backface-visibility: visible !important;
+}
+
+.gift-card-preview-wrap .hm-gift-card__shine {
+    transform: rotate(-8deg) !important;
+}
+
+.gift-card-preview-caption {
+    text-align: center;
+    margin: 0.85rem 0 0;
+    font-size: 0.95rem;
+    color: var(--gray-600, #4b5563);
+}
+
+.gift-card-preview-caption strong {
+    color: var(--primary-green-dark);
+}
+
+.gift-cards-profile-note {
+    font-size: 0.92rem;
+    color: var(--gray-600, #4b5563);
+    background: var(--light-green, #ecfdf5);
+    border: 1px solid var(--primary-100, #d1fae5);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    margin-top: 1rem;
+    line-height: 1.5;
+}
+
+.cart-item--gift-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.cart-item--gift-card .checkout-gift-card-thumb {
+    width: 88px;
+}
+
+.checkout-gift-card-thumb {
+    flex-shrink: 0;
+    width: 120px;
+}
+
+.cart-item--gift-card .cart-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.checkout-gift-card-thumb .hm-gift-card {
+    margin: 0;
+}
+
+.order-item:has(.checkout-gift-card-thumb) {
+    align-items: flex-start;
+}
+
+.order-item .checkout-gift-card-thumb + .order-item-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.gift-cards-container .hm-gift-card {
+    margin-bottom: 1rem;
+}
+
+.gift-card-account-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0 0 0.5rem;
+    padding: 0 0.25rem;
+}
+
+.gift-card-account-label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--gray-500, #6b7280);
+    margin-bottom: 0.15rem;
+}
+
+.gift-card-account-value {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--gray-800, #1f2937);
+    text-transform: capitalize;
+}
+
+.gift-card-account-message {
+    margin: 0.5rem 0 0;
+    font-style: italic;
+    color: var(--gray-600, #4b5563);
+    font-size: 0.92rem;
+    padding: 0 0.25rem;
+}
+
+@media (max-width: 480px) {
+    .hm-gift-card {
+        max-width: 100%;
+    }
+}

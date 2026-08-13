@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Complete your profile — H&amp;M Herbs</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="stylesheet" href="css/address-autocomplete.css">
+    <link rel="stylesheet" href="css/brand-tokens.css?v=admin-sync-5">
+
+    <style>
+
+        :root { --gray-300: #d1d5db; --gray-600: #4b5563; --error: #dc2626; }
+
+        body {
+
+            font-family: Inter, system-ui, sans-serif;
+
+            background: linear-gradient(135deg, var(--brand-sidebar-from) 0%, var(--brand-sidebar-to) 100%);
+
+            min-height: 100vh;
+
+            display: flex;
+
+            align-items: flex-start;
+
+            justify-content: center;
+
+            padding: 2rem 1rem;
+
+            margin: 0;
+
+        }
+
+        .card {
+
+            background: #fff;
+
+            padding: 2rem;
+
+            border-radius: 0.5rem;
+
+            max-width: 520px;
+
+            width: 100%;
+
+            overflow: visible;
+
+        }
+
+        h1 { font-size: 1.25rem; color: var(--primary-green); margin: 0 0 0.5rem; }
+
+        p { color: var(--gray-600); font-size: 0.9375rem; line-height: 1.5; margin: 0 0 1rem; }
+
+        label { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.35rem; color: #374151; }
+
+        .form-input {
+
+            width: 100%;
+
+            box-sizing: border-box;
+
+            padding: 0.75rem;
+
+            border: 1px solid var(--gray-300);
+
+            border-radius: 0.375rem;
+
+            margin-bottom: 1rem;
+
+        }
+
+        .form-row {
+
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 0.75rem;
+
+        }
+
+        .form-row .form-input { margin-bottom: 0; }
+
+        .form-row-wrap { margin-bottom: 1rem; }
+
+        .section-title {
+
+            font-size: 0.95rem;
+
+            font-weight: 700;
+
+            color: var(--primary-green);
+
+            margin: 1.25rem 0 0.75rem;
+
+            padding-top: 0.25rem;
+
+            border-top: 1px solid #e5e7eb;
+
+        }
+
+        .btn {
+
+            width: 100%;
+
+            padding: 0.75rem;
+
+            border: none;
+
+            border-radius: 0.375rem;
+
+            background: var(--primary-green);
+
+            color: #fff;
+
+            font-weight: 600;
+
+            cursor: pointer;
+
+            margin-top: 0.5rem;
+
+        }
+
+        .btn:disabled { opacity: 0.65; cursor: wait; }
+
+        .status-banner {
+
+            display: none;
+
+            padding: 0.75rem 0.9rem;
+
+            border-radius: 0.375rem;
+
+            font-size: 0.875rem;
+
+            line-height: 1.45;
+
+            margin-bottom: 1rem;
+
+        }
+
+        .status-banner.is-error {
+
+            display: block;
+
+            background: #fef2f2;
+
+            color: #b91c1c;
+
+            border: 1px solid #fecaca;
+
+        }
+
+        .status-banner.is-info {
+
+            display: block;
+
+            background: #eff6ff;
+
+            color: #1d4ed8;
+
+            border: 1px solid #bfdbfe;
+
+        }
+
+        .form-help { font-size: 0.8125rem; color: var(--gray-600); margin: -0.5rem 0 1rem; }
+
+        .form-input.input-error { border-color: var(--error); box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.18); }
+
+    </style>
+
+    <link rel="stylesheet" href="css/accessibility-enhancements.css?v=a11y-1">
+</head>
+
+<body>
+
+    <div class="card">
+
+        <h1><i class="fas fa-leaf" aria-hidden="true"></i> Complete your profile</h1>
+
+        <p>Google sign-in succeeded. Please confirm your date of birth (21+), phone number, and mailing address so we can process orders and reach you about your purchases.</p>
+
+
+
+        <div id="status-banner" class="status-banner" role="alert" aria-live="polite"></div>
+
+
+
+        <form id="profileForm" novalidate>
+
+            <label for="dob">Date of birth</label>
+
+            <input type="date" id="dob" class="form-input" required>
+
+
+
+            <div class="section-title">Contact</div>
+
+            <label for="phone">Phone</label>
+
+            <input type="tel" id="phone" class="form-input" placeholder="(555) 555-0100" autocomplete="tel" required>
+
+
+
+            <div class="section-title">Mailing address</div>
+
+            <p class="form-help">Start typing your street address for suggestions, or enter it manually.</p>
+
+            <label for="address-line1">Street address</label>
+
+            <input type="text" id="address-line1" class="form-input" required>
+
+
+
+            <label for="address-line2">Apt / suite <span style="font-weight:400;color:var(--gray-600);">(optional)</span></label>
+
+            <input type="text" id="address-line2" class="form-input" autocomplete="off">
+
+
+
+            <div class="form-row-wrap">
+
+                <div class="form-row">
+
+                    <div>
+
+                        <label for="address-city">City</label>
+
+                        <input type="text" id="address-city" class="form-input" required>
+
+                    </div>
+
+                    <div>
+
+                        <label for="address-state">State</label>
+
+                        <input type="text" id="address-state" class="form-input" maxlength="2" placeholder="MS" required>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <label for="address-zip">ZIP code</label>
+
+            <input type="text" id="address-zip" class="form-input" inputmode="numeric" maxlength="10" required>
+
+
+
+            <button type="submit" class="btn" id="profile-submit-btn">Continue</button>
+
+        </form>
+
+    </div>
+
+    <script src="js/phone-us-format.js"></script>
+
+    <script src="js/address-autocomplete.js"></script>
+
+    <script>
+
+        function apiOrigin() {
+
+            if (location.protocol === 'file:') return 'http://localhost:3001';
+
+            const h = location.hostname;
+
+            if ((h === 'localhost' || h === '127.0.0.1') && location.port && location.port !== '3001') {
+
+                return 'http://localhost:3001';
+
+            }
+
+            return '';
+
+        }
+
+
+
+        const params = new URLSearchParams(location.search);
+
+        const returnTo = params.get('returnTo') || 'index.html';
+
+        const token = localStorage.getItem('hmherbs_customer_token');
+
+        const dobInput = document.getElementById('dob');
+
+        const phoneInput = document.getElementById('phone');
+
+        const stateInput = document.getElementById('address-state');
+
+        const statusBanner = document.getElementById('status-banner');
+
+        const submitBtn = document.getElementById('profile-submit-btn');
+
+        const now = new Date();
+
+        const maxDob = new Date(now.getFullYear() - 21, now.getMonth(), now.getDate());
+
+        dobInput.max = maxDob.toISOString().slice(0, 10);
+
+
+
+        const phoneApi = window.HMHERBS_PHONE_US;
+
+        if (phoneApi && typeof phoneApi.attach === 'function') {
+
+            phoneApi.attach(phoneInput);
+
+        }
+
+
+
+        if (window.HMHERBS_ADDRESS_AUTOCOMPLETE) {
+
+            window.HMHERBS_ADDRESS_AUTOCOMPLETE.attach({
+
+                line1: '#address-line1',
+
+                line2: '#address-line2',
+
+                city: '#address-city',
+
+                state: '#address-state',
+
+                zip: '#address-zip',
+
+                apiBase: apiOrigin() ? apiOrigin() + '/api' : '/api',
+
+            });
+
+        }
+
+
+
+        if (stateInput) {
+
+            stateInput.addEventListener('input', () => {
+
+                stateInput.value = stateInput.value.replace(/[^a-zA-Z]/g, '').toUpperCase().slice(0, 2);
+
+            });
+
+        }
+
+
+
+        function showStatus(message, type) {
+
+            statusBanner.textContent = message;
+
+            statusBanner.className = 'status-banner ' + (type === 'error' ? 'is-error' : 'is-info');
+
+            statusBanner.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+
+        }
+
+
+
+        function clearStatus() {
+
+            statusBanner.textContent = '';
+
+            statusBanner.className = 'status-banner';
+
+        }
+
+
+
+        function markInvalid(el) {
+
+            if (!el) return;
+
+            document.querySelectorAll('.form-input.input-error').forEach(function (n) { n.classList.remove('input-error'); });
+
+            el.classList.add('input-error');
+
+            el.addEventListener('input', function clr() { el.classList.remove('input-error'); el.removeEventListener('input', clr); });
+
+            try { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (_) { /* ignore */ }
+
+            try { el.focus({ preventScroll: true }); } catch (_) { try { el.focus(); } catch (e) { /* ignore */ } }
+
+        }
+
+
+
+        function validateForm() {
+
+            clearStatus();
+
+            const dateOfBirth = dobInput.value;
+
+            const phone = phoneInput.value.trim();
+
+            const mailingAddress = {
+
+                addressLine1: document.getElementById('address-line1').value.trim(),
+
+                addressLine2: document.getElementById('address-line2').value.trim(),
+
+                city: document.getElementById('address-city').value.trim(),
+
+                state: stateInput.value.trim().toUpperCase(),
+
+                postalCode: document.getElementById('address-zip').value.trim(),
+
+            };
+
+
+
+            if (!dateOfBirth) {
+
+                showStatus('Please enter your date of birth.', 'error');
+
+                markInvalid(dobInput);
+
+                return null;
+
+            }
+
+            const dob = new Date(dateOfBirth + 'T12:00:00');
+
+            if (Number.isNaN(dob.getTime())) {
+
+                showStatus('Please enter a valid date of birth.', 'error');
+
+                markInvalid(dobInput);
+
+                return null;
+
+            }
+
+            if (dob > maxDob) {
+
+                showStatus('You must be 21 or older to shop with us.', 'error');
+
+                markInvalid(dobInput);
+
+                return null;
+
+            }
+
+            if (!phone) {
+
+                showStatus('Please enter your phone number.', 'error');
+
+                markInvalid(phoneInput);
+
+                return null;
+
+            }
+
+            if (phoneApi && !phoneApi.isValidDisplay(phone, false)) {
+
+                showStatus('Phone must be a valid US number like (555) 555-0100.', 'error');
+
+                markInvalid(phoneInput);
+
+                return null;
+
+            }
+
+            if (!mailingAddress.addressLine1 || !mailingAddress.city || !mailingAddress.state || !mailingAddress.postalCode) {
+
+                showStatus('Please complete your mailing address (street, city, state, and ZIP).', 'error');
+
+                markInvalid(document.getElementById('address-line1'));
+
+                return null;
+
+            }
+
+            if (!/^[A-Z]{2}$/.test(mailingAddress.state)) {
+
+                showStatus('State must be a 2-letter code (e.g. FL).', 'error');
+
+                markInvalid(stateInput);
+
+                return null;
+
+            }
+
+            if (!/^\d{5}(-\d{4})?$/.test(mailingAddress.postalCode)) {
+
+                showStatus('ZIP code must be 5 digits or ZIP+4 (12345 or 12345-6789).', 'error');
+
+                markInvalid(document.getElementById('address-zip'));
+
+                return null;
+
+            }
+
+
+
+            return { dateOfBirth, phone, mailingAddress };
+
+        }
+
+
+
+        async function prefillProfile() {
+
+            if (!token) return;
+
+            try {
+
+                const res = await fetch(apiOrigin() + '/api/user/profile', {
+
+                    headers: { Authorization: 'Bearer ' + token }
+
+                });
+
+                if (!res.ok) return;
+
+                const data = await res.json();
+
+                const u = data.user || data;
+
+                if (u.dateOfBirth || u.date_of_birth) {
+
+                    dobInput.value = String(u.dateOfBirth || u.date_of_birth).slice(0, 10);
+
+                }
+
+                if (u.phone) phoneInput.value = u.phone;
+
+            } catch (_) { /* optional */ }
+
+
+
+            try {
+
+                const res = await fetch(apiOrigin() + '/api/user/addresses', {
+
+                    headers: { Authorization: 'Bearer ' + token }
+
+                });
+
+                if (!res.ok) return;
+
+                const data = await res.json();
+
+                const list = Array.isArray(data.addresses) ? data.addresses : [];
+
+                const ship = list.find((a) => a.type === 'shipping') || list[0];
+
+                if (!ship) return;
+
+                document.getElementById('address-line1').value = ship.address_line_1 || ship.addressLine1 || '';
+
+                document.getElementById('address-line2').value = ship.address_line_2 || ship.addressLine2 || '';
+
+                document.getElementById('address-city').value = ship.city || '';
+
+                document.getElementById('address-state').value = String(ship.state || '').toUpperCase();
+
+                document.getElementById('address-zip').value = ship.postal_code || ship.postalCode || '';
+
+            } catch (_) { /* optional */ }
+
+        }
+
+
+
+        if (!token) {
+
+            showStatus('Session expired. Please sign in with Google again.', 'error');
+
+            document.getElementById('profileForm').style.display = 'none';
+
+        } else {
+
+            prefillProfile();
+
+        }
+
+
+
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+
+            e.preventDefault();
+
+            const payload = validateForm();
+
+            if (!payload) return;
+
+
+
+            submitBtn.disabled = true;
+
+            submitBtn.textContent = 'Saving…';
+
+            showStatus('Saving your profile…', 'info');
+
+
+
+            try {
+
+                const res = await fetch(apiOrigin() + '/api/auth/complete-google-profile', {
+
+                    method: 'POST',
+
+                    headers: {
+
+                        'Content-Type': 'application/json',
+
+                        Authorization: 'Bearer ' + token
+
+                    },
+
+                    body: JSON.stringify(payload)
+
+                });
+
+                const data = await res.json().catch(() => ({}));
+
+                if (!res.ok) {
+
+                    showStatus(data.error || 'Could not save your profile. Please check your entries and try again.', 'error');
+
+                    submitBtn.disabled = false;
+
+                    submitBtn.textContent = 'Continue';
+
+                    return;
+
+                }
+
+                if (data.user) {
+
+                    localStorage.setItem('hmherbs_customer_user', JSON.stringify(data.user));
+
+                }
+
+                window.location.replace(returnTo.replace(/^\/+/, '') || 'index.html');
+
+            } catch (_) {
+
+                showStatus('Network error — could not reach the server. Make sure the store backend is running, then try again.', 'error');
+
+                submitBtn.disabled = false;
+
+                submitBtn.textContent = 'Continue';
+
+            }
+
+        });
+
+    </script>
+
+    <script src="js/accessibility.js?v=a11y-1" defer></script>
+</body>
+
+</html>
+
+

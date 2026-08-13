@@ -1,0 +1,67 @@
+/* Address type-ahead suggestions (US). Manual entry always allowed. */
+.hm-address-autocomplete-wrap {
+    position: relative;
+}
+
+/* Elevate the whole field row so the dropdown stacks above fields below it. */
+.form-group.hm-address-ac-active,
+.form-group:has(.hm-address-autocomplete-wrap.is-open) {
+    position: relative;
+    z-index: 50;
+}
+
+.hm-address-suggest-list {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 2px);
+    z-index: 2;
+    margin: 0;
+    padding: 0.35rem 0;
+    list-style: none;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    box-shadow: 0 10px 25px rgb(0 0 0 / 0.12);
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+.hm-address-suggest-list[hidden] {
+    display: none !important;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+}
+
+.hm-address-suggest-item {
+    padding: 0.55rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.35;
+    color: #1f2937;
+    cursor: pointer;
+}
+
+.hm-address-suggest-item:hover,
+.hm-address-suggest-item.is-active {
+    background: #ecfdf5;
+    color: #065f46;
+}
+
+.hm-address-suggest-status {
+    padding: 0.65rem 0.75rem;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    color: #6b7280;
+    cursor: default;
+}
+
+.hm-address-suggest-status.is-loading {
+    color: #2563eb;
+}
+
+.hm-address-suggest-hint {
+    font-size: 0.8125rem;
+    color: #6b7280;
+    margin: -0.35rem 0 0.85rem;
+}

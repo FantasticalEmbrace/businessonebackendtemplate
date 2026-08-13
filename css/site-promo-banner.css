@@ -1,0 +1,143 @@
+/* Site-wide promo bar (admin-configured). Loaded on storefront pages. */
+
+.site-promo-banner {
+    --promo-bg: var(--brand-primary);
+    --promo-text: var(--white);
+    --promo-accent: var(--brand-accent-gold);
+    --promo-border: rgba(255, 255, 255, 0.2);
+    position: relative;
+    z-index: 10001;
+    width: 100%;
+    background: var(--promo-bg);
+    color: var(--promo-text);
+    border-bottom: 1px solid var(--promo-border);
+    font-size: 0.875rem;
+    line-height: 1.35;
+}
+
+.site-promo-banner[data-preset="sale"] {
+    --promo-bg: linear-gradient(100deg, var(--brand-sidebar-from) 0%, var(--brand-primary) 45%, var(--brand-primary-light) 100%);
+    background: var(--promo-bg);
+}
+
+.site-promo-banner[data-preset="flash"] {
+    --promo-bg: linear-gradient(95deg, #7f1d1d 0%, #b91c1c 50%, #dc2626 100%);
+    --promo-accent: var(--brand-accent-gold);
+    background: var(--promo-bg);
+}
+
+.site-promo-banner[data-preset="holiday"] {
+    --promo-bg: linear-gradient(95deg, #14532d 0%, #166534 40%, #1a5c3a 100%);
+    --promo-accent: var(--brand-accent-gold);
+    background: var(--promo-bg);
+}
+
+.site-promo-banner[data-preset="info"] {
+    --promo-bg: linear-gradient(95deg, #1e3a5f 0%, #1e40af 50%, #2563eb 100%);
+    --promo-accent: #e0e7ff;
+    background: var(--promo-bg);
+}
+
+.site-promo-banner[data-preset="custom"] {
+    background: var(--promo-bg);
+    color: var(--promo-text);
+}
+
+.site-promo-banner__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    text-align: center;
+}
+
+.site-promo-banner__icon {
+    flex-shrink: 0;
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.site-promo-banner__icon-img {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    object-fit: contain;
+    display: block;
+}
+
+.site-promo-banner__text {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.site-promo-banner__headline {
+    display: block;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.site-promo-banner__subline {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.8125rem;
+    opacity: 0.95;
+    font-weight: 400;
+}
+
+.site-promo-banner__cta {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.28rem 0.75rem;
+    border-radius: 999px;
+    background: var(--promo-accent);
+    color: #1a1a1a;
+    font-weight: 600;
+    font-size: 0.8125rem;
+    text-decoration: none;
+    border: none;
+    white-space: nowrap;
+}
+
+.site-promo-banner__cta:hover,
+.site-promo-banner__cta:focus-visible {
+    filter: brightness(1.08);
+    outline: 2px solid var(--promo-text);
+    outline-offset: 2px;
+}
+
+.site-promo-banner__dismiss {
+    flex-shrink: 0;
+    margin-left: auto;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.15);
+    color: inherit;
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.site-promo-banner__dismiss:hover,
+.site-promo-banner__dismiss:focus-visible {
+    background: rgba(255, 255, 255, 0.28);
+    outline: 2px solid var(--promo-text);
+    outline-offset: 1px;
+}
+
+@media (max-width: 640px) {
+    .site-promo-banner__inner {
+        padding: 0.45rem 0.75rem;
+    }
+
+    .site-promo-banner__dismiss {
+        margin-left: 0;
+    }
+}

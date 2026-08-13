@@ -1,0 +1,95 @@
+/**
+ * Business One merchant platform — default palette (admin, POS chrome, emails).
+ * Customer website face colors unlock when websiteEnabled is true.
+ */
+:root {
+    --brand-primary: #ff9b1f;
+    --brand-primary-light: #ffb347;
+    --brand-primary-dark: #e8890f;
+    --brand-sidebar-from: #0f172a;
+    --brand-sidebar-to: #1e293b;
+    --brand-accent: #1f82ff;
+    --brand-accent-btn: #1873e6;
+    --brand-accent-gold: #ff9b1f;
+    --brand-accent-gold-rgb: 255, 155, 31;
+
+    --brand-primary-rgb: 255, 155, 31;
+    --brand-primary-light-rgb: 255, 179, 71;
+    --brand-sidebar-from-rgb: 15, 23, 42;
+    --brand-sidebar-to-rgb: 30, 41, 59;
+
+    --primary: var(--brand-primary);
+    --primary-green: var(--brand-primary);
+    --primary-green-light: var(--brand-primary-light);
+    --primary-green-dark: var(--brand-primary-dark);
+    --dark-green: var(--brand-sidebar-from);
+    --accent-gold: var(--brand-accent-gold);
+    --light-green: #fff7ed;
+    --secondary-sage: var(--brand-accent);
+
+    --primary-50: #fff7ed;
+    --primary-100: #ffedd5;
+    --primary-300: #ffb347;
+    --primary-500: var(--brand-primary);
+    --primary-600: var(--brand-primary-dark);
+    --primary-700: var(--brand-sidebar-from);
+
+    --white: #ffffff;
+    --gray-50: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-300: #cbd5e1;
+    --gray-400: #94a3b8;
+    --gray-500: #64748b;
+    --gray-600: #475569;
+    --gray-700: #334155;
+    --gray-800: #1e293b;
+    --gray-900: #0f172a;
+
+    --success: #15803d;
+    --warning: #f59e0b;
+    --error: #ef4444;
+    --info: #1873e6;
+
+    --badge-success-bg: #dcfce7;
+    --badge-success-text: #166534;
+    --badge-warning-bg: #fef3c7;
+    --badge-warning-text: #92400e;
+    --badge-info-bg: #dbeafe;
+    --badge-info-text: #1e40af;
+    --badge-danger-bg: #fef2f2;
+    --badge-danger-text: #b91c1c;
+
+    --brand-surface-subtle: rgba(var(--brand-primary-rgb), 0.06);
+    --brand-surface-muted: rgba(var(--brand-primary-rgb), 0.08);
+    --brand-surface-soft: rgba(var(--brand-primary-rgb), 0.12);
+    --brand-surface-medium: rgba(var(--brand-primary-rgb), 0.18);
+    --brand-border-soft: rgba(15, 23, 42, 0.1);
+    --brand-border-medium: rgba(15, 23, 42, 0.18);
+    --brand-focus-ring: 0 0 0 3px rgba(24, 115, 230, 0.25);
+    --brand-focus-ring-md: 0 0 0 3px rgba(24, 115, 230, 0.3);
+    --brand-focus-ring-lg: 0 0 0 5px rgba(24, 115, 230, 0.25);
+    --brand-focus-ring-sm: 0 0 0 2px rgba(24, 115, 230, 0.3);
+    --brand-btn-shadow: 0 2px 4px rgba(15, 23, 42, 0.15);
+    --brand-btn-shadow-hover: 0 4px 8px rgba(15, 23, 42, 0.2);
+}
+
+/* Website-locked nav items */
+.nav-item.is-plan-locked .nav-link,
+.nav-link.is-plan-locked {
+    opacity: 0.45;
+    pointer-events: none;
+    cursor: not-allowed;
+    position: relative;
+}
+
+.nav-item.is-plan-locked::after {
+    content: attr(data-lock-hint);
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.65);
+    padding: 0 1rem 0.5rem 2.75rem;
+}
