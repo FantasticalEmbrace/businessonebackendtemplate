@@ -118,7 +118,7 @@ const POS_SETTING_META = Object.freeze({
     pos_personnel_mode: { description: 'POS personnel mode', type: 'string' },
     pos_receipt_return_policy: { description: 'Return policy on POS receipts', type: 'string' },
     pos_show_cost_in_cart: { description: 'Show product cost in POS cart', type: 'boolean' },
-    pos_hardware_printer: { description: 'POS receipt printer: auto, elo_star, or browser', type: 'string' },
+    pos_hardware_printer: { description: 'POS receipt printer: auto, elo_star, star_android, or browser', type: 'string' },
     pos_display_card_checkout: { description: 'NMI terminal card checkout enabled', type: 'boolean' },
     pos_poi_device_id: { description: 'NMI POI device ID for A3700', type: 'string' },
     pos_card_display_mode: { description: 'Card checkout mode (NMI NMI terminal)', type: 'string' }

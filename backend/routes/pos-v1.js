@@ -805,7 +805,7 @@ router.post('/print/receipt', authenticatePosEmployee, async (req, res) => {
         });
         const runtime = hardware?.runtime || {};
         const driver = String(runtime.printerDriver || 'browser').toLowerCase();
-        if (driver === 'browser' || driver === 'elo_star') {
+        if (driver === 'browser' || driver === 'elo_star' || driver === 'star_android') {
             return res.status(400).json({
                 error: 'This register is not configured for network receipt printing.',
                 code: 'PRINTER_NOT_NETWORK'

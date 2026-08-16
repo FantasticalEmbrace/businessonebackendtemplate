@@ -5,12 +5,19 @@ const { findModel, isPayPointModel, isAndroidAioRegister, fieldRequired, fieldVi
 
 const PRINTER_DRIVER_MAP = Object.freeze({
     elo_star: 'elo_star',
+    star_android: 'star_android',
     star_network: 'star_network',
     escpos_network: 'escpos_network',
     browser: 'browser',
     zebra_label: 'browser',
     brother_label: 'browser'
 });
+
+/** Built-in / USB Star on device (EloView bridge or Capacitor StarIO10) — not network ESC/POS. */
+function isLocalStarPrinterDriver(driver) {
+    const d = String(driver || '').trim().toLowerCase();
+    return d === 'elo_star' || d === 'star_android';
+}
 
 function pickFirst(equipment, type) {
     return (equipment || []).find((e) => e.equipmentType === type && e.isActive) || null;
@@ -25,9 +32,10 @@ function resolvePrinterDriver(printerRow, registerRow, globalPrinter) {
     if (registerRow?.config?.catalogModelId) {
         const regModel = findModel(registerRow.config.catalogModelId);
         if (regModel?.driver === 'elo_star') return 'elo_star';
+        if (regModel?.driver === 'star_android') return 'star_android';
     }
     const g = String(globalPrinter || 'auto').trim();
-    if (g === 'elo_star' || g === 'browser') return g;
+    if (g === 'elo_star' || g === 'star_android' || g === 'browser') return g;
     return 'auto';
 }
 
@@ -107,7 +115,7 @@ function buildIssues({
         });
     }
 
-    if (!receiptPrinter && printerDriver !== 'elo_star') {
+    if (!receiptPrinter && !isLocalStarPrinterDriver(printerDriver)) {
         issues.push('No receipt printer assigned — receipts will use browser print.');
     } else if (receiptPrinter) {
         missingConfigFields(receiptPrinter).forEach((label) => {
@@ -124,7 +132,7 @@ function buildIssues({
             if (!String(cashDrawer.config?.address || '').trim()) {
                 issues.push('Network cash drawer is missing interface IP/hostname.');
             }
-        } else if (!linkedPrinter && printerDriver !== 'elo_star') {
+        } else if (!linkedPrinter && !isLocalStarPrinterDriver(printerDriver)) {
             issues.push('Cash drawer is not linked to a receipt printer.');
         }
         missingConfigFields(cashDrawer).forEach((label) => {
@@ -220,7 +228,7 @@ async function buildRegisterHardwareProfile(pool, posDeviceRecordId, options = {
     }
 
     return {
-        ready: issues.length === 0 || Boolean(poiDeviceId && (receiptPrinter || printerDriver === 'elo_star')),
+        ready: issues.length === 0 || Boolean(poiDeviceId && (receiptPrinter || isLocalStarPrinterDriver(printerDriver))),
         issues,
         equipmentCount: equipment.length,
         register: summarizeEquipment(register, {
@@ -243,7 +251,7 @@ async function buildRegisterHardwareProfile(pool, posDeviceRecordId, options = {
                     ? 'network'
                     : linkedPrinter
                       ? 'receipt_printer'
-                      : printerDriver === 'elo_star'
+                      : isLocalStarPrinterDriver(printerDriver)
                         ? 'register'
                         : 'none',
             drawerAddress: cashDrawer?.config?.address || ''
@@ -272,7 +280,7 @@ async function buildRegisterHardwareProfile(pool, posDeviceRecordId, options = {
                     ? 'network'
                     : linkedPrinter
                       ? 'printer'
-                      : printerDriver === 'elo_star'
+                      : isLocalStarPrinterDriver(printerDriver)
                         ? 'register'
                         : 'none',
             cashDrawerAddress: cashDrawer?.config?.address || '',

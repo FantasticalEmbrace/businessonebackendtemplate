@@ -384,7 +384,7 @@ async function ensurePosSchema(pool) {
             ('pos_card_payment_processor', 'nmi', 'In-store POS processor: inherit (match website), epi, nmi, or mxmerchant', 'string'),
             ('pos_card_payment_adapter', 'integrated', 'POS card payment: semi-integrated NMI terminal only', 'string'),
             ('pos_custom_payment_driver_url', '', 'Optional URL to custom POS payment driver script when adapter is custom', 'string'),
-            ('pos_hardware_printer', 'auto', 'POS receipt printer: auto, elo_star, or browser', 'string'),
+            ('pos_hardware_printer', 'auto', 'POS receipt printer: auto, elo_star, star_android, or browser', 'string'),
             ('pos_display_card_checkout', 'true', 'NMI terminal card checkout (semi-integrated)', 'boolean'),
             ('pos_poi_device_id', '', 'NMI POI device ID for A3700 terminal (Customer Present Cloud)', 'string'),
             ('pos_card_display_mode', 'nmi_terminal', 'Card checkout: NMI terminal (semi-integrated)', 'string')
