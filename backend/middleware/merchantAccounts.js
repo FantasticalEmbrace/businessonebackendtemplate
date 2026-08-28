@@ -23,6 +23,8 @@ function shouldSkipMerchantResolve(req) {
     const path = String(req.path || '');
     if (path === '/api/health' || path.startsWith('/api/health/')) return true;
     if (path.startsWith('/api/platform/tenants') || path.startsWith('/api/platform/directory')) return true;
+    // Customer portal + pay-by-link (token auth only)
+    if (path.startsWith('/api/shop/') || path === '/api/shop') return true;
     if (req.method === 'GET' && !path.startsWith('/api/')) return true;
     // Admin login before merchant context exists on the token
     if (path === '/api/admin/login' || path === '/api/auth/login') return true;
