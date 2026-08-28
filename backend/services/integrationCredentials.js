@@ -140,6 +140,11 @@ function resolve(key) {
     return firstEnv(ENV_FALLBACKS[key]);
 }
 
+/** Merchant store credentials only — never platform .env fallbacks (POS, shop pay-by-link). */
+function resolveDbOnly(key) {
+    return trim(cache[key]);
+}
+
 function isTruthyFlag(raw) {
     const s = trim(raw).toLowerCase();
     return s === '1' || s === 'true' || s === 'yes';
@@ -446,6 +451,67 @@ function getPosNmiPrivateApiKey() {
     return resolve('cred_pos_nmi_private_api_key');
 }
 
+function getMerchantPosNmiPublicTokenizationKey() {
+    return resolveDbOnly('cred_pos_nmi_public_tokenization_key');
+}
+
+function getMerchantPosNmiPrivateApiKey() {
+    return resolveDbOnly('cred_pos_nmi_private_api_key');
+}
+
+function isMerchantPosNmiSandboxHint() {
+    const raw = resolveDbOnly('cred_pos_nmi_sandbox');
+    if (raw) return isTruthyFlag(raw);
+    return false;
+}
+
+function isMerchantPosNmiConfigured() {
+    return Boolean(getMerchantPosNmiPublicTokenizationKey() && getMerchantPosNmiPrivateApiKey());
+}
+
+function getMerchantEpiPublicTokenizationKey() {
+    return resolveDbOnly('cred_epi_public_tokenization_key');
+}
+
+function getMerchantEpiPrivateApiKey() {
+    return resolveDbOnly('cred_epi_private_api_key');
+}
+
+function isMerchantEpiConfigured() {
+    return Boolean(getMerchantEpiPublicTokenizationKey() && getMerchantEpiPrivateApiKey());
+}
+
+function resolveMerchantMxmerchantAuth(scope = 'pos') {
+    const prefix = scope === 'pos' ? 'cred_pos_mxmerchant_' : 'cred_mxmerchant_';
+    const method = resolveDbOnly(`${prefix}auth_method`) || resolveDbOnly('cred_mxmerchant_auth_method') || 'consumer';
+    const authMethod = String(method).toLowerCase() === 'username' ? 'username' : 'consumer';
+    return {
+        authMethod,
+        merchantId: resolveDbOnly(`${prefix}merchant_id`) || resolveDbOnly('cred_mxmerchant_merchant_id'),
+        consumerKey: resolveDbOnly(`${prefix}consumer_key`) || resolveDbOnly('cred_mxmerchant_consumer_key'),
+        consumerSecret: resolveDbOnly(`${prefix}consumer_secret`) || resolveDbOnly('cred_mxmerchant_consumer_secret'),
+        username: resolveDbOnly(`${prefix}username`) || resolveDbOnly('cred_mxmerchant_username'),
+        password: resolveDbOnly(`${prefix}password`) || resolveDbOnly('cred_mxmerchant_password'),
+        terminalId:
+            resolveDbOnly('cred_pos_mxmerchant_terminal_id') || resolveDbOnly('cred_mxmerchant_terminal_id')
+    };
+}
+
+function getMerchantMxmerchantCredentials(scope = 'pos') {
+    const auth = resolveMerchantMxmerchantAuth(scope);
+    const hasAuth =
+        auth.authMethod === 'username'
+            ? Boolean(auth.username && auth.password)
+            : Boolean(auth.consumerKey && auth.consumerSecret);
+    const sandboxRaw = resolveDbOnly(scope === 'pos' ? 'cred_pos_mxmerchant_sandbox' : 'cred_mxmerchant_sandbox');
+    return {
+        ...auth,
+        merchantId: String(auth.merchantId || '').trim(),
+        hasAuth,
+        sandbox: sandboxRaw ? isTruthyFlag(sandboxRaw) : false
+    };
+}
+
 function isNmiSandboxHint() {
     const raw = resolve('cred_nmi_sandbox');
     if (raw) return isTruthyFlag(raw);
@@ -516,6 +582,15 @@ module.exports = {
     getNmiPrivateApiKey,
     getPosNmiPublicTokenizationKey,
     getPosNmiPrivateApiKey,
+    getMerchantPosNmiPublicTokenizationKey,
+    getMerchantPosNmiPrivateApiKey,
+    isMerchantPosNmiSandboxHint,
+    isMerchantPosNmiConfigured,
+    getMerchantEpiPublicTokenizationKey,
+    getMerchantEpiPrivateApiKey,
+    isMerchantEpiConfigured,
+    getMerchantMxmerchantCredentials,
+    resolveDbOnly,
     isNmiSandboxHint,
     isPosNmiSandboxHint,
     getShippoApiToken,

@@ -96,8 +96,3 @@ deploy/_miami_key_audit.txt
 *.code-workspace
 commitmsg.txt
 
-
-# Never commit scraped ProCharge/EPI vendor dumps (may embed secrets)
-backend/tmp-procharge*
-backend/tmp-*.html
-backend/tmp-*.zip

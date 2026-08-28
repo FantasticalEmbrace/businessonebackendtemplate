@@ -92,6 +92,7 @@ function mapPosEmployeeRow(e) {
         canOpenDrawer: Boolean(e.can_open_drawer),
         allowManualDiscounts: Boolean(e.allow_manual_discounts),
         canViewCost: Boolean(e.can_view_cost),
+        canViewShopFloor: e.can_view_shop_floor == null ? false : Boolean(e.can_view_shop_floor),
         createdAt: e.created_at,
         updatedAt: e.updated_at,
     };

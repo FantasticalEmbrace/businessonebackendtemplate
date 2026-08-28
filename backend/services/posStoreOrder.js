@@ -387,9 +387,11 @@ async function ensurePosCustomProduct(pool) {
     return created[0];
 }
 
-async function loadCatalogLines(pool, lineItems) {
+async function loadCatalogLines(pool, lineItems, merchantId = null) {
     const enriched = [];
     let customProduct = null;
+    const midSql = merchantId ? ' AND p.merchant_id = ?' : '';
+    const midSqlBare = merchantId ? ' AND merchant_id = ?' : '';
     for (const raw of lineItems) {
         const quantity = Number(raw.quantity);
         if (!Number.isFinite(quantity) || quantity <= 0 || quantity > 999) {
@@ -438,9 +440,9 @@ async function loadCatalogLines(pool, lineItems) {
                 `SELECT pv.*, p.name AS product_name, p.is_taxable, p.track_inventory, p.is_active AS product_active
                  FROM product_variants pv
                  JOIN products p ON p.id = pv.product_id
-                 WHERE pv.id = ? AND pv.is_active = 1 AND p.is_active = 1
+                 WHERE pv.id = ? AND pv.is_active = 1 AND p.is_active = 1${midSql}
                  LIMIT 1`,
-                [variantId]
+                merchantId ? [variantId, merchantId] : [variantId]
             );
             variantRow = variants[0] || null;
             if (variantRow) productRow = variantRow;
@@ -451,9 +453,9 @@ async function loadCatalogLines(pool, lineItems) {
                 `SELECT pv.*, p.id AS parent_product_id, p.name AS product_name, p.is_taxable, p.track_inventory, p.is_active AS product_active
                  FROM product_variants pv
                  JOIN products p ON p.id = pv.product_id
-                 WHERE pv.sku = ? AND pv.is_active = 1 AND p.is_active = 1
+                 WHERE pv.sku = ? AND pv.is_active = 1 AND p.is_active = 1${midSql}
                  LIMIT 1`,
-                [sku]
+                merchantId ? [sku, merchantId] : [sku]
             );
             if (byVariantSku[0]) {
                 variantRow = byVariantSku[0];
@@ -461,8 +463,8 @@ async function loadCatalogLines(pool, lineItems) {
             } else {
                 const [byProductSku] = await pool.execute(
                     `SELECT id, sku, name, price, is_taxable, track_inventory, inventory_quantity
-                     FROM products WHERE sku = ? AND is_active = 1 LIMIT 1`,
-                    [sku]
+                     FROM products WHERE sku = ? AND is_active = 1${midSqlBare} LIMIT 1`,
+                    merchantId ? [sku, merchantId] : [sku]
                 );
                 productRow = byProductSku[0] || null;
             }
@@ -471,8 +473,8 @@ async function loadCatalogLines(pool, lineItems) {
         if (!productRow && productId) {
             const [byId] = await pool.execute(
                 `SELECT id, sku, name, price, is_taxable, track_inventory, inventory_quantity
-                 FROM products WHERE id = ? AND is_active = 1 LIMIT 1`,
-                [productId]
+                 FROM products WHERE id = ? AND is_active = 1${midSqlBare} LIMIT 1`,
+                merchantId ? [productId, merchantId] : [productId]
             );
             productRow = byId[0] || null;
         }
@@ -550,7 +552,8 @@ async function resumePendingPosOrder(pool, existing, options = {}) {
         paymentId: existing.payment_reference || `pos:retry:${existing.id}`,
         paymentStatus: 'paid',
         skipConfirmationEmail: true,
-        allowOversell: Boolean(options.allowOversell ?? true)
+        allowOversell: Boolean(options.allowOversell ?? true),
+        orderStatus: 'delivered'
     });
     return {
         ...result,
@@ -603,7 +606,8 @@ function assertManualDiscountsAllowed(allowManual, lineItems, cartDiscountPercen
 /**
  * Create and finalize an in-store POS order (PCI-safe: no card PAN/CVV).
  */
-async function createInStorePosOrder(pool, payload, deviceId, verifiedEmployeeId = null) {
+async function createInStorePosOrder(pool, payload, deviceId, verifiedEmployeeId = null, options = {}) {
+    const merchantId = options.merchantId || payload.merchantId || null;
     const posProcessor = await loadPosPaymentProcessor(pool);
     const clientTransactionId = String(
         payload.clientTransactionId || payload.client_transaction_id || ''
@@ -667,7 +671,7 @@ async function createInStorePosOrder(pool, payload, deviceId, verifiedEmployeeId
         throw err;
     }
 
-    const enrichedPreview = await loadCatalogLines(pool, lineItems);
+    const enrichedPreview = await loadCatalogLines(pool, lineItems, merchantId);
     const preCartSubtotal = merchandiseSubtotal(enrichedPreview);
 
     const paymentMeta = payload.payment || payload;
@@ -842,36 +846,44 @@ async function createInStorePosOrder(pool, payload, deviceId, verifiedEmployeeId
     await connection.beginTransaction();
 
     try {
-        const [orderResult] = await connection.execute(
-            `INSERT INTO orders (
-                order_number, user_id, email, status, payment_status,
+        const orderCols = `order_number, user_id, email, status, payment_status,
                 subtotal, tax_amount, shipping_amount, discount_amount, total_amount,
                 shipping_first_name, shipping_last_name,
                 billing_first_name, billing_last_name,
                 notes, payment_method, payment_reference, sales_channel,
-                pos_client_transaction_id, pos_device_id, pos_employee_id, pos_shift_session_id
-            ) VALUES (?, ?, ?, 'pending', 'pending', ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [
-                orderNumber,
-                customerUser?.id || null,
-                orderEmail,
-                totalsFinal.subtotal,
-                totalsFinal.taxAmount,
-                totalsFinal.discountAmount,
-                saleTotal,
-                shippingFirst,
-                shippingLast,
-                shippingFirst,
-                shippingLast,
-                notesFinal,
-                paymentMethod,
-                paymentReference,
-                salesChannel,
-                clientTransactionId || null,
-                deviceId || null,
-                employeeId,
-                shiftSessionId
-            ].map(sqlBind)
+                pos_client_transaction_id, pos_device_id, pos_employee_id, pos_shift_session_id`;
+        const orderVals = `?, ?, ?, 'pending', 'pending', ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?`;
+        const orderParams = [
+            orderNumber,
+            customerUser?.id || null,
+            orderEmail,
+            totalsFinal.subtotal,
+            totalsFinal.taxAmount,
+            totalsFinal.discountAmount,
+            saleTotal,
+            shippingFirst,
+            shippingLast,
+            shippingFirst,
+            shippingLast,
+            notesFinal,
+            paymentMethod,
+            paymentReference,
+            salesChannel,
+            clientTransactionId || null,
+            deviceId || null,
+            employeeId,
+            shiftSessionId
+        ];
+        const withMerchant = merchantId
+            ? {
+                  cols: `${orderCols}, merchant_id`,
+                  vals: `${orderVals}, ?`,
+                  params: [...orderParams, merchantId]
+              }
+            : { cols: orderCols, vals: orderVals, params: orderParams };
+        const [orderResult] = await connection.execute(
+            `INSERT INTO orders (${withMerchant.cols}) VALUES (${withMerchant.vals})`,
+            withMerchant.params.map(sqlBind)
         );
 
         const orderId = orderResult.insertId;
@@ -961,7 +973,8 @@ async function createInStorePosOrder(pool, payload, deviceId, verifiedEmployeeId
             paymentStatus: 'paid',
             paymentProcessor: posProcessor,
             skipConfirmationEmail: true,
-            allowOversell: paymentCaptured
+            allowOversell: paymentCaptured,
+            orderStatus: 'delivered'
         });
 
         if (shiftSessionId) {
@@ -1004,14 +1017,20 @@ async function createInStorePosOrder(pool, payload, deviceId, verifiedEmployeeId
     }
 }
 
-async function syncPosOrderBatch(pool, sales, deviceId, verifiedEmployeeId = null) {
+async function syncPosOrderBatch(pool, sales, deviceId, verifiedEmployeeId = null, options = {}) {
     const results = [];
     for (const sale of sales) {
         try {
             const normalized = { ...sale, fromOfflineSync: true };
             delete normalized.employeeId;
             delete normalized.employee_id;
-            const result = await createInStorePosOrder(pool, normalized, deviceId, verifiedEmployeeId);
+            const result = await createInStorePosOrder(
+                pool,
+                normalized,
+                deviceId,
+                verifiedEmployeeId,
+                options
+            );
             results.push({
                 clientTransactionId: sale.clientTransactionId || sale.client_transaction_id,
                 success: true,

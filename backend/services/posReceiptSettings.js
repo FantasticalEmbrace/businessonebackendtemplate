@@ -35,7 +35,7 @@ const DEFAULTS = {
     showPlatformLine: true,
     showCashier: true,
     showCashSavings: true,
-    autoPrint: true,
+    autoPrint: false,
     copyCount: 2,
     showOrderBarcode: true,
     returnPolicy: ''

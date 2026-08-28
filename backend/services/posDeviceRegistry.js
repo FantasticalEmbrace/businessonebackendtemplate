@@ -97,7 +97,17 @@ function resolveStoreUrlForNewKey() {
     }
 }
 
-async function listDevices(pool) {
+async function listDevices(pool, merchantId = null) {
+    if (merchantId) {
+        const [rows] = await pool.execute(
+            `SELECT id, device_label, key_prefix, is_active, last_seen_at, created_at, updated_at
+             FROM pos_devices
+             WHERE is_active = 1 AND merchant_id = ?
+             ORDER BY device_label ASC`,
+            [merchantId]
+        );
+        return rows || [];
+    }
     const [rows] = await pool.execute(
         `SELECT id, device_label, key_prefix, is_active, last_seen_at, created_at, updated_at
          FROM pos_devices
@@ -107,9 +117,18 @@ async function listDevices(pool) {
     return rows || [];
 }
 
-async function findDeviceByLabel(pool, deviceLabel) {
+async function findDeviceByLabel(pool, deviceLabel, merchantId = null) {
     const label = String(deviceLabel || '').trim().slice(0, 64);
     if (!label) return null;
+    if (merchantId) {
+        const [rows] = await pool.execute(
+            `SELECT id, device_label, is_active FROM pos_devices
+             WHERE LOWER(device_label) = LOWER(?) AND is_active = 1 AND merchant_id = ?
+             LIMIT 1`,
+            [label, merchantId]
+        );
+        return rows[0] || null;
+    }
     const [rows] = await pool.execute(
         `SELECT id, device_label, is_active FROM pos_devices WHERE LOWER(device_label) = LOWER(?) AND is_active = 1 LIMIT 1`,
         [label]
@@ -117,7 +136,7 @@ async function findDeviceByLabel(pool, deviceLabel) {
     return rows[0] || null;
 }
 
-async function createDevice(pool, deviceLabel) {
+async function createDevice(pool, deviceLabel, merchantId = null) {
     const label = String(deviceLabel || '').trim().slice(0, 64);
     if (label.length < 2) {
         const err = new Error('Register name must be at least 2 characters');
@@ -125,7 +144,7 @@ async function createDevice(pool, deviceLabel) {
         throw err;
     }
 
-    const existing = await findDeviceByLabel(pool, label);
+    const existing = await findDeviceByLabel(pool, label, merchantId);
     if (existing) {
         const err = new Error(
             `Register "${label}" already exists. Click "New key" on that register to generate a replacement key.`
@@ -140,11 +159,33 @@ async function createDevice(pool, deviceLabel) {
     const prefix = keyPrefix(apiKey);
     const parsed = parseDeviceApiKey(apiKey);
 
-    const [result] = await pool.execute(
-        `INSERT INTO pos_devices (device_label, api_key_hash, key_prefix, is_active)
-         VALUES (?, ?, ?, 1)`,
-        [label, apiKeyHash, prefix]
-    );
+    let result;
+    if (merchantId) {
+        [result] = await pool.execute(
+            `INSERT INTO pos_devices (device_label, api_key_hash, key_prefix, is_active, merchant_id)
+             VALUES (?, ?, ?, 1, ?)`,
+            [label, apiKeyHash, prefix, merchantId]
+        );
+        try {
+            const { hashTenantSecret } = require('../utils/ensureTenantsSchema');
+            const dirHash = hashTenantSecret(apiKey);
+            await pool.execute(
+                `INSERT INTO platform_merchant_keys
+                 (merchant_id, kind, key_hash, key_prefix, label)
+                 VALUES (?, 'device_key', ?, ?, ?)
+                 ON DUPLICATE KEY UPDATE merchant_id = VALUES(merchant_id), label = VALUES(label)`,
+                [merchantId, dirHash, prefix, label]
+            );
+        } catch {
+            /* directory optional if tables missing */
+        }
+    } else {
+        [result] = await pool.execute(
+            `INSERT INTO pos_devices (device_label, api_key_hash, key_prefix, is_active)
+             VALUES (?, ?, ?, 1)`,
+            [label, apiKeyHash, prefix]
+        );
+    }
 
     return {
         id: result.insertId,
@@ -238,17 +279,26 @@ async function touchDeviceSeen(pool, deviceRowId) {
     await pool.execute(`UPDATE pos_devices SET last_seen_at = CURRENT_TIMESTAMP WHERE id = ?`, [deviceRowId]).catch(() => {});
 }
 
-async function authenticateDevice(pool, deviceLabel, providedKey) {
+async function authenticateDevice(pool, deviceLabel, providedKey, merchantId = null) {
     const label = String(deviceLabel || 'register-1').trim().slice(0, 64);
     const key = String(providedKey || '').trim();
     if (!key) {
         return { ok: false, code: 'POS_AUTH_FAILED' };
     }
 
-    const [rows] = await pool.execute(
-        `SELECT id, device_label, api_key_hash, is_active FROM pos_devices WHERE LOWER(device_label) = LOWER(?) LIMIT 1`,
-        [label]
-    );
+    let rows;
+    if (merchantId) {
+        [rows] = await pool.execute(
+            `SELECT id, device_label, api_key_hash, is_active FROM pos_devices
+             WHERE LOWER(device_label) = LOWER(?) AND merchant_id = ? LIMIT 1`,
+            [label, merchantId]
+        );
+    } else {
+        [rows] = await pool.execute(
+            `SELECT id, device_label, api_key_hash, is_active FROM pos_devices WHERE LOWER(device_label) = LOWER(?) LIMIT 1`,
+            [label]
+        );
+    }
     const registered = rows[0];
 
     if (registered) {
@@ -260,7 +310,17 @@ async function authenticateDevice(pool, deviceLabel, providedKey) {
             return { ok: false, code: 'POS_AUTH_FAILED' };
         }
         await touchDeviceSeen(pool, registered.id);
-        return { ok: true, deviceId: registered.device_label, deviceRecordId: registered.id };
+        return {
+            ok: true,
+            deviceId: registered.device_label,
+            deviceRecordId: registered.id
+        };
+    }
+
+    // First-time registration: create device for this merchant if key is a valid pos1 key
+    // (legacy open enroll disabled under shared tenancy)
+    if (merchantId) {
+        return { ok: false, code: 'POS_AUTH_FAILED' };
     }
 
     const expected = String(process.env.POS_DEVICE_API_KEY || '').trim();

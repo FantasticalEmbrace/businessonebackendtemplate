@@ -345,7 +345,7 @@ async function ensurePosSchema(pool) {
             ('pos_receipt_show_platform_line', 'true', 'Show Business One POS line on receipts', 'boolean'),
             ('pos_receipt_show_cashier', 'true', 'Show cashier name on POS receipts', 'boolean'),
             ('pos_receipt_show_cash_savings', 'true', 'Show cash savings line on POS receipts', 'boolean'),
-            ('pos_receipt_auto_print', 'true', 'Auto-open print dialog after each sale', 'boolean'),
+            ('pos_receipt_auto_print', 'false', 'Automatically print a paper receipt after each sale', 'boolean'),
             ('pos_receipt_copy_count', '2', 'Number of receipt copies to print (1–3)', 'number'),
             ('pos_receipt_show_order_barcode', 'true', 'Show order number as barcode on receipts', 'boolean'),
             ('pos_session_timeout_minutes', '30', 'Minutes before POS employee must re-enter PIN', 'number'),
@@ -391,6 +391,22 @@ async function ensurePosSchema(pool) {
         `);
     } catch (e) {
         logger.warn(`Database: pos cash discount settings — ${logger.formatMysqlError(e)}`);
+    }
+    try {
+        const [migrated] = await pool.query(
+            `SELECT 1 FROM settings WHERE key_name = 'pos_receipt_auto_print_opt_in_migrated' LIMIT 1`
+        );
+        if (!migrated?.length) {
+            await pool.query(
+                `UPDATE settings SET value = 'false', description = 'Automatically print a paper receipt after each sale' WHERE key_name = 'pos_receipt_auto_print'`
+            );
+            await pool.query(`
+                INSERT IGNORE INTO settings (key_name, value, description, type) VALUES
+                ('pos_receipt_auto_print_opt_in_migrated', '1', 'One-time: paper receipt prints only when cashier taps Print unless Auto-print is turned back on', 'boolean')
+            `);
+        }
+    } catch (e) {
+        logger.warn(`Database: pos receipt auto-print opt-in — ${logger.formatMysqlError(e)}`);
     }
     try {
         await pool.query(`

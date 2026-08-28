@@ -33,7 +33,11 @@
         return { token, platformKey: key };
     })();
     authToken = initialHash.token;
-    platformKey = initialHash.platformKey;
+    platformKey =
+        params.get('platformKey') ||
+        params.get('key') ||
+        initialHash.platformKey ||
+        '';
     const isPlatformMode = Boolean(storeOrigin) || forcePlatform || Boolean(platformKey);
 
     function apiBase() {
@@ -56,17 +60,12 @@
             localStorage.getItem('authToken') ||
             sessionStorage.getItem('adminToken') ||
             '';
-        if (!authToken) {
-            authToken = window.prompt('Paste your admin API token (from admin while logged in):') || '';
-        }
         return authToken;
     }
 
     function getPlatformKey() {
         if (!isPlatformMode) return '';
-        if (platformKey) return platformKey;
-        platformKey = window.prompt('Platform support key (from support queue):') || '';
-        return platformKey;
+        return platformKey || '';
     }
 
     async function api(path, options = {}) {
@@ -147,6 +146,10 @@
             setStatus('Missing session id in URL');
             return;
         }
+        if (isPlatformMode && !getPlatformKey()) {
+            setStatus('Missing support key. Close this window and Join again from the technician app.');
+            return;
+        }
         // storeOrigin is optional when the viewer is hosted on the merchant store (apiBase uses location.origin).
         cleanup();
         setStatus('Waiting for register screen share…');
@@ -184,9 +187,18 @@
         }
         cleanup();
         setStatus('Session ended');
+        try {
+            window.b1ViewerShell?.close?.();
+        } catch {
+            /* ignore */
+        }
     }
 
     document.getElementById('end-btn')?.addEventListener('click', endSession);
     document.getElementById('reload-btn')?.addEventListener('click', start);
-    start();
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => setTimeout(start, 0));
+    } else {
+        setTimeout(start, 0);
+    }
 })();

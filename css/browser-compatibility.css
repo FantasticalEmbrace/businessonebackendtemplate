@@ -126,8 +126,8 @@
 @media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
   /* IE11 specific styles */
   .btn-primary {
-    background-color: #ff9b1f;
-    border-color: #ff9b1f;
+    background-color: #047857;
+    border-color: #047857;
   }
   
   .btn-primary:hover {

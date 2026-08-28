@@ -202,7 +202,24 @@ async function ensurePersonnelSchema(pool) {
             sql: `ALTER TABLE pos_employees ADD COLUMN can_view_cost TINYINT(1) NOT NULL DEFAULT 0
                   COMMENT 'May see product cost in POS cart when store cost display is enabled'`,
         },
+        {
+            column: 'can_view_shop_floor',
+            sql: `ALTER TABLE pos_employees ADD COLUMN can_view_shop_floor TINYINT(1) NOT NULL DEFAULT 0
+                  COMMENT 'May view all ongoing shop jobs and WIP board on the register'`,
+        },
     ]);
+    try {
+        if (await columnExists(pool, 'pos_employees', 'can_view_shop_floor')) {
+            await pool.query(
+                `ALTER TABLE pos_employees MODIFY can_view_shop_floor TINYINT(1) NOT NULL DEFAULT 0
+                 COMMENT 'May view all ongoing shop jobs and WIP board on the register'`
+            );
+        }
+    } catch (e) {
+        if (!isDuplicateError(e)) {
+            logger.warn(`Database: can_view_shop_floor default — ${logger.formatMysqlError(e)}`);
+        }
+    }
     try {
         if (await tableExists(pool, 'payment_cards')) {
             await pool.query(

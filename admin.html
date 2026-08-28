@@ -25,7 +25,7 @@
     <link rel="stylesheet" href="css/hm-choice-toggles.css?v=20260629b">
 
     <style>
-        /* Admin layout tokens — palette from css/brand-tokens.css */
+        /* Admin layout tokens â€” palette from css/brand-tokens.css */
         :root {
             --admin-sidebar-from: var(--brand-sidebar-from);
             --admin-sidebar-to: var(--brand-sidebar-to);
@@ -160,7 +160,7 @@
             text-align: center;
         }
 
-        /* Main Content — scrollable region (sidebar stays fixed) */
+        /* Main Content â€” scrollable region (sidebar stays fixed) */
         .main-content {
             flex: 1;
             margin-left: 280px;
@@ -571,7 +571,7 @@
             border-radius: var(--border-radius);
         }
 
-        /* Wide admin tables (customers, etc.) — scroll inside card without clipping first columns */
+        /* Wide admin tables (customers, etc.) â€” scroll inside card without clipping first columns */
         .card--table-scroll {
             overflow: visible;
         }
@@ -696,7 +696,7 @@
             padding: 0.4rem 0.55rem;
         }
 
-        /* Products table — fit desktop content area without horizontal scroll */
+        /* Products table â€” fit desktop content area without horizontal scroll */
         .admin-products-table-wrap {
             overflow-x: auto;
             width: 100%;
@@ -2002,7 +2002,7 @@
         }
 
         .principal-build-balance-details[open] summary::before {
-            content: '−';
+            content: 'âˆ’';
         }
 
         .principal-build-balance-body {
@@ -2199,7 +2199,7 @@
         }
 
         .pos-network-assistant-checks li.is-pending::before {
-            content: '○ ';
+            content: 'â—‹ ';
             color: var(--gray-400);
         }
 
@@ -2455,7 +2455,7 @@
             pointer-events: none !important;
         }
 
-        /* Inactive admin sections are parked here — must not affect main scroll height */
+        /* Inactive admin sections are parked here â€” must not affect main scroll height */
         #admin-section-storage {
             display: none !important;
             height: 0 !important;
@@ -2901,7 +2901,7 @@
             white-space: nowrap;
         }
 
-        /* Promo start/end — scrollable lists + 12-hour + AM/PM (native datetime-local cannot force scrollbars) */
+        /* Promo start/end â€” scrollable lists + 12-hour + AM/PM (native datetime-local cannot force scrollbars) */
         .promo-datetime-group .form-label {
             display: block;
             font-weight: 600;
@@ -2955,7 +2955,7 @@
             padding-bottom: 0.35rem;
         }
 
-        /* Checkout promotion editor — modal */
+        /* Checkout promotion editor â€” modal */
         .promo-editor-modal[hidden] {
             display: none !important;
             visibility: hidden !important;
@@ -3486,9 +3486,9 @@
                             </div>
                         </div>
                         <div id="productsBulkBar" class="admin-products-bulk-bar admin-products-bulk-bar--empty hm-choice-skip" role="region" aria-label="Bulk product actions for POS register and website">
-                            <span id="productsBulkCount" class="admin-products-bulk-count">Select products below — bulk actions for POS register and website</span>
+                            <span id="productsBulkCount" class="admin-products-bulk-count">Select products below â€” bulk actions for POS register and website</span>
                             <button type="button" id="productsBulkEditBtn" class="btn btn-primary btn-sm" disabled>
-                                <i class="fas fa-pen-to-square" aria-hidden="true"></i> Edit settings…
+                                <i class="fas fa-pen-to-square" aria-hidden="true"></i> Edit settingsâ€¦
                             </button>
                             <span class="admin-products-bulk-divider" aria-hidden="true"></span>
                             <div class="admin-products-bulk-group admin-products-bulk-group--pos" role="group" aria-label="POS register">
@@ -3540,7 +3540,7 @@
                     </div>
                     <div class="card-content">
                         <p style="margin:0 0 1rem;color:var(--gray-600);font-size:0.92rem;line-height:1.55;">
-                            Save a spreadsheet of <strong>every product</strong> — SKU, prices, cost, stock, descriptions,
+                            Save a spreadsheet of <strong>every product</strong> â€” SKU, prices, cost, stock, descriptions,
                             and image links. Keep a copy somewhere safe (USB drive, cloud folder, email to yourself).
                             If a register or computer is replaced, upload this same file below to restore your inventory.
                         </p>
@@ -3578,7 +3578,7 @@
                                     <code>low_stock_threshold</code>, <code>health_categories</code>
                                 </p>
                                 <p style="margin:0;color:var(--gray-500);">
-                                    Column headers are flexible — common POS exports like <em>Product Name</em>,
+                                    Column headers are flexible â€” common POS exports like <em>Product Name</em>,
                                     <em>Retail Price</em>, <em>On Hand</em>, and <em>UPC</em> are recognized automatically.
                                 </p>
                             </div>
@@ -3597,7 +3597,7 @@
                         <div id="importProgress" style="margin-top: 1rem; display: none;">
                             <div class="loading">
                                 <div class="spinner"></div>
-                                Importing products…
+                                Importing productsâ€¦
                             </div>
                         </div>
                         <div id="importResults" style="margin-top: 1rem; display: none;"></div>
@@ -3705,7 +3705,7 @@
                                     </div>
                                     <div>
                                         <label class="form-label" for="taxHmIgnoreStates">Ignored states (CSV)</label>
-                                        <input type="text" id="taxHmIgnoreStates" class="form-input" placeholder="e.g. AK,DE,MT — leave blank if none" maxlength="120">
+                                        <input type="text" id="taxHmIgnoreStates" class="form-input" placeholder="e.g. AK,DE,MT â€” leave blank if none" maxlength="120">
                                     </div>
                                     <div>
                                         <label class="form-label" for="taxHmAccountantEmail">Tax accountant email</label>
@@ -3722,7 +3722,7 @@
                         </div>
 
                         <p style="margin-bottom: 1rem; font-size: 0.95rem;">
-                            <strong>Tax accountant:</strong> <span id="taxAccountantEmailDisplay">—</span>
+                            <strong>Tax accountant:</strong> <span id="taxAccountantEmailDisplay">â€”</span>
                         </p>
                         <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: end;">
                             <div>
@@ -3863,7 +3863,7 @@
                 <div class="card card--table-scroll">
                     <div class="card-content">
                         <p style="margin:0 0 1rem;color:var(--gray-600);font-size:0.9rem;">
-                            Organize customers into groups for promotions, pricing, and reporting. Set standing discounts and link checkout promo codes. Assign groups from each customer’s profile.
+                            Organize customers into groups for promotions, pricing, and reporting. Set standing discounts and link checkout promo codes. Assign groups from each customerâ€™s profile.
                         </p>
                         <div id="customerGroupsTable" class="loading">
                             <div class="spinner"></div>
@@ -3971,7 +3971,7 @@
                 <div class="content-header">
                     <h1 class="page-title">EDSA Appointments</h1>
                     <p style="color: var(--gray-500); margin-top: 0.35rem; font-size: 0.9375rem;">
-                        Calendar view — click an appointment to edit. Use <strong>Block dates</strong> to close days to online booking. Paid sessions are charged at checkout when NMI is configured.
+                        Calendar view â€” click an appointment to edit. Use <strong>Block dates</strong> to close days to online booking. Paid sessions are charged at checkout when NMI is configured.
                     </p>
                 </div>
 
@@ -4227,7 +4227,7 @@
                 <div class="content-header">
                     <h1 class="page-title">Marketing</h1>
                     <p class="page-subtitle" style="color: var(--gray-600); font-size: 0.95rem;">
-                        Newsletter signups, in-store display promos, and checkout discounts — managed here for your marketing team.
+                        Newsletter signups, in-store display promos, and checkout discounts â€” managed here for your marketing team.
                     </p>
                 </div>
 
@@ -4236,7 +4236,7 @@
                     <div class="card-content">
                         <h3 style="margin: 0 0 0.5rem 0;">Newsletter signup</h3>
                         <p style="margin: 0 0 1rem 0; color: var(--gray-600); font-size: 0.88rem;">
-                            Paste the link to your Mailchimp signup page (Audience → Signup forms → Share in Mailchimp). Visitors who click Subscribe on the site go there. Your Mailchimp manager can send you this link if you do not have it.
+                            Paste the link to your Mailchimp signup page (Audience â†’ Signup forms â†’ Share in Mailchimp). Visitors who click Subscribe on the site go there. Your Mailchimp manager can send you this link if you do not have it.
                         </p>
                         <form id="marketing-hub-form">
                             <div class="form-group">
@@ -4271,7 +4271,7 @@
                     <div class="card-content">
                         <h3 style="margin:0 0 0.35rem 0;">Display ad library</h3>
                         <p style="margin:0 0 1rem 0;color:var(--gray-600);font-size:0.88rem;">
-                            Create and manage rotating promos for front-facing POS screens. Reuse banner images from your Mailchimp emails —
+                            Create and manage rotating promos for front-facing POS screens. Reuse banner images from your Mailchimp emails â€”
                             upload the same creative here or paste an image URL. Ads hide automatically when the cashier rings up items.
                         </p>
                         <div id="pos-display-ads-list" style="margin-bottom:1rem;"></div>
@@ -4296,7 +4296,7 @@
                             </div>
                             <div class="form-group" style="margin-top:0.75rem;">
                                 <label for="pos-display-ad-image-url">Image URL</label>
-                                <input class="form-input" id="pos-display-ad-image-url" name="imageUrl" type="url" maxlength="500" placeholder="https://… or upload below">
+                                <input class="form-input" id="pos-display-ad-image-url" name="imageUrl" type="url" maxlength="500" placeholder="https://â€¦ or upload below">
                             </div>
                             <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;margin-top:0.5rem;">
                                 <label class="btn btn-secondary btn-sm" style="cursor:pointer;margin:0;">
@@ -4359,7 +4359,7 @@
                         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0.75rem;">
                             <div class="form-group">
                                 <label for="promo-link-url">CTA link URL (optional)</label>
-                                <input class="form-input" id="promo-link-url" type="text" maxlength="500" placeholder="/product.html?slug=your-product — or https://…" spellcheck="false">
+                                <input class="form-input" id="promo-link-url" type="text" maxlength="500" placeholder="/product.html?slug=your-product â€” or https://â€¦" spellcheck="false">
                             </div>
                             <div class="form-group">
                                 <label for="promo-link-label">CTA button label (optional)</label>
@@ -4369,9 +4369,9 @@
                         <div class="form-group promo-product-link-field">
                             <label for="promo-product-link-search">Link this promo to a product (optional)</label>
                             <p style="margin:0 0 0.35rem 0;color:var(--gray-600);font-size:0.88rem;">
-                                Start typing a name or SKU — a dropdown list opens under this field so you can pick the exact product. (Or paste any URL above.)
+                                Start typing a name or SKU â€” a dropdown list opens under this field so you can pick the exact product. (Or paste any URL above.)
                             </p>
-                            <input type="text" class="form-input" id="promo-product-link-search" placeholder="Type to search products…"
+                            <input type="text" class="form-input" id="promo-product-link-search" placeholder="Type to search productsâ€¦"
                                 autocomplete="off" autocapitalize="off" spellcheck="false"
                                 aria-autocomplete="list" aria-expanded="false" aria-controls="promo-product-link-results" role="combobox">
                             <div id="promo-product-link-results" class="promo-product-link-results-panel" role="listbox" aria-label="Matching products" hidden></div>
@@ -4379,7 +4379,7 @@
                         <div class="form-group">
                             <label for="promo-icon">Icon (optional)</label>
                             <p style="margin:0 0 0.5rem 0;color:var(--gray-600);font-size:0.88rem;">Type an emoji or short text, or upload a small image (PNG/WebP/SVG, max 512KB) from your machine.</p>
-                            <input class="form-input" id="promo-icon" type="text" maxlength="12" placeholder="Emoji or short marker, e.g. 🌿 or SALE">
+                            <input class="form-input" id="promo-icon" type="text" maxlength="12" placeholder="Emoji or short marker, e.g. ðŸŒ¿ or SALE">
                             <input type="hidden" id="promo-icon-url" value="">
                             <div style="display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center;margin-top:0.5rem;">
                                 <label for="promo-icon-file" class="sr-only">Upload promo banner icon image</label>
@@ -4414,7 +4414,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="promotions-table-body">
-                                    <tr><td colspan="4" style="padding:1rem;color:var(--gray-500);">Loading…</td></tr>
+                                    <tr><td colspan="4" style="padding:1rem;color:var(--gray-500);">Loadingâ€¦</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -4449,7 +4449,7 @@
                     <div class="card">
                         <div class="card-content">
                             <h3 style="margin:0 0 0.25rem 0;">Add team member</h3>
-                            <p style="margin:0 0 1rem 0;color:var(--gray-600);font-size:0.9rem;">New accounts are active immediately — share login details securely.</p>
+                            <p style="margin:0 0 1rem 0;color:var(--gray-600);font-size:0.9rem;">New accounts are active immediately â€” share login details securely.</p>
                             <form id="admin-team-create-form" style="display:grid;gap:0.75rem;max-width:32rem;">
                                 <div class="form-group">
                                     <label for="team-create-email">Email</label>
@@ -4493,9 +4493,10 @@
                                 </div>
                                 <div class="form-group"><label for="register-only-email">Email (optional)</label><input class="form-input" id="register-only-email" name="email" type="email" autocomplete="email"></div>
                                 <div class="form-group"><label for="register-only-pin">4-digit register PIN</label>
-                                    <input class="form-input" id="register-only-pin" name="pin" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" required placeholder="••••" autocomplete="off"></div>
+                                    <input class="form-input" id="register-only-pin" name="pin" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" required placeholder="â€¢â€¢â€¢â€¢" autocomplete="off"></div>
                                 <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;"><input type="checkbox" id="register-can-authorize" name="canAuthorize" value="true"> Can approve line and sale discounts (manager PIN)</label>
                                 <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;"><input type="checkbox" id="register-allow-manual-discounts" name="allowManualDiscounts" value="true"> Can apply manual line and sale discounts</label>
+                                <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;"><input type="checkbox" id="register-can-view-shop-floor" name="canViewShopFloor" value="true"> Can view shop floor (ongoing jobs &amp; WIP status)</label>
                                 <label id="register-refund-permission-row" style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;"><input type="checkbox" id="register-can-process-refunds" name="canProcessRefunds" value="true"> Can process refunds <span style="color:var(--gray-600);font-weight:400;">(Admin/Developer only)</span></label>
                                 <label id="register-view-cost-permission-row" style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;"><input type="checkbox" id="register-can-view-cost" name="canViewCost" value="true"> Can view product cost at register <span style="color:var(--gray-600);font-weight:400;">(Admin/Developer only)</span></label>
                                 <button type="submit" class="btn btn-secondary"><i class="fas fa-cash-register"></i> Add register-only employee</button>
@@ -4517,7 +4518,7 @@
                             <div id="admin-team-list" class="personnel-list-mount">
                                 <div class="loading" style="padding:2rem;text-align:center;color:var(--gray-500);">
                                     <div class="spinner" style="margin:0 auto 0.75rem;"></div>
-                                    Loading personnel…
+                                    Loading personnelâ€¦
                                 </div>
                             </div>
                             <div id="admin-team-profile" class="pos-employee-profile-mount" style="margin-top:1rem;display:none;"></div>
@@ -4584,7 +4585,7 @@
                         <div>
                             <h1 class="page-title">Point of Sale</h1>
                             <p style="margin:0.35rem 0 0;color:var(--gray-600);font-size:0.92rem;">
-                                Business One register app — registers, hardware, payments, and receipts. Store name comes from <strong>Settings → Store info</strong>.
+                                Business One register app â€” registers, hardware, payments, and receipts. Store name comes from <strong>Settings â†’ Store info</strong>.
                             </p>
                         </div>
                         <a href="https://pos.businessonecomprehensive.com/" class="btn btn-primary" target="_blank" rel="noopener noreferrer">
@@ -4597,8 +4598,8 @@
                 <div id="pos-troubleshoot-assistant" class="pos-network-assistant pos-troubleshoot-assistant" aria-live="polite">
                     <div class="pos-network-assistant-header">
                         <div>
-                            <h4>AI troubleshoot assistant <span class="pos-network-assistant-model-tag" id="pos-troubleshoot-model-tag"></span><span id="pos-troubleshoot-issue-count" class="pos-troubleshoot-badge">Scanning…</span></h4>
-                            <p class="pos-network-assistant-progress" id="pos-troubleshoot-progress">Checking registers, equipment, network, and license…</p>
+                            <h4>AI troubleshoot assistant <span class="pos-network-assistant-model-tag" id="pos-troubleshoot-model-tag"></span><span id="pos-troubleshoot-issue-count" class="pos-troubleshoot-badge">Scanningâ€¦</span></h4>
+                            <p class="pos-network-assistant-progress" id="pos-troubleshoot-progress">Checking registers, equipment, network, and licenseâ€¦</p>
                         </div>
                         <div style="display:flex;gap:0.35rem;flex-wrap:wrap;">
                             <button type="button" class="btn btn-ghost btn-sm" id="pos-troubleshoot-refresh" title="Scan store again">Scan again</button>
@@ -4608,7 +4609,7 @@
                     <div id="pos-troubleshoot-body">
                         <div id="pos-troubleshoot-ai-banner" class="pos-network-assistant-ai-banner" style="display:none;"></div>
                         <div id="pos-troubleshoot-status" class="pos-network-assistant-status" style="display:none;">
-                            <h5 id="pos-troubleshoot-status-headline">Checking your store…</h5>
+                            <h5 id="pos-troubleshoot-status-headline">Checking your storeâ€¦</h5>
                             <div id="pos-troubleshoot-status-next" class="pos-network-assistant-status-next"></div>
                             <div class="pos-network-assistant-status-grid">
                                 <div class="pos-network-assistant-status-col">
@@ -4622,11 +4623,11 @@
                             </div>
                         </div>
                         <div class="pos-network-assistant-chat" id="pos-troubleshoot-chat">
-                            <p class="pos-network-assistant-chat-label">Ask what&apos;s wrong — reads your live setup and suggests plain steps to fix it</p>
+                            <p class="pos-network-assistant-chat-label">Ask what&apos;s wrong â€” reads your live setup and suggests plain steps to fix it</p>
                             <div id="pos-troubleshoot-chat-log" class="pos-network-assistant-chat-log" aria-live="polite"></div>
                             <form id="pos-troubleshoot-chat-form" class="pos-network-assistant-chat-form">
                                 <label class="sr-only" for="pos-troubleshoot-chat-input">Ask the troubleshoot assistant</label>
-                                <input type="text" class="form-input" id="pos-troubleshoot-chat-input" name="pos_troubleshoot_chat" maxlength="2000" placeholder="e.g. Register 1 won&apos;t print receipts — what should I check?" autocomplete="off">
+                                <input type="text" class="form-input" id="pos-troubleshoot-chat-input" name="pos_troubleshoot_chat" maxlength="2000" placeholder="e.g. Register 1 won&apos;t print receipts â€” what should I check?" autocomplete="off">
                                 <button type="submit" class="btn btn-primary btn-sm" id="pos-troubleshoot-chat-send">Send</button>
                             </form>
                             <button type="button" class="btn btn-ghost btn-sm" id="pos-troubleshoot-clear-chat" style="margin-top:0.35rem;">Clear chat</button>
@@ -4689,17 +4690,17 @@
                                 <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;"><input type="checkbox" name="pos_receipt_show_cashier" value="true"> Cashier name</label>
                                 <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;"><input type="checkbox" name="pos_receipt_show_cash_savings" value="true"> Cash savings line</label>
                                 <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;"><input type="checkbox" name="pos_receipt_show_order_barcode" value="true"> Order barcode</label>
-                                <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;"><input type="checkbox" name="pos_receipt_auto_print" value="true"> Auto-print after sale</label>
+                                <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;"><input type="checkbox" name="pos_receipt_auto_print" value="true"> Auto-print paper after sale</label>
                             </div>
                             <div class="form-group" style="margin-top:0.75rem;">
                                 <label for="pos-receipt-copy-count">Receipt copies</label>
                                 <input class="form-input" id="pos-receipt-copy-count" name="pos_receipt_copy_count" type="number" min="1" max="3" step="1" placeholder="2" style="max-width:8rem;">
-                                <p class="form-help" style="margin-top:0.35rem;">1 = customer only · 2 = customer + store · 3 adds an extra copy. No card numbers are printed (PCI-safe).</p>
+                                <p class="form-help" style="margin-top:0.35rem;">1 = customer only Â· 2 = customer + store Â· 3 adds an extra copy. No card numbers are printed (PCI-safe).</p>
                             </div>
                             <div class="form-group" style="margin-top:0.75rem;">
                                 <label for="pos-receipt-return-policy">Return policy line</label>
                                 <input class="form-input" id="pos-receipt-return-policy" name="pos_receipt_return_policy" type="text" maxlength="300" placeholder="e.g. Returns with receipt within 30 days on unopened items.">
-                                <p class="form-help" style="margin-top:0.35rem;">Printed on receipts as plain text only — not legal advice.</p>
+                                <p class="form-help" style="margin-top:0.35rem;">Printed on receipts as plain text only â€” not legal advice.</p>
                             </div>
                         </div>
                     </div>
@@ -4745,7 +4746,7 @@
                             </div>
                             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.75rem;">
                                 <div class="form-group">
-                                    <label for="pos-daily-sales-email-hour">Send at hour (0–23)</label>
+                                    <label for="pos-daily-sales-email-hour">Send at hour (0â€“23)</label>
                                     <input class="form-input" id="pos-daily-sales-email-hour" name="pos_daily_sales_email_hour" type="number" min="0" max="23" step="1" placeholder="21" style="max-width:8rem;">
                                 </div>
                                 <div class="form-group">
@@ -4786,7 +4787,7 @@
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label for="pos-payroll-email-hour">Send at hour (0–23)</label>
+                                    <label for="pos-payroll-email-hour">Send at hour (0â€“23)</label>
                                     <input class="form-input" id="pos-payroll-email-hour" name="pos_payroll_email_hour" type="number" min="0" max="23" step="1" placeholder="8" style="max-width:8rem;">
                                 </div>
                                 <div class="form-group">
@@ -4802,13 +4803,62 @@
                             </label>
                             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.75rem;">
                                 <div class="form-group">
-                                    <label for="pos-eod-reminder-hour">Reminder hour (0–23)</label>
+                                    <label for="pos-eod-reminder-hour">Reminder hour (0â€“23)</label>
                                     <input class="form-input" id="pos-eod-reminder-hour" name="pos_eod_reminder_hour" type="number" min="0" max="23" step="1" placeholder="20" style="max-width:8rem;">
                                 </div>
                                 <div class="form-group">
                                     <label for="pos-eod-reminder-minute">Minute</label>
                                     <input class="form-input" id="pos-eod-reminder-minute" name="pos_eod_reminder_minute" type="number" min="0" max="59" step="1" placeholder="0" style="max-width:8rem;">
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-content">
+                            <h3 style="margin:0 0 0.35rem 0;">Shop verticals</h3>
+                            <p style="margin:0 0 1rem;color:var(--gray-600);font-size:0.88rem;">Select one or more shop types to unlock industry-specific job workflows, fields, and catalog options on the register. Combine modes for shops that do multiple services (e.g. auto service + tire shop).</p>
+                            <div style="display:grid;gap:0.55rem;margin-bottom:0.85rem;">
+                                <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;"><input type="checkbox" name="pos_shop_vertical" value="auto"> <span><strong>Auto service</strong> — repair orders, bays, parts receiving, diagnostic workflow</span></label>
+                                <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;"><input type="checkbox" name="pos_shop_vertical" value="body"> <span><strong>Body shop</strong> — collision estimates, insurance/claim fields, paint workflow</span></label>
+                                <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;"><input type="checkbox" name="pos_shop_vertical" value="upholstery"> <span><strong>Upholstery</strong> — materials, deposits, bench workflow (no parts receiving)</span></label>
+                                <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;"><input type="checkbox" name="pos_shop_vertical" value="tire"> <span><strong>Tire shop</strong> — tire inspect/quote, mount &amp; balance, TPMS workflow</span></label>
+                            </div>
+                            <p class="form-help" style="margin:0 0 1rem;">Leave all unchecked for retail-only registers. Job persistence API is wired — data will sync when the shop module is enabled on your server.</p>
+                            <div id="pos-shop-tire-alignment-prices" style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--gray-200);">
+                                <h4 style="margin:0 0 0.35rem;font-size:0.95rem;">Tire shop — alignment pricing</h4>
+                                <p class="form-help" style="margin:0 0 0.75rem;">Register staff pick 2-wheel or 4-wheel on tire jobs; these prices appear on the estimate automatically.</p>
+                                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));gap:0.75rem;max-width:24rem;">
+                                    <div class="form-group" style="margin:0;">
+                                        <label for="pos-shop-alignment-2wheel-price">2-wheel alignment ($)</label>
+                                        <input class="form-input" id="pos-shop-alignment-2wheel-price" name="pos_shop_alignment_2wheel_price" type="number" min="0" step="0.01" placeholder="59.99">
+                                    </div>
+                                    <div class="form-group" style="margin:0;">
+                                        <label for="pos-shop-alignment-4wheel-price">4-wheel alignment ($)</label>
+                                        <input class="form-input" id="pos-shop-alignment-4wheel-price" name="pos_shop_alignment_4wheel_price" type="number" min="0" step="0.01" placeholder="89.99">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card" id="shop-customer-workflows-root">
+                        <div class="card-content">
+                            <h3 style="margin:0 0 0.35rem 0;">Customer workflow portal</h3>
+                            <p style="margin:0 0 1rem;color:var(--gray-600);font-size:0.88rem;">Build the graphical timeline customers see when you text or email a status link — from waiting to be seen through inspection, decisions, work in progress, completion, and payment. Add custom processes and link catalog SKUs so work steps appear when those services are on the job.</p>
+                            <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;margin:0 0 1rem;">
+                                <input type="checkbox" id="shop-wf-payment-link-enabled" checked> Allow customers to pay online via payment link (otherwise front desk only)
+                            </label>
+                            <div style="display:flex;gap:0.45rem;flex-wrap:wrap;margin-bottom:1rem;">
+                                <button type="button" class="btn btn-primary btn-sm" data-shop-wf-vertical="auto">Auto</button>
+                                <button type="button" class="btn btn-secondary btn-sm" data-shop-wf-vertical="body">Body</button>
+                                <button type="button" class="btn btn-secondary btn-sm" data-shop-wf-vertical="tire">Tire</button>
+                                <button type="button" class="btn btn-secondary btn-sm" data-shop-wf-vertical="upholstery">Upholstery</button>
+                            </div>
+                            <div id="shop-wf-process-list"></div>
+                            <p id="shop-wf-msg" style="min-height:1.25rem;font-size:0.9rem;margin:0.75rem 0 0;color:var(--gray-600);"></p>
+                            <div style="display:flex;gap:0.65rem;flex-wrap:wrap;margin-top:0.75rem;">
+                                <button type="button" class="btn btn-secondary btn-sm" id="shop-wf-add-process">Add process</button>
+                                <button type="button" class="btn btn-secondary btn-sm" id="shop-wf-reset-vertical">Reset vertical to defaults</button>
+                                <button type="button" class="btn btn-primary btn-sm" id="shop-wf-save">Save customer workflows</button>
                             </div>
                         </div>
                     </div>
@@ -4828,11 +4878,11 @@
                                 <div style="display:grid;gap:0.5rem;">
                                     <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;">
                                         <input type="radio" name="pos_personnel_mode" value="time_clock_and_pos" checked style="margin-top:0.2rem;">
-                                        <span><strong>Time clock + POS</strong> — clock in/out and ring sales (default)</span>
+                                        <span><strong>Time clock + POS</strong> â€” clock in/out and ring sales (default)</span>
                                     </label>
                                     <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;">
                                         <input type="radio" name="pos_personnel_mode" value="time_clock_only" style="margin-top:0.2rem;">
-                                        <span><strong>Time clock only</strong> — employees clock in/out; no sales screen</span>
+                                        <span><strong>Time clock only</strong> â€” employees clock in/out; no sales screen</span>
                                     </label>
                                 </div>
                             </div>
@@ -4853,7 +4903,7 @@
                             <div class="form-group">
                                 <label for="pos-catalog-refresh-minutes">Catalog auto-refresh (minutes)</label>
                                 <input class="form-input" id="pos-catalog-refresh-minutes" name="pos_catalog_refresh_minutes" type="number" min="15" max="1440" step="1" placeholder="60" style="max-width:8rem;">
-                                <p class="form-help" style="margin-top:0.35rem;">How often registers refresh prices and stock when online (15–1440).</p>
+                                <p class="form-help" style="margin-top:0.35rem;">How often registers refresh prices and stock when online (15â€“1440).</p>
                             </div>
                             <p data-pos-settings-save-msg style="min-height:1.25rem;font-size:0.9rem;margin:1rem 0 0;"></p>
                             <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
@@ -4870,13 +4920,13 @@
                             <h3 style="margin:0 0 0.35rem 0;">Store website address for POS</h3>
                             <p style="margin:0 0 1rem 0;color:var(--gray-600);font-size:0.88rem;">
                                 Save your public store address here <strong>before</strong> generating device keys.
-                                New keys include this address, so tablets only need the key — not a separate website field.
+                                New keys include this address, so tablets only need the key â€” not a separate website field.
                                 Business One ops uses this URL for live stats and remote support.
                             </p>
                             <div class="form-group" style="margin-bottom:0.75rem;">
                                 <label for="pos-store-base-url">Store website address</label>
                                 <input class="form-input" id="pos-store-base-url" name="pos_store_base_url" type="url" maxlength="512" placeholder="https://store.example.com" autocomplete="off">
-                                <p class="form-help" style="margin-top:0.35rem;">Example: <code>https://www.yourstore.com</code> — no trailing slash, not this admin page.</p>
+                                <p class="form-help" style="margin-top:0.35rem;">Example: <code>https://www.yourstore.com</code> â€” no trailing slash, not this admin page.</p>
                             </div>
                             <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;">
                                 <button type="button" class="btn btn-primary" id="pos-store-base-url-save-btn">Save store address</button>
@@ -4890,7 +4940,7 @@
                             <h3 style="margin:0 0 0.35rem 0;">Register tablets</h3>
                             <p style="margin:0 0 1rem 0;color:var(--gray-600);font-size:0.88rem;">
                                 One key per tablet. Set the store website address above first, then generate a key.
-                                On the tablet, paste the <strong>device key only</strong> — it already knows which store to use.
+                                On the tablet, paste the <strong>device key only</strong> â€” it already knows which store to use.
                                 Use <strong>New key</strong> to rotate. <strong>Revoke</strong> removes the register.
                             </p>
                             <div id="pos-devices-list" style="margin-bottom:0.75rem;"></div>
@@ -4904,6 +4954,22 @@
                             <p id="pos-device-create-msg" style="min-height:1.25rem;font-size:0.9rem;margin:0.5rem 0 0;"></p>
                         </div>
                     </div>
+                    <div class="card" id="pos-desktop-support-client-card">
+                        <div class="card-content">
+                            <h3 style="margin:0 0 0.35rem 0;">Desktop support client (Windows)</h3>
+                            <p style="margin:0 0 1rem 0;color:var(--gray-600);font-size:0.88rem;">
+                                Install <strong>BusinessOneDesktopSupportClient</strong> on the store Windows PC so Business One can connect for full-desktop help.
+                                After install, open the app, enter this store API address, and enroll with the support enrollment key from your Business One onboarding (or <code>POS_SUPPORT_ENROLL_KEY</code> on the server).
+                            </p>
+                            <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;">
+                                <a class="btn btn-primary" id="pos-support-client-download-link" href="/support-agent/downloads/BusinessOneDesktopSupportClient-Setup.exe" download>
+                                    <i class="fas fa-download" aria-hidden="true"></i> Download Windows client
+                                </a>
+                                <button type="button" class="btn btn-secondary" id="pos-support-client-copy-url">Copy download link</button>
+                            </div>
+                            <p id="pos-support-client-msg" style="min-height:1.25rem;font-size:0.9rem;margin:0.75rem 0 0;"></p>
+                        </div>
+                    </div>
                 </div>
 
                 <div data-pos-panel="payments" class="admin-section-stack" style="display:none;">
@@ -4912,7 +4978,7 @@
                             <h3 style="margin:0 0 0.35rem 0;">Card payment processor</h3>
                             <p style="margin:0 0 1rem 0;color:var(--gray-600);font-size:0.88rem;">
                                 <strong>Website checkout</strong> and <strong>in-store POS</strong> can use different processors and merchant accounts.
-                                Choose each below; enter API keys in <strong>Developer Tools → Integration credentials</strong> (developer login only).
+                                Choose each below; enter API keys in <strong>Developer Tools â†’ Integration credentials</strong> (developer login only).
                             </p>
                             <div class="form-group">
                                 <span class="form-label" style="display:block;margin-bottom:0.5rem;font-weight:600;">Website checkout processor</span>
@@ -4922,7 +4988,7 @@
                                         <span class="payment-processor-card">
                                             <span class="payment-processor-badge payment-processor-badge--default">Default</span>
                                             <span class="payment-processor-title">EPI</span>
-                                            <span class="payment-processor-desc">Standard merchants — customer checkout and integrated POS use your EPI ISO keys.</span>
+                                            <span class="payment-processor-desc">Standard merchants â€” customer checkout and integrated POS use your EPI ISO keys.</span>
                                         </span>
                                     </label>
                                     <label class="payment-processor-option">
@@ -4930,7 +4996,7 @@
                                         <span class="payment-processor-card payment-processor-card--high-risk">
                                             <span class="payment-processor-badge payment-processor-badge--warn">NMI gateway</span>
                                             <span class="payment-processor-title">NMI</span>
-                                            <span class="payment-processor-desc">NMI gateway — high-risk or restricted products, or when selected for all store cards.</span>
+                                            <span class="payment-processor-desc">NMI gateway â€” high-risk or restricted products, or when selected for all store cards.</span>
                                         </span>
                                     </label>
                                     <label class="payment-processor-option">
@@ -4938,7 +5004,7 @@
                                         <span class="payment-processor-card">
                                             <span class="payment-processor-badge payment-processor-badge--default">MX gateway</span>
                                             <span class="payment-processor-title">MX</span>
-                                            <span class="payment-processor-desc">MX Merchant gateway — website checkout and virtual terminal on the register.</span>
+                                            <span class="payment-processor-desc">MX Merchant gateway â€” website checkout and virtual terminal on the register.</span>
                                         </span>
                                     </label>
                                 </div>
@@ -4946,7 +5012,7 @@
 
                             <h4 style="margin:1.5rem 0 0.35rem 0;">In-store POS card processor</h4>
                             <p style="margin:0 0 0.75rem 0;color:var(--gray-600);font-size:0.88rem;">
-                                Choose which processor handles in-store card payments. This can differ from website checkout — configure each processor&apos;s keys under Developer Tools → Integration credentials.
+                                Choose which processor handles in-store card payments. This can differ from website checkout â€” configure each processor&apos;s keys under Developer Tools â†’ Integration credentials.
                             </p>
                             <div class="payment-processor-radios" role="radiogroup" aria-label="In-store POS card processor" style="margin-bottom:1rem;">
                                 <label class="payment-processor-option">
@@ -5000,7 +5066,7 @@
 
                             <h4 style="margin:1.5rem 0 0.35rem 0;">In-store card checkout</h4>
                             <p style="margin:0 0 1rem 0;color:var(--gray-600);font-size:0.88rem;">
-                                When using <strong>NMI</strong>, the register sends the total to your payment terminal (semi-integrated) or uses Collect.js on the register (virtual). Set deployment mode and POI device ID under <strong>Developer Tools → Integration credentials</strong>. Configure each register’s terminal and printer under <strong>Equipment</strong>.
+                                When using <strong>NMI</strong>, the register sends the total to your payment terminal (semi-integrated) or uses Collect.js on the register (virtual). Set deployment mode and POI device ID under <strong>Developer Tools â†’ Integration credentials</strong>. Configure each registerâ€™s terminal and printer under <strong>Equipment</strong>.
                             </p>
                             <input type="hidden" name="pos_card_payment_adapter" value="integrated">
                             <input type="hidden" name="pos_display_card_checkout" value="true">
@@ -5023,13 +5089,13 @@
                                 <div class="pos-network-assistant-header">
                                     <div>
                                         <h4>AI setup assistant <span class="pos-network-assistant-model-tag" id="pos-network-assistant-model-tag"></span></h4>
-                                        <p class="pos-network-assistant-progress" id="pos-network-assistant-progress">Loading…</p>
+                                        <p class="pos-network-assistant-progress" id="pos-network-assistant-progress">Loadingâ€¦</p>
                                     </div>
                                     <button type="button" class="btn btn-ghost btn-sm" id="pos-network-assistant-restart" title="Clear skipped steps and start over">Start over</button>
                                 </div>
                                 <div id="pos-network-assistant-ai-banner" class="pos-network-assistant-ai-banner" style="display:none;"></div>
                                 <div id="pos-network-assistant-status" class="pos-network-assistant-status" style="display:none;">
-                                    <h5 id="pos-network-assistant-status-headline">Checking your setup…</h5>
+                                    <h5 id="pos-network-assistant-status-headline">Checking your setupâ€¦</h5>
                                     <div id="pos-network-assistant-status-next" class="pos-network-assistant-status-next"></div>
                                     <div class="pos-network-assistant-status-grid">
                                         <div class="pos-network-assistant-status-col">
@@ -5048,11 +5114,11 @@
                                     <div class="pos-network-assistant-actions" id="pos-network-assistant-actions"></div>
                                 </div>
                                 <div class="pos-network-assistant-chat" id="pos-network-assistant-chat">
-                                    <p class="pos-network-assistant-chat-label">AI assistant — reads your current setup automatically</p>
+                                    <p class="pos-network-assistant-chat-label">AI assistant â€” reads your current setup automatically</p>
                                     <div id="pos-network-assistant-chat-log" class="pos-network-assistant-chat-log" aria-live="polite"></div>
                                     <form id="pos-network-assistant-chat-form" class="pos-network-assistant-chat-form">
                                         <label class="sr-only" for="pos-network-assistant-chat-input">Ask the network assistant</label>
-                                        <input type="text" class="form-input" id="pos-network-assistant-chat-input" name="pos_network_assistant_chat" maxlength="2000" placeholder="Ask anything or say what you want done…" autocomplete="off">
+                                        <input type="text" class="form-input" id="pos-network-assistant-chat-input" name="pos_network_assistant_chat" maxlength="2000" placeholder="Ask anything or say what you want doneâ€¦" autocomplete="off">
                                         <button type="submit" class="btn btn-primary btn-sm" id="pos-network-assistant-chat-send">Send</button>
                                     </form>
                                 </div>
@@ -5062,10 +5128,10 @@
                                 <summary>How to set up reserved addresses on the router</summary>
                                 <ol>
                                     <li>In the router settings, note your store network address and subnet mask.</li>
-                                    <li>Plug the router in: internet cable to the modem, store devices to LAN ports or store Wi‑Fi.</li>
+                                    <li>Plug the router in: internet cable to the modem, store devices to LAN ports or store Wiâ€‘Fi.</li>
                                     <li>For each POS device, copy the <strong>hardware address (MAC)</strong> from the sticker and tell the router to always give it the IP you entered on the equipment record.</li>
-                                    <li>Connect registers and card readers to a <strong>store-only Wi‑Fi</strong> network — not guest Wi‑Fi. Write the Wi‑Fi name and password in <strong>Network notes</strong>.</li>
-                                    <li>Enter the same MAC on each <strong>Equipment</strong> row. Paste the router&apos;s connected-device list → <strong>Parse &amp; match</strong> → <strong>Apply</strong>.</li>
+                                    <li>Connect registers and card readers to a <strong>store-only Wiâ€‘Fi</strong> network â€” not guest Wiâ€‘Fi. Write the Wiâ€‘Fi name and password in <strong>Network notes</strong>.</li>
+                                    <li>Enter the same MAC on each <strong>Equipment</strong> row. Paste the router&apos;s connected-device list â†’ <strong>Parse &amp; match</strong> â†’ <strong>Apply</strong>.</li>
                                     <li><strong>Backup internet test:</strong> run a sale on normal internet, unplug the modem cable, run a sale again on cellular backup (if the router has it).</li>
                                 </ol>
                             </details>
@@ -5087,7 +5153,7 @@
                                 </div>
                                 <div class="form-group" style="margin:0;">
                                     <label for="pos-network-notes">Network notes</label>
-                                    <textarea class="form-input" id="pos-network-notes" name="notes" rows="3" maxlength="2000" placeholder="Wi‑Fi name and password, router login, install notes…"></textarea>
+                                    <textarea class="form-input" id="pos-network-notes" name="notes" rows="3" maxlength="2000" placeholder="Wiâ€‘Fi name and password, router login, install notesâ€¦"></textarea>
                                 </div>
                                 <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;">
                                     <button type="submit" class="btn btn-secondary btn-sm" id="pos-network-save-btn">Save network settings</button>
@@ -5158,7 +5224,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="pos-equipment-register">Assigned register <span class="form-required-mark" aria-hidden="true">*</span></label>
-                                    <select class="form-input" id="pos-equipment-register" name="posDeviceId"><option value="">— Any / unassigned —</option></select>
+                                    <select class="form-input" id="pos-equipment-register" name="posDeviceId"><option value="">â€” Any / unassigned â€”</option></select>
                                     <p id="pos-equipment-register-help" class="form-help" style="margin-top:0.35rem;">Assign all equipment for a station to the same register so they wire together.</p>
                                 </div>
                                 <div id="pos-equipment-paypoint-guide" class="form-help" style="display:none;margin:0 0 0.75rem 0;padding:0.75rem 1rem;border:1px solid var(--gray-200);border-radius:8px;background:var(--gray-50,#f9fafb);">
@@ -5167,7 +5233,7 @@
                                         <li>Create a register under <strong>Registers</strong> and install its API key on the PayPoint browser.</li>
                                         <li>Select that same register in <strong>Assigned register</strong> above.</li>
                                         <li>Enter the <strong>serial number</strong> from the Elo sticker on the unit.</li>
-                                        <li>Enter the <strong>PayPoint IP</strong> below (Elo settings → Network, or your router).</li>
+                                        <li>Enter the <strong>PayPoint IP</strong> below (Elo settings â†’ Network, or your router).</li>
                                     </ol>
                                 </div>
                                 <div id="pos-equipment-config-fields" class="pos-equipment-config-grid"></div>
@@ -5194,18 +5260,18 @@
                         <div class="card-content">
                             <h3 style="margin:0 0 0.35rem 0;">Business One POS license</h3>
                             <p style="margin:0 0 1rem 0;color:var(--gray-600);font-size:0.88rem;">
-                                Business One POS + hosting rates are configured on the server for this merchant — not public signup pricing.
+                                Business One POS + hosting rates are configured on the server for this merchant â€” not public signup pricing.
                                 Set up NMI platform billing, order a WTI modem, and optionally pay the remaining website build balance in the section below.
                                 Everyone else uses the public <a href="https://businessonecomprehensive.com/billing-portal.html" target="_blank" rel="noopener noreferrer">billing portal</a>.
                                 Enforcement is <strong>off</strong> until you set <code>POS_LICENSE_ENFORCE=true</code> on the server.
                             </p>
                             <div id="pos-license-summary" style="margin-bottom:1rem;padding:0.85rem 1rem;background:var(--gray-50);border-radius:8px;font-size:0.9rem;"></div>
                             <p id="pos-license-auto-status-note" style="margin:0 0 1rem 0;max-width:42rem;color:var(--gray-600);font-size:0.88rem;">
-                                Account details and monthly charges are on file — use <strong>Platform billing</strong> below to save a card, order a modem, or pay the optional build balance. Status and failover usage update automatically.
+                                Account details and monthly charges are on file â€” use <strong>Platform billing</strong> below to save a card, order a modem, or pay the optional build balance. Status and failover usage update automatically.
                             </p>
                             <form id="pos-license-form" style="display:none;gap:0.75rem;max-width:32rem;">
                                 <div id="pos-license-dev-panel" style="display:grid;gap:0.75rem;">
-                                    <p style="margin:0;color:var(--gray-600);font-size:0.85rem;">Developer tools — billing runs automatically; merchants use Platform billing below.</p>
+                                    <p style="margin:0;color:var(--gray-600);font-size:0.85rem;">Developer tools â€” billing runs automatically; merchants use Platform billing below.</p>
                                     <div class="form-group">
                                         <label for="pos-license-business">Business name</label>
                                         <input class="form-input" id="pos-license-business" name="businessName" maxlength="200">
@@ -5230,7 +5296,7 @@
                                     </div>
                                     <div class="form-group">
                                         <label>Failover data this period</label>
-                                        <p id="pos-license-failover-readout" style="margin:0;font-size:0.9rem;">—</p>
+                                        <p id="pos-license-failover-readout" style="margin:0;font-size:0.9rem;">â€”</p>
                                         <p style="margin:0.35rem 0 0;color:var(--gray-600);font-size:0.85rem;">
                                             Metered automatically from the WTI modem and registers. First 2 GB included with the first station; each additional GB is $10/mo. Clears after a successful charge.
                                         </p>
@@ -5238,7 +5304,7 @@
                                     <div class="form-group">
                                         <label for="pos-license-comped">Service comped until</label>
                                         <input class="form-input" id="pos-license-comped" name="serviceCompedUntil" type="date" style="max-width:12rem;">
-                                        <p style="margin:0.35rem 0 0;color:var(--gray-600);font-size:0.85rem;">Credit a free month (or longer) without charging — developer only.</p>
+                                        <p style="margin:0.35rem 0 0;color:var(--gray-600);font-size:0.85rem;">Credit a free month (or longer) without charging â€” developer only.</p>
                                     </div>
                                     <div class="form-group">
                                         <label for="pos-license-grace">Grace days override</label>
@@ -5322,7 +5388,7 @@
                                             <span id="principal-build-balance-summary-hint" style="font-weight:400;color:var(--gray-600);font-size:0.88rem;"></span>
                                         </summary>
                                         <div class="principal-build-balance-body">
-                                            <p style="margin:0 0 0.75rem 0;color:var(--gray-600);font-size:0.85rem;">Optional — expand only when you are ready to pay. Charges are immediate.</p>
+                                            <p style="margin:0 0 0.75rem 0;color:var(--gray-600);font-size:0.85rem;">Optional â€” expand only when you are ready to pay. Charges are immediate.</p>
                                             <p id="principal-build-balance-desc" style="margin:0 0 0.75rem 0;color:var(--gray-600);font-size:0.88rem;"></p>
                                             <p id="principal-build-balance-amount" style="margin:0 0 0.75rem 0;font-size:1rem;font-weight:600;"></p>
                                             <div id="principal-build-balance-actions" style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:flex-end;">
@@ -5348,7 +5414,7 @@
                             <div id="pos-license-waive-card" class="card" style="margin-top:1.25rem;max-width:32rem;display:none;">
                                 <div class="card-content">
                                     <h4 style="margin:0 0 0.5rem 0;">Developer: credit missed month</h4>
-                                    <p style="margin:0 0 0.75rem 0;color:var(--gray-600);font-size:0.88rem;">Waive the missed payment and restore service without charging. Merchant admins cannot do this — billing must fail or succeed on its own.</p>
+                                    <p style="margin:0 0 0.75rem 0;color:var(--gray-600);font-size:0.88rem;">Waive the missed payment and restore service without charging. Merchant admins cannot do this â€” billing must fail or succeed on its own.</p>
                                     <p id="pos-license-past-due-owed" style="margin:0 0 0.75rem 0;font-size:0.95rem;"></p>
                                     <form id="pos-license-waive-form" style="display:grid;gap:0.65rem;">
                                         <div class="form-group" style="margin:0;">
@@ -5417,7 +5483,7 @@
                         <div class="form-group">
                             <label for="inventory-global-low-stock">Global low-stock threshold</label>
                             <input class="form-input" id="inventory-global-low-stock" name="inventory_global_low_stock_threshold" type="number" min="0" max="9999" step="1" placeholder="5" style="max-width:8rem;">
-                            <p class="form-help" style="margin-top:0.35rem;">Used when a product has no per-item threshold. Warns shoppers and flags items in Admin → Low stock.</p>
+                            <p class="form-help" style="margin-top:0.35rem;">Used when a product has no per-item threshold. Warns shoppers and flags items in Admin â†’ Low stock.</p>
                         </div>
                         <div class="form-group">
                             <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
@@ -5492,8 +5558,8 @@
                             <div class="form-group" style="margin-top:0.75rem;padding:0.85rem 1rem;background:var(--gray-50, #f8fafc);border-radius:8px;border:1px solid var(--gray-200);">
                                 <h4 style="margin:0 0 0.35rem 0;">Website pricing</h4>
                                 <p style="margin:0;color:var(--gray-600);font-size:0.88rem;">
-                                    Online checkout uses <strong>interchange+</strong> — one price on the website; no dual cash/card display at checkout.
-                                    <strong>Dual cash discount</strong> is for the physical store only — enable it under <strong>Point of Sale → Register display</strong>.
+                                    Online checkout uses <strong>interchange+</strong> â€” one price on the website; no dual cash/card display at checkout.
+                                    <strong>Dual cash discount</strong> is for the physical store only â€” enable it under <strong>Point of Sale â†’ Register display</strong>.
                                 </p>
                             </div>
                             <div class="form-group" style="display:none;" aria-hidden="true">
@@ -5533,12 +5599,12 @@
                             Sign in with the Google account you use for appointments. When someone books an EDSA session on your website, it is added to that calendar. Times already booked on that calendar will not be offered online.
                         </p>
                         <div id="gcal-status-panel" style="border:1px solid var(--gray-200);border-radius:8px;padding:0.85rem;background:var(--gray-50);margin-bottom:0.85rem;">
-                            <p id="gcal-status-text" style="margin:0;color:var(--gray-600);font-size:0.9rem;">Checking connection…</p>
+                            <p id="gcal-status-text" style="margin:0;color:var(--gray-600);font-size:0.9rem;">Checking connectionâ€¦</p>
                         </div>
                         <div class="form-group" id="gcal-calendar-wrap" style="display:none;">
                             <label for="gcal-calendar-select">Calendar for EDSA appointments</label>
                             <select class="form-input" id="gcal-calendar-select">
-                                <option value="">Select calendar…</option>
+                                <option value="">Select calendarâ€¦</option>
                             </select>
                             <p style="margin:0.35rem 0 0;color:var(--gray-500);font-size:0.84rem;">
                                 If your calendar is not in the list, type your usual calendar name below (often your Gmail address).
@@ -5559,15 +5625,15 @@
                     <div class="card-content">
                         <h3 style="margin: 0 0 0.25rem 0;">Google Business Profile</h3>
                         <p style="margin: 0 0 1rem 0; color: var(--gray-600); font-size: 0.92rem;">
-                            Sign in with the Google account that manages your store on Google Maps and Search. After Google approves API access for this project, saving store info or holidays below updates your website footer immediately and can push hours to Google when connected (on save only — not on a schedule).
+                            Sign in with the Google account that manages your store on Google Maps and Search. After Google approves API access for this project, saving store info or holidays below updates your website footer immediately and can push hours to Google when connected (on save only â€” not on a schedule).
                         </p>
                         <div id="gbp-status-panel" style="border:1px solid var(--gray-200);border-radius:8px;padding:0.85rem;background:var(--gray-50);margin-bottom:0.85rem;">
-                            <p id="gbp-status-text" style="margin:0;color:var(--gray-600);font-size:0.9rem;">Checking connection…</p>
+                            <p id="gbp-status-text" style="margin:0;color:var(--gray-600);font-size:0.9rem;">Checking connectionâ€¦</p>
                         </div>
                         <div class="form-group" id="gbp-location-wrap" style="display:none;">
                             <label for="gbp-location-select">Business location on Google</label>
                             <select class="form-input" id="gbp-location-select" disabled>
-                                <option value="">Select location…</option>
+                                <option value="">Select locationâ€¦</option>
                             </select>
                         </div>
                         <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:0.25rem;">
@@ -5582,7 +5648,7 @@
                     <div class="card-content">
                             <h3 style="margin: 0 0 0.25rem 0;">Holiday schedule</h3>
                             <p style="margin: 0 0 1rem 0; color: var(--gray-600); font-size: 0.92rem;">
-                                Planned closures or special hours — separate from regular hours in <strong>Store info</strong>. Use <strong>Save store info &amp; holidays</strong> for contact details, hours, and this list.
+                                Planned closures or special hours â€” separate from regular hours in <strong>Store info</strong>. Use <strong>Save store info &amp; holidays</strong> for contact details, hours, and this list.
                             </p>
                             <div class="form-group">
                                 <label for="holiday-template-type">Holiday list</label>
@@ -5698,7 +5764,7 @@
                                     </div>
                                     <p style="margin:0;font-size:0.85rem;color:var(--gray-600);line-height:1.5;">
                                         Text, images, prices, page styling, popups. <br>
-                                        <strong>→ Update files, then hard-refresh.</strong> No migration needed.
+                                        <strong>â†’ Update files, then hard-refresh.</strong> No migration needed.
                                     </p>
                                 </div>
                                 <div style="border:1px solid var(--gray-200);border-radius:8px;background:var(--gray-50);padding:0.9rem;">
@@ -5707,7 +5773,7 @@
                                     </div>
                                     <p style="margin:0;font-size:0.85rem;color:var(--gray-600);line-height:1.5;">
                                         Changes inside the <code>backend/</code> folder. <br>
-                                        <strong>→ Update files + restart the server.</strong>
+                                        <strong>â†’ Update files + restart the server.</strong>
                                     </p>
                                 </div>
                                 <div style="border:1px solid var(--gray-200);border-radius:8px;background:var(--gray-50);padding:0.9rem;">
@@ -5716,7 +5782,7 @@
                                     </div>
                                     <p style="margin:0;font-size:0.85rem;color:var(--gray-600);line-height:1.5;">
                                         Anything that mentions a <em>migration</em> or "adds a column/table." <br>
-                                        <strong>→ Update files + run migrations + restart.</strong>
+                                        <strong>â†’ Update files + run migrations + restart.</strong>
                                     </p>
                                 </div>
                             </div>
@@ -5748,7 +5814,7 @@
                                 <li style="display:flex;gap:0.85rem;align-items:flex-start;margin-bottom:1rem;">
                                     <span style="flex:0 0 auto;width:1.75rem;height:1.75rem;border-radius:50%;background:var(--success);color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:600;">4</span>
                                     <div style="font-size:0.9rem;color:var(--gray-700);line-height:1.55;">
-                                        <strong>Run migrations</strong> <span style="color:var(--gray-500);">(database updates only)</span> —
+                                        <strong>Run migrations</strong> <span style="color:var(--gray-500);">(database updates only)</span> â€”
                                         use the <em>"Run pending migrations"</em> button below and type <code style="background:var(--gray-100);padding:0.1rem 0.4rem;border-radius:4px;font-size:0.85rem;">RUN MIGRATIONS</code> when asked. Skip for frontend-only updates.
                                     </div>
                                 </li>
@@ -5789,9 +5855,9 @@
                             <p style="margin:0 0 1rem 0;color:var(--gray-600);font-size:0.92rem;line-height:1.55;">
                                 Enter payment processor and shipping API keys here instead of editing <code>backend/.env</code>.
                                 Values are stored in the database and take effect immediately. Secret fields show
-                                <em>[configured]</em> when already saved — leave blank to keep the current value.
+                                <em>[configured]</em> when already saved â€” leave blank to keep the current value.
                             </p>
-                            <p id="dev-integrations-status" style="margin:0 0 1rem 0;font-size:0.88rem;color:var(--gray-600);">Loading…</p>
+                            <p id="dev-integrations-status" style="margin:0 0 1rem 0;font-size:0.88rem;color:var(--gray-600);">Loadingâ€¦</p>
 
                             <form id="dev-integrations-form" autocomplete="off">
                                 <div class="form-group dev-channel-section">
@@ -5861,7 +5927,7 @@
                                                     <div data-cred-mx-auth="consumer">
                                                         <div class="form-group">
                                                             <label for="cred_mxmerchant_consumer_key">Consumer key</label>
-                                                            <input class="form-input" id="cred_mxmerchant_consumer_key" name="cred_mxmerchant_consumer_key" data-cred-field data-cred-secret placeholder="From MX → Settings → Applications/API">
+                                                            <input class="form-input" id="cred_mxmerchant_consumer_key" name="cred_mxmerchant_consumer_key" data-cred-field data-cred-secret placeholder="From MX â†’ Settings â†’ Applications/API">
                                                         </div>
                                                         <div class="form-group">
                                                             <label for="cred_mxmerchant_consumer_secret">Consumer secret</label>
@@ -5955,7 +6021,7 @@
                                                     <div class="form-group" data-cred-physical="cred_nmi_deployment_mode" style="display:none;">
                                                         <label for="cred_pos_poi_device_id">POI device ID (chip reader)</label>
                                                         <input class="form-input" id="cred_pos_poi_device_id" name="cred_pos_poi_device_id" data-cred-field placeholder="NMI Customer Present Cloud device ID">
-                                                        <p class="form-help" style="margin:0.35rem 0 0;">Also updates the store-wide terminal fallback under POS → Equipment.</p>
+                                                        <p class="form-help" style="margin:0.35rem 0 0;">Also updates the store-wide terminal fallback under POS â†’ Equipment.</p>
                                                     </div>
                                                 </div>
                                             </span>
@@ -5965,7 +6031,7 @@
                                             <span class="payment-processor-card">
                                                 <span class="payment-processor-badge payment-processor-badge--default">MX gateway</span>
                                                 <span class="payment-processor-title">MX</span>
-                                                <span class="payment-processor-desc">In-store MX account — On Screen, Physical terminal, or Quick Pay.</span>
+                                                <span class="payment-processor-desc">In-store MX account â€” On Screen, Physical terminal, or Quick Pay.</span>
                                                 <div class="payment-processor-cred-body" data-cred-stop>
                                                     <div class="form-group">
                                                         <label for="cred_mxmerchant_deployment_mode">Deployment</label>
@@ -5982,7 +6048,7 @@
                                                     <div data-cred-modes="physical" style="display:none;">
                                                         <div class="form-group">
                                                             <label for="cred_mxmerchant_terminal_id">MX Terminal ID</label>
-                                                            <input class="form-input" id="cred_mxmerchant_terminal_id" name="cred_mxmerchant_terminal_id" data-cred-field placeholder="From MX → Terminals">
+                                                            <input class="form-input" id="cred_mxmerchant_terminal_id" name="cred_mxmerchant_terminal_id" data-cred-field placeholder="From MX â†’ Terminals">
                                                             <small style="color:var(--gray-500);">Required for Physical deployment (Dejavoo, AnywhereCommerce, etc.).</small>
                                                         </div>
                                                     </div>
@@ -6019,7 +6085,7 @@
                                         <div class="payment-processor-cred-body" data-cred-stop>
                                             <div class="form-group">
                                                 <label for="cred_shippo_api_token">API token</label>
-                                                <input class="form-input" id="cred_shippo_api_token" name="cred_shippo_api_token" data-cred-field data-cred-secret type="password" placeholder="shippo_test_… or shippo_live_…" autocomplete="new-password">
+                                                <input class="form-input" id="cred_shippo_api_token" name="cred_shippo_api_token" data-cred-field data-cred-secret type="password" placeholder="shippo_test_â€¦ or shippo_live_â€¦" autocomplete="new-password">
                                             </div>
                                             <label style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.85rem;cursor:pointer;">
                                                 <input type="checkbox" id="cred_shippo_test_mode" name="cred_shippo_test_mode" data-cred-field data-cred-bool>
@@ -6069,7 +6135,7 @@
                                             <p style="font-size:0.82rem;color:var(--gray-600);margin:0.85rem 0 0;line-height:1.45;">
                                                 <strong>UPS &amp; FedEx:</strong> Connect your carrier accounts in the
                                                 <a href="https://goshippo.com/settings/carriers" target="_blank" rel="noopener">Shippo dashboard</a>
-                                                (not here). USPS often works via Shippo’s platform account. Use
+                                                (not here). USPS often works via Shippoâ€™s platform account. Use
                                                 <em>Test connections</em> below to confirm each carrier returns live rates before go-live.
                                             </p>
                                         </div>
@@ -6094,7 +6160,7 @@
                             <h3 style="margin:0 0 0.25rem 0;">Import inventory from CSV</h3>
                             <p style="margin:0 0 1rem 0;color:var(--gray-600);font-size:0.92rem;line-height:1.55;">
                                 Migrate products from another POS or vendor file. Same importer as
-                                <strong>Import Products</strong> in the sidebar — useful when onboarding a new store.
+                                <strong>Import Products</strong> in the sidebar â€” useful when onboarding a new store.
                                 Download the template, fill in SKU, name, price, cost, quantity, descriptions, and image URLs, then upload.
                             </p>
                             <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem;">
@@ -6111,7 +6177,7 @@
                                 <i class="fas fa-upload" aria-hidden="true"></i> Import products
                             </button>
                             <div id="devImportProgress" style="margin-top:1rem;display:none;">
-                                <div class="loading"><div class="spinner"></div>Importing products…</div>
+                                <div class="loading"><div class="spinner"></div>Importing productsâ€¦</div>
                             </div>
                             <div id="devImportResults" style="margin-top:1rem;display:none;"></div>
                         </div>
@@ -6124,7 +6190,7 @@
                                 Download a full SQL backup of the live database (customers, orders, tax data, products, and settings).
                                 Use this before deploying updates or making major changes.
                             </p>
-                            <p id="dev-tools-backup-meta" style="margin:0 0 1rem 0;color:var(--gray-600);font-size:0.88rem;">Loading backup info…</p>
+                            <p id="dev-tools-backup-meta" style="margin:0 0 1rem 0;color:var(--gray-600);font-size:0.88rem;">Loading backup infoâ€¦</p>
                             <button type="button" class="btn btn-primary" id="dev-tools-backup-btn">
                                 <i class="fas fa-download" aria-hidden="true"></i> Download SQL backup
                             </button>
@@ -6138,9 +6204,9 @@
                                 Apply pending schema updates from <code>database/migrations/</code> without wiping customer or sales data.
                                 This is the safe way to update production after a code deploy.
                             </p>
-                            <div id="dev-tools-migrations-summary" style="margin:0 0 1rem 0;color:var(--gray-700);font-size:0.9rem;">Loading migration status…</div>
+                            <div id="dev-tools-migrations-summary" style="margin:0 0 1rem 0;color:var(--gray-700);font-size:0.9rem;">Loading migration statusâ€¦</div>
                             <div id="dev-tools-migrations-list" style="border:1px solid var(--gray-200);border-radius:8px;background:var(--gray-50);padding:0.75rem;max-height:280px;overflow:auto;margin-bottom:1rem;">
-                                <p style="margin:0;color:var(--gray-500);">Loading…</p>
+                                <p style="margin:0;color:var(--gray-500);">Loadingâ€¦</p>
                             </div>
                             <button type="button" class="btn btn-success" id="dev-tools-run-migrations-btn">
                                 <i class="fas fa-play" aria-hidden="true"></i> Run pending migrations
@@ -6403,7 +6469,7 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="promo-form-desc">Description (internal)</label>
-                                            <input class="form-input" id="promo-form-desc" maxlength="500" placeholder="Labor Day — standard shipping waived">
+                                            <input class="form-input" id="promo-form-desc" maxlength="500" placeholder="Labor Day â€” standard shipping waived">
                                         </div>
                                     </div>
                                     <label style="margin-bottom: 1rem; display:block;"><input type="checkbox" id="promo-form-active" name="promo_form_active" checked> Active</label>
@@ -6420,7 +6486,7 @@
                                             </label>
                                             <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;">
                                                 <input type="radio" name="promo-form-channel" value="pos" style="margin-top:0.2rem;">
-                                                <span><strong>In-store only</strong><br><span class="form-help" style="margin:0;">Auto-applies at the POS when items qualify — cashiers never type a code.</span></span>
+                                                <span><strong>In-store only</strong><br><span class="form-help" style="margin:0;">Auto-applies at the POS when items qualify â€” cashiers never type a code.</span></span>
                                             </label>
                                         </div>
                                     </div>
@@ -6495,7 +6561,7 @@
                                         <div class="form-group">
                                             <label for="promo-form-product-promo-strategy">Product promotion model</label>
                                             <select class="form-input" id="promo-form-product-promo-strategy" style="max-width:28rem;">
-                                                <option value="trigger_reward">Trigger SKUs → Reward SKUs</option>
+                                                <option value="trigger_reward">Trigger SKUs â†’ Reward SKUs</option>
                                                 <option value="classic">Classic (eligible cart + optional buy/get)</option>
                                             </select>
                                             <small class="form-help">Trigger/Reward applies discounts only after the buyer meets a minimum quantity of trigger SKUs in the cart. Each reward row can target different SKUs with its own discount type (% / $ / set price).</small>
@@ -6506,7 +6572,7 @@
                                                 <label for="promo-trigger-prod-q">Trigger SKUs</label>
                                                 <div id="promo-trigger-chips" class="promo-prod-chips" aria-live="polite"></div>
                                                 <div class="promo-prod-search-wrap">
-                                                    <input type="text" class="form-input" id="promo-trigger-prod-q" autocomplete="off" placeholder="Products that must be in cart…">
+                                                    <input type="text" class="form-input" id="promo-trigger-prod-q" autocomplete="off" placeholder="Products that must be in cartâ€¦">
                                                     <div id="promo-trigger-results" class="promo-prod-results-local promo-product-link-results-panel" role="listbox" aria-label="Matching products" hidden></div>
                                                 </div>
                                                 <div class="form-group" style="margin-top:0.75rem;margin-bottom:0;">
@@ -6524,31 +6590,31 @@
                                         </div>
                                         <div id="promo-panel-classic-products" style="display:none;">
                                             <div class="form-group">
-                                                <label for="promo-scope-prod-q">Eligible products — search</label>
+                                                <label for="promo-scope-prod-q">Eligible products â€” search</label>
                                                 <div id="promo-scope-prod-chips" class="promo-prod-chips" aria-live="polite"></div>
                                                 <div class="promo-prod-search-wrap">
-                                                    <input type="text" class="form-input" id="promo-scope-prod-q" autocomplete="off" placeholder="Type product name or SKU…" aria-autocomplete="list" aria-controls="promo-scope-prod-results">
+                                                    <input type="text" class="form-input" id="promo-scope-prod-q" autocomplete="off" placeholder="Type product name or SKUâ€¦" aria-autocomplete="list" aria-controls="promo-scope-prod-results">
                                                     <div id="promo-scope-prod-results" class="promo-prod-results-local promo-product-link-results-panel" role="listbox" aria-label="Matching products" hidden></div>
                                                 </div>
-                                                <small class="form-help">Percent/$ off applies to eligible subtotal. Buy‑get uses these SKUs unless you narrow buy/reward lists below.</small>
+                                                <small class="form-help">Percent/$ off applies to eligible subtotal. Buyâ€‘get uses these SKUs unless you narrow buy/reward lists below.</small>
                                             </div>
                                             <div id="promo-bogo-product-pickers" style="display:none;margin-top:0.75rem;padding-top:0.65rem;border-top:1px dashed var(--gray-200);">
                                                 <p style="font-size:0.85rem;color:var(--gray-600);margin:0 0 0.85rem;">
-                                                    When buy &amp; get quantities are both set — paid vs reward pools.
+                                                    When buy &amp; get quantities are both set â€” paid vs reward pools.
                                                 </p>
                                                 <div class="form-group">
-                                                    <label for="promo-bogo-buy-q">Paid (buy) products — search</label>
+                                                    <label for="promo-bogo-buy-q">Paid (buy) products â€” search</label>
                                                     <div id="promo-bogo-buy-chips" class="promo-prod-chips" aria-live="polite"></div>
                                                     <div class="promo-prod-search-wrap">
-                                                        <input type="text" class="form-input" id="promo-bogo-buy-q" autocomplete="off" placeholder="Search product buyers pay for…">
+                                                        <input type="text" class="form-input" id="promo-bogo-buy-q" autocomplete="off" placeholder="Search product buyers pay forâ€¦">
                                                         <div id="promo-bogo-buy-results" class="promo-prod-results-local promo-product-link-results-panel" role="listbox" hidden></div>
                                                     </div>
                                                 </div>
                                                 <div class="form-group">
-                                                    <label for="promo-bogo-get-q">Reward (discounted) products — search</label>
+                                                    <label for="promo-bogo-get-q">Reward (discounted) products â€” search</label>
                                                     <div id="promo-bogo-get-chips" class="promo-prod-chips" aria-live="polite"></div>
                                                     <div class="promo-prod-search-wrap">
-                                                        <input type="text" class="form-input" id="promo-bogo-get-q" autocomplete="off" placeholder="Search discounted item…">
+                                                        <input type="text" class="form-input" id="promo-bogo-get-q" autocomplete="off" placeholder="Search discounted itemâ€¦">
                                                         <div id="promo-bogo-get-results" class="promo-prod-results-local promo-product-link-results-panel" role="listbox" hidden></div>
                                                     </div>
                                                 </div>
@@ -6559,10 +6625,10 @@
                                         <label for="promo-scope-category-add">Categories</label>
                                         <input type="hidden" id="promo-form-category-ids" value="">
                                         <select class="form-input" id="promo-scope-category-add" aria-describedby="promo-scope-cat-help" style="max-width:28rem;margin-bottom:0.5rem;">
-                                            <option value="">Choose a category to add…</option>
+                                            <option value="">Choose a category to addâ€¦</option>
                                         </select>
                                         <div id="promo-scope-cat-chips" class="promo-prod-chips" aria-live="polite"></div>
-                                        <small class="form-help" id="promo-scope-cat-help">Choose one category per selection; add more categories by picking again from the dropdown. Remove with ×.</small>
+                                        <small class="form-help" id="promo-scope-cat-help">Choose one category per selection; add more categories by picking again from the dropdown. Remove with Ã—.</small>
                                     </div>
 
                                     <div id="promo-block-classic-merch-effects">
@@ -6589,7 +6655,7 @@
                                     <div id="promo-bogo-reward-fields" class="form-group" style="display:none;">
                                         <label for="promo-form-bogo-reward-type">Discount on get items (per bundle)</label>
                                         <select class="form-input" id="promo-form-bogo-reward-type" style="max-width:22rem;">
-                                            <option value="free">Free — 100% off the get items</option>
+                                            <option value="free">Free â€” 100% off the get items</option>
                                             <option value="percent_off">Percent off the get items</option>
                                             <option value="fixed_off">Dollar off the get items</option>
                                         </select>
@@ -6641,6 +6707,7 @@
     <script src="admin-pos-billing.js"></script>
     <script src="admin-pos-troubleshoot.js"></script>
     <script src="js/password-toggle.js?v=4"></script>
+    <script src="js/admin-shop-workflows.js?v=1"></script>
     <script src="admin-app.js?v=product-form-errors-1"></script>
     <script src="admin-edsa-calendar.js"></script>
     <script src="admin-customers.js?v=search-fix-2"></script>

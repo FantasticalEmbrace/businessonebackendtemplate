@@ -11,7 +11,7 @@ async function authenticatePosDevice(req, res, next) {
         const provided = headerKey || (bearerLooksLikeJwt ? '' : bearer);
         const deviceLabel = String(req.headers['x-pos-device-id'] || 'register-1').trim().slice(0, 64);
 
-        const result = await authenticateDevice(req.pool, deviceLabel, provided);
+        const result = await authenticateDevice(req.pool, deviceLabel, provided, req.merchantId || null);
         if (!result.ok) {
             const status = result.code === 'POS_API_DISABLED' ? 503 : 401;
             return res.status(status).json({

@@ -1,15 +1,35 @@
-# Hosting (later — not this phase)
+# Hosting
 
-This merchant template stays **local only** until you ask to go live. Do not push the merchant Node API or Asterisk to Linode as part of the current work.
+Local first. Production only when you ask.
 
-## Intended placement (when ready)
+## Architecture (Merchant Accounts)
+
+| Piece | Role |
+|-------|------|
+| **Merchant Accounts** (`business-one-merchant-accounts`) | Creates accounts + private MySQL DB per merchant; website keys; device-key directory |
+| **This repo (shared POS backend)** | One Node API; `MERCHANT_ACCOUNTS_ENABLED=true` routes each request to that merchant’s private DB |
+| **Website** | Separate process / Linode; calls shared POS API with `X-Website-Api-Key` only |
+| **POS app** | `business-one-pos`; store URL = shared POS API; device key registered in Merchant Accounts |
+| Marketing / Ops Admin | SiteGround + `business-one-backend` | Billing / signup; not merchant store data |
+
+See `../business-one-merchant-accounts/README.md`.
+
+## Local Merchant Accounts
+
+```env
+MERCHANT_ACCOUNTS_ENABLED=true
+MERCHANT_ACCOUNTS_ORIGIN=http://127.0.0.1:3015
+```
+
+## Intended production placement
 
 | Piece | Host | Notes |
 |-------|------|--------|
-| Marketing site | SiteGround | Unchanged; keep relative links / empty API meta for local dev |
-| Merchant Node + MySQL | Linode | One stack per merchant or multi-tenant later |
-| Asterisk / PBX | Linode (or same VPS) | Siptrunk for PSTN; provision URLs public |
-| Ops Admin | As today (marketing + `business-one-backend`) | Staff login for lines / MAC / milestones |
+| Marketing site | SiteGround | Unchanged |
+| Merchant Accounts + shared POS API + MySQL | Linode | Private DB per Merchant Account |
+| Merchant websites | Separate Linode each (or shared static host) | Talk to shared POS API with website key |
+| Asterisk / PBX | Linode (or same VPS) | Siptrunk for PSTN |
+| Ops Admin | Marketing + `business-one-backend` | Staff login for lines / MAC / milestones |
 
 ## GAPS / MAC provisioning checklist (later)
 

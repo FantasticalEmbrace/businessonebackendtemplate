@@ -5,16 +5,24 @@ const {
     getEpiPrivateApiKey,
     getNmiPublicTokenizationKey,
     getNmiPrivateApiKey,
-    getPosNmiPublicTokenizationKey,
-    getPosNmiPrivateApiKey,
     getNmiCollectJsUrl,
-    getPosNmiCollectJsUrl,
     getNmiTransactUrl,
-    getPosNmiTransactUrl,
     isNmiSandboxHint,
-    isPosNmiSandboxHint
+    getMerchantPosNmiPublicTokenizationKey,
+    getMerchantPosNmiPrivateApiKey,
+    getMerchantPosNmiCollectJsUrl,
+    getMerchantPosNmiTransactUrl,
+    isMerchantPosNmiSandboxHint,
+    DEFAULT_COLLECT_JS
 } = require('../utils/nmiEnv');
-const { getMxmerchantCredentials } = require('./integrationCredentials');
+const {
+    getMerchantMxmerchantCredentials,
+    isMerchantPosNmiConfigured,
+    isMerchantEpiConfigured,
+    getMerchantEpiPublicTokenizationKey,
+    getMerchantEpiPrivateApiKey,
+    getMxmerchantCredentials
+} = require('./integrationCredentials');
 const { isMxmerchantConfigured } = require('./mxmerchantGateway');
 
 const DEFAULT_PROCESSOR = 'epi';
@@ -97,18 +105,6 @@ function processorConfigured(processorId) {
     return Boolean(creds.publicKey && creds.privateKey);
 }
 
-function posProcessorConfigured(processorId) {
-    const id = normalizeStoreProcessor(processorId);
-    if (id === MX_PROCESSOR_ID) {
-        return isMxmerchantConfigured('pos');
-    }
-    if (id === 'nmi') {
-        const creds = resolvePosProcessorCredentials('nmi');
-        return Boolean(creds.publicKey && creds.privateKey);
-    }
-    return processorConfigured(id);
-}
-
 /**
  * Resolve Collect.js + Direct Post keys for the active store processor.
  * EPI falls back to NMI env names when EPI_* keys are not set (legacy deployments).
@@ -161,14 +157,14 @@ function resolveProcessorCredentials(processorId) {
 }
 
 /**
- * NMI credentials for in-store POS (terminal + customer display).
- * Uses POS_NMI_* env vars — separate merchant account from website NMI_* keys.
+ * In-store POS / shop customer pay — merchant's own processor keys from settings only.
+ * Never falls back to platform .env keys (Business One billing keys stay separate).
  */
-function resolvePosProcessorCredentials(processorId) {
+function resolveMerchantPosProcessorCredentials(processorId) {
     const processor = normalizeStoreProcessor(processorId);
 
     if (processor === MX_PROCESSOR_ID) {
-        const mx = getMxmerchantCredentials('pos');
+        const mx = getMerchantMxmerchantCredentials('pos');
         const meta = STORE_PROCESSORS[processor];
         return {
             processor,
@@ -178,6 +174,7 @@ function resolvePosProcessorCredentials(processorId) {
             sandbox: Boolean(mx.sandbox),
             accountScope: 'pos',
             driver: 'mxmerchant',
+            merchantOwned: true
         };
     }
 
@@ -185,29 +182,51 @@ function resolvePosProcessorCredentials(processorId) {
         return {
             processor,
             label: `${NMI_PROCESSOR_LABEL} (in-store)`,
-            publicKey: getPosNmiPublicTokenizationKey(),
-            privateKey: getPosNmiPrivateApiKey(),
-            collectJsUrl: getPosNmiCollectJsUrl(),
-            transactUrl: getPosNmiTransactUrl(),
-            sandbox: isPosNmiSandboxHint(),
-            accountScope: 'pos'
+            publicKey: getMerchantPosNmiPublicTokenizationKey(),
+            privateKey: getMerchantPosNmiPrivateApiKey(),
+            collectJsUrl: getMerchantPosNmiCollectJsUrl(),
+            transactUrl: getMerchantPosNmiTransactUrl(),
+            sandbox: isMerchantPosNmiSandboxHint(),
+            accountScope: 'pos',
+            merchantOwned: true
         };
     }
 
-    const epiPublic = getEpiPublicTokenizationKey();
-    const epiPrivate = getEpiPrivateApiKey();
     const meta = STORE_PROCESSORS[processor];
-
     return {
         processor,
         label: meta?.label || processor,
-        publicKey: epiPublic || getNmiPublicTokenizationKey(),
-        privateKey: epiPrivate || getNmiPrivateApiKey(),
-        collectJsUrl: getNmiCollectJsUrl(),
-        transactUrl: getNmiTransactUrl(),
-        sandbox: isNmiSandboxHint(),
-        accountScope: 'pos'
+        publicKey: getMerchantEpiPublicTokenizationKey(),
+        privateKey: getMerchantEpiPrivateApiKey(),
+        collectJsUrl: DEFAULT_COLLECT_JS,
+        transactUrl: getMerchantPosNmiTransactUrl(),
+        sandbox: isMerchantPosNmiSandboxHint(),
+        accountScope: 'pos',
+        merchantOwned: true
     };
+}
+
+function merchantPosProcessorConfigured(processorId) {
+    const id = normalizeStoreProcessor(processorId);
+    if (id === MX_PROCESSOR_ID) {
+        return Boolean(getMerchantMxmerchantCredentials('pos').hasAuth);
+    }
+    if (id === 'nmi') {
+        return isMerchantPosNmiConfigured();
+    }
+    return isMerchantEpiConfigured();
+}
+
+/**
+ * @deprecated Prefer resolveMerchantPosProcessorCredentials for store-facing payments.
+ * Kept for website checkout paths that may still use env fallbacks during migration.
+ */
+function resolvePosProcessorCredentials(processorId) {
+    return resolveMerchantPosProcessorCredentials(processorId);
+}
+
+function posProcessorConfigured(processorId) {
+    return merchantPosProcessorConfigured(processorId);
 }
 
 function listStoreProcessors() {
@@ -233,7 +252,9 @@ module.exports = {
     loadPosPaymentProcessor,
     resolveProcessorCredentials,
     resolvePosProcessorCredentials,
+    resolveMerchantPosProcessorCredentials,
     processorConfigured,
     posProcessorConfigured,
+    merchantPosProcessorConfigured,
     listStoreProcessors
 };

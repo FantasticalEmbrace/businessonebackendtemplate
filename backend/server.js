@@ -1,4 +1,4 @@
-// Business One merchant platform — Backend API (template copy; do not confuse with HM Herbs)
+﻿// Business One merchant platform â€” Backend API (template copy; do not confuse with HM Herbs)
 
 const express = require('express');
 const cors = require('cors');
@@ -34,11 +34,13 @@ const {
 const { ensureProductVariantSchema } = require('./utils/ensureProductVariantSchema');
 const { ensureShippingSchema } = require('./utils/ensureShippingSchema');
 const { ensurePosSchema } = require('./utils/ensurePosSchema');
+const { ensureTenantsSchema } = require('./utils/ensureTenantsSchema');
 const { hydrateFromDatabase: hydrateIntegrationCredentials } = require('./services/integrationCredentials');
 const { ensurePosSignupSchema } = require('./utils/ensurePosSignupSchema');
 const { ensureMenuSchema } = require('./utils/ensureMenuSchema');
 const { ensurePlatformSupportSchema } = require('./utils/ensurePlatformSupportSchema');
 const { ensurePersonnelSchema } = require('./utils/ensurePersonnelSchema');
+const { ensureShopJobsSchema } = require('./utils/ensureShopJobsSchema');
 const { ensureGiftCardPurchaseSchema } = require('./utils/ensureGiftCardPurchaseSchema');
 const { ensureGiftCardCatalog } = require('./utils/ensureGiftCardCatalog');
 const { ensureProductStorefrontSchema } = require('./utils/ensureProductStorefrontSchema');
@@ -111,7 +113,7 @@ function shouldLogDatabaseError(errorCode) {
     return false; // Don't log - too soon since last log
 }
 
-// Database connection (local MySQL or Linode Managed MySQL — see utils/dbConfig.js)
+// Database connection (local MySQL or Linode Managed MySQL â€” see utils/dbConfig.js)
 let dbConfig;
 try {
     dbConfig = buildDbConfig();
@@ -134,18 +136,22 @@ if (process.env.NODE_ENV === 'development') {
 
     // Warn if password is missing
     if (!dbConfig.password || dbConfig.password.trim() === '') {
-        logger.warn('⚠️ WARNING: DB_PASSWORD is empty or not set in .env file!');
+        logger.warn('âš ï¸ WARNING: DB_PASSWORD is empty or not set in .env file!');
         logger.warn('   Database connections will fail. Please set DB_PASSWORD in backend/.env');
     }
 }
 
 const pool = mysql.createPool(dbConfig);
 
-// Attach DB pool to every request first (public routes and middleware expect req.pool).
-app.use((req, res, next) => {
-    req.pool = pool;
-    next();
-});
+const { createMerchantAccountsMiddleware, accountsEnabled } = require('./middleware/merchantAccounts');
+
+// Attach DB pool to every request. Shared-schema tenancy resolves merchant_id (no DB-per-shop).
+app.use(createMerchantAccountsMiddleware(pool));
+if (accountsEnabled()) {
+    logger.info('Merchant tenancy: shared schema with merchant_id isolation', {
+        mode: process.env.MERCHANT_TENANCY || 'shared'
+    });
+}
 
 // Enhanced Security Middleware
 app.use(helmet({
@@ -411,7 +417,7 @@ const authLimiter = rateLimit({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Static uploads — always resolve to backend/uploads (relative "uploads" breaks if cwd is not backend/)
+// Static uploads â€” always resolve to backend/uploads (relative "uploads" breaks if cwd is not backend/)
 const uploadsDir = path.join(__dirname, 'uploads');
 const rootPath = path.join(__dirname, '..');
 
@@ -430,7 +436,7 @@ app.get('/uploads/products/:filename', async (req, res) => {
     }
 });
 
-// Catalog images under /images/products/ — serve only when the file exists (no substitute image).
+// Catalog images under /images/products/ â€” serve only when the file exists (no substitute image).
 app.get('/images/products/:filename', async (req, res) => {
     const filename = req.params.filename || '';
     if (!filename || filename.includes('..') || /[/\\]/.test(filename)) {
@@ -450,7 +456,7 @@ app.get('/images/products/:filename', async (req, res) => {
 
 app.use('/uploads', express.static(uploadsDir));
 
-// Service worker: dedicated handler (correct MIME, no-cache, scope) — avoids flaky registration on :3001
+// Service worker: dedicated handler (correct MIME, no-cache, scope) â€” avoids flaky registration on :3001
 app.get('/service-worker.js', (req, res, next) => {
     const swPath = path.join(rootPath, 'service-worker.js');
     res.type('application/javascript');
@@ -476,7 +482,7 @@ if (process.env.STAGING_BLOCK_INDEXING === 'true') {
 // Permanent SEO redirects from repo-root redirects-301.csv (see file header).
 app.use(createSeoRedirectMiddleware({ rootPath, logger }));
 
-// Business One POS UI — hosted on the dedicated POS platform (pos.businessonecomprehensive.com), not on store servers.
+// Business One POS UI â€” hosted on the dedicated POS platform (pos.businessonecomprehensive.com), not on store servers.
 // Local dev only: set SERVE_POS_UI=true to serve ../business-one-pos at /pos/ from this server.
 const posAppPath = path.join(rootPath, '..', 'business-one-pos');
 const servePosUi = String(process.env.SERVE_POS_UI || '').toLowerCase() === 'true';
@@ -496,14 +502,18 @@ if (servePosUi && fsSync.existsSync(posAppPath)) {
     });
 }
 
-const supportAgentPath = fsSync.existsSync(path.join(rootPath, 'business-one-support-agent'))
-    ? path.join(rootPath, 'business-one-support-agent')
-    : path.join(rootPath, '..', 'business-one-support-agent');
+const supportAgentPath = fsSync.existsSync(path.join(rootPath, 'businessonedesktopsupportclient'))
+    ? path.join(rootPath, 'businessonedesktopsupportclient')
+    : fsSync.existsSync(path.join(rootPath, '..', 'businessonedesktopsupportclient'))
+      ? path.join(rootPath, '..', 'businessonedesktopsupportclient')
+      : fsSync.existsSync(path.join(rootPath, 'business-one-support-agent'))
+        ? path.join(rootPath, 'business-one-support-agent')
+        : path.join(rootPath, '..', 'business-one-support-agent');
 if (fsSync.existsSync(supportAgentPath)) {
     app.use('/support-agent', express.static(supportAgentPath));
 }
 
-// Business One Support Desk — dedicated local URL (not the HM Herbs storefront)
+// Business One Support Desk â€” dedicated local URL (not the HM Herbs storefront)
 app.get('/support-desk', (req, res) => {
     res.sendFile(path.join(rootPath, 'platform-support.html'));
 });
@@ -569,8 +579,9 @@ const authenticateAdmin = async (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const [rows] = await pool.execute(
-            'SELECT id, email, first_name, last_name, role, is_active FROM admin_users WHERE id = ? AND is_active = 1',
+        const db = req.pool || pool;
+        const [rows] = await db.execute(
+            'SELECT id, email, first_name, last_name, role, is_active, merchant_id FROM admin_users WHERE id = ? AND is_active = 1',
             [decoded.adminId]
         );
 
@@ -579,10 +590,31 @@ const authenticateAdmin = async (req, res, next) => {
         }
 
         const { normalizeAdminRole } = require('./utils/adminRoles');
+        const { tenancyShared } = require('./utils/ensureTenantsSchema');
         req.admin = { ...rows[0], role: normalizeAdminRole(rows[0].role) };
+        if (tenancyShared() && rows[0].merchant_id) {
+            req.merchantId = rows[0].merchant_id;
+            req.merchantAccount = req.merchantAccount || { id: rows[0].merchant_id };
+        }
         next();
     } catch (error) {
-        return res.status(403).json({ error: 'Invalid admin token' });
+        // merchant_id column may be missing in single-store DBs
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const db = req.pool || pool;
+            const [rows] = await db.execute(
+                'SELECT id, email, first_name, last_name, role, is_active FROM admin_users WHERE id = ? AND is_active = 1',
+                [decoded.adminId]
+            );
+            if (rows.length === 0) {
+                return res.status(401).json({ error: 'Invalid admin token' });
+            }
+            const { normalizeAdminRole } = require('./utils/adminRoles');
+            req.admin = { ...rows[0], role: normalizeAdminRole(rows[0].role) };
+            return next();
+        } catch {
+            return res.status(403).json({ error: 'Invalid admin token' });
+        }
     }
 };
 
@@ -641,7 +673,7 @@ app.get('/api/health/ready', async (req, res) => {
     }
 });
 
-// Promo banner (early registration; uses `pool` directly; always 200 — see utils/promoBanner.js)
+// Promo banner (early registration; uses `pool` directly; always 200 â€” see utils/promoBanner.js)
 app.get('/api/promo-banner', async (req, res) => {
     try {
         await handlePromoBannerGet(pool, res, logger);
@@ -899,7 +931,7 @@ app.post('/api/auth/forgot-password', authLimiter, userForgotPasswordValidation,
                 const first = String(u.first_name || '').trim() || 'there';
                 const result = await sendMail({
                     to: u.email,
-                    subject: 'H&M Herbs — reset your password',
+                    subject: 'H&M Herbs â€” reset your password',
                     html: `
                         <h2>Password reset</h2>
                         <p>Hello ${first},</p>
@@ -913,7 +945,7 @@ app.post('/api/auth/forgot-password', authLimiter, userForgotPasswordValidation,
                 });
                 if (!result.sent) {
                     logger.info('Customer password reset (SMTP not configured):', { email: u.email, resetUrl });
-                    console.log('\n🔑 Customer password reset link (set SMTP_* in backend/.env to send email):\n');
+                    console.log('\nðŸ”‘ Customer password reset link (set SMTP_* in backend/.env to send email):\n');
                     console.log(`   ${resetUrl}\n`);
                 }
             } catch (emailErr) {
@@ -1401,6 +1433,13 @@ app.get('/api/products', async (req, res) => {
             }
         }
 
+        const { merchantIdFromReq } = require('./utils/merchantScope');
+        const merchantId = merchantIdFromReq(req);
+        if (merchantId) {
+            whereConditions.push('p.merchant_id = ?');
+            queryParams.push(merchantId);
+        }
+
         // Exclude scheduled events/non-product items from product listing
         const excludedSkus = ['51302']; // Association of Natural Health EDSA Biofeedback Testing
         const excludedSlugs = ['association-of-natural-health-edsa-biofeedback-testing'];
@@ -1543,7 +1582,7 @@ app.get('/api/products', async (req, res) => {
             }
         }
 
-        // Database unreachable — 503 so clients do not treat an empty list as a valid catalog
+        // Database unreachable â€” 503 so clients do not treat an empty list as a valid catalog
         const dbUnavailable =
             error.code === 'ER_ACCESS_DENIED_ERROR' ||
             error.code === 'ECONNREFUSED' ||
@@ -1576,8 +1615,13 @@ app.get('/api/products/:slug', async (req, res) => {
         const raw = String(slug || '').trim();
         const isNumericId = /^\d+$/.test(raw);
         const idParam = isNumericId ? Number(raw) : -1;
+        const { merchantIdFromReq } = require('./utils/merchantScope');
+        const merchantId = merchantIdFromReq(req);
+        const db = req.pool || pool;
+        const midSql = merchantId ? ' AND p.merchant_id = ?' : '';
+        const midParams = merchantId ? [raw, idParam, merchantId] : [raw, idParam];
 
-        const [products] = await pool.execute(`
+        const [products] = await db.execute(`
             SELECT 
                 p.*,
                 b.name as brand_name,
@@ -1588,8 +1632,8 @@ app.get('/api/products/:slug', async (req, res) => {
             FROM products p
             LEFT JOIN brands b ON p.brand_id = b.id
             LEFT JOIN product_categories pc ON p.category_id = pc.id
-            WHERE p.is_active = 1 AND ${STOREFRONT_VISIBLE_WHERE} AND (p.slug = ? OR p.id = ?)
-        `, [raw, idParam]);
+            WHERE p.is_active = 1 AND ${STOREFRONT_VISIBLE_WHERE} AND (p.slug = ? OR p.id = ?)${midSql}
+        `, midParams);
 
         if (products.length === 0) {
             return res.status(404).json({ error: 'Product not found' });
@@ -1782,7 +1826,7 @@ const {
 
 const { requirePermission: requireAdminPermissionLevel } = require('./middleware/adminAuth');
 
-// Marketing hub (Mailchimp signup URL / headline) — registered on the main app so `/api/admin/marketing-settings`
+// Marketing hub (Mailchimp signup URL / headline) â€” registered on the main app so `/api/admin/marketing-settings`
 // is never missed by the catch-all 404 (some deployments had only this path fail from the admin router).
 app.get('/api/admin/marketing-settings', authenticateAdmin, requireAdminPermissionLevel('manager'), (req, res) => {
     try {
@@ -1809,7 +1853,7 @@ app.put('/api/admin/marketing-settings', authenticateAdmin, requireAdminPermissi
     }
 });
 
-// Front-facing display ad playlists — registered on the main app (same reliability fix as marketing-settings).
+// Front-facing display ad playlists â€” registered on the main app (same reliability fix as marketing-settings).
 app.get('/api/admin/pos/front-displays', authenticateAdmin, requireAdminPermissionLevel('manager'), async (req, res) => {
     try {
         const displays = await listFrontDisplays(pool);
@@ -1880,6 +1924,8 @@ app.use('/api/admin/customer-groups', require('./routes/admin-customer-groups'))
 app.use('/api/admin/gift-cards', require('./routes/admin-gift-cards'));
 app.use('/api/admin/dev-tools', require('./routes/admin-dev-tools'));
 app.use('/api/admin/personnel', require('./routes/admin-personnel'));
+app.use('/api/admin/shop', require('./routes/admin-shop'));
+app.use('/api/shop', require('./routes/shop-customer-portal'));
 app.use('/api/admin/pos', require('./routes/admin-pos'));
 app.use('/api/bo', require('./routes/bo-platform'));
 app.use('/api/admin/bo', require('./routes/bo-platform'));
@@ -1897,12 +1943,13 @@ app.use('/api/platform/billing', require('./routes/platform-billing'));
 app.use('/api/platform/support/hub', require('./routes/platform-support-hub'));
 app.use('/api/platform/support/store', require('./routes/platform-support-store'));
 app.use('/api/platform/ops', require('./routes/platform-ops'));
+app.use('/api/platform', require('./routes/platform-tenants'));
 app.use('/api/pos-support/v1', require('./routes/pos-support-v1'));
 app.use('/api/pos/v1', require('./routes/pos-v1'));
 // Customer-facing account API (addresses CRUD, password change, order detail,
 // wishlist collections + items). Mounted AFTER the inline /api/user/* handlers
 // (profile, orders list, addresses GET, loyalty, gift-cards) defined above so
-// those keep working — express tries router routes only if no inline match.
+// those keep working â€” express tries router routes only if no inline match.
 app.use('/api/user', require('./routes/user')({ pool, authenticateToken, logger }));
 
 app.use('/api', publicRoutes);
@@ -1951,6 +1998,7 @@ app.use('/api/*', (req, res) => {
     try {
         await ensureShippingSchema(pool);
         await ensurePosSchema(pool);
+        await ensureTenantsSchema(pool);
         await hydrateIntegrationCredentials(pool);
         await ensurePlatformBillingSchema(pool);
         await ensurePosSignupSchema(pool);
@@ -1959,6 +2007,7 @@ app.use('/api/*', (req, res) => {
         await refreshStoreBaseUrlFromDb(pool);
         await ensurePlatformSupportSchema(pool);
         await ensurePersonnelSchema(pool);
+        await ensureShopJobsSchema(pool);
     } catch (e) {
         logger.error(`ensureShippingSchema failed: ${logger.formatMysqlError(e)}`);
     }
@@ -2046,7 +2095,7 @@ app.use('/api/*', (req, res) => {
             console.log('EDSA/customer email: SMTP configured (branded appointment emails enabled)');
         } else {
             console.warn(
-                'EDSA/customer email: SMTP not configured — set SMTP_HOST, SMTP_USER, SMTP_PASSWORD in backend/.env. ' +
+                'EDSA/customer email: SMTP not configured â€” set SMTP_HOST, SMTP_USER, SMTP_PASSWORD in backend/.env. ' +
                     'Until then, new bookings rely on Google Calendar guest invites when calendar is connected.'
             );
         }
@@ -2090,9 +2139,9 @@ app.use('/api/*', (req, res) => {
     }).on('error', (error) => {
         logger.error('Server startup error:', error);
         if (error.code === 'EADDRINUSE') {
-            console.error(`❌ Port ${PORT} is already in use. Please stop the other process or change the port.`);
+            console.error(`âŒ Port ${PORT} is already in use. Please stop the other process or change the port.`);
         } else {
-            console.error(`❌ Failed to start server: ${error.message}`);
+            console.error(`âŒ Failed to start server: ${error.message}`);
         }
         process.exit(1);
     });

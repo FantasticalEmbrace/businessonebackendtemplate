@@ -160,10 +160,15 @@ async function listInStorePosSales(pool, options = {}) {
     const offset = Math.max(0, Number(options.offset) || 0);
     const date = String(options.date || '').slice(0, 10);
     const q = String(options.q || '').trim();
+    const merchantId = options.merchantId || null;
 
     const where = [`o.sales_channel = 'in_store'`, `o.payment_status IN ('paid', 'refunded')`];
     const params = [];
 
+    if (merchantId) {
+        where.push('o.merchant_id = ?');
+        params.push(merchantId);
+    }
     if (date) {
         const bounds = getStoreDayBoundsRfc3339(date);
         where.push('o.created_at >= ? AND o.created_at <= ?');
@@ -206,7 +211,7 @@ async function listInStorePosSales(pool, options = {}) {
     return { sales, total, limit, offset };
 }
 
-async function getInStorePosOrderReceipt(pool, orderNumber) {
+async function getInStorePosOrderReceipt(pool, orderNumber, merchantId = null) {
     const orderNum = String(orderNumber || '').trim();
     if (!orderNum) {
         const err = new Error('ORDER_NUMBER_REQUIRED');
@@ -219,9 +224,9 @@ async function getInStorePosOrderReceipt(pool, orderNumber) {
         `SELECT o.*, e.first_name, e.last_name, e.employee_code
            FROM orders o
            LEFT JOIN pos_employees e ON e.id = o.pos_employee_id
-          WHERE o.order_number = ?
+          WHERE o.order_number = ?${merchantId ? ' AND o.merchant_id = ?' : ''}
           LIMIT 1`,
-        [orderNum]
+        merchantId ? [orderNum, merchantId] : [orderNum]
     );
     const order = orders[0];
     if (!order) {

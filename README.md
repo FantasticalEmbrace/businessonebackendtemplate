@@ -25,9 +25,12 @@ Website nav items stay greyed with “Not on your plan — add a website build�
 | Service | Typical URL |
 |---------|-------------|
 | This merchant API + static admin | `http://127.0.0.1:3011` |
+| **Merchant Accounts** (shared multi-merchant control plane) | sibling `business-one-merchant-accounts` `:3015` |
 | Business One Phone (PBX) | `http://127.0.0.1:3040` |
 | Ops Admin (marketing site) | `http://localhost:8080` + `business-one-backend` `:3002` |
 | POS app | sibling `business-one-pos` |
+
+For shared POS + private DB per shop, see **Merchant Accounts** (`../business-one-merchant-accounts/README.md`) and set `MERCHANT_ACCOUNTS_ENABLED=true` in `backend/.env`.
 
 ## Quick start
 

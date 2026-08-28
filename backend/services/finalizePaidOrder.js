@@ -39,7 +39,16 @@ async function recalcUserOrderAggregates(connection, userId) {
  */
 async function finalizePaidOrder(
     pool,
-    { orderId, paymentId, paymentStatus, paymentProcessor, paymentToken, skipConfirmationEmail = false, allowOversell = false }
+    {
+        orderId,
+        paymentId,
+        paymentStatus,
+        paymentProcessor,
+        paymentToken,
+        skipConfirmationEmail = false,
+        allowOversell = false,
+        orderStatus = 'processing'
+    }
 ) {
     const oid = Number(orderId);
     if (!Number.isFinite(oid) || oid < 1) {
@@ -73,28 +82,29 @@ async function finalizePaidOrder(
 
     try {
         const paidStatus = paymentStatus || 'paid';
+        const nextOrderStatus = String(orderStatus || 'processing').trim() || 'processing';
         let statusUpdated = false;
         if (paymentId) {
             const proc = paymentProcessor ? String(paymentProcessor).trim() : null;
             const token = paymentToken ? String(paymentToken).trim() : null;
             const [upd] = await connection.execute(
                 `UPDATE orders
-                    SET status = 'processing',
+                    SET status = ?,
                         payment_status = ?,
                         payment_reference = ?,
                         payment_processor = COALESCE(?, payment_processor),
                         payment_token = COALESCE(?, payment_token)
                   WHERE id = ? AND status = 'pending'`,
-                [paidStatus, String(paymentId).trim(), proc, token, oid]
+                [nextOrderStatus, paidStatus, String(paymentId).trim(), proc, token, oid]
             );
             statusUpdated = upd.affectedRows > 0;
         } else {
             const [upd] = await connection.execute(
                 `UPDATE orders
-                    SET status = 'processing',
+                    SET status = ?,
                         payment_status = ?
                   WHERE id = ? AND status = 'pending'`,
-                [paidStatus, oid]
+                [nextOrderStatus, paidStatus, oid]
             );
             statusUpdated = upd.affectedRows > 0;
         }

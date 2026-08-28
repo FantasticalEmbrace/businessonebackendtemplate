@@ -81,7 +81,7 @@ const POS_SETTING_META = Object.freeze({
     pos_receipt_show_platform_line: { description: 'Show Business One line on receipts', type: 'boolean' },
     pos_receipt_show_cashier: { description: 'Show cashier name on POS receipts', type: 'boolean' },
     pos_receipt_show_cash_savings: { description: 'Show cash savings line on POS receipts', type: 'boolean' },
-    pos_receipt_auto_print: { description: 'Auto-open print dialog after each sale', type: 'boolean' },
+    pos_receipt_auto_print: { description: 'Automatically print a paper receipt after each sale', type: 'boolean' },
     pos_receipt_copy_count: { description: 'Number of receipt copies to print (1–3)', type: 'number' },
     pos_receipt_show_order_barcode: { description: 'Show order number as barcode on receipts', type: 'boolean' },
     pos_session_timeout_minutes: { description: 'POS PIN session timeout minutes', type: 'number' },

@@ -53,9 +53,9 @@ class AdminApp {
     getApiBaseUrl() {
         // Check if we're using file:// protocol (opened directly)
         if (window.location.protocol === 'file:') {
-            console.warn('âš ï¸ Admin panel opened via file:// protocol. Please use a web server.');
-            console.warn('ðŸ’¡ Start the backend server: cd backend && npm start');
-            console.warn('ðŸ’¡ Then access: http://localhost:3001/admin.html');
+            console.warn('Ã¢Å¡Â Ã¯Â¸Â Admin panel opened via file:// protocol. Please use a web server.');
+            console.warn('Ã°Å¸â€™Â¡ Start the backend server: cd backend && npm start');
+            console.warn('Ã°Å¸â€™Â¡ Then access: http://localhost:3001/admin.html');
             // Still return the API URL for when server is running
             return 'http://localhost:3001/api';
         }
@@ -1638,7 +1638,7 @@ class AdminApp {
         if (!statusEl) return;
         if (this.currentUser?.role !== 'developer') return;
 
-        statusEl.textContent = 'Loading credentials…';
+        statusEl.textContent = 'Loading credentialsâ€¦';
         if (msg) msg.textContent = '';
 
         try {
@@ -1808,7 +1808,7 @@ class AdminApp {
 
         if (btn) btn.disabled = true;
         if (msg) {
-            msg.textContent = 'Saving…';
+            msg.textContent = 'Savingâ€¦';
             msg.style.color = 'var(--gray-600)';
         }
 
@@ -1844,7 +1844,7 @@ class AdminApp {
         const btn = document.getElementById('dev-integrations-test-btn');
         if (btn) btn.disabled = true;
         if (msg) {
-            msg.textContent = 'Testing connections…';
+            msg.textContent = 'Testing connectionsâ€¦';
             msg.style.color = 'var(--gray-600)';
         }
 
@@ -1855,7 +1855,7 @@ class AdminApp {
             });
             const lines = Object.entries(res.results || {}).map(([k, v]) => {
                 const label = k.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase());
-                let line = `${label}: ${v.ok ? 'OK' : 'Failed'} — ${v.message}`;
+                let line = `${label}: ${v.ok ? 'OK' : 'Failed'} â€” ${v.message}`;
                 if (k === 'shippo' && Array.isArray(v.carrierSummary) && v.carrierSummary.length) {
                     line += `<br><span style="font-size:0.9em;margin-left:1rem;">${v.carrierSummary.map((c) => this._escapeHtml(c)).join('<br><span style="margin-left:1rem;"></span>')}</span>`;
                 }
@@ -1899,7 +1899,7 @@ class AdminApp {
         }
 
         const url = `${this.apiBaseUrl}/admin/dev-tools/backup`;
-        this.showNotification('Building database backup…', 'info');
+        this.showNotification('Building database backupâ€¦', 'info');
         try {
             const response = await fetch(url, {
                 method: 'GET',
@@ -2032,7 +2032,7 @@ class AdminApp {
             pos_receipt_show_platform_line: 'Show Business One POS line on receipts',
             pos_receipt_show_cashier: 'Show cashier name on POS receipts',
             pos_receipt_show_cash_savings: 'Show cash savings line on POS receipts',
-            pos_receipt_auto_print: 'Auto-open print dialog after each sale',
+            pos_receipt_auto_print: 'Automatically print a paper receipt after each sale',
             pos_receipt_copy_count: 'Number of receipt copies to print (1-3)',
             pos_receipt_show_order_barcode: 'Show order number as barcode on receipts',
             pos_receipt_return_policy: 'Return policy line printed on POS receipts (text only)',
@@ -2066,6 +2066,9 @@ class AdminApp {
             pos_display_store_hours_idle: 'Show store hours on idle customer display',
             pos_show_cost_in_cart: 'Show product cost in POS cart for manual discounts',
             pos_personnel_mode: 'Personnel mode: time_clock_only or time_clock_and_pos',
+            pos_shop_verticals: 'JSON array of shop verticals: auto, body, upholstery, tire (combine as needed)',
+            pos_shop_alignment_2wheel_price: 'Tire shop 2-wheel alignment price on POS estimates',
+            pos_shop_alignment_4wheel_price: 'Tire shop 4-wheel alignment price on POS estimates',
             pos_display_card_checkout: 'NMI terminal card checkout enabled',
             pos_card_display_mode: 'Card checkout: NMI terminal mode',
         };
@@ -3003,6 +3006,21 @@ class AdminApp {
         form.querySelectorAll('[name="pos_personnel_mode"]').forEach((el) => {
             el.checked = el.value === personnelMode;
         });
+        const shopVertsRaw = String(map.get('pos_shop_verticals') || '[]');
+        let shopVerts = [];
+        try {
+            shopVerts = JSON.parse(shopVertsRaw);
+            if (!Array.isArray(shopVerts)) shopVerts = [];
+        } catch {
+            shopVerts = shopVertsRaw.split(/[,+|]/).map((s) => s.trim()).filter(Boolean);
+        }
+        form.querySelectorAll('[name="pos_shop_vertical"]').forEach((el) => {
+            el.checked = shopVerts.includes(el.value);
+        });
+        const align2 = form.querySelector('[name="pos_shop_alignment_2wheel_price"]');
+        if (align2) align2.value = String(map.get('pos_shop_alignment_2wheel_price') ?? '59.99');
+        const align4 = form.querySelector('[name="pos_shop_alignment_4wheel_price"]');
+        if (align4) align4.value = String(map.get('pos_shop_alignment_4wheel_price') ?? '89.99');
     }
 
     _syncPosCustomDriverUrlVisibility() {
@@ -3320,6 +3338,25 @@ class AdminApp {
                 }
                 return { key_name: key, value: mode, description: meta[key], type: 'string' };
             }
+            if (key === 'pos_shop_verticals') {
+                const selected = Array.from(form.querySelectorAll('[name="pos_shop_vertical"]:checked')).map(
+                    (el) => el.value
+                );
+                return {
+                    key_name: key,
+                    value: JSON.stringify(selected),
+                    description: meta[key],
+                    type: 'string'
+                };
+            }
+            if (key === 'pos_shop_alignment_2wheel_price' || key === 'pos_shop_alignment_4wheel_price') {
+                let price = Number(form.querySelector(`[name="${key}"]`)?.value);
+                if (!Number.isFinite(price) || price < 0) {
+                    price = key.includes('2wheel') ? 59.99 : 89.99;
+                }
+                price = Math.round(price * 100) / 100;
+                return { key_name: key, value: String(price), description: meta[key], type: 'number' };
+            }
             if (key === 'pos_receipt_return_policy') {
                 const el = form.querySelector('[name="pos_receipt_return_policy"]');
                 return {
@@ -3511,8 +3548,8 @@ class AdminApp {
                           ? `<div><strong>Failover data:</strong> ${Number(license.failoverGbUsed).toFixed(1)} GB (within included 2 GB)</div>`
                           : '';
                 summary.innerHTML = `
-                    <div><strong>Business:</strong> ${this.escapeHtml(license.businessName || '—')}</div>
-                    <div><strong>Billing email:</strong> ${this.escapeHtml(license.billingEmail || '—')}</div>
+                    <div><strong>Business:</strong> ${this.escapeHtml(license.businessName || 'â€”')}</div>
+                    <div><strong>Billing email:</strong> ${this.escapeHtml(license.billingEmail || 'â€”')}</div>
                     <div><strong>Status:</strong> ${this.escapeHtml(license.status || 'trial')}</div>
                     <div><strong>Active registers:</strong> ${activeDevices} of ${license.licensedStationCount || 1} licensed</div>
                     <div><strong>Monthly:</strong> ${this.escapeHtml(license.monthlyFormatted || '-')}</div>
@@ -3552,7 +3589,7 @@ class AdminApp {
                 const over = Number(license.failoverOverageAmount) || 0;
                 failoverEl.textContent =
                     over > 0
-                        ? `${gb.toFixed(1)} GB used · $${over.toFixed(2)} overage due`
+                        ? `${gb.toFixed(1)} GB used Â· $${over.toFixed(2)} overage due`
                         : gb > 0
                           ? `${gb.toFixed(1)} GB used (within included 2 GB)`
                           : '0 GB used this period';
@@ -3738,7 +3775,7 @@ class AdminApp {
             if (msg) {
                 msg.textContent = value
                     ? 'Store address saved.'
-                    : 'Cleared — env FRONTEND_URL / POS_PLATFORM_STORE_URL will be used if set.';
+                    : 'Cleared â€” env FRONTEND_URL / POS_PLATFORM_STORE_URL will be used if set.';
                 msg.style.color = 'var(--success)';
             }
             this.showToast('Store website address saved', 'success');
@@ -3757,7 +3794,7 @@ class AdminApp {
         const value = String(input?.value || '').trim();
         if (!value) {
             if (msg) {
-                msg.textContent = 'Nothing to copy — enter a store address first.';
+                msg.textContent = 'Nothing to copy â€” enter a store address first.';
                 msg.style.color = 'var(--error)';
             }
             return;
@@ -3765,7 +3802,7 @@ class AdminApp {
         try {
             await navigator.clipboard.writeText(value);
             if (msg) {
-                msg.textContent = 'Copied — paste into Web POS setup.';
+                msg.textContent = 'Copied â€” paste into Web POS setup.';
                 msg.style.color = 'var(--success)';
             }
         } catch {
@@ -3777,7 +3814,7 @@ class AdminApp {
         }
     }
 
-    /** Remote support connect lives on Business One ops admin — not merchant admin. */
+    /** Remote support connect lives on Business One ops admin â€” not merchant admin. */
     async loadPosSupport() {
         const list = document.getElementById('pos-support-agents-list');
         const configMsg = document.getElementById('pos-support-config-msg');
@@ -3796,9 +3833,11 @@ class AdminApp {
                 }
                 configMsg.innerHTML = msg;
             }
-            const dl = document.getElementById('pos-support-download-link');
-            if (dl && res.windowsAgentDownloadUrl) {
-                dl.href = res.windowsAgentDownloadUrl;
+            const dl =
+                document.getElementById('pos-support-client-download-link') ||
+                document.getElementById('pos-support-download-link');
+            if (dl && (res.windowsClientDownloadUrl || res.windowsAgentDownloadUrl)) {
+                dl.href = res.windowsClientDownloadUrl || res.windowsAgentDownloadUrl;
                 dl.style.display = '';
             }
 
@@ -4062,7 +4101,7 @@ class AdminApp {
                     <code style="user-select:all">${this.escapeHtml(apiKey)}</code>
                     <button type="button" class="btn btn-secondary btn-sm" data-copy-pos-device-key>Copy</button>
                 </span>
-                <br><span style="font-size:0.9rem;">Paste this key on the tablet (${openPos}). The key already includes this store’s address.</span>`;
+                <br><span style="font-size:0.9rem;">Paste this key on the tablet (${openPos}). The key already includes this storeâ€™s address.</span>`;
             msg.style.color = 'var(--gray-800)';
             const copyBtn = msg.querySelector('[data-copy-pos-device-key]');
             if (copyBtn) {
@@ -4206,7 +4245,7 @@ class AdminApp {
 
             if (!displays.length) {
                 list.innerHTML =
-                    '<p style="margin:0;color:var(--gray-500);font-size:0.9rem;">No front-facing displays yet. Add a <strong>Customer display</strong> under Point of Sale â†’ Equipment and assign it to a register.</p>';
+                    '<p style="margin:0;color:var(--gray-500);font-size:0.9rem;">No front-facing displays yet. Add a <strong>Customer display</strong> under Point of Sale Ã¢â€ â€™ Equipment and assign it to a register.</p>';
                 return;
             }
 
@@ -4663,7 +4702,7 @@ class AdminApp {
         if (/access_denied/i.test(text)) {
             return (
                 'Google denied access. If the app is in Testing mode, add your Google test users under ' +
-                'Google Cloud â†’ OAuth consent screen â†’ Test users. Also confirm the redirect URI ' +
+                'Google Cloud Ã¢â€ â€™ OAuth consent screen Ã¢â€ â€™ Test users. Also confirm the redirect URI ' +
                 'http://localhost:3001/api/admin/settings/google-calendar/callback is listed on your OAuth client.'
             );
         }
@@ -4973,11 +5012,11 @@ class AdminApp {
             const res = await this.apiRequest('/admin/settings/google-calendar/calendars');
             const calendars = Array.isArray(res?.calendars) ? res.calendars : [];
             if (!calendars.length) {
-                select.innerHTML = '<option value="">No calendars found — enter your calendar below</option>';
+                select.innerHTML = '<option value="">No calendars found â€” enter your calendar below</option>';
                 return;
             }
             select.innerHTML =
-                '<option value="">Select calendar…</option>' +
+                '<option value="">Select calendarâ€¦</option>' +
                 calendars
                     .map((cal) => {
                         const label = `${cal.summary || cal.id}${cal.primary ? ' (main calendar)' : ''}`;
@@ -5384,19 +5423,20 @@ class AdminApp {
         const canOpenDrawer = Boolean(reg?.canOpenDrawer);
         const allowManualDiscounts = Boolean(reg?.allowManualDiscounts);
         const canViewCost = Boolean(reg?.canViewCost);
+        const canViewShopFloor = Boolean(reg?.canViewShopFloor);
         const restrictedBlocks = this.isFullAdmin
             ? `
                 <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;margin-bottom:0.65rem;">
                     <input type="checkbox" name="canProcessRefunds" value="true"${canProcessRefunds ? ' checked' : ''} style="margin-top:0.2rem;">
-                    <span>Can process refunds <span style="color:var(--gray-600);font-weight:400;">(Admin/Developer only — register PIN required)</span></span>
+                    <span>Can process refunds <span style="color:var(--gray-600);font-weight:400;">(Admin/Developer only â€” register PIN required)</span></span>
                 </label>
                 <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;margin-bottom:0.65rem;">
                     <input type="checkbox" name="canOpenDrawer" value="true"${canOpenDrawer ? ' checked' : ''} style="margin-top:0.2rem;">
-                    <span>Can open cash drawer manually <span style="color:var(--gray-600);font-weight:400;">(Admin/Developer only — Shift screen button)</span></span>
+                    <span>Can open cash drawer manually <span style="color:var(--gray-600);font-weight:400;">(Admin/Developer only â€” Shift screen button)</span></span>
                 </label>
                 <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;">
                     <input type="checkbox" name="canViewCost" value="true"${canViewCost ? ' checked' : ''} style="margin-top:0.2rem;">
-                    <span>Can view product cost at register <span style="color:var(--gray-600);font-weight:400;">(Admin/Developer only — requires store cost display enabled)</span></span>
+                    <span>Can view product cost at register <span style="color:var(--gray-600);font-weight:400;">(Admin/Developer only â€” requires store cost display enabled)</span></span>
                 </label>`
             : '';
         return `
@@ -5404,11 +5444,15 @@ class AdminApp {
                 <h5 style="margin:0 0 0.75rem;font-size:0.95rem;color:var(--gray-700);">Register permissions</h5>
                 <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;margin-bottom:0.65rem;">
                     <input type="checkbox" name="allowManualDiscounts" value="true"${allowManualDiscounts ? ' checked' : ''} style="margin-top:0.2rem;">
-                    <span>Can apply manual line and sale discounts <span style="color:var(--gray-600);font-weight:400;">(off by default — automatic promotions still apply)</span></span>
+                    <span>Can apply manual line and sale discounts <span style="color:var(--gray-600);font-weight:400;">(off by default â€” automatic promotions still apply)</span></span>
                 </label>
                 <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;margin-bottom:0.65rem;">
                     <input type="checkbox" name="canAuthorize" value="true"${canAuthorize ? ' checked' : ''} style="margin-top:0.2rem;">
                     <span>Can approve line and sale discounts <span style="color:var(--gray-600);font-weight:400;">(manager PIN)</span></span>
+                </label>
+                <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;margin-bottom:0.65rem;">
+                    <input type="checkbox" name="canViewShopFloor" value="true"${canViewShopFloor ? ' checked' : ''} style="margin-top:0.2rem;">
+                    <span>Can view shop floor <span style="color:var(--gray-600);font-weight:400;">(all ongoing jobs and WIP status on the register)</span></span>
                 </label>
                 ${restrictedBlocks}
             </div>`;
@@ -5646,6 +5690,7 @@ class AdminApp {
         const canViewCost = this.isFullAdmin
             ? !!form.querySelector('[name="canViewCost"]')?.checked
             : undefined;
+        const canViewShopFloor = !!form.querySelector('[name="canViewShopFloor"]')?.checked;
 
         if (pin && !this._isValidRegisterPin(pin)) {
             if (msg) {
@@ -5674,6 +5719,7 @@ class AdminApp {
                     hourlyRate: hourlyRaw === '' ? null : Number(hourlyRaw),
                     canAuthorize,
                     allowManualDiscounts,
+                    canViewShopFloor,
                     ...(canProcessRefunds !== undefined ? { canProcessRefunds } : {}),
                     ...(canOpenDrawer !== undefined ? { canOpenDrawer } : {}),
                     ...(canViewCost !== undefined ? { canViewCost } : {}),
@@ -5738,6 +5784,7 @@ class AdminApp {
                             hourlyRate: hourlyRaw === '' ? null : Number(hourlyRaw),
                             canAuthorize,
                             allowManualDiscounts,
+                            canViewShopFloor,
                             ...(canProcessRefunds !== undefined ? { canProcessRefunds } : {}),
                             ...(canOpenDrawer !== undefined ? { canOpenDrawer } : {}),
                             ...(canViewCost !== undefined ? { canViewCost } : {}),
@@ -5782,6 +5829,8 @@ class AdminApp {
                     canAuthorize: fd.get('canAuthorize') === 'on' || fd.get('canAuthorize') === 'true',
                     allowManualDiscounts:
                         fd.get('allowManualDiscounts') === 'on' || fd.get('allowManualDiscounts') === 'true',
+                    canViewShopFloor:
+                        fd.get('canViewShopFloor') === 'on' || fd.get('canViewShopFloor') === 'true',
                     ...(this.isFullAdmin
                         ? {
                               canProcessRefunds:
@@ -7104,7 +7153,7 @@ class AdminApp {
                         <td><code>${this.escapeHtml(r.code)}</code></td>
                         <td>${this.escapeHtml(channel)}</td>
                         <td>${this.escapeHtml(active)}</td>
-                        <td style="font-size:0.88rem">${this.escapeHtml(r.description || '—')}</td>
+                        <td style="font-size:0.88rem">${this.escapeHtml(r.description || 'â€”')}</td>
                         <td style="white-space:nowrap">
                             <button type="button" class="btn btn-secondary btn-sm" data-promo-edit="${r.id}">Edit</button>
                             <button type="button" class="btn btn-danger btn-sm" data-promo-delete="${r.id}">Delete</button>
@@ -7135,7 +7184,7 @@ class AdminApp {
         if (!rules.effects.length && !usesTriggerSku) {
             if (msg) {
                 msg.textContent =
-                    'Add a Triggerâ†’Reward SKU setup, cart discount (classic), buy/get, or check Free shipping.';
+                    'Add a TriggerÃ¢â€ â€™Reward SKU setup, cart discount (classic), buy/get, or check Free shipping.';
                 msg.style.color = 'var(--error)';
             }
             this.showToast('Add promotion rules first', 'error');
@@ -7147,7 +7196,7 @@ class AdminApp {
 
             const bad = () => {
                 const t =
-                    'Trigger mode: add at least one Trigger SKU, minimum quantity â‰¥ 1, and one reward SKU group with a valid discount value.';
+                    'Trigger mode: add at least one Trigger SKU, minimum quantity Ã¢â€°Â¥ 1, and one reward SKU group with a valid discount value.';
                 if (msg) {
 
                     msg.textContent = t;
@@ -7419,13 +7468,13 @@ class AdminApp {
             if (keyInput && !keyInput.dataset.dirty) {
                 keyInput.value = '';
                 keyInput.placeholder = settings.ziptaxApiKeyConfigured
-                    ? 'Ziptax key saved — leave blank to keep current'
+                    ? 'Ziptax key saved â€” leave blank to keep current'
                     : 'Paste Ziptax API key';
             }
             if (keyStatus) {
                 keyStatus.textContent = settings.ziptaxApiKeyConfigured
                     ? `Configured: ${settings.ziptaxApiKey || '[configured]'}`
-                    : 'Not configured yet — online checkout tax will fail until a key is saved.';
+                    : 'Not configured yet â€” online checkout tax will fail until a key is saved.';
             }
             if (hmIgnore && !hmIgnore.dataset.dirty) hmIgnore.value = settings.hmIgnoreStates || '';
             if (hmEmailInput && !hmEmailInput.dataset.dirty) hmEmailInput.value = hmEmail;
@@ -7761,7 +7810,7 @@ class AdminApp {
             const d = new Date(booking.requested_date);
             const dateStr = Number.isNaN(d.getTime()) ? booking.requested_date : d.toLocaleDateString();
             const timeStr = booking.requested_time ? String(booking.requested_time).slice(0, 5) : '';
-            text += ` â†’ ${dateStr}${timeStr ? ' ' + timeStr : ''}`;
+            text += ` Ã¢â€ â€™ ${dateStr}${timeStr ? ' ' + timeStr : ''}`;
         }
         if (booking.customer_request_notes) {
             text += ` - ${this.escapeHtml(String(booking.customer_request_notes).slice(0, 80))}`;
@@ -8129,7 +8178,7 @@ class AdminApp {
                 // Always replace with fresh products to ensure we have the latest data
                 this.allProducts = response.products || [];
 
-                console.log('âœ… Products stored in allProducts:', {
+                console.log('Ã¢Å“â€¦ Products stored in allProducts:', {
                     count: this.allProducts.length,
                     useServerPagination: this.productsPagination.useServerPagination,
                     totalProducts: this.productsPagination.totalProducts,
@@ -8140,7 +8189,7 @@ class AdminApp {
 
                 // Log sample products to verify they have category_id and is_featured
                 if (this.allProducts.length > 0) {
-                    console.log('ðŸ“¦ Sample products after loading:', this.allProducts.slice(0, 5).map(p => ({
+                    console.log('Ã°Å¸â€œÂ¦ Sample products after loading:', this.allProducts.slice(0, 5).map(p => ({
                         id: p.id,
                         name: p.name,
                         category_id: p.category_id,
@@ -8160,7 +8209,7 @@ class AdminApp {
                         p.is_featured === '1' ||
                         p.is_featured === 'true'
                     );
-                    console.log('â­ Featured products found:', {
+                    console.log('Ã¢Â­Â Featured products found:', {
                         count: featuredProducts.length,
                         products: featuredProducts.map(p => ({
                             id: p.id,
@@ -8229,11 +8278,11 @@ class AdminApp {
                 requestAnimationFrame(() => {
                     // Double-check products are still loaded before rendering
                     if (this.allProducts.length > 0) {
-                        console.log('ðŸŽ¨ Rendering products via requestAnimationFrame, product count:', this.allProducts.length);
+                        console.log('Ã°Å¸Å½Â¨ Rendering products via requestAnimationFrame, product count:', this.allProducts.length);
                         this.renderFilteredProductsImmediate();
                     } else {
                         // If products disappeared (shouldn't happen), try loading again
-                        console.warn('âš ï¸ Products were loaded but allProducts is empty, reloading...');
+                        console.warn('Ã¢Å¡Â Ã¯Â¸Â Products were loaded but allProducts is empty, reloading...');
                         setTimeout(() => this.loadProducts(), 200);
                     }
                 });
@@ -8244,7 +8293,7 @@ class AdminApp {
                     // Only render if container is still showing loading or is empty
                     if (container && (container.querySelector('.loading') || container.innerHTML.trim() === '')) {
                         if (this.allProducts.length > 0) {
-                            console.log('ðŸ”„ Fallback render triggered, product count:', this.allProducts.length);
+                            console.log('Ã°Å¸â€â€ž Fallback render triggered, product count:', this.allProducts.length);
                             this.renderFilteredProductsImmediate();
                         }
                     }
@@ -8312,7 +8361,7 @@ class AdminApp {
                 }
             }
         } catch (error) {
-            console.error('âŒ Error loading products:', error);
+            console.error('Ã¢ÂÅ’ Error loading products:', error);
             // Create error message safely
             const errorDiv = document.createElement('div');
             errorDiv.style.textAlign = 'center';
@@ -8358,14 +8407,14 @@ class AdminApp {
     async loadCategoriesForFilters() {
         try {
             if (!this.authToken) {
-                console.warn('âš ï¸ Cannot load categories: not authenticated');
+                console.warn('Ã¢Å¡Â Ã¯Â¸Â Cannot load categories: not authenticated');
                 return;
             }
 
-            console.log('ðŸ“¥ Loading categories for filter...');
+            console.log('Ã°Å¸â€œÂ¥ Loading categories for filter...');
             const response = await this.apiRequest('/admin/categories');
 
-            console.log('ðŸ“¦ Categories API response:', {
+            console.log('Ã°Å¸â€œÂ¦ Categories API response:', {
                 response: response,
                 isArray: Array.isArray(response),
                 length: response ? response.length : 0
@@ -8373,14 +8422,14 @@ class AdminApp {
 
             if (response && Array.isArray(response)) {
                 this.allCategories = response;
-                console.log('âœ… Loaded categories:', this.allCategories.length);
+                console.log('Ã¢Å“â€¦ Loaded categories:', this.allCategories.length);
                 this.populateCategoryFilter();
             } else {
-                console.warn('âš ï¸ Categories response is not an array:', response);
+                console.warn('Ã¢Å¡Â Ã¯Â¸Â Categories response is not an array:', response);
                 this.allCategories = [];
             }
         } catch (error) {
-            console.error('âŒ Failed to load categories for filter:', error);
+            console.error('Ã¢ÂÅ’ Failed to load categories for filter:', error);
             this.allCategories = [];
         }
     }
@@ -8420,11 +8469,11 @@ class AdminApp {
     populateCategoryFilter() {
         const categoryFilter = document.getElementById('productsCategoryFilter');
         if (!categoryFilter) {
-            console.warn('âš ï¸ Category filter dropdown not found');
+            console.warn('Ã¢Å¡Â Ã¯Â¸Â Category filter dropdown not found');
             return;
         }
 
-        console.log('ðŸ”„ Populating category filter:', {
+        console.log('Ã°Å¸â€â€ž Populating category filter:', {
             categoriesCount: this.allCategories.length,
             categories: this.allCategories
         });
@@ -8443,15 +8492,15 @@ class AdminApp {
                 option.textContent = category.name || `Category ${category.id}`;
                 categoryFilter.appendChild(option);
             });
-            console.log('âœ… Added', this.allCategories.length, 'categories to filter dropdown');
+            console.log('Ã¢Å“â€¦ Added', this.allCategories.length, 'categories to filter dropdown');
         } else {
-            console.warn('âš ï¸ No categories to add to filter dropdown');
+            console.warn('Ã¢Å¡Â Ã¯Â¸Â No categories to add to filter dropdown');
         }
 
         // Restore the selected value if it still exists
         if (currentValue && this.allCategories.some(c => c.id == currentValue)) {
             categoryFilter.value = currentValue;
-            console.log('âœ… Restored selected category:', currentValue);
+            console.log('Ã¢Å“â€¦ Restored selected category:', currentValue);
         }
     }
 
@@ -8807,7 +8856,7 @@ class AdminApp {
         // Ensure searchTerm is a string
         searchTerm = searchTerm || '';
 
-        console.log('ðŸ” filterProducts() called with:', {
+        console.log('Ã°Å¸â€Â filterProducts() called with:', {
             searchTerm: searchTerm,
             searchTermType: typeof searchTerm,
             brandId: brandId,
@@ -8823,7 +8872,7 @@ class AdminApp {
         if (searchTerm && searchTerm.trim()) {
             const searchTerms = searchTerm.toLowerCase().trim().split(/\s+/).filter(word => word.length > 0);
 
-            console.log('ðŸ” Filtering by search term (FIRST):', {
+            console.log('Ã°Å¸â€Â Filtering by search term (FIRST):', {
                 searchTerm: searchTerm,
                 searchTerms: searchTerms,
                 totalProductsBeforeFilter: filtered.length
@@ -8845,7 +8894,7 @@ class AdminApp {
                     return matches;
                 });
 
-                console.log('âœ… After search filter (FIRST):', {
+                console.log('Ã¢Å“â€¦ After search filter (FIRST):', {
                     filteredCount: filtered.length,
                     sampleProducts: filtered.slice(0, 5).map(p => p.name)
                 });
@@ -8856,7 +8905,7 @@ class AdminApp {
         if (brandId) {
             const selectedBrandId = parseInt(brandId, 10);
 
-            console.log('ðŸ” Filtering by brand:', {
+            console.log('Ã°Å¸â€Â Filtering by brand:', {
                 brandId: brandId,
                 selectedBrandId: selectedBrandId,
                 totalProductsBeforeFilter: filtered.length,
@@ -8898,7 +8947,7 @@ class AdminApp {
                 return false;
             });
 
-            console.log('âœ… After brand filter:', {
+            console.log('Ã¢Å“â€¦ After brand filter:', {
                 filteredCount: filtered.length,
                 sampleProducts: filtered.slice(0, 5).map(p => ({
                     id: p.id,
@@ -8914,7 +8963,7 @@ class AdminApp {
             const selectedCategoryId = parseInt(categoryId, 10);
             const selectedCategory = this.allCategories.find(c => c.id == categoryId);
 
-            console.log('ðŸ” Filtering by category:', {
+            console.log('Ã°Å¸â€Â Filtering by category:', {
                 categoryId: categoryId,
                 selectedCategoryId: selectedCategoryId,
                 totalProductsBeforeFilter: filtered.length,
@@ -8931,10 +8980,10 @@ class AdminApp {
                 category_id_type: typeof p.category_id,
                 category_name: p.category_name
             }));
-            console.log('ðŸ“¦ Sample products before category filter:', sampleProducts);
+            console.log('Ã°Å¸â€œÂ¦ Sample products before category filter:', sampleProducts);
 
             // Also log what we're trying to match
-            console.log('ðŸŽ¯ Trying to match category:', {
+            console.log('Ã°Å¸Å½Â¯ Trying to match category:', {
                 selectedCategoryId: selectedCategoryId,
                 selectedCategoryIdType: typeof selectedCategoryId,
                 selectedCategoryName: selectedCategory ? selectedCategory.name : 'NOT FOUND',
@@ -8944,7 +8993,7 @@ class AdminApp {
 
             // Check if any products have the matching category_id
             const productsWithMatchingId = filtered.filter(p => p.category_id == selectedCategoryId);
-            console.log('ðŸ” Products with matching category_id:', {
+            console.log('Ã°Å¸â€Â Products with matching category_id:', {
                 count: productsWithMatchingId.length,
                 sample: productsWithMatchingId.slice(0, 5).map(p => ({
                     id: p.id,
@@ -8968,7 +9017,7 @@ class AdminApp {
             if (nullCategoryCount > 0) {
                 categoryIdDistribution['null/undefined'] = nullCategoryCount;
             }
-            console.log('ðŸ“Š Category ID distribution (first 50 products):', categoryIdDistribution);
+            console.log('Ã°Å¸â€œÅ  Category ID distribution (first 50 products):', categoryIdDistribution);
 
             // Show what categories these IDs correspond to
             const categoryIdNames = {};
@@ -8976,10 +9025,10 @@ class AdminApp {
                 const cat = this.allCategories.find(c => c.id == cid);
                 categoryIdNames[cid] = cat ? cat.name : `Unknown (ID: ${cid})`;
             });
-            console.log('ðŸ“‹ Category names for product category_ids:', categoryIdNames);
+            console.log('Ã°Å¸â€œâ€¹ Category names for product category_ids:', categoryIdNames);
 
             // Show all available categories in dropdown
-            console.log('ðŸ“‹ All available categories in dropdown:', this.allCategories.map(c => ({
+            console.log('Ã°Å¸â€œâ€¹ All available categories in dropdown:', this.allCategories.map(c => ({
                 id: c.id,
                 name: c.name
             })));
@@ -9043,7 +9092,7 @@ class AdminApp {
                 fullCategoryDistribution['null/undefined'] = fullNullCount;
             }
 
-            console.log('âœ… After category filter:', {
+            console.log('Ã¢Å“â€¦ After category filter:', {
                 filteredCount: filtered.length,
                 matchedByCategoryId: matchedByCategoryId,
                 matchedByCategoryName: matchedByCategoryName,
@@ -9061,7 +9110,7 @@ class AdminApp {
 
             // If no matches, show helpful message
             if (filtered.length === 0 && noMatch > 0) {
-                console.warn('âš ï¸ No products match this category filter!', {
+                console.warn('Ã¢Å¡Â Ã¯Â¸Â No products match this category filter!', {
                     reason: 'Products have different category_id values',
                     selectedCategoryId: selectedCategoryId,
                     selectedCategoryName: selectedCategory ? selectedCategory.name : 'NOT FOUND',
@@ -9077,7 +9126,7 @@ class AdminApp {
 
         // Debug: Log if featuredStatus was undefined
         if (featuredStatus === undefined) {
-            console.warn('âš ï¸ filterProducts() called with undefined featuredStatus!', {
+            console.warn('Ã¢Å¡Â Ã¯Â¸Â filterProducts() called with undefined featuredStatus!', {
                 searchTerm,
                 brandId,
                 categoryId,
@@ -9088,7 +9137,7 @@ class AdminApp {
         if (featuredStatusStr !== '') {
             const isFeatured = featuredStatusStr === 'true';
 
-            console.log('ðŸ” Filtering by featured status:', {
+            console.log('Ã°Å¸â€Â Filtering by featured status:', {
                 featuredStatus: featuredStatusStr,
                 isFeatured: isFeatured,
                 totalProductsBeforeFilter: filtered.length,
@@ -9111,7 +9160,7 @@ class AdminApp {
                 return productIsFeatured === isFeatured;
             });
 
-            console.log('âœ… After featured filter:', {
+            console.log('Ã¢Å“â€¦ After featured filter:', {
                 filteredCount: filtered.length,
                 sampleFilteredProducts: filtered.slice(0, 5).map(p => ({
                     id: p.id,
@@ -9151,7 +9200,7 @@ class AdminApp {
     _renderFilteredProductsImpl() {
         const container = document.getElementById('productsTable');
         if (!container) {
-            console.error('âŒ Products table container not found!');
+            console.error('Ã¢ÂÅ’ Products table container not found!');
             return;
         }
 
@@ -9164,7 +9213,7 @@ class AdminApp {
         const brandId = brandFilter ? brandFilter.value : '';
         const categoryId = categoryFilter ? categoryFilter.value : '';
 
-        console.log('ðŸŽ¨ _renderFilteredProductsImpl - reading filter values:', {
+        console.log('Ã°Å¸Å½Â¨ _renderFilteredProductsImpl - reading filter values:', {
             searchTerm: searchTerm,
             searchTermLength: searchTerm ? searchTerm.length : 0,
             searchInputExists: !!searchInput,
@@ -9183,7 +9232,7 @@ class AdminApp {
         // Ensure featuredStatus is always a string, never undefined
         featuredStatus = featuredStatus || '';
 
-        console.log('ðŸŽ¨ Rendering filtered products:', {
+        console.log('Ã°Å¸Å½Â¨ Rendering filtered products:', {
             searchTerm: searchTerm,
             brandId: brandId,
             categoryId: categoryId,
@@ -9200,17 +9249,17 @@ class AdminApp {
 
         // If no products are loaded and no filters are active, products may still be loading
         if (this.allProducts.length === 0 && !searchTerm && !brandId && !categoryId && !featuredStatus) {
-            console.log('â³ Products not loaded yet, showing loading state...');
+            console.log('Ã¢ÂÂ³ Products not loaded yet, showing loading state...');
             container.innerHTML = '<div class="loading"><div class="spinner"></div>Loading products...</div>';
             // Try to load products if they haven't been loaded yet
             // Use a longer delay to avoid race conditions
             setTimeout(() => {
                 if (this.allProducts.length === 0) {
-                    console.log('ðŸ”„ Retrying product load...');
+                    console.log('Ã°Å¸â€â€ž Retrying product load...');
                     this.loadProducts();
                 } else {
                     // Products loaded in the meantime, render them
-                    console.log('âœ… Products loaded, rendering...');
+                    console.log('Ã¢Å“â€¦ Products loaded, rendering...');
                     this._renderFilteredProductsImpl();
                 }
             }, 300);
@@ -9219,7 +9268,7 @@ class AdminApp {
 
         // Ensure categories are loaded if category filter is active
         if (categoryId && this.allCategories.length === 0) {
-            console.warn('âš ï¸ Category filter active but categories not loaded yet. Loading...');
+            console.warn('Ã¢Å¡Â Ã¯Â¸Â Category filter active but categories not loaded yet. Loading...');
             this.loadCategoriesForFilters().then(() => {
                 // Retry filtering after categories are loaded
                 this.renderFilteredProducts();
@@ -9288,7 +9337,7 @@ class AdminApp {
             // Ensure we have products to render
             if (filteredProducts.length === 0 && this.allProducts.length > 0) {
                 // This shouldn't happen, but if it does, use allProducts
-                console.warn('âš ï¸ Filtered products empty but allProducts has data, using allProducts');
+                console.warn('Ã¢Å¡Â Ã¯Â¸Â Filtered products empty but allProducts has data, using allProducts');
                 filteredProducts = this.allProducts.slice(0, this.productsPagination.itemsPerPage);
             }
 
@@ -9300,7 +9349,7 @@ class AdminApp {
                     p.is_featured === '1' ||
                     p.is_featured === 'true'
                 );
-                console.log('ðŸŽ¨ About to render products table:', {
+                console.log('Ã°Å¸Å½Â¨ About to render products table:', {
                     totalProducts: filteredProducts.length,
                     featuredProducts: featuredInFiltered.length,
                     featuredProductIds: featuredInFiltered.map(p => ({ id: p.id, name: p.name, is_featured: p.is_featured }))
@@ -9367,7 +9416,7 @@ class AdminApp {
                     <td class="col-sku"><code title="${esc(product.sku)}">${esc(product.sku)}</code></td>
                     <td class="product-name-cell">
                         <span class="product-name-primary" title="${name}">${name}</span>
-                        <span class="product-name-meta" title="${cat}">${cat}${variantBadge ? ` · ${variantBadge}` : ''}</span>
+                        <span class="product-name-meta" title="${cat}">${cat}${variantBadge ? ` Â· ${variantBadge}` : ''}</span>
                     </td>
                     <td><span class="cell-ellipsis" title="${brand}">${brand}</span></td>
                     <td class="col-money">${money(product.price)}</td>
@@ -9379,8 +9428,8 @@ class AdminApp {
                     </td>
                     <td class="col-status">
                         <span class="status-inline">
-                            <span class="badge badge-pos ${product.is_active ? 'badge-success' : 'badge-danger'}" title="POS register — ${product.is_active ? 'available at in-store register' : 'hidden from POS register'}">${product.is_active ? 'POS on' : 'POS off'}</span>
-                            <span class="badge badge-web ${showOnWeb ? 'badge-success' : 'badge-secondary'}" title="Website storefront — ${showOnWeb ? 'visible on website' : 'hidden from website (in-store only)'}">${showOnWeb ? 'Web on' : 'Web off'}</span>
+                            <span class="badge badge-pos ${product.is_active ? 'badge-success' : 'badge-danger'}" title="POS register â€” ${product.is_active ? 'available at in-store register' : 'hidden from POS register'}">${product.is_active ? 'POS on' : 'POS off'}</span>
+                            <span class="badge badge-web ${showOnWeb ? 'badge-success' : 'badge-secondary'}" title="Website storefront â€” ${showOnWeb ? 'visible on website' : 'hidden from website (in-store only)'}">${showOnWeb ? 'Web on' : 'Web off'}</span>
                             ${isFeatured ? '<span class="badge badge-info" title="Featured" style="padding:0.2rem 0.4rem;"><i class="fas fa-star" aria-hidden="true"></i></span>' : ''}
                         </span>
                     </td>
@@ -9514,7 +9563,7 @@ class AdminApp {
         if (countEl) {
             countEl.textContent =
                 count === 0
-                    ? 'Select products below — bulk actions for POS register and website'
+                    ? 'Select products below â€” bulk actions for POS register and website'
                     : count === 1
                       ? '1 product selected'
                       : `${count} products selected`;
@@ -9643,8 +9692,8 @@ class AdminApp {
                     </div>
                     <div class="bulk-edit-section">
                         <h4>Organization</h4>
-                        ${selectRow('brand_id', 'Brand', `<option value="">— Select brand —</option>${brandOptions}`)}
-                        ${selectRow('category_id', 'Category', `<option value="">— Select category —</option>${categoryOptions}`)}
+                        ${selectRow('brand_id', 'Brand', `<option value="">â€” Select brand â€”</option>${brandOptions}`)}
+                        ${selectRow('category_id', 'Category', `<option value="">â€” Select category â€”</option>${categoryOptions}`)}
                     </div>
                     <div class="bulk-edit-section" style="border-bottom:none;margin-bottom:0;padding-bottom:0;">
                         <h4>Pricing &amp; inventory</h4>
@@ -10546,7 +10595,7 @@ class AdminApp {
             const closeBtn = document.createElement('button');
             closeBtn.type = 'button';
             closeBtn.setAttribute('aria-label', 'Dismiss notification');
-            closeBtn.textContent = '×';
+            closeBtn.textContent = 'Ã—';
             closeBtn.style.cssText = 'background:transparent;border:none;color:white;font-size:1.4rem;line-height:1;cursor:pointer;padding:0 0.15rem;margin-left:0.25rem;opacity:0.9;';
             closeBtn.addEventListener('click', () => dismissNotification(notification));
             container.appendChild(closeBtn);
@@ -11405,7 +11454,7 @@ function createProductModal(title, formId, isEdit = false) {
 
             if (field.name === 'long_description') {
                 const hint = document.createElement('div');
-                hint.textContent = 'Plain text only — headings and paragraphs are formatted automatically on the storefront.';
+                hint.textContent = 'Plain text only â€” headings and paragraphs are formatted automatically on the storefront.';
                 hint.style.fontSize = '0.8rem';
                 hint.style.color = 'var(--gray-500)';
                 hint.style.marginTop = '0.35rem';
@@ -12385,7 +12434,7 @@ function editProduct(productId) {
     // Load existing product data
     loadProductForEdit(productId);
 
-    // Handle form submission — keep modal open when save fails so data and errors remain visible
+    // Handle form submission â€” keep modal open when save fails so data and errors remain visible
     const form = document.getElementById('edit-product-form');
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -12574,7 +12623,7 @@ function showProductFormError(formElement, message) {
     const close = document.createElement('button');
     close.type = 'button';
     close.setAttribute('aria-label', 'Dismiss error');
-    close.textContent = '×';
+    close.textContent = 'Ã—';
     close.style.cssText =
         'background:transparent;border:none;color:#991b1b;font-size:1.35rem;line-height:1;cursor:pointer;padding:0 0.2rem;';
     close.addEventListener('click', () => clearProductFormError(formElement));
@@ -12600,7 +12649,7 @@ async function updateProduct(productId, formData, formElement) {
     if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.dataset.hmOriginalLabel = submitBtn.textContent;
-        submitBtn.textContent = 'Saving…';
+        submitBtn.textContent = 'Savingâ€¦';
     }
     try {
         const productData = {};
@@ -12626,7 +12675,7 @@ async function updateProduct(productId, formData, formElement) {
         }
 
         // Log featured status for debugging
-        console.log('ðŸ“ Product update data:', {
+        console.log('Ã°Å¸â€œÂ Product update data:', {
             productId: productId,
             is_featured: productData.is_featured,
             is_featured_type: typeof productData.is_featured,
@@ -12710,7 +12759,7 @@ function showAddProduct() {
     loadBrandsForEdit();
     loadCategoriesForEdit();
 
-    // Handle form submission — keep modal open on errors so work is not lost
+    // Handle form submission â€” keep modal open on errors so work is not lost
     const form = document.getElementById('add-product-form');
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -12727,7 +12776,7 @@ async function createProduct(formData, formElement) {
     if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.dataset.hmOriginalLabel = submitBtn.textContent;
-        submitBtn.textContent = 'Creating…';
+        submitBtn.textContent = 'Creatingâ€¦';
     }
     try {
         const productData = {};
@@ -14013,7 +14062,7 @@ async function matchProductsToCategories() {
 
             // Log category assignments to console
             if (results.categoryAssignments && Object.keys(results.categoryAssignments).length > 0) {
-                console.log('ðŸ“‹ Category Assignments:');
+                console.log('Ã°Å¸â€œâ€¹ Category Assignments:');
                 Object.entries(results.categoryAssignments).forEach(([category, count]) => {
                     console.log(`   ${category}: ${count} products`);
                 });

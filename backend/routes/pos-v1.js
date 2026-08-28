@@ -26,6 +26,9 @@ const { loadPosReceiptSettings } = require('../services/posReceiptSettings');
 const { loadPosSecuritySettings } = require('../services/posSecuritySettings');
 const { loadPosOperationsSettings } = require('../services/posOperationsSettings');
 const { loadPosRegisterExperienceSettings } = require('../services/posRegisterExperienceSettings');
+const { loadPosShopSettings } = require('../services/posShopSettings');
+const shopJobs = require('../services/shopJobs');
+const customerWorkflow = require('../services/shopCustomerWorkflow');
 const { loadStoreHours, storeHourFooterLines } = require('../utils/storePublicInfo');
 const { loadPosPaymentConfig } = require('../services/posPaymentConfig');
 const { loadPosCardCheckoutSettings } = require('../services/posCardCheckoutSettings');
@@ -69,6 +72,7 @@ const {
     briefRegisterTroubleshoot,
     chatRegisterTroubleshoot
 } = require('../services/posTroubleshootAi');
+const { merchantIdFromReq } = require('../utils/merchantScope');
 
 const posPinLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -133,7 +137,7 @@ router.put('/failover/usage', async (req, res) => {
 
 router.get('/config', async (req, res) => {
     try {
-        const [cashDiscount, store, security, payment, taxRate, operations, experience, cardCheckout, displayAds, paymentMethods, loyaltyProgram] =
+        const [cashDiscount, store, security, payment, taxRate, operations, experience, cardCheckout, displayAds, paymentMethods, loyaltyProgram, shopSettings, customerWorkflows] =
             await Promise.all([
             loadCashDiscountSettings(req.pool),
             loadPosStoreConfig(req.pool),
@@ -145,7 +149,9 @@ router.get('/config', async (req, res) => {
             loadPosCardCheckoutSettings(req.pool),
             listDisplayAdsForRegister(req.pool, req.posDeviceRecordId),
             loadPosPaymentMethodsSettings(req.pool),
-            loadLoyaltyProgramSettings(req.pool)
+            loadLoyaltyProgramSettings(req.pool),
+            loadPosShopSettings(req.pool),
+            customerWorkflow.loadCustomerWorkflowConfig(req.pool)
         ]);
         const receipt = await loadPosReceiptSettings(req.pool, store.storeLogoUrl);
         const storeHours = await loadStoreHours(req.pool);
@@ -165,6 +171,12 @@ router.get('/config', async (req, res) => {
             platformName: 'Business One',
             taxRate,
             currency: 'USD',
+            shopVertical: shopSettings.shopVertical,
+            shopVerticals: shopSettings.shopVerticals,
+            shopJobsEnabled: shopSettings.shopJobsEnabled,
+            shop: shopSettings.shop,
+            customerWorkflows: customerWorkflows,
+            customerPortalBasePath: '/shop-track.html',
             paymentMethods: paymentMethods.methods,
             paymentMethodOptions: {
                 cash: paymentMethods.cash,
@@ -358,8 +370,13 @@ router.get('/catalog', attachOptionalPosEmployee, async (req, res) => {
         const limit = Math.min(500, Math.max(1, parseInt(req.query.limit, 10) || 200));
         const offset = (page - 1) * limit;
 
+        const merchantId = merchantIdFromReq(req);
         let where = "p.is_active = 1 AND p.sku <> 'POS-CUSTOM'";
         const params = [];
+        if (merchantId) {
+            where += ' AND p.merchant_id = ?';
+            params.push(merchantId);
+        }
         if (sinceValid) {
             where += ' AND p.updated_at >= ?';
             params.push(sinceValid);
@@ -376,6 +393,16 @@ router.get('/catalog', attachOptionalPosEmployee, async (req, res) => {
 
         const limitNum = Number(limit);
         const offsetNum = Number(offset);
+        const listParams = [];
+        let listWhere = "p.is_active = 1 AND p.sku <> 'POS-CUSTOM'";
+        if (merchantId) {
+            listWhere += ' AND p.merchant_id = ?';
+            listParams.push(merchantId);
+        }
+        if (sinceValid) {
+            listWhere += ' AND p.updated_at >= ?';
+            listParams.push(sinceValid);
+        }
         const [products] = await req.pool.execute(
             `SELECT p.id, p.sku, p.name, p.slug, p.price, p.cost_price, p.inventory_quantity, p.track_inventory,
                     p.is_taxable, p.updated_at, p.category_id,
@@ -384,11 +411,10 @@ router.get('/catalog', attachOptionalPosEmployee, async (req, res) => {
              FROM products p
              LEFT JOIN product_categories pc ON pc.id = p.category_id AND pc.is_active = 1
              LEFT JOIN product_images pi ON pi.product_id = p.id AND pi.is_primary = 1
-             WHERE p.is_active = 1 AND p.sku <> 'POS-CUSTOM'
-             ${sinceValid ? 'AND p.updated_at >= ?' : ''}
+             WHERE ${listWhere}
              ORDER BY p.id ASC
              LIMIT ${limitNum} OFFSET ${offsetNum}`,
-            sinceValid ? [sinceValid] : []
+            listParams
         );
 
         const productIds = products.map((p) => p.id);
@@ -454,6 +480,10 @@ router.get('/catalog', attachOptionalPosEmployee, async (req, res) => {
 
 router.get('/categories', async (req, res) => {
     try {
+        const merchantId = merchantIdFromReq(req);
+        const midClause = merchantId ? ' AND merchant_id = ?' : '';
+        const midParams = merchantId ? [merchantId] : [];
+        const pMidClause = merchantId ? ' AND p.merchant_id = ?' : '';
         const [rows] = await req.pool.execute(
             `SELECT pc.id, pc.name, pc.slug, pc.image_url, pc.description, pc.parent_id,
                     COALESCE(dp.direct_count, 0) AS direct_count,
@@ -462,23 +492,25 @@ router.get('/categories', async (req, res) => {
              LEFT JOIN (
                 SELECT category_id, COUNT(*) AS direct_count
                   FROM products
-                 WHERE is_active = 1
+                 WHERE is_active = 1${midClause}
                  GROUP BY category_id
              ) dp ON dp.category_id = pc.id
              LEFT JOIN (
                 SELECT c.parent_id, COUNT(p.id) AS child_count
                   FROM product_categories c
-                  INNER JOIN products p ON p.category_id = c.id AND p.is_active = 1
+                  INNER JOIN products p ON p.category_id = c.id AND p.is_active = 1${pMidClause}
                  WHERE c.is_active = 1 AND c.parent_id IS NOT NULL
                  GROUP BY c.parent_id
              ) cp ON cp.parent_id = pc.id
              WHERE pc.is_active = 1
                AND (COALESCE(dp.direct_count, 0) + COALESCE(cp.child_count, 0) > 0)
-             ORDER BY pc.sort_order ASC, pc.name ASC`
+             ORDER BY pc.sort_order ASC, pc.name ASC`,
+            merchantId ? [...midParams, ...midParams] : []
         );
         const [uncatRows] = await req.pool.execute(
             `SELECT COUNT(*) AS product_count FROM products
-             WHERE is_active = 1 AND (category_id IS NULL OR category_id = 0)`
+             WHERE is_active = 1 AND (category_id IS NULL OR category_id = 0)${midClause}`,
+            midParams
         );
         const uncategorized = Number(uncatRows[0]?.product_count) || 0;
         const categories = (rows || []).map((row) => {
@@ -534,6 +566,9 @@ router.get('/products/lookup', attachOptionalPosEmployee, async (req, res) => {
             return res.status(400).json({ error: 'Search query required (q or sku)' });
         }
 
+        const merchantId = merchantIdFromReq(req);
+        const midProduct = merchantId ? ' AND p.merchant_id = ?' : '';
+        const variantParams = merchantId ? [q, q, merchantId] : [q, q];
         const [variantHits] = await req.pool.execute(
             `SELECT pv.id AS variant_id, pv.sku, pv.name AS variant_name, pv.price AS variant_price,
                     pv.inventory_quantity AS variant_inventory,
@@ -545,9 +580,9 @@ router.get('/products/lookup', attachOptionalPosEmployee, async (req, res) => {
              JOIN products p ON p.id = pv.product_id
              LEFT JOIN product_images pi ON pi.product_id = p.id AND pi.is_primary = 1
              WHERE pv.is_active = 1 AND p.is_active = 1 AND p.sku <> 'POS-CUSTOM'
-               AND (pv.sku = ? OR p.sku = ?)
+               AND (pv.sku = ? OR p.sku = ?)${midProduct}
              LIMIT 5`,
-            [q, q]
+            variantParams
         );
 
         if (variantHits.length) {
@@ -572,15 +607,17 @@ router.get('/products/lookup', attachOptionalPosEmployee, async (req, res) => {
             });
         }
 
+        const productParams = merchantId ? [q, `%${q}%`, merchantId, q] : [q, `%${q}%`, q];
         const [productHits] = await req.pool.execute(
             `SELECT p.id, p.sku, p.name, p.slug, p.price, p.cost_price, p.inventory_quantity, p.track_inventory, p.is_taxable,
                     pi.image_url AS primary_image_url
              FROM products p
              LEFT JOIN product_images pi ON pi.product_id = p.id AND pi.is_primary = 1
              WHERE p.is_active = 1 AND p.sku <> 'POS-CUSTOM' AND (p.sku = ? OR p.name LIKE ?)
+               ${merchantId ? 'AND p.merchant_id = ?' : ''}
              ORDER BY CASE WHEN p.sku = ? THEN 0 ELSE 1 END, p.name ASC
              LIMIT 10`,
-            [q, `%${q}%`, q]
+            productParams
         );
 
         res.json({
@@ -636,7 +673,7 @@ router.post('/cart/pricing', authenticatePosEmployee, async (req, res) => {
         const taxExempt = Boolean(body.taxExempt || body.tax_exempt || customerUser?.tax_exempt);
         const taxRate = taxExempt ? 0 : await loadStoreTaxRate(req.pool);
 
-        const catalogLines = await loadCatalogLines(req.pool, lineItems);
+        const catalogLines = await loadCatalogLines(req.pool, lineItems, merchantIdFromReq(req));
         const preCartSubtotal = merchandiseSubtotal(catalogLines);
         const promoPricing = await pricePosCart(req.pool, {
             catalogLines,
@@ -831,7 +868,13 @@ router.post('/print/receipt', authenticatePosEmployee, async (req, res) => {
 
 router.post('/orders', authenticatePosEmployee, requireActivePosLicense, async (req, res) => {
     try {
-        const result = await createInStorePosOrder(req.pool, req.body, req.posDeviceId, req.posEmployee.id);
+        const result = await createInStorePosOrder(
+            req.pool,
+            req.body,
+            req.posDeviceId,
+            req.posEmployee.id,
+            { merchantId: merchantIdFromReq(req) }
+        );
         res.status(result.duplicate ? 200 : 201).json({ success: true, ...result });
     } catch (error) {
         logger.error('POS create order error:', error);
@@ -889,7 +932,8 @@ async function handleListPosSales(req, res) {
             date: req.query.date,
             q: req.query.q,
             limit: req.query.limit,
-            offset: req.query.offset
+            offset: req.query.offset,
+            merchantId: merchantIdFromReq(req)
         });
         res.json({ success: true, ...result });
     } catch (error) {
@@ -900,7 +944,11 @@ async function handleListPosSales(req, res) {
 
 async function handlePosOrderReceipt(req, res) {
     try {
-        const receipt = await getInStorePosOrderReceipt(req.pool, req.params.orderNumber);
+        const receipt = await getInStorePosOrderReceipt(
+            req.pool,
+            req.params.orderNumber,
+            merchantIdFromReq(req)
+        );
         res.json({ success: true, receipt });
     } catch (error) {
         const code = error.code || 'RECEIPT_FAILED';
@@ -936,7 +984,9 @@ router.post('/sync', authenticatePosEmployee, requireActivePosLicense, async (re
         if (sales.length > 100) {
             return res.status(400).json({ error: 'Maximum 100 sales per sync batch', code: 'BATCH_TOO_LARGE' });
         }
-        const results = await syncPosOrderBatch(req.pool, sales, req.posDeviceId, req.posEmployee.id);
+        const results = await syncPosOrderBatch(req.pool, sales, req.posDeviceId, req.posEmployee.id, {
+            merchantId: merchantIdFromReq(req)
+        });
         const failed = results.filter((r) => !r.success).length;
         res.json({
             success: failed === 0,
@@ -1075,11 +1125,75 @@ router.get('/employees/me', authenticatePosEmployee, async (req, res) => {
                 canProcessRefunds: Boolean(employee.can_process_refunds),
                 canOpenDrawer: Boolean(employee.can_open_drawer),
                 allowManualDiscounts: personnel.employeeAllowManualDiscounts(employee),
-                canViewCost: personnel.employeeCanViewCost(employee)
+                canViewCost: personnel.employeeCanViewCost(employee),
+                canViewShopFloor: personnel.employeeCanViewShopFloor(employee)
             }
         });
     } catch (e) {
         res.status(500).json({ error: 'Failed to load employee profile' });
+    }
+});
+
+router.get('/shop/jobs', authenticatePosEmployee, async (req, res) => {
+    try {
+        const employee = await personnel.getEmployeeById(req.pool, req.posEmployee.id);
+        if (!personnel.employeeCanViewShopFloor(employee) && !(await personnel.employeeCanAuthorize(req.pool, employee))) {
+            return res.status(403).json({ error: 'Shop floor access required' });
+        }
+        const result = await shopJobs.listJobs(req.pool, {
+            status: req.query.status,
+            jobType: req.query.jobType
+        });
+        res.json(result);
+    } catch (e) {
+        logger.error('POS shop jobs list error:', e);
+        res.status(500).json({ error: 'Failed to list shop jobs' });
+    }
+});
+
+router.post('/shop/jobs', authenticatePosEmployee, async (req, res) => {
+    try {
+        const result = await shopJobs.createJob(req.pool, req.body, { employeeId: req.posEmployee.id });
+        if (!result.job) {
+            return res.status(500).json({ error: result.message || 'Failed to create shop job' });
+        }
+        res.status(201).json(result);
+    } catch (e) {
+        logger.error('POS shop job create error:', e);
+        res.status(500).json({ error: 'Failed to create shop job' });
+    }
+});
+
+router.patch('/shop/jobs/:id', authenticatePosEmployee, async (req, res) => {
+    try {
+        const result = await shopJobs.updateJob(req.pool, req.params.id, req.body, {
+            employeeId: req.posEmployee.id
+        });
+        if (!result.job) {
+            return res.status(404).json({ error: result.error || 'Job not found' });
+        }
+        res.json(result);
+    } catch (e) {
+        logger.error('POS shop job update error:', e);
+        res.status(500).json({ error: 'Failed to update shop job' });
+    }
+});
+
+router.post('/shop/jobs/:id/send-portal-link', authenticatePosEmployee, async (req, res) => {
+    try {
+        const channel = String(req.body?.channel || 'link').toLowerCase();
+        const portalUrl = String(req.body?.portalUrl || '').trim();
+        const result = await customerWorkflow.sendCustomerPortalLink(req.pool, {
+            jobId: req.params.id,
+            channel,
+            phone: req.body?.phone,
+            email: req.body?.email,
+            portalUrl
+        });
+        res.json(result);
+    } catch (e) {
+        logger.error('POS send portal link error:', e);
+        res.status(500).json({ error: 'Failed to send portal link' });
     }
 });
 

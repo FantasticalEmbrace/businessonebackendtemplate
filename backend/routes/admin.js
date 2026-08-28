@@ -868,6 +868,13 @@ router.get('/products', ...adminAuth, async (req, res) => {
             whereConditions.push('p.inventory_quantity <= p.low_stock_threshold');
         }
 
+        const { merchantIdFromReq } = require('../utils/merchantScope');
+        const merchantId = merchantIdFromReq(req);
+        if (merchantId) {
+            whereConditions.push('p.merchant_id = ?');
+            queryParams.push(merchantId);
+        }
+
         // Build the base query - use string concatenation to avoid template literal issues
         let query = 'SELECT ' +
             'p.id, p.sku, p.name, p.slug, p.price, p.cost_price, p.inventory_quantity, ' +
@@ -1167,14 +1174,14 @@ router.post('/products', ...adminAuth, requirePermission('manager'), productVali
             );
 
             // Insert product
-            const [result] = await connection.execute(`
-                INSERT INTO products (
-                    sku, name, slug, short_description, long_description,
+            const { merchantIdFromReq } = require('../utils/merchantScope');
+            const merchantId = merchantIdFromReq(req);
+            const productCols = `sku, name, slug, short_description, long_description,
                     brand_id, category_id, price, compare_price, cost_price, weight,
                     inventory_quantity, low_stock_threshold, is_active, is_featured, show_on_web,
-                    is_cannabis, coa_url, coa_updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            `, [
+                    is_cannabis, coa_url, coa_updated_at`;
+            const productVals = `?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?`;
+            const productParams = [
                 finalSku,
                 name,
                 slug,
@@ -1194,7 +1201,14 @@ router.post('/products', ...adminAuth, requirePermission('manager'), productVali
                 isCannabis,
                 coaUrlValue,
                 coaDateValue
-            ]);
+            ];
+            const insertCols = merchantId ? `${productCols}, merchant_id` : productCols;
+            const insertVals = merchantId ? `${productVals}, ?` : productVals;
+            if (merchantId) productParams.push(merchantId);
+            const [result] = await connection.execute(
+                `INSERT INTO products (${insertCols}) VALUES (${insertVals})`,
+                productParams
+            );
 
             const productId = result.insertId;
 
@@ -4674,6 +4688,7 @@ router.get('/team', ...adminAuth, requirePermission('admin'), async (req, res) =
                 canOpenDrawer: Boolean(row.can_open_drawer),
                 allowManualDiscounts: Boolean(row.allow_manual_discounts),
                 canViewCost: Boolean(row.can_view_cost),
+                canViewShopFloor: row.can_view_shop_floor == null ? false : Boolean(row.can_view_shop_floor),
             };
             if (row.admin_user_id) registerByAdmin.set(row.admin_user_id, reg);
             else registerOnlyEmployees.push(reg);
@@ -4767,6 +4782,7 @@ function mapTeamRegisterRow(employee) {
         canOpenDrawer: Boolean(employee.can_open_drawer),
         allowManualDiscounts: Boolean(employee.allow_manual_discounts),
         canViewCost: Boolean(employee.can_view_cost),
+        canViewShopFloor: employee.can_view_shop_floor == null ? false : Boolean(employee.can_view_shop_floor),
     };
 }
 

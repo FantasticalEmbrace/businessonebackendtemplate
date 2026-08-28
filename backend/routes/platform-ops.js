@@ -1,4 +1,4 @@
-'use strict';
+﻿'use strict';
 
 const express = require('express');
 const router = express.Router();
@@ -19,7 +19,7 @@ router.get('/merchant-overview', async (req, res) => {
     }
 });
 
-/** Business One ops remote support — not merchant-store admin. */
+/** Business One ops remote support â€” not merchant-store admin. */
 router.get('/support', async (req, res) => {
     try {
         const registerSupport = require('../services/posRegisterSupport');
@@ -38,8 +38,8 @@ router.get('/support', async (req, res) => {
             windowsAgents: agents,
             rustdesk: rustDeskServerConfig(),
             windowsAgentDownloadUrl: base
-                ? `${base}/support-agent/downloads/BusinessOneSupportAgent-Setup.exe`
-                : '/support-agent/downloads/BusinessOneSupportAgent-Setup.exe',
+                ? `${base}/support-agent/downloads/BusinessOneDesktopSupportClient-Setup.exe`
+                : '/support-agent/downloads/BusinessOneDesktopSupportClient-Setup.exe',
             viewerPage: base ? `${base}/support-viewer.html` : '/support-viewer.html',
             enrollConfigured: isEnrollConfigured(),
             storeBaseUrl: base || null

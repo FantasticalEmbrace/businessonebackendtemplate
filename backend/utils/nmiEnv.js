@@ -45,6 +45,27 @@ function getPosNmiPrivateApiKey() {
     return creds.getPosNmiPrivateApiKey();
 }
 
+/** Merchant-owned in-store keys only (saved when the store signs up / configures their processor). */
+function getMerchantPosNmiPublicTokenizationKey() {
+    return creds.getMerchantPosNmiPublicTokenizationKey();
+}
+
+function getMerchantPosNmiPrivateApiKey() {
+    return creds.getMerchantPosNmiPrivateApiKey();
+}
+
+function isMerchantPosNmiSandboxHint() {
+    return creds.isMerchantPosNmiSandboxHint();
+}
+
+function getMerchantPosNmiTransactUrl() {
+    return resolveNmiTransactUrl('', isMerchantPosNmiSandboxHint());
+}
+
+function getMerchantPosNmiCollectJsUrl() {
+    return isMerchantPosNmiSandboxHint() ? SANDBOX_COLLECT_JS : DEFAULT_COLLECT_JS;
+}
+
 function isPosNmiSandboxHint() {
     return creds.isPosNmiSandboxHint();
 }
@@ -238,6 +259,11 @@ module.exports = {
     getNmiPrivateApiKey,
     getPosNmiPublicTokenizationKey,
     getPosNmiPrivateApiKey,
+    getMerchantPosNmiPublicTokenizationKey,
+    getMerchantPosNmiPrivateApiKey,
+    getMerchantPosNmiTransactUrl,
+    getMerchantPosNmiCollectJsUrl,
+    isMerchantPosNmiSandboxHint,
     getNmiTransactUrl,
     getPosNmiTransactUrl,
     getNmiCollectJsUrl,

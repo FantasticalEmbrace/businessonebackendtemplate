@@ -21,10 +21,18 @@ async function authenticateAdmin(req, res, next) {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const [rows] = await req.pool.execute(
-            'SELECT id, email, first_name, last_name, role, is_active FROM admin_users WHERE id = ? AND is_active = 1',
-            [decoded.adminId]
-        );
+        let rows;
+        try {
+            [rows] = await req.pool.execute(
+                'SELECT id, email, first_name, last_name, role, is_active, merchant_id FROM admin_users WHERE id = ? AND is_active = 1',
+                [decoded.adminId]
+            );
+        } catch {
+            [rows] = await req.pool.execute(
+                'SELECT id, email, first_name, last_name, role, is_active FROM admin_users WHERE id = ? AND is_active = 1',
+                [decoded.adminId]
+            );
+        }
 
         if (rows.length === 0) {
             return res.status(401).json({ error: 'Invalid admin token' });
@@ -34,6 +42,10 @@ async function authenticateAdmin(req, res, next) {
             ...rows[0],
             role: normalizeAdminRole(rows[0].role),
         };
+        if (rows[0].merchant_id) {
+            req.merchantId = rows[0].merchant_id;
+            req.merchantAccount = req.merchantAccount || { id: rows[0].merchant_id };
+        }
         next();
     } catch {
         return res.status(403).json({ error: 'Invalid admin token' });

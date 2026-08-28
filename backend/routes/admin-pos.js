@@ -1,4 +1,4 @@
-'use strict';
+﻿'use strict';
 
 const express = require('express');
 const jwt = require('jsonwebtoken');
@@ -8,12 +8,6 @@ const multer = require('multer');
 const router = express.Router();
 const logger = require('../utils/logger');
 const { POS_SETTING_KEYS, POS_SETTING_META, loadPosSettings } = require('../services/posSettings');
-const {
-    getStoreBaseUrl,
-    getEnvStoreBaseUrl,
-    normalizeStoreBaseUrl,
-    setStoreBaseUrlOverride
-} = require('../utils/platformSupportEnv');
 const {
     listDevices,
     createDevice,
@@ -93,14 +87,14 @@ const uploadDisplayAdImage = multer({
         destination: (_req, _file, cb) => cb(null, displayAdUploadDir),
         filename: (_req, file, cb) => {
             const ext = path.extname(file.originalname || '').toLowerCase() || '.jpg';
-            const safe = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.avif'].includes(ext) ? ext : '.jpg';
+            const safe = ['.jpg', '.jpeg', '.png', '.webp', '.gif'].includes(ext) ? ext : '.jpg';
             cb(null, `display-ad-${Date.now()}-${Math.random().toString(36).slice(2, 8)}${safe}`);
         }
     }),
     limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter: (_req, file, cb) => {
-        if (/^image\/(jpeg|png|webp|gif|avif)$/i.test(file.mimetype)) cb(null, true);
-        else cb(new Error('Only JPEG, PNG, WebP, GIF, or AVIF images are allowed'));
+        if (/^image\/(jpeg|png|webp|gif)$/i.test(file.mimetype)) cb(null, true);
+        else cb(new Error('Only JPEG, PNG, WebP, or GIF images are allowed'));
     }
 });
 
@@ -111,15 +105,27 @@ async function authenticateAdmin(req, res, next) {
     if (!process.env.JWT_SECRET) return res.status(500).json({ error: 'Server configuration error' });
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const [rows] = await req.pool.execute(
-            'SELECT id, email, first_name, last_name, role FROM admin_users WHERE id = ? AND is_active = 1',
-            [decoded.adminId]
-        );
+        let rows;
+        try {
+            [rows] = await req.pool.execute(
+                'SELECT id, email, first_name, last_name, role, merchant_id FROM admin_users WHERE id = ? AND is_active = 1',
+                [decoded.adminId]
+            );
+        } catch {
+            [rows] = await req.pool.execute(
+                'SELECT id, email, first_name, last_name, role FROM admin_users WHERE id = ? AND is_active = 1',
+                [decoded.adminId]
+            );
+        }
         if (!rows.length) return res.status(401).json({ error: 'Invalid admin token' });
         req.admin = rows[0];
+        if (rows[0].merchant_id) {
+            req.merchantId = rows[0].merchant_id;
+            req.merchantAccount = req.merchantAccount || { id: rows[0].merchant_id };
+        }
         next();
     } catch {
-        return res.status(401).json({ error: 'Invalid admin token' });
+        return res.status(403).json({ error: 'Invalid admin token' });
     }
 }
 
@@ -152,16 +158,13 @@ router.use(requireManager);
 router.get('/settings', async (req, res) => {
     try {
         const values = await loadPosSettings(req.pool);
-        if (!String(values.pos_store_base_url || '').trim()) {
-            values.pos_store_base_url = getStoreBaseUrl() || getEnvStoreBaseUrl() || '';
-        }
         const settings = POS_SETTING_KEYS.map((key) => ({
             key_name: key,
             value: values[key] ?? '',
             description: POS_SETTING_META[key]?.description || key,
             type: POS_SETTING_META[key]?.type || 'string'
         }));
-        res.json({ settings, effectiveStoreBaseUrl: getStoreBaseUrl() || '' });
+        res.json({ settings });
     } catch (e) {
         logger.error('POS settings fetch error:', e);
         res.status(500).json({ error: 'Failed to load POS settings' });
@@ -175,16 +178,6 @@ router.put('/settings', async (req, res) => {
         const filtered = incoming.filter((s) => s?.key_name && allowed.has(s.key_name));
         if (!filtered.length) {
             return res.status(400).json({ error: 'No valid POS settings provided' });
-        }
-        for (const setting of filtered) {
-            if (setting.key_name !== 'pos_store_base_url') continue;
-            const normalized = normalizeStoreBaseUrl(setting.value);
-            if (String(setting.value || '').trim() && !normalized) {
-                return res.status(400).json({
-                    error: 'Store website address must be a full http(s) URL (e.g. https://store.example.com).'
-                });
-            }
-            setting.value = normalized;
         }
         const connection = await req.pool.getConnection();
         try {
@@ -210,11 +203,7 @@ router.put('/settings', async (req, res) => {
         } finally {
             connection.release();
         }
-        const storeUrlRow = filtered.find((s) => s.key_name === 'pos_store_base_url');
-        if (storeUrlRow) {
-            setStoreBaseUrlOverride(storeUrlRow.value);
-        }
-        res.json({ success: true, effectiveStoreBaseUrl: getStoreBaseUrl() || '' });
+        res.json({ success: true });
     } catch (e) {
         logger.error('POS settings save error:', e);
         res.status(500).json({ error: 'Failed to save POS settings' });
@@ -223,7 +212,7 @@ router.put('/settings', async (req, res) => {
 
 router.get('/devices', async (req, res) => {
     try {
-        const devices = await listDevices(req.pool);
+        const devices = await listDevices(req.pool, req.merchantId || null);
         res.json({
             devices: devices.map((d) => ({
                 id: d.id,
@@ -246,7 +235,11 @@ router.post('/devices', async (req, res) => {
         if (!gate.ok) {
             return res.status(402).json({ error: gate.message, code: gate.code, license: gate.license });
         }
-        const created = await createDevice(req.pool, req.body?.deviceLabel || req.body?.device_label);
+        const created = await createDevice(
+            req.pool,
+            req.body?.deviceLabel || req.body?.device_label,
+            req.merchantId || null
+        );
         res.status(201).json({
             device: {
                 id: created.id,
@@ -744,7 +737,7 @@ router.get('/license', async (req, res) => {
                 billingSchedulerEnabled:
                     String(process.env.BILLING_SCHEDULER_ENABLED || process.env.POS_BILLING_SCHEDULER_ENABLED || '')
                         .toLowerCase() === 'true',
-                processor: 'nmi',
+                processor: 'procharge',
                 graceDaysDefault: getDefaultGraceDays(),
                 maxBillingRetries: getMaxBillingRetries(),
                 revokeDevicesOnCancel:
@@ -807,10 +800,10 @@ router.post('/license/waive-past-due', requireDeveloper, async (req, res) => {
     }
 });
 
-/** @deprecated Public signup links removed — use admin POS License panel. */
+/** @deprecated Public signup links removed â€” use admin POS License panel. */
 router.post('/billing/setup-token', async (req, res) => {
     res.status(410).json({
-        error: 'Billing signup links are disabled. Save payment in Admin → Point of Sale → License.',
+        error: 'Billing signup links are disabled. Save payment in Admin â†’ Point of Sale â†’ License.',
         code: 'SETUP_LINKS_DISABLED'
     });
 });
@@ -841,7 +834,7 @@ router.get('/support/registers', async (req, res) => {
             registers,
             windowsAgents: agents,
             rustdesk: rustDeskServerConfig(),
-            windowsAgentDownloadUrl: '/support-agent/downloads/BusinessOneSupportAgent-Setup.exe',
+            windowsAgentDownloadUrl: '/support-agent/downloads/BusinessOneDesktopSupportClient-Setup.exe',
             viewerPage: '/support-viewer.html',
             enrollConfigured: isEnrollConfigured(),
             platformHubEnabled: isPlatformHubEnabled(),
@@ -886,7 +879,7 @@ router.post('/support/registers/:deviceId/session', async (req, res) => {
         scheduleSupportSessionSync(req.pool, session.id, {
             claimedBy: `${req.admin.first_name || ''} ${req.admin.last_name || ''}`.trim() || req.admin.email
         });
-        const base = getStoreBaseUrl() || String(process.env.FRONTEND_URL || '').trim().replace(/\/+$/, '');
+        const base = String(process.env.FRONTEND_URL || '').trim().replace(/\/+$/, '');
         res.json({
             session,
             viewerUrl: `${base || ''}/support-viewer.html?session=${session.id}`
