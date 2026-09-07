@@ -1815,6 +1815,56 @@ router.post('/support/session/:id/consent', async (req, res) => {
     }
 });
 
+router.post('/support/session/:id/frame', async (req, res) => {
+    try {
+        const frameStore = require('../services/posSupportFrameStore');
+        const row = await registerSupport.getSessionById(req.pool, req.params.id);
+        if (!row || Number(row.pos_device_id) !== Number(req.posDeviceRecordId)) {
+            return res.status(404).json({ error: 'Session not found' });
+        }
+        if (['ended', 'denied', 'expired'].includes(String(row.status || ''))) {
+            return res.status(400).json({ error: 'Session is closed' });
+        }
+        const first = !frameStore.hasFrame(req.params.id);
+        const ok = frameStore.setFrame(req.params.id, {
+            data: req.body?.data,
+            mime: req.body?.mime,
+            width: req.body?.width,
+            height: req.body?.height
+        });
+        if (!ok) return res.status(400).json({ error: 'Invalid frame' });
+        if (first) {
+            await req.pool.execute(
+                `UPDATE pos_register_support_sessions
+                 SET status = CASE WHEN status IN ('pending', 'awaiting_consent') THEN 'connecting' ELSE status END,
+                     signal_version = signal_version + 1
+                 WHERE id = ?`,
+                [req.params.id]
+            );
+        }
+        res.json({ ok: true, first });
+    } catch (e) {
+        res.status(500).json({ error: e.message || 'Frame upload failed' });
+    }
+});
+
+router.get('/support/session/:id/frame', async (req, res) => {
+    try {
+        const frameStore = require('../services/posSupportFrameStore');
+        const row = await registerSupport.getSessionById(req.pool, req.params.id);
+        if (!row || Number(row.pos_device_id) !== Number(req.posDeviceRecordId)) {
+            return res.status(404).json({ error: 'Session not found' });
+        }
+        const since = Number(req.query.since) || 0;
+        const frame = frameStore.getFrame(req.params.id, since);
+        if (!frame) return res.status(404).json({ error: 'No frame' });
+        if (frame.unchanged) return res.json({ unchanged: true, updatedAt: frame.updatedAt });
+        res.json(frame);
+    } catch (e) {
+        res.status(500).json({ error: e.message || 'Frame read failed' });
+    }
+});
+
 router.post('/support/session/:id/offer', async (req, res) => {
     try {
         const session = await registerSupport.setOfferSdp(

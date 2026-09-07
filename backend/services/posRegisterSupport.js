@@ -370,7 +370,12 @@ async function getSignalState(pool, sessionId, { sinceVersion = 0, deviceRecordI
     }
     const version = Number(row.signal_version) || 0;
     if (version <= sinceVersion) {
-        return { session: mapSessionRow(row), changed: false, signalVersion: version };
+        return {
+            session: mapSessionRow(row),
+            changed: false,
+            signalVersion: version,
+            hasPreviewFrame: require('./posSupportFrameStore').hasFrame(sessionId)
+        };
     }
     return {
         session: mapSessionRow(row),
@@ -386,7 +391,8 @@ async function getSignalState(pool, sessionId, { sinceVersion = 0, deviceRecordI
             } catch {
                 return null;
             }
-        })()
+        })(),
+        hasPreviewFrame: require('./posSupportFrameStore').hasFrame(sessionId)
     };
 }
 
@@ -402,6 +408,11 @@ async function endSession(pool, sessionId, { byAdmin = false, deviceRecordId = n
         `UPDATE pos_register_support_sessions SET status = 'ended', ended_at = CURRENT_TIMESTAMP, signal_version = signal_version + 1 WHERE id = ?`,
         [sessionId]
     );
+    try {
+        require('./posSupportFrameStore').clearFrame(sessionId);
+    } catch {
+        /* ignore */
+    }
     logger.info('[pos-support] Session ended', { sessionId, byAdmin });
     return true;
 }

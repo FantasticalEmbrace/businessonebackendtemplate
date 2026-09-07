@@ -1482,7 +1482,7 @@ app.get('/api/products', async (req, res) => {
         const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
 
         // Ensure limit and offset are integers
-        const limitInt = parseInt(limit) || 20;
+        const limitInt = Math.min(parseInt(limit) || 20, 2000);
         const offsetInt = parseInt(offset) || 0;
 
         // Build query with embedded LIMIT/OFFSET (MySQL2 has issues with LIMIT/OFFSET placeholders)
