@@ -275,5 +275,75 @@
         });
     }
 
+    /**
+     * Open a 4×6 portrait print view for a Shippo label PDF (upright on screen and printer).
+     * Falls back to direct URL if pop-ups are blocked.
+     */
+    function openShippingLabelForPrint(labelUrl) {
+        const url = String(labelUrl || '').trim();
+        if (!url) return null;
+        const w = window.open('about:blank', '_blank');
+        if (!w) {
+            return window.open(url, '_blank', 'noopener,noreferrer');
+        }
+        const safe = url
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        try {
+            w.document.open();
+            w.document.write(`<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>Shipping label</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; background: #e5e7eb; }
+  .toolbar {
+    padding: 0.5rem 1rem; background: #1f2937; color: #fff;
+    font: 14px system-ui, sans-serif; display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;
+  }
+  .toolbar button, .toolbar a.btn {
+    background: #059669; color: #fff; border: none; padding: 0.4rem 0.9rem;
+    border-radius: 6px; cursor: pointer; font: inherit; text-decoration: none;
+  }
+  .toolbar a.btn.alt { background: #374151; }
+  .viewer {
+    display: flex; justify-content: center; align-items: flex-start;
+    min-height: calc(100vh - 44px); padding: 1rem;
+  }
+  .label-sheet {
+    width: 4in; height: 6in; background: #fff;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15); overflow: hidden;
+  }
+  .label-sheet iframe { width: 100%; height: 100%; border: 0; display: block; }
+  @page { size: 4in 6in portrait; margin: 0; }
+  @media print {
+    .toolbar { display: none !important; }
+    html, body { background: #fff; width: 4in; height: 6in; }
+    .viewer { padding: 0; min-height: 0; display: block; }
+    .label-sheet { width: 4in; height: 6in; box-shadow: none; }
+  }
+</style></head><body>
+<div class="toolbar">
+  <span>4×6 shipping label</span>
+  <button type="button" onclick="window.print()">Print</button>
+  <a class="btn alt" href="${safe}" target="_blank" rel="noopener noreferrer">Open PDF</a>
+</div>
+<div class="viewer"><div class="label-sheet"><iframe title="Shipping label" src="${safe}"></iframe></div></div>
+</body></html>`);
+            w.document.close();
+        } catch (err) {
+            try {
+                w.location.href = url;
+            } catch (_) {
+                w.close();
+                return window.open(url, '_blank', 'noopener,noreferrer');
+            }
+        }
+        return w;
+    }
+
     window.HMShippingFulfillment = { mount };
+    window.HMShippingLabelPrint = { open: openShippingLabelForPrint };
 })();

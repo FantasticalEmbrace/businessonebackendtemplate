@@ -2295,7 +2295,7 @@ router.delete('/categories/:id', ...adminAuth, requirePermission('admin'), async
 // Order Management
 router.get('/orders', ...adminAuth, async (req, res) => {
     try {
-        const { page = 1, limit = 20, status, search } = req.query;
+        const { page = 1, limit = 20, status, search, sort, dir } = req.query;
         const pageInt = parseInt(page, 10) || 1;
         const limitInt = parseInt(limit, 10) || 20;
         const offset = (pageInt - 1) * limitInt;
@@ -2324,18 +2324,29 @@ router.get('/orders', ...adminAuth, async (req, res) => {
             return res.status(400).json({ error: 'Invalid pagination parameters' });
         }
 
-        // Embed LIMIT and OFFSET directly into query string (MySQL2 has issues with LIMIT/OFFSET placeholders)
+        const sortDir = String(dir || '').toLowerCase() === 'asc' ? 'ASC' : 'DESC';
+        const orderSortMap = {
+            customer: `o.shipping_last_name ${sortDir}, o.shipping_first_name ${sortDir}`,
+            status: `o.status ${sortDir}`,
+            payment: `o.payment_status ${sortDir}`,
+            total: `o.total_amount ${sortDir}`,
+            items: `item_count ${sortDir}`,
+            date: `o.created_at ${sortDir}`,
+        };
+        const ordersOrderBy = orderSortMap[String(sort || '')] || 'o.created_at DESC';
+
         const query = `
             SELECT 
-                o.id, o.order_number, o.email, o.status, o.payment_status,
+                o.id, o.order_number, o.email, o.status, o.payment_status, o.fulfillment_status,
                 o.total_amount, o.created_at, o.shipping_first_name, o.shipping_last_name,
+                o.label_url, o.label_printed_at, o.label_created_at,
                 COALESCE(o.sales_channel, 'online') AS sales_channel,
                 COUNT(oi.id) as item_count
             FROM orders o
             LEFT JOIN order_items oi ON o.id = oi.order_id
             ${whereClause}
             GROUP BY o.id
-            ORDER BY o.created_at DESC
+            ORDER BY ${ordersOrderBy}
             LIMIT ${limitParam} OFFSET ${offsetParam}
         `;
 
@@ -2387,11 +2398,155 @@ router.get('/orders/:id', ...adminAuth, async (req, res) => {
             [orderId]
         );
 
+        let payment_tenders = [];
+        try {
+            const [tenderRows] = await req.pool.execute(
+                `SELECT tender_type, amount, loyalty_points, gift_card_id,
+                        cash_tendered, cash_change, check_number,
+                        terminal_last_four, terminal_auth_code, payment_reference, metadata
+                   FROM order_payment_tenders
+                  WHERE order_id = ?
+                  ORDER BY id ASC`,
+                [orderId]
+            );
+            payment_tenders = tenderRows || [];
+        } catch (e) {
+            if (e.code !== 'ER_NO_SUCH_TABLE') throw e;
+        }
+
         const { enrichOrderTracking } = require('../utils/trackingUrl');
-        res.json({ order: enrichOrderTracking(orders[0]), items });
+        res.json({ order: enrichOrderTracking(orders[0]), items, payment_tenders });
     } catch (error) {
         logger.error('Admin order detail fetch error:', error);
         res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+router.get('/orders/:id/receipt', ...adminAuth, async (req, res) => {
+    try {
+        const orderId = parseInt(req.params.id, 10);
+        if (!Number.isFinite(orderId) || orderId < 1) {
+            return res.status(400).json({ error: 'Invalid order id' });
+        }
+
+        const {
+            loadAdminOrderReceiptContext,
+            buildOrderReceiptHtml
+        } = require('../services/adminOrderReceipt');
+        const context = await loadAdminOrderReceiptContext(req.pool, orderId);
+        const wantsHtml = String(req.query.format || '').toLowerCase() === 'html'
+            || String(req.headers.accept || '').includes('text/html');
+        const html = buildOrderReceiptHtml(context, {
+            autoPrint: String(req.query.print || '').trim() === '1'
+        });
+
+        if (wantsHtml) {
+            res.setHeader('Content-Type', 'text/html; charset=utf-8');
+            return res.send(html);
+        }
+
+        res.json({
+            html,
+            orderNumber: context.order.order_number,
+            email: context.customerEmail
+        });
+    } catch (error) {
+        const code = error.code || 'RECEIPT_FAILED';
+        const status = code === 'ORDER_NOT_FOUND' ? 404 : code === 'INVALID_ORDER_ID' ? 400 : 500;
+        logger.error('Admin order receipt fetch error:', error);
+        res.status(status).json({ error: error.message || 'Failed to load receipt', code });
+    }
+});
+
+router.post('/orders/:id/email-receipt', ...adminAuth, async (req, res) => {
+    try {
+        const orderId = parseInt(req.params.id, 10);
+        if (!Number.isFinite(orderId) || orderId < 1) {
+            return res.status(400).json({ error: 'Invalid order id' });
+        }
+
+        const { emailAdminOrderReceipt } = require('../services/adminOrderReceipt');
+        const result = await emailAdminOrderReceipt(req.pool, orderId, {
+            to: req.body?.email || req.body?.to
+        });
+        res.json({
+            success: true,
+            ...result,
+            message: `Receipt emailed to ${result.email}`
+        });
+    } catch (error) {
+        const code = error.code || 'EMAIL_RECEIPT_FAILED';
+        const statusMap = {
+            INVALID_ORDER_ID: 400,
+            ORDER_NOT_FOUND: 404,
+            ORDER_NOT_PAID: 400,
+            NO_CUSTOMER_EMAIL: 400,
+            SMTP_NOT_CONFIGURED: 503,
+            EMAIL_FAILED: 502,
+            EMAIL_SEND_FAILED: 502,
+            INVALID_EMAIL: 400
+        };
+        logger.error('Admin order receipt email error:', error);
+        res.status(statusMap[code] || 500).json({
+            error: error.message || 'Could not email receipt',
+            code
+        });
+    }
+});
+
+router.post('/orders/:id/print-receipt', ...adminAuth, async (req, res) => {
+    try {
+        const orderId = parseInt(req.params.id, 10);
+        if (!Number.isFinite(orderId) || orderId < 1) {
+            return res.status(400).json({ error: 'Invalid order id' });
+        }
+
+        const { printAdminOrderReceipt } = require('../services/adminOrderReceipt');
+        const result = await printAdminOrderReceipt(req.pool, orderId);
+        res.json({ success: true, ...result });
+    } catch (error) {
+        const code = error.code || 'PRINT_FAILED';
+        const statusMap = {
+            ORDER_NOT_FOUND: 404,
+            INVALID_ORDER_ID: 400,
+            BROWSER_PRINT_ONLY: 400,
+            PRINTER_NOT_NETWORK: 400,
+            PRINT_FAILED: 502
+        };
+        logger.error('Admin order receipt print error:', error);
+        res.status(statusMap[code] || 500).json({
+            error: error.message || 'Could not print receipt',
+            code
+        });
+    }
+});
+
+router.post('/orders/:id/mark-label-printed', ...adminAuth, async (req, res) => {
+    try {
+        const orderId = parseInt(req.params.id, 10);
+        if (!Number.isFinite(orderId) || orderId < 1) {
+            return res.status(400).json({ error: 'Invalid order id' });
+        }
+        const [rows] = await req.pool.execute(
+            'SELECT id, label_url, label_printed_at FROM orders WHERE id = ? LIMIT 1',
+            [orderId]
+        );
+        if (!rows.length) {
+            return res.status(404).json({ error: 'Order not found' });
+        }
+        if (!rows[0].label_url) {
+            return res.status(400).json({ error: 'No shipping label exists for this order yet' });
+        }
+        if (!rows[0].label_printed_at) {
+            await req.pool.execute(
+                'UPDATE orders SET label_printed_at = NOW(), updated_at = NOW() WHERE id = ?',
+                [orderId]
+            );
+        }
+        res.json({ success: true });
+    } catch (error) {
+        logger.error('Mark label printed error:', error);
+        res.status(500).json({ error: 'Failed to mark label as printed' });
     }
 });
 

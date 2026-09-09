@@ -2,6 +2,70 @@
 
 const HM_CLOSE_ICON_SVG = '<svg class="cart-close-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12 5.7 16.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4z"/></svg>';
 
+/** Open a print window synchronously on user click, then load receipt HTML (avoids popup blockers). */
+const HMReceiptPrint = (() => {
+    const LOADING_HTML = `<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>Receipt</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; min-height: 100%; font: 15px/1.5 system-ui, sans-serif; background: #f3f4f6; color: #1f2937; }
+  .wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; text-align: center; }
+  .spinner { width: 2.25rem; height: 2.25rem; border: 3px solid #d1d5db; border-top-color: #059669; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 1rem; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style></head><body>
+<div class="wrap"><div class="spinner" aria-hidden="true"></div><p>Loading receipt…</p></div>
+</body></html>`;
+
+    function openLoading() {
+        const w = window.open('about:blank', '_blank', 'width=420,height=720');
+        if (!w) return null;
+        try {
+            w.document.open();
+            w.document.write(LOADING_HTML);
+            w.document.close();
+        } catch (err) {
+            try {
+                w.close();
+            } catch (_) {
+                /* ignore */
+            }
+            return null;
+        }
+        return w;
+    }
+
+    function writeReceipt(win, html) {
+        if (!win || win.closed) return false;
+        const body = String(html || '').trim();
+        if (!body) return false;
+        try {
+            win.document.open();
+            win.document.write(
+                body.replace('</body>', '<script>window.onload=function(){window.focus();window.print();};</script></body>')
+            );
+            win.document.close();
+            return true;
+        } catch (err) {
+            return false;
+        }
+    }
+
+    function closeQuietly(win) {
+        if (!win || win.closed) return;
+        try {
+            win.close();
+        } catch (_) {
+            /* ignore */
+        }
+    }
+
+    return { openLoading, writeReceipt, closeQuietly };
+})();
+
+window.HMReceiptPrint = HMReceiptPrint;
+
 class AdminApp {
     constructor() {
         // Dynamic API base URL configuration
@@ -393,6 +457,192 @@ class AdminApp {
         }
     }
 
+    async printOrderReceipt(orderId, salesChannel, options = {}) {
+        if (this._receiptPrintInFlight) {
+            HMReceiptPrint.closeQuietly(options.printWindow);
+            return;
+        }
+        this._receiptPrintInFlight = true;
+
+        const triggerEl = options.triggerEl || null;
+        const prevDisabled = triggerEl ? triggerEl.disabled : false;
+        if (triggerEl) triggerEl.disabled = true;
+
+        let printWindow = options.printWindow || null;
+
+        try {
+            const isInStore = String(salesChannel || '').toLowerCase() === 'in_store';
+            if (isInStore) {
+                try {
+                    const networkResult = await this.apiRequest(`/admin/orders/${orderId}/print-receipt`, {
+                        method: 'POST',
+                        body: JSON.stringify({}),
+                    });
+                    if (networkResult?.method === 'network') {
+                        HMReceiptPrint.closeQuietly(printWindow);
+                        this.showNotification('Receipt sent to network printer', 'success');
+                        return;
+                    }
+                } catch (err) {
+                    const fallbackCodes = new Set(['PRINTER_NOT_NETWORK', 'BROWSER_PRINT_ONLY']);
+                    if (!fallbackCodes.has(err.code)) {
+                        HMReceiptPrint.closeQuietly(printWindow);
+                        this.showNotification(err.message || 'Could not print receipt', 'error');
+                        return;
+                    }
+                }
+            }
+
+            if (!printWindow) {
+                printWindow = HMReceiptPrint.openLoading();
+            }
+            if (!printWindow) {
+                this._showPopupBlockedGuidance({
+                    orderId,
+                    salesChannel,
+                    purpose: 'receipt',
+                    triggerEl,
+                });
+                return;
+            }
+
+            const data = await this.apiRequest(`/admin/orders/${orderId}/receipt`);
+            const html = String(data?.html || '').trim();
+            if (!html) {
+                HMReceiptPrint.closeQuietly(printWindow);
+                this.showNotification('Could not load receipt', 'error');
+                return;
+            }
+            if (!HMReceiptPrint.writeReceipt(printWindow, html)) {
+                HMReceiptPrint.closeQuietly(printWindow);
+                this._showPopupBlockedGuidance({
+                    orderId,
+                    salesChannel,
+                    purpose: 'receipt',
+                    triggerEl,
+                });
+            }
+        } catch (err) {
+            HMReceiptPrint.closeQuietly(printWindow);
+            this.showNotification(err.message || 'Could not print receipt', 'error');
+        } finally {
+            this._receiptPrintInFlight = false;
+            if (triggerEl) triggerEl.disabled = prevDisabled;
+        }
+    }
+
+    _showPopupBlockedGuidance({ orderId, salesChannel, purpose = 'receipt', triggerEl = null } = {}) {
+        document.querySelector('.admin-popup-blocked-dialog')?.remove();
+
+        const overlay = document.createElement('div');
+        overlay.className = 'admin-popup-blocked-dialog admin-branded-dialog-overlay';
+        overlay.style.cssText =
+            'position:fixed;inset:0;background:rgba(15,23,42,0.55);z-index:12000;display:flex;align-items:center;justify-content:center;padding:1.5rem;';
+
+        const box = document.createElement('div');
+        box.style.cssText =
+            'background:#fff;border-radius:var(--border-radius-lg,12px);max-width:520px;width:100%;box-shadow:var(--shadow-lg);padding:1.5rem 1.5rem 1.25rem;max-height:min(90vh,640px);overflow:auto;';
+        box.setAttribute('role', 'dialog');
+        box.setAttribute('aria-modal', 'true');
+        box.setAttribute('aria-labelledby', 'admin-popup-blocked-title');
+
+        const title = document.createElement('h2');
+        title.id = 'admin-popup-blocked-title';
+        title.textContent = 'Pop-ups blocked';
+        title.style.cssText =
+            'margin:0 0 0.75rem;font-size:1.25rem;color:var(--primary-green);font-weight:600;';
+
+        const intro = document.createElement('p');
+        intro.textContent =
+            'Your browser blocked the print window. Allow pop-ups for this admin site, then try again.';
+        intro.style.cssText = 'margin:0 0 1rem;color:var(--gray-700);line-height:1.55;font-size:0.95rem;';
+
+        const stepsTitle = document.createElement('p');
+        stepsTitle.textContent = 'How to allow pop-ups:';
+        stepsTitle.style.cssText = 'margin:0 0 0.5rem;font-weight:600;color:var(--gray-800);font-size:0.9rem;';
+
+        const list = document.createElement('ol');
+        list.style.cssText = 'margin:0 0 1.25rem 1.25rem;color:var(--gray-700);line-height:1.55;font-size:0.9rem;';
+        for (const step of this._popupBlockedSteps(purpose)) {
+            const li = document.createElement('li');
+            li.textContent = step;
+            li.style.marginBottom = '0.35rem';
+            list.appendChild(li);
+        }
+
+        const btnRow = document.createElement('div');
+        btnRow.style.cssText = 'display:flex;gap:0.75rem;justify-content:flex-end;flex-wrap:wrap;';
+
+        const close = () => overlay.remove();
+
+        const closeBtn = document.createElement('button');
+        closeBtn.type = 'button';
+        closeBtn.className = 'btn btn-secondary';
+        closeBtn.textContent = 'Close';
+        closeBtn.addEventListener('click', close);
+
+        const retryBtn = document.createElement('button');
+        retryBtn.type = 'button';
+        retryBtn.className = 'btn btn-primary';
+        retryBtn.textContent = 'Try again';
+        retryBtn.addEventListener('click', () => {
+            close();
+            const printWindow = HMReceiptPrint.openLoading();
+            void this.printOrderReceipt(orderId, salesChannel, { printWindow, triggerEl });
+        });
+
+        btnRow.appendChild(closeBtn);
+        btnRow.appendChild(retryBtn);
+        box.appendChild(title);
+        box.appendChild(intro);
+        box.appendChild(stepsTitle);
+        box.appendChild(list);
+        box.appendChild(btnRow);
+        overlay.appendChild(box);
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) close();
+        });
+        document.body.appendChild(overlay);
+        retryBtn.focus();
+    }
+
+    _popupBlockedSteps(purpose = 'receipt') {
+        const noun = purpose === 'receipt' ? 'the receipt' : 'this page';
+        const host = window.location.hostname || 'this site';
+        const byBrowser = {
+            chrome: [
+                'Click the lock or tune icon to the left of the address bar.',
+                'Open Site settings (or Permissions).',
+                'Find Pop-ups and redirects and set it to Allow.',
+                `Return here and click Try again to print ${noun}.`,
+            ],
+            edge: [
+                'Click the lock icon to the left of the address bar.',
+                'Choose Permissions for this site.',
+                'Set Pop-ups and redirects to Allow.',
+                `Return here and click Try again to print ${noun}.`,
+            ],
+            firefox: [
+                'Click the shield or lock icon in the address bar.',
+                'Open Connection secure → More information → Permissions.',
+                'Uncheck Block pop-up windows, or click the blocked-pop-up icon in the address bar and choose Allow pop-ups for this site.',
+                `Return here and click Try again to print ${noun}.`,
+            ],
+            safari: [
+                'In the menu bar, open Safari → Settings (or Preferences) → Websites.',
+                'Select Pop-up Windows in the sidebar.',
+                `Set ${host} to Allow.`,
+                `Return here and click Try again to print ${noun}.`,
+            ],
+            other: [
+                'Open your browser settings for this website.',
+                'Allow pop-ups and redirects for this admin site.',
+                `Return here and click Try again to print ${noun}.`,
+            ],
+        };
+        return byBrowser[hmDetectBrowserFamily()] || byBrowser.other;
+    }
+
     async showOrderDetail(orderId) {
         if (!this.authToken) {
             this.showNotification('Please log in to view orders.', 'error');
@@ -407,13 +657,16 @@ class AdminApp {
             }
 
             const order = data.order;
-            const items = data.items || [];
+            const items = data.items || order.items || [];
+            const paymentTenders = data.payment_tenders || [];
+            const shop = this._isShopOrdersView();
             const customerName = [order.shipping_first_name, order.shipping_last_name].filter(Boolean).join(' ')
                 || [order.account_first_name, order.account_last_name].filter(Boolean).join(' ')
                 || '-';
             const closeBtn =
                 `<button type="button" class="modal-close" onclick="this.closest('.modal').remove()" aria-label="Close">${HM_CLOSE_ICON_SVG}</button>`;
 
+            const itemsHeading = shop ? `Parts & labor (${items.length})` : `Items (${items.length})`;
             const itemsHtml = items.length
                 ? `<div class="table-container"><table class="table">
                     <thead><tr><th>Product</th><th>SKU</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
@@ -427,19 +680,82 @@ class AdminApp {
                             <td>${this.formatAdminMoney(item.total)}</td>
                         </tr>`).join('')}
                     </tbody></table></div>`
-                : '<p style="color:var(--gray-500);">No line items.</p>';
+                : `<p style="color:var(--gray-500);">${shop ? 'No parts or labor lines yet.' : 'No line items.'}</p>`;
+
+            const headerBadges = shop
+                ? `<span class="badge ${order.payment_status === 'paid' ? 'badge-success' : 'badge-warning'}">${this.escapeHtml(this._formatPaymentStatus(order.payment_status))}</span>`
+                : `<span class="badge ${this._orderStatusBadgeClass(order.status)}">${this.escapeHtml(this._formatOrderStatus(order.status))}</span>
+                            <span class="badge ${this._salesChannelBadgeClass(order)}">${this.escapeHtml(this._formatSalesChannel(order))}</span>
+                            <span class="badge ${order.payment_status === 'paid' ? 'badge-success' : 'badge-warning'}">${this.escapeHtml(this._formatPaymentStatus(order.payment_status))}</span>
+                            ${order.fulfillment_status ? `<span class="badge badge-info">${this.escapeHtml(this._formatFulfillmentStatus(order.fulfillment_status))}</span>` : ''}`;
+
+            const paymentBlock = `
+                        <h4 style="margin:1.25rem 0 0.75rem;color:var(--gray-800);">Payment</h4>
+                        ${this._formatPaymentTendersHtml(paymentTenders, order)}`;
+
+            const totalsBlock = shop
+                ? `<div>
+                        <h4 style="margin:0 0 0.75rem;color:var(--gray-800);">Job totals</h4>
+                        <div style="font-size:0.95rem;line-height:1.6;">
+                            <div style="display:flex;justify-content:space-between;"><span>Parts & labor</span><span>${this.formatAdminMoney(order.subtotal)}</span></div>
+                            ${Number(order.discount_amount) > 0 ? `<div style="display:flex;justify-content:space-between;"><span>Discount</span><span>-${this.formatAdminMoney(order.discount_amount)}</span></div>` : ''}
+                            <div style="display:flex;justify-content:space-between;"><span>Tax</span><span>${this.formatAdminMoney(order.tax_amount)}</span></div>
+                            <div style="display:flex;justify-content:space-between;font-weight:700;margin-top:0.35rem;padding-top:0.35rem;border-top:1px solid var(--gray-200);"><span>Total</span><span>${this.formatAdminMoney(order.total_amount)}</span></div>
+                        </div>
+                        ${paymentBlock}
+                    </div>`
+                : `<div>
+                        <h4 style="margin:0 0 0.75rem;color:var(--gray-800);">Order totals</h4>
+                        <div style="font-size:0.95rem;line-height:1.6;">
+                            <div style="display:flex;justify-content:space-between;"><span>Subtotal</span><span>${this.formatAdminMoney(order.subtotal)}</span></div>
+                            <div style="display:flex;justify-content:space-between;"><span>Discount</span><span>-${this.formatAdminMoney(order.discount_amount)}</span></div>
+                            <div style="display:flex;justify-content:space-between;"><span>Shipping</span><span>${this.formatAdminMoney(order.shipping_amount)}</span></div>
+                            <div style="display:flex;justify-content:space-between;"><span>Tax</span><span>${this.formatAdminMoney(order.tax_amount)}</span></div>
+                            <div style="display:flex;justify-content:space-between;font-weight:700;margin-top:0.35rem;padding-top:0.35rem;border-top:1px solid var(--gray-200);"><span>Total</span><span>${this.formatAdminMoney(order.total_amount)}</span></div>
+                            ${order.promo_code ? `<div style="margin-top:0.5rem;color:var(--gray-600);">Promo: <code>${this.escapeHtml(order.promo_code)}</code></div>` : ''}
+                        </div>
+                        ${paymentBlock}
+                    </div>`;
+
+            const addressBlocks = shop
+                ? ''
+                : `<div>
+                        <h4 style="margin:0 0 0.75rem;color:var(--gray-800);">Shipping address</h4>
+                        ${this._formatAddressBlock('shipping', order)}
+                    </div>
+                    <div>
+                        <h4 style="margin:0 0 0.75rem;color:var(--gray-800);">Billing address</h4>
+                        ${this._formatAddressBlock('billing', order)}
+                    </div>`;
+
+            const progressHeading = shop ? 'Job summary' : 'Order progress';
+            const progressPanel = shop
+                ? `<div id="order-progress-panel" style="padding:0 1.5rem 1.5rem;border-top:1px solid var(--gray-200);">
+                    <h4 style="margin:1rem 0 0.75rem;color:var(--gray-800);">${progressHeading}</h4>
+                    ${this._renderShopOrderSummary(order)}
+                </div>`
+                : `<div id="order-progress-panel" style="padding:0 1.5rem 1.5rem;border-top:1px solid var(--gray-200);">
+                    <h4 style="margin:1rem 0 0.75rem;color:var(--gray-800);">${progressHeading}</h4>
+                    ${this._renderOrderProgress(order)}
+                </div>
+                <div id="order-shipping-fulfillment" style="padding:0 1.5rem 1.5rem;border-top:1px solid var(--gray-200);"></div>`;
 
             const modal = this._mountAdminModal(`
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:1.5rem;border-bottom:1px solid var(--gray-200);gap:1rem;">
                     <div>
-                        <h3 style="margin:0 0 0.35rem;color:var(--primary-green);">Order <code>${this.escapeHtml(order.order_number)}</code></h3>
+                        <h3 style="margin:0 0 0.35rem;color:var(--primary-green);">${shop ? 'Repair order' : 'Order'} <code>${this.escapeHtml(order.order_number)}</code></h3>
                         <div style="font-size:0.85rem;color:var(--gray-500);">${this.formatAdminDateTime(order.created_at)}</div>
                         <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.75rem;">
-                            <span class="badge ${this._orderStatusBadgeClass(order.status)}">${this.escapeHtml(this._formatOrderStatus(order.status))}</span>
-                            <span class="badge ${this._salesChannelBadgeClass(order)}">${this.escapeHtml(this._formatSalesChannel(order))}</span>
-                            <span class="badge ${order.payment_status === 'paid' ? 'badge-success' : 'badge-warning'}">${this.escapeHtml(order.payment_status)}</span>
-                            ${order.fulfillment_status ? `<span class="badge badge-info">${this.escapeHtml(this._formatFulfillmentStatus(order.fulfillment_status))}</span>` : ''}
+                            ${headerBadges}
                         </div>
+                        ${shop ? '' : `<div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.75rem;">
+                            <button type="button" class="btn btn-sm btn-secondary" id="orderPrintReceiptBtn" title="Print receipt">
+                                <i class="fas fa-print"></i> Print receipt
+                            </button>
+                            <button type="button" class="btn btn-sm btn-secondary" id="orderEmailReceiptBtn" title="Email receipt to customer">
+                                <i class="fas fa-envelope"></i> Email receipt
+                            </button>
+                        </div>`}
                     </div>
                     ${closeBtn}
                 </div>
@@ -454,38 +770,16 @@ class AdminApp {
                             ${order.user_id ? `<button type="button" class="btn btn-sm btn-secondary" id="orderViewCustomerBtn" style="margin-top:0.75rem;"><i class="fas fa-user"></i> View customer</button>` : ''}
                         </div>
                     </div>
-                    <div>
-                        <h4 style="margin:0 0 0.75rem;color:var(--gray-800);">Order totals</h4>
-                        <div style="font-size:0.95rem;line-height:1.6;">
-                            <div style="display:flex;justify-content:space-between;"><span>Subtotal</span><span>${this.formatAdminMoney(order.subtotal)}</span></div>
-                            <div style="display:flex;justify-content:space-between;"><span>Discount</span><span>-${this.formatAdminMoney(order.discount_amount)}</span></div>
-                            <div style="display:flex;justify-content:space-between;"><span>Shipping</span><span>${this.formatAdminMoney(order.shipping_amount)}</span></div>
-                            <div style="display:flex;justify-content:space-between;"><span>Tax</span><span>${this.formatAdminMoney(order.tax_amount)}</span></div>
-                            <div style="display:flex;justify-content:space-between;font-weight:700;margin-top:0.35rem;padding-top:0.35rem;border-top:1px solid var(--gray-200);"><span>Total</span><span>${this.formatAdminMoney(order.total_amount)}</span></div>
-                            ${order.promo_code ? `<div style="margin-top:0.5rem;color:var(--gray-600);">Promo: <code>${this.escapeHtml(order.promo_code)}</code></div>` : ''}
-                        </div>
-                    </div>
-                    <div>
-                        <h4 style="margin:0 0 0.75rem;color:var(--gray-800);">Shipping address</h4>
-                        ${this._formatAddressBlock('shipping', order)}
-                    </div>
-                    <div>
-                        <h4 style="margin:0 0 0.75rem;color:var(--gray-800);">Billing address</h4>
-                        ${this._formatAddressBlock('billing', order)}
-                    </div>
+                    ${totalsBlock}
+                    ${addressBlocks}
                 </div>
 
                 <div style="padding:0 1.5rem 1.5rem;">
-                    <h4 style="margin:0 0 0.75rem;color:var(--gray-800);">Items (${items.length})</h4>
+                    <h4 style="margin:0 0 0.75rem;color:var(--gray-800);">${itemsHeading}</h4>
                     ${itemsHtml}
                 </div>
 
-                <div id="order-progress-panel" style="padding:0 1.5rem 1.5rem;border-top:1px solid var(--gray-200);">
-                    <h4 style="margin:1rem 0 0.75rem;color:var(--gray-800);">Order progress</h4>
-                    ${this._renderOrderProgress(order)}
-                </div>
-
-                <div id="order-shipping-fulfillment" style="padding:0 1.5rem 1.5rem;border-top:1px solid var(--gray-200);"></div>
+                ${progressPanel}
 
                 <div style="padding:0 1.5rem 1.5rem;display:flex;justify-content:flex-end;">
                     <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Close</button>
@@ -494,8 +788,13 @@ class AdminApp {
 
             if (!modal) return;
 
+            if (!shop) {
+                this._bindOrderLabelPrintButtons(modal);
+                this._bindManualTrackingForm(modal, modal);
+            }
+
             const shipSlot = modal.querySelector('#order-shipping-fulfillment');
-            if (shipSlot && window.HMShippingFulfillment) {
+            if (!shop && shipSlot && window.HMShippingFulfillment) {
                 void window.HMShippingFulfillment.mount(orderId, shipSlot, this, modal);
             }
 
@@ -505,6 +804,36 @@ class AdminApp {
                     modal.remove();
                     this.showCustomerProfile(order.user_id);
                 });
+            }
+
+            if (!shop) {
+                const printReceiptBtn = modal.querySelector('#orderPrintReceiptBtn');
+                if (printReceiptBtn) {
+                    printReceiptBtn.addEventListener('click', () => {
+                        if (this._receiptPrintInFlight) return;
+                        const printWindow = HMReceiptPrint.openLoading();
+                        void this.printOrderReceipt(orderId, order.sales_channel, {
+                            printWindow,
+                            triggerEl: printReceiptBtn,
+                        });
+                    });
+                }
+
+                const emailReceiptBtn = modal.querySelector('#orderEmailReceiptBtn');
+                if (emailReceiptBtn) {
+                    const customerEmail = String(order.email || order.account_email || '').trim();
+                    if (!customerEmail) {
+                        emailReceiptBtn.disabled = true;
+                        emailReceiptBtn.title = 'No customer email on this order';
+                    } else if (String(order.payment_status || '').toLowerCase() !== 'paid') {
+                        emailReceiptBtn.disabled = true;
+                        emailReceiptBtn.title = 'Receipt email is available after payment';
+                    } else {
+                        emailReceiptBtn.addEventListener('click', () => {
+                            void this.emailOrderReceipt(orderId, customerEmail, order.order_number);
+                        });
+                    }
+                }
             }
 
         } catch (error) {
