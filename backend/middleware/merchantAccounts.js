@@ -19,6 +19,16 @@ function extractPosDeviceKey(req) {
     return bearerLooksLikeJwt ? '' : bearer;
 }
 
+function isAdminJwtScopedApi(path) {
+    // Admin console uses Bearer JWT only (no X-Website-Api-Key). Same allowance as /api/admin.
+    // Platform/POS billing routes authenticate via assertBillingAuth / admin JWT themselves.
+    return (
+        path.startsWith('/api/admin') ||
+        path.startsWith('/api/platform/billing') ||
+        path.startsWith('/api/pos-billing')
+    );
+}
+
 function shouldSkipMerchantResolve(req) {
     const path = String(req.path || '');
     if (path === '/api/health' || path.startsWith('/api/health/')) return true;
@@ -63,12 +73,13 @@ function createMerchantAccountsMiddleware(fallbackPool) {
                 row = await findById(req.pool, jwtMerchantId);
             }
 
-            // Admin JWT routes: merchant comes from token after authenticateAdmin runs —
-            // allow through; authenticateAdmin will set req.merchantId from admin row.
-            const isAdminApi = String(req.path || '').startsWith('/api/admin');
-            const isPosApi = String(req.path || '').startsWith('/api/pos');
+            // Admin JWT / owner-console billing: merchant comes from token after auth runs —
+            // allow through without shop headers. Header/slug resolution above still applies
+            // when X-Website-Api-Key / X-Merchant-Account / device key is present (real tenants).
+            const path = String(req.path || '');
+            const isPosApi = path.startsWith('/api/pos');
 
-            if (!row && isAdminApi) {
+            if (!row && isAdminJwtScopedApi(path)) {
                 return next();
             }
 
