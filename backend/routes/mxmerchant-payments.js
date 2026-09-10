@@ -27,6 +27,7 @@ const {
     getMxmerchantConfig,
     buildWebsitePosData,
 } = require('../utils/mxmerchantEnv');
+const { markUnpaidPaymentOutcome } = require('../services/unpaidPaymentStatus');
 
 const router = express.Router();
 
@@ -199,6 +200,20 @@ router.post('/process-mx-payment', async (req, res) => {
 
         const sale = await getPayment(paymentId, 'website');
         if (!sale.ok) {
+            const mxStatus = String(sale.status || sale.raw?.status || '').trim().toLowerCase();
+            const unpaidOutcome =
+                mxStatus === 'declined' || mxStatus === 'voided' || mxStatus === 'chargedback'
+                    ? 'declined'
+                    : 'failed';
+            try {
+                await markUnpaidPaymentOutcome(req.pool, oid, unpaidOutcome);
+            } catch (markErr) {
+                logger.warn('Could not mark unpaid payment outcome after MX response', {
+                    orderId: oid,
+                    unpaidOutcome,
+                    err: markErr.message,
+                });
+            }
             return res.status(402).json({
                 success: false,
                 error: sale.responseText || 'Payment not approved',

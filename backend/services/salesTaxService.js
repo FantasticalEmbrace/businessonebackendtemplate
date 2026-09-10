@@ -41,7 +41,7 @@ async function ensureTaxSettingsHydrated(pool) {
     }
 }
 
-/** Tenant-scoped Ziptax key (Business One ≠ HM Herbs). */
+/** Tenant-scoped Ziptax key (storefront vs Business One billing). */
 function ziptaxApiKey(tenant = 'business_one') {
     return taxSettings.getZiptaxApiKey(normalizeTenant(tenant));
 }
@@ -203,7 +203,7 @@ function mapZiptaxJurisdictions(baseRates = [], subtotal, taxAmount, taxRate) {
 async function quoteZiptax({ amount, shipTo, tenant = 'business_one' }) {
     const key = ziptaxApiKey(tenant);
     if (!key) {
-        const label = normalizeTenant(tenant) === 'hmherbs' ? 'HM Herbs' : 'Business One';
+        const label = normalizeTenant(tenant) === 'hmherbs' ? 'Storefront' : 'Business One';
         const err = new Error(
             `Sales tax cannot be calculated: ${label} Ziptax API key is not configured. Add it under ${label === 'Business One' ? 'Business One Admin → Tax' : 'Admin → Sales Tax Reporting'}.`
         );
@@ -310,8 +310,8 @@ async function quoteZiptax({ amount, shipTo, tenant = 'business_one' }) {
  * Quote sales tax for a taxable amount shipped to `shipTo`.
  * Always live from the provider at call time (checkout) — no long-lived rate cache.
  *
- * opts.tenant: 'hmherbs' | 'business_one' (controls ignore-state list)
- * opts.pool: optional — refreshes admin-stored Ziptax key / ignore states from DB
+ * opts.tenant: 'hmherbs' | 'business_one' (controls tax-exempt destination-state list)
+ * opts.pool: optional — refreshes admin-stored Ziptax key / exempt states from DB
  */
 async function quoteSalesTax(opts = {}) {
     await ensureTaxSettingsHydrated(opts.pool);
@@ -324,9 +324,12 @@ async function quoteSalesTax(opts = {}) {
     const tenant = normalizeTenant(opts.tenant);
     const to = opts.shipTo ? assertShipTo(opts.shipTo) : null;
 
-    if (to && taxSettings.isStateIgnored(to.state, tenant)) {
-        logger.info('[sales-tax] State ignored for tenant — $0 tax', { tenant, state: to.state });
-        return emptyBreakdown(subtotal, to, 'ignored_state');
+    if (to && taxSettings.isStateTaxExempt(to.state, tenant)) {
+        logger.info('[sales-tax] Tax-exempt destination state — $0 tax (sales still allowed)', {
+            tenant,
+            state: to.state
+        });
+        return emptyBreakdown(subtotal, to, 'exempt_state');
     }
 
     const provider = taxProvider();

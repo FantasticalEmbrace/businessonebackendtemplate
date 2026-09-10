@@ -252,6 +252,26 @@ class AdminApp {
         return 'badge-info';
     }
 
+    _paymentStatusBadgeClass(status) {
+        const s = String(status || '').toLowerCase();
+        if (s === 'paid') return 'badge-success';
+        if (s === 'declined') return 'badge-danger';
+        if (s === 'failed') return 'badge-warning';
+        if (s === 'refunded') return 'badge-info';
+        return 'badge-secondary';
+    }
+
+    _formatPaymentStatus(status) {
+        const labels = {
+            pending: 'Payment pending',
+            paid: 'Paid',
+            failed: 'Failed',
+            declined: 'Declined',
+            refunded: 'Refunded',
+        };
+        const key = String(status || '').toLowerCase();
+        return labels[key] || key.replace(/_/g, ' ');
+    }
     _formatOrderStatus(status) {
         const labels = {
             pending: 'Order placed',
@@ -683,10 +703,10 @@ class AdminApp {
                 : `<p style="color:var(--gray-500);">${shop ? 'No parts or labor lines yet.' : 'No line items.'}</p>`;
 
             const headerBadges = shop
-                ? `<span class="badge ${order.payment_status === 'paid' ? 'badge-success' : 'badge-warning'}">${this.escapeHtml(this._formatPaymentStatus(order.payment_status))}</span>`
+                ? `<span class="badge ${this._paymentStatusBadgeClass(order.payment_status)}">${this.escapeHtml(this._formatPaymentStatus(order.payment_status))}</span>`
                 : `<span class="badge ${this._orderStatusBadgeClass(order.status)}">${this.escapeHtml(this._formatOrderStatus(order.status))}</span>
                             <span class="badge ${this._salesChannelBadgeClass(order)}">${this.escapeHtml(this._formatSalesChannel(order))}</span>
-                            <span class="badge ${order.payment_status === 'paid' ? 'badge-success' : 'badge-warning'}">${this.escapeHtml(this._formatPaymentStatus(order.payment_status))}</span>
+                            <span class="badge ${this._paymentStatusBadgeClass(order.payment_status)}">${this.escapeHtml(this._formatPaymentStatus(order.payment_status))}</span>
                             ${order.fulfillment_status ? `<span class="badge badge-info">${this.escapeHtml(this._formatFulfillmentStatus(order.fulfillment_status))}</span>` : ''}`;
 
             const paymentBlock = `
@@ -8055,8 +8075,8 @@ class AdminApp {
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="badge ${order.payment_status === 'paid' ? 'badge-success' : 'badge-warning'}">
-                                        ${this.escapeHtml(order.payment_status)}
+                                    <span class="badge ${this._paymentStatusBadgeClass(order.payment_status)}">
+                                        ${this.escapeHtml(this._formatPaymentStatus(order.payment_status))}
                                     </span>
                                 </td>
                                 <td>$${parseFloat(order.total_amount || 0).toFixed(2)}</td>

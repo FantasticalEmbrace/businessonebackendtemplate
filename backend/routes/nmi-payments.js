@@ -23,6 +23,10 @@ const {
     loadStorePaymentProcessor,
     resolveProcessorCredentials
 } = require('../services/storePaymentProcessor');
+const {
+    markUnpaidPaymentOutcome,
+    nmiUnpaidOutcomeFromSale
+} = require('../services/unpaidPaymentStatus');
 
 const router = express.Router();
 
@@ -393,9 +397,20 @@ router.post('/process-payment', async (req, res) => {
         }
 
         if (!sale.ok) {
+            const unpaidOutcome = nmiUnpaidOutcomeFromSale(sale);
+            try {
+                await markUnpaidPaymentOutcome(req.pool, oid, unpaidOutcome);
+            } catch (markErr) {
+                logger.warn('Could not mark unpaid payment outcome after NMI response', {
+                    orderId: oid,
+                    unpaidOutcome,
+                    err: markErr.message
+                });
+            }
             return res.status(402).json({
                 success: false,
                 error: sale.responseText,
+                declineCode: unpaidOutcome === 'declined' ? 'CARD_DECLINED' : 'PAYMENT_FAILED',
                 nmiResponse: sale.responseCode,
                 nmi: sale.fields
             });
