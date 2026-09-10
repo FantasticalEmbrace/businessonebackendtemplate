@@ -1,4 +1,4 @@
-// Business One merchant admin
+﻿// Business One merchant admin
 
 const HM_CLOSE_ICON_SVG = '<svg class="cart-close-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12 5.7 16.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4z"/></svg>';
 
@@ -1096,6 +1096,8 @@ class AdminApp {
                 this.canManageStoreHours = Boolean(data.canManageStoreHours);
                 this.canManageStoreHoursDelegation = Boolean(data.canManageStoreHoursDelegation);
                 this.defaultSection = data.defaultSection || 'dashboard';
+                this.isPrincipalStore = Boolean(data.isPrincipalStore);
+                this.chromeBranding = data.chromeBranding || null;
                 localStorage.setItem('adminToken', this.authToken);
 
                 await this.loadDashboard();
@@ -1210,6 +1212,8 @@ class AdminApp {
             this.canManageStoreHours = Boolean(data.canManageStoreHours);
             this.canManageStoreHoursDelegation = Boolean(data.canManageStoreHoursDelegation);
             this.defaultSection = data.defaultSection || 'dashboard';
+            this.isPrincipalStore = Boolean(data.isPrincipalStore);
+            this.chromeBranding = data.chromeBranding || null;
             return true;
         } catch (error) {
             const msg = String(error?.message || '').toLowerCase();
@@ -1343,6 +1347,67 @@ class AdminApp {
         if (syncBtn) syncBtn.disabled = !allowed;
     }
 
+    applyAdminChromeBranding(chrome) {
+        const brand = chrome || this.chromeBranding || { useDefault: true, displayName: 'Business One Admin' };
+        this.chromeBranding = brand;
+        const root = document.getElementById('adminSidebarBrand');
+        const icon = document.getElementById('adminSidebarBrandIcon');
+        const logo = document.getElementById('adminSidebarBrandLogo');
+        const nameEl = document.getElementById('adminSidebarBrandName');
+        if (!root || !nameEl) return;
+
+        const useDefault =
+            brand.useDefault !== false ||
+            !String(brand.logoUrl || '').trim() ||
+            !String(brand.displayName || '').trim();
+        const displayName = useDefault
+            ? 'Business One Admin'
+            : String(brand.displayName).trim();
+
+        nameEl.textContent = displayName;
+        root.dataset.defaultBrand = useDefault ? '1' : '0';
+        root.classList.toggle('is-merchant-brand', !useDefault);
+
+        if (useDefault) {
+            if (icon) icon.hidden = false;
+            if (logo) {
+                logo.hidden = true;
+                logo.removeAttribute('src');
+                logo.alt = '';
+            }
+            return;
+        }
+
+        if (icon) icon.hidden = true;
+        if (logo) {
+            logo.hidden = false;
+            logo.src = String(brand.logoUrl);
+            logo.alt = displayName;
+            logo.onerror = () => {
+                logo.hidden = true;
+                if (icon) icon.hidden = false;
+                root.classList.remove('is-merchant-brand');
+                root.dataset.defaultBrand = '1';
+                nameEl.textContent = 'Business One Admin';
+            };
+        }
+    }
+
+    async refreshAdminChromeBranding() {
+        if (!this.authToken) {
+            this.applyAdminChromeBranding({ useDefault: true, displayName: 'Business One Admin' });
+            return;
+        }
+        try {
+            const data = await this.apiRequest('/admin/chrome-branding');
+            if (data?.chromeBranding) {
+                this.applyAdminChromeBranding(data.chromeBranding);
+            }
+        } catch (err) {
+            console.warn('Chrome branding refresh failed:', err.message || err);
+        }
+    }
+
     async loadDashboard() {
         // Hide login screen and show dashboard
         const loginScreen = document.getElementById('loginScreen');
@@ -1362,6 +1427,11 @@ class AdminApp {
         }
 
         this.applyRoleAccess();
+        if (this.chromeBranding) {
+            this.applyAdminChromeBranding(this.chromeBranding);
+        } else {
+            await this.refreshAdminChromeBranding();
+        }
 
         const landing = this.canAccessSection(this.defaultSection)
             ? this.defaultSection
@@ -2426,6 +2496,7 @@ class AdminApp {
     _storeInfoSettingMeta() {
         return {
             store_name: 'Store display name',
+            store_logo_url: 'Store logo URL for admin chrome and storefront',
             store_phone: 'Primary store phone number',
             store_email: 'Primary store contact email',
             store_address_line1: 'Store street address line 1',
@@ -3840,6 +3911,7 @@ class AdminApp {
                 msg.style.color = 'var(--success)';
             }
             this.showToast('POS settings saved', 'success');
+            await this.refreshAdminChromeBranding();
         } catch (err) {
             if (msg) {
                 msg.textContent = err.message || 'Save failed.';
@@ -4939,6 +5011,11 @@ class AdminApp {
             }
             const toastType = res?.googleBusinessSync?.synced === false ? 'warning' : 'success';
             this.showToast(statusLine, toastType);
+            if (res?.chromeBranding) {
+                this.applyAdminChromeBranding(res.chromeBranding);
+            } else {
+                await this.refreshAdminChromeBranding();
+            }
             if (res?.googleBusinessSync?.synced) {
                 await this.loadIntegrationLogs();
             }
@@ -10866,6 +10943,9 @@ class AdminApp {
         localStorage.removeItem('adminToken');
         this.authToken = null;
         this.currentUser = null;
+        this.chromeBranding = null;
+        this.isPrincipalStore = false;
+        this.applyAdminChromeBranding({ useDefault: true, displayName: 'Business One Admin' });
 
         const adminDashboard = document.getElementById('adminDashboard');
         const loginScreen = document.getElementById('loginScreen');

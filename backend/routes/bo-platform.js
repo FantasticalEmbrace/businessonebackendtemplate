@@ -6,6 +6,8 @@ const fs = require('fs');
 const router = express.Router();
 const { getProductFeatures, WEBSITE_LOCKED_SECTIONS } = require('../config/productFeatures');
 
+const { persistMerchantStoreBranding } = require('../services/storeBranding');
+
 const BRANDING_PATH = path.join(__dirname, '..', '..', 'data', 'branding.json');
 
 function readBranding() {
@@ -55,7 +57,7 @@ router.get('/branding', (_req, res) => {
     res.json({ branding: readBranding(), defaults: BO_DEFAULTS });
 });
 
-router.put('/branding', (req, res) => {
+router.put('/branding', async (req, res) => {
     const features = getProductFeatures();
     const body = req.body || {};
     const current = readBranding();
@@ -80,12 +82,33 @@ router.put('/branding', (req, res) => {
     }
 
     writeBranding(next);
+    // Keep settings + admin chrome in sync when merchants save branding from the BO panel.
+    if (req.pool) {
+        try {
+            await persistMerchantStoreBranding(req.pool, {
+                storeName: next.storeName,
+                logoUrl: next.logoUrl,
+            });
+        } catch {
+            /* settings sync is best-effort */
+        }
+    }
     res.json({ success: true, branding: next, websiteEnabled: features.websiteEnabled });
 });
 
-router.post('/branding/reset', (_req, res) => {
+router.post('/branding/reset', async (req, res) => {
     const next = { ...BO_DEFAULTS, updatedAt: new Date().toISOString() };
     writeBranding(next);
+    if (req.pool) {
+        try {
+            await persistMerchantStoreBranding(req.pool, {
+                storeName: next.storeName,
+                logoUrl: next.logoUrl,
+            });
+        } catch {
+            /* ignore */
+        }
+    }
     res.json({ success: true, branding: next });
 });
 

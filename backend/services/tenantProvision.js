@@ -168,6 +168,16 @@ async function provisionTenant(pool, input = {}) {
 
     const owner = await ensureOwnerAdmin(pool, id, billingEmail, businessName);
 
+    try {
+        const { persistMerchantStoreBranding } = require('./storeBranding');
+        await persistMerchantStoreBranding(pool, {
+            storeName: businessName,
+            logoUrl: input.logoUrl || input.storeLogoUrl || undefined,
+        });
+    } catch {
+        /* branding sync is best-effort during provision */
+    }
+
     const row = await findById(pool, id);
     return {
         alreadyProvisioned: false,

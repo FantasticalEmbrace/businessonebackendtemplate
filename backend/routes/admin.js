@@ -202,7 +202,11 @@ const { TaxLedgerService, toDateKey } = require('../services/taxLedger');
 const { TaxAccountantReportService } = require('../services/taxAccountantReport');
 const storeTaxSettings = require('../services/storeTaxSettings');
 const { resolveEcommerceStoreAccess } = require('../services/storeEcommerceTier');
-const { isPrincipalStore } = require('../services/storeBranding');
+const {
+    isPrincipalStore,
+    resolveAdminChromeBranding,
+    persistMerchantStoreBranding,
+} = require('../services/storeBranding');
 
 async function loadGoogleBusinessStoreHours(pool) {
     const keys = [...GBP_STORE_HOUR_KEYS];
@@ -415,6 +419,7 @@ router.post('/auth/login', adminAuthLimiter, ...adminLoginValidation, async (req
 
         const role = normalizeAdminRole(admin.role);
         const canHours = await resolveCanManageStoreHours(req.pool, role, admin.id);
+        const chromeBranding = await resolveAdminChromeBranding(req.pool);
         res.json({
             message: 'Admin login successful',
             token,
@@ -430,6 +435,8 @@ router.post('/auth/login', adminAuthLimiter, ...adminLoginValidation, async (req
             defaultSection: defaultSectionForRole(role),
             canManageStoreHours: canHours,
             canManageStoreHoursDelegation: canManageStoreHours(role),
+            chromeBranding,
+            isPrincipalStore: Boolean(chromeBranding.isPrincipalStore),
         });
     } catch (error) {
         // Log full error details for debugging
@@ -632,7 +639,8 @@ router.get('/auth/me', ...adminAuth, async (req, res) => {
     const role = normalizeAdminRole(req.admin.role);
     const canHours = await resolveCanManageStoreHours(req.pool, role, req.admin.id);
     const ecommerceAccess = await resolveEcommerceStoreAccess(req.pool);
-    const principalStore = await isPrincipalStore(req.pool);
+    const chromeBranding = await resolveAdminChromeBranding(req.pool);
+    const principalStore = Boolean(chromeBranding.isPrincipalStore);
     let allowedSections = allowedSectionsForRole(role);
     if (!ecommerceAccess.enabled && Array.isArray(allowedSections)) {
         allowedSections = allowedSections.filter((section) => section !== 'marketing');
@@ -653,8 +661,20 @@ router.get('/auth/me', ...adminAuth, async (req, res) => {
         canManageStoreHoursDelegation: canManageStoreHours(role),
         ecommerceStore: Boolean(ecommerceAccess.enabled),
         ecommerceAccessReason: ecommerceAccess.reason,
-        isPrincipalStore: Boolean(principalStore),
+        isPrincipalStore: principalStore,
+        chromeBranding,
     });
+});
+
+/** Sidebar / admin chrome branding (Business One default vs merchant name+logo). */
+router.get('/chrome-branding', ...adminAuth, async (req, res) => {
+    try {
+        const chromeBranding = await resolveAdminChromeBranding(req.pool);
+        res.json({ chromeBranding });
+    } catch (error) {
+        logger.error('Chrome branding error:', error);
+        res.status(500).json({ error: 'Failed to load chrome branding' });
+    }
 });
 
 // Dashboard Statistics
@@ -3059,11 +3079,28 @@ router.put('/settings', ...adminAuth, requirePermission('manager'), settingsVali
 
             await connection.commit();
 
+            const nameSetting = filteredSettings.find((s) => s.key_name === 'store_name');
+            const logoSetting = filteredSettings.find(
+                (s) => s.key_name === 'store_logo_url' || s.key_name === 'pos_store_logo_url'
+            );
+            if (nameSetting || logoSetting) {
+                try {
+                    await persistMerchantStoreBranding(req.pool, {
+                        storeName: nameSetting ? nameSetting.value : undefined,
+                        logoUrl: logoSetting ? logoSetting.value : undefined,
+                    });
+                } catch (brandErr) {
+                    logger.warn('Branding file sync after settings save:', brandErr.message);
+                }
+            }
+
             const googleBusinessSync = await tryAutoSyncGoogleBusinessHours(req, updatedKeyNames);
 
+            const chromeBranding = await resolveAdminChromeBranding(req.pool);
             res.json({
                 message: 'Settings updated successfully',
                 googleBusinessSync,
+                chromeBranding,
             });
 
         } catch (error) {

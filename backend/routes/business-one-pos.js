@@ -23,6 +23,7 @@ const {
 } = require('../services/platformBillingAccount');
 const { purchaseHardware, chargeSignupMonthlyAndBuild } = require('../services/platformBillingRunner');
 const { compensateSignupBilling } = require('../services/prochargeRefunds');
+const { persistMerchantStoreBranding } = require('../services/storeBranding');
 
 function isSignupEnabled() {
     return String(process.env.BUSINESS_ONE_POS_SIGNUP_ENABLED || 'false').toLowerCase() === 'true';
@@ -192,6 +193,16 @@ router.post('/signup', signupLimiter, async (req, res) => {
               };
 
         account = await ensureAccountForSignup(req.pool, { businessName, billingEmail });
+
+        const signupLogoUrl = String(req.body.logoUrl || req.body.storeLogoUrl || '').trim().slice(0, 500);
+        try {
+            await persistMerchantStoreBranding(req.pool, {
+                storeName: businessName,
+                logoUrl: signupLogoUrl || undefined,
+            });
+        } catch (brandErr) {
+            logger.warn('[business-one-pos] branding persist failed', { message: brandErr.message });
+        }
 
         await saveBillingVault(req.pool, {
             accountId: account.id,
