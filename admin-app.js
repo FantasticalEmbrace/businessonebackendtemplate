@@ -115,25 +115,21 @@ class AdminApp {
     }
 
     getApiBaseUrl() {
-        // Check if we're using file:// protocol (opened directly)
+        // file:// has no origin — point at the local merchant API port.
         if (window.location.protocol === 'file:') {
-            console.warn('Ã¢Å¡Â Ã¯Â¸Â Admin panel opened via file:// protocol. Please use a web server.');
-            console.warn('Ã°Å¸â€™Â¡ Start the backend server: cd backend && npm start');
-            console.warn('Ã°Å¸â€™Â¡ Then access: http://localhost:3001/admin.html');
-            // Still return the API URL for when server is running
-            return 'http://localhost:3001/api';
+            console.warn('Admin panel opened via file:// protocol. Please use a web server.');
+            console.warn('Start the backend server: cd backend && npm start');
+            console.warn('Then access: http://127.0.0.1:3011/admin.html');
+            return 'http://127.0.0.1:3011/api';
         }
 
-        // Check if we're in development (localhost)
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            // If served from backend server, use relative path
-            if (window.location.port === '3001') {
-                return '/api';
-            }
-            return 'http://localhost:3001/api';
+        // Any localhost / 127.0.0.1 host (any port, including 3011): same-origin /api.
+        // Never hardcode :3001 when the page is already served by the backend.
+        const host = window.location.hostname;
+        if (host === 'localhost' || host === '127.0.0.1') {
+            return '/api';
         }
 
-        // For production, use the same origin with /api path
         return `${window.location.origin}/api`;
     }
 
