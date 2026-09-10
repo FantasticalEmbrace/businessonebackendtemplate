@@ -127,6 +127,7 @@ async function assertPrincipalAccount(pool, account) {
 
 async function getPrincipalDashboard(pool, account) {
     await assertPrincipalAccount(pool, account);
+    await syncPrincipalMeta(pool, account.id);
     const { listSubscriptions, listHardwareCatalog } = require('./platformBillingAccount');
     const { computeMonthlyTotal } = require('./platformBillingRunner');
     const { computeHardwareCheckout } = require('./platformBillingPricing');
@@ -136,6 +137,8 @@ async function getPrincipalDashboard(pool, account) {
     const { isProchargeSandbox } = require('../utils/prochargeEnv');
     const { getModemBillingStatus } = require('./billingPrerequisites');
 
+    // Re-fetch after sync in case contact fields were seeded
+    account = (await getAccountById(pool, account.id)) || account;
     await refreshFailoverBillingForAccount(pool, account.id);
     const failoverGbUsed = await getMeteredFailoverGb(pool, account.id);
     const modemBilling = await getModemBillingStatus(pool, account.id, account);
