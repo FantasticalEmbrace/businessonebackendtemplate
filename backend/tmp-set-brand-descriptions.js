@@ -11,7 +11,7 @@ const descriptions = {
     'dr-tonys': "Dr. Tony's delivers doctor-formulated liquid multivitamins and targeted wellness blends created by Dr. Tony O’Donnell.",
     'enzymedica': 'Enzymedica offers high-quality digestive enzymes and gut health solutions to support nutrient absorption and comfort.',
     'formor': 'ForMor International offers nutritional supplements and functional beverages focused on everyday wellness and energy support.',
-    'hm-herbs': 'Business One house line featuring Cardio Amaze and related heart health and nitric oxide support formulas.',
+    'business-one': 'Business One house line featuring Cardio Amaze and related heart health and nitric oxide support formulas.',
     'hemp-bombs': 'Hemp Bombs produces hemp-derived CBD gummies, oils, capsules, and topicals for relaxation and recovery.',
     'herbs-for-life': 'Herbs For Life creates herbal tinctures and nutritional formulas rooted in traditional botanical wellness.',
     'hi-tech-pharmaceuticals': 'Hi-Tech Pharmaceuticals manufactures sports nutrition, thermogenic, and performance supplements using advanced delivery systems.',

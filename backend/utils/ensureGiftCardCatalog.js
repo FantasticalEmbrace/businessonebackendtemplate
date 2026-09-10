@@ -36,8 +36,8 @@ async function resolveBrandId(pool) {
     if (row?.id) return row.id;
 
     const [r] = await pool.execute(
-        `INSERT INTO brands (name, slug, description, is_active)
-         VALUES ('Business One', 'hm-herbs', 'Business One', 1)`
+        `INSERT INTO brands (name, slug, description, logo_url, is_active)
+         VALUES ('Business One', 'business-one', 'Business One', '/images/brand-images/business-one.png', 1)`
     );
     return r.insertId;
 }

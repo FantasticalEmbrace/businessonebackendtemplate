@@ -31,7 +31,7 @@ INSERT INTO brands (name, slug, description) VALUES
 ('Natures Plus', 'natures-plus', 'Premium natural vitamins and supplements'),
 ('Global Healing', 'global-healing', 'Organic and natural health products'),
 ('Host Defence', 'host-defence', 'Mushroom-based immune support supplements'),
-('HM Enterprise', 'hm-enterprise', 'Store proprietary formulations and products'),
+('Business One', 'business-one', 'Business One proprietary formulations and products'),
 ('Terry Naturally', 'terry-naturally', 'Clinically studied natural health products'),
 ('Unicity', 'unicity', 'Science-based nutritional supplements'),
 ('Newton Labs', 'newton-labs', 'Homeopathic remedies and natural medicines'),
