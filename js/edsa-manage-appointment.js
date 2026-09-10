@@ -90,7 +90,7 @@ function clearSiteMessage() {
     }
 }
 
-const STORE_PHONE_DIGITS = '7068619454';
+const STORE_PHONE_DIGITS = '8502902084';
 const STORE_PHONE_TEL = '+18502902084';
 
 function storePhoneDisplay() {

@@ -83,7 +83,7 @@ PRODUCTION_DOMAIN=your-domain.com
 DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=
-DB_NAME=hmherbs
+DB_NAME=business_one_platform
 
 # Security (auto-generated secure keys)
 JWT_SECRET=${require('crypto').randomBytes(32).toString('hex')}
@@ -131,17 +131,17 @@ async function setupDatabase(dbPassword) {
     try {
         // Create database
         console.log('🔄 Creating database...');
-        execCommand(`mysql -u root ${passwordFlag} -e "CREATE DATABASE IF NOT EXISTS hmherbs;"`);
+        execCommand(`mysql -u root ${passwordFlag} -e "CREATE DATABASE IF NOT EXISTS business_one_platform;"`);
         console.log('✅ Database created');
         
         // Run schema
         console.log('🔄 Creating tables...');
-        execCommand(`mysql -u root ${passwordFlag} hmherbs < database/schema.sql`);
+        execCommand(`mysql -u root ${passwordFlag} business_one_platform < database/schema.sql`);
         console.log('✅ Tables created');
         
         // Load seed data
         console.log('🔄 Loading seed data...');
-        execCommand(`mysql -u root ${passwordFlag} hmherbs < database/seed-data.sql`);
+        execCommand(`mysql -u root ${passwordFlag} business_one_platform < database/seed-data.sql`);
         console.log('✅ Seed data loaded');
         
     } catch (error) {
@@ -315,7 +315,7 @@ process.on('SIGINT', () => {
         packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
     } else {
         packageJson = {
-            "name": "hmherbs",
+            "name": "business_one_platform",
             "version": "1.0.0",
             "description": "Business One Merchant Platform"
         };

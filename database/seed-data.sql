@@ -63,7 +63,7 @@ INSERT INTO product_categories (name, slug, description, sort_order) VALUES
 ('CBD', 'cbd', 'Hemp-derived CBD oils, gummies, topicals, and wellness products', 16);
 
 -- Sample products removed - products will be populated via scraping tool
--- Use the admin console "Scrape HM Herbs" button to populate products from the original website
+-- Use the admin console "Import catalog" button to populate products from the original website
 
 -- Insert system settings
 INSERT INTO settings (key_name, value, description, type) VALUES

@@ -1,6 +1,6 @@
 @echo off
 echo ========================================
-echo Your Store Database Setup
+echo Business One Database Setup
 echo ========================================
 echo.
 
@@ -20,9 +20,9 @@ echo ✅ MySQL found
 echo.
 
 REM Test connection and create database
-echo Creating database 'hmherbs'...
+echo Creating database 'business_one_platform'...
 echo Please enter your MySQL root password when prompted:
-%MYSQL_PATH% -u root -p -e "CREATE DATABASE IF NOT EXISTS hmherbs CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+%MYSQL_PATH% -u root -p -e "CREATE DATABASE IF NOT EXISTS business_one_platform CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
 if %ERRORLEVEL% NEQ 0 (
     echo ❌ Failed to create database. Please check your password.
@@ -30,14 +30,14 @@ if %ERRORLEVEL% NEQ 0 (
     exit /b 1
 )
 
-echo ✅ Database 'hmherbs' created successfully
+echo ✅ Database 'business_one_platform' created successfully
 echo.
 
 REM Run schema
 if exist %SCHEMA_PATH% (
     echo Running database schema...
     echo Please enter your MySQL root password again:
-    %MYSQL_PATH% -u root -p hmherbs < %SCHEMA_PATH%
+    %MYSQL_PATH% -u root -p business_one_platform < %SCHEMA_PATH%
     
     if %ERRORLEVEL% EQU 0 (
         echo ✅ Database schema applied successfully
@@ -55,7 +55,7 @@ if /i "%LOAD_SEED%"=="y" (
     if exist %SEED_PATH% (
         echo Loading seed data...
         echo Please enter your MySQL root password again:
-        %MYSQL_PATH% -u root -p hmherbs < %SEED_PATH%
+        %MYSQL_PATH% -u root -p business_one_platform < %SEED_PATH%
         
         if %ERRORLEVEL% EQU 0 (
             echo ✅ Seed data loaded successfully

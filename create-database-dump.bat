@@ -1,9 +1,9 @@
 @echo off
-REM MySQL Database Dump Script for Your Store
+REM MySQL Database Dump Script for Business One
 REM Creates a backup of your MySQL database
 
 echo ========================================
-echo Your Store Database Dump Utility
+echo Business One Database Dump Utility
 echo ========================================
 echo.
 
@@ -11,7 +11,7 @@ REM Set default database values (update these if different)
 set DB_HOST=localhost
 set DB_USER=root
 set DB_PASSWORD=
-set DB_NAME=hmherbs
+set DB_NAME=business_one_platform
 
 REM Check if .env file exists and read values
 if exist "backend\.env" (

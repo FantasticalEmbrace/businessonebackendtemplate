@@ -21,7 +21,7 @@ async function loadPosStoreConfig(pool) {
         /* env fallback only */
     }
 
-    if (!storeName) storeName = 'Store';
+    if (!storeName) storeName = 'Business One';
 
     return { storeName, storeLogoUrl };
 }
