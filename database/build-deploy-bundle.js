@@ -64,6 +64,10 @@ const sections = [
         file: path.join(root, 'migrations', '20260509_web_promotions_marketing.sql')
     },
     {
+        title: 'POS auto promotions channel columns',
+        file: path.join(root, 'migrations', '20260701_pos_auto_promotions.sql')
+    },
+    {
         title: 'CBD category and product assignments',
         file: path.join(root, 'migrations', '20260612_cbd_category.sql')
     },

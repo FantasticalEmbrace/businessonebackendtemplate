@@ -46,6 +46,7 @@ const { ensureGiftCardCatalog } = require('./utils/ensureGiftCardCatalog');
 const { ensureProductStorefrontSchema } = require('./utils/ensureProductStorefrontSchema');
 const { ensureCbdCategory } = require('./utils/ensureCbdCategory');
 const { ensureCustomerGroupSchema } = require('./utils/ensureCustomerGroupSchema');
+const { ensureWebPromotionsSchema } = require('./utils/ensureWebPromotionsSchema');
 const { ensureUserPasswordResetSchema } = require('./utils/ensureUserPasswordResetSchema');
 const { ensureEdsaBookingSchema } = require('./utils/ensureEdsaBookingSchema');
 const { ensureEdsaBlockedDatesTable } = require('./services/edsaBlockedDates');
@@ -2072,6 +2073,12 @@ app.use('/api/*', (req, res) => {
         await ensureCustomerGroupSchema(pool);
     } catch (e) {
         logger.error(`ensureCustomerGroupSchema failed: ${logger.formatMysqlError(e)}`);
+    }
+
+    try {
+        await ensureWebPromotionsSchema(pool);
+    } catch (e) {
+        logger.error(`ensureWebPromotionsSchema failed: ${logger.formatMysqlError(e)}`);
     }
 
     try {
