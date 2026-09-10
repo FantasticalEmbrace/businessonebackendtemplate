@@ -10,7 +10,7 @@ const {
     DEFAULT_CHROME_NAME,
 } = require('../services/storeBranding');
 
-function mockPool(settings = {}) {
+function mockPool(settings = {}, { principal = false } = {}) {
     return {
         async execute(sql, params) {
             if (/FROM settings/i.test(sql) && /key_name IN/i.test(sql)) {
@@ -19,7 +19,10 @@ function mockPool(settings = {}) {
                     .map((k) => ({ key_name: k, value: settings[k] }));
                 return [rows];
             }
-            if (/FROM billing_accounts/i.test(sql) || /ensureDefaultAccount/i.test(sql)) {
+            if (/FROM billing_accounts/i.test(sql)) {
+                if (principal) {
+                    return [[{ id: 1, account_key: 'default', status: 'active' }]];
+                }
                 return [[]];
             }
             return [[]];
@@ -74,5 +77,20 @@ describe('admin chrome branding', () => {
         expect(chrome.useDefault).toBe(false);
         expect(chrome.displayName).toBe('River Tire');
         expect(chrome.logoUrl).toBe('/uploads/river-tire.png');
+    });
+
+    test('still adopts merchant branding when principal billing account exists', async () => {
+        const chrome = await resolveAdminChromeBranding(
+            mockPool(
+                {
+                    store_name: 'Acme Auto Repair',
+                    store_logo_url: 'https://cdn.example.com/acme-icon.png',
+                },
+                { principal: true }
+            )
+        );
+        expect(chrome.useDefault).toBe(false);
+        expect(chrome.displayName).toBe('Acme Auto Repair');
+        expect(chrome.isPrincipalStore).toBe(true);
     });
 });

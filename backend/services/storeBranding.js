@@ -197,7 +197,10 @@ async function resolveAdminChromeBranding(pool) {
 
     const hasMerchantName = Boolean(customName) && !isPlatformDefaultName(customName);
     const hasMerchantLogo = Boolean(customLogo) && !isPlatformDefaultLogo(customLogo);
-    const useDefault = principal || !(hasMerchantName && hasMerchantLogo);
+    // Merchant chrome when both a real business name and logo are configured.
+    // Principal installs without custom branding keep Business One Admin.
+    // (Do not force principal-only: dedicated merchant DBs still have a `default` billing account.)
+    const useDefault = !(hasMerchantName && hasMerchantLogo);
 
     if (useDefault) {
         return {
@@ -213,7 +216,7 @@ async function resolveAdminChromeBranding(pool) {
         useDefault: false,
         displayName: customName,
         logoUrl: customLogo,
-        isPrincipalStore: false,
+        isPrincipalStore: principal,
         storeName: customName,
     };
 }

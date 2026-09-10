@@ -1348,6 +1348,7 @@ class AdminApp {
     }
 
     applyAdminChromeBranding(chrome) {
+        if (this.demoMode) return;
         const brand = chrome || this.chromeBranding || { useDefault: true, displayName: 'Business One Admin' };
         this.chromeBranding = brand;
         const root = document.getElementById('adminSidebarBrand');
@@ -1356,13 +1357,11 @@ class AdminApp {
         const nameEl = document.getElementById('adminSidebarBrandName');
         if (!root || !nameEl) return;
 
-        const useDefault =
-            brand.useDefault !== false ||
-            !String(brand.logoUrl || '').trim() ||
-            !String(brand.displayName || '').trim();
-        const displayName = useDefault
-            ? 'Business One Admin'
-            : String(brand.displayName).trim();
+        const logoUrl = String(brand.logoUrl || '').trim();
+        const merchantName = String(brand.displayName || brand.storeName || '').trim();
+        // API sets useDefault:false only when both name+logo are merchant-custom.
+        const useDefault = !(brand.useDefault === false && logoUrl && merchantName);
+        const displayName = useDefault ? 'Business One Admin' : merchantName;
 
         nameEl.textContent = displayName;
         root.dataset.defaultBrand = useDefault ? '1' : '0';
@@ -1374,6 +1373,7 @@ class AdminApp {
                 logo.hidden = true;
                 logo.removeAttribute('src');
                 logo.alt = '';
+                logo.onerror = null;
             }
             return;
         }
@@ -1381,10 +1381,11 @@ class AdminApp {
         if (icon) icon.hidden = true;
         if (logo) {
             logo.hidden = false;
-            logo.src = String(brand.logoUrl);
+            logo.src = logoUrl;
             logo.alt = displayName;
             logo.onerror = () => {
                 logo.hidden = true;
+                logo.onerror = null;
                 if (icon) icon.hidden = false;
                 root.classList.remove('is-merchant-brand');
                 root.dataset.defaultBrand = '1';
