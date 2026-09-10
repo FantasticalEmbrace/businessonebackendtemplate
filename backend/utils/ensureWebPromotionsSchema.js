@@ -44,6 +44,9 @@ async function ensureWebPromotionsSchema(pool) {
                 usage_limit_total INT NULL,
                 usage_limit_per_email INT NULL,
                 rules JSON NOT NULL,
+                applies_web TINYINT(1) NOT NULL DEFAULT 1,
+                applies_pos TINYINT(1) NOT NULL DEFAULT 1,
+                auto_apply_pos TINYINT(1) NOT NULL DEFAULT 1,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 UNIQUE KEY uq_web_promotions_code (code)
