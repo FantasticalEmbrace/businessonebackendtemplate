@@ -30,6 +30,33 @@ async function columnExists(pool, tableName, columnName) {
 }
 
 async function resolveBrandId(pool) {
+    // Migrate leftover HM slug stubs left over from the template split-off.
+    await pool.execute(
+        `UPDATE brands
+         SET name = 'Business One',
+             slug = 'business-one',
+             description = COALESCE(NULLIF(TRIM(description), ''), 'Business One'),
+             logo_url = COALESCE(NULLIF(TRIM(logo_url), ''), '/images/brand-images/business-one.png')
+         WHERE slug IN ('hm-herbs', 'hm-enterprise')
+            OR (LOWER(name) = 'business one' AND slug <> 'business-one')`
+    );
+
+    const [[bySlug]] = await pool.query(
+        `SELECT id FROM brands WHERE slug = 'business-one' LIMIT 1`
+    );
+    if (bySlug?.id) {
+        await pool.execute(
+            `UPDATE brands
+             SET name = 'Business One',
+                 description = COALESCE(NULLIF(TRIM(description), ''), 'Business One'),
+                 logo_url = COALESCE(NULLIF(TRIM(logo_url), ''), '/images/brand-images/business-one.png'),
+                 is_active = 1
+             WHERE id = ?`,
+            [bySlug.id]
+        );
+        return bySlug.id;
+    }
+
     const [[row]] = await pool.query(
         `SELECT id FROM brands WHERE is_active = 1 ORDER BY id ASC LIMIT 1`
     );
