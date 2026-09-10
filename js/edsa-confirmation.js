@@ -73,7 +73,7 @@ function renderConfirmation(root, data) {
     const name = [data.firstName, data.lastName].filter(Boolean).join(' ') || 'Guest';
     const mapsUrl =
         'https://maps.google.com/?q=1140+Battlefield+Pkwy,+Fort+Oglethorpe,+GA+30742';
-    const location = data.location || '1140 Battlefield Pkwy, Fort Oglethorpe, GA 30742';
+    const location = data.location || 'Business One — see businessonecomprehensive.com';
     const pendingRequest = '';
 
     root.innerHTML = `

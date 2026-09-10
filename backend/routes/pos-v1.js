@@ -1126,7 +1126,9 @@ router.get('/employees/me', authenticatePosEmployee, async (req, res) => {
                 canOpenDrawer: Boolean(employee.can_open_drawer),
                 allowManualDiscounts: personnel.employeeAllowManualDiscounts(employee),
                 canViewCost: personnel.employeeCanViewCost(employee),
-                canViewShopFloor: personnel.employeeCanViewShopFloor(employee)
+                canViewShopFloor: personnel.employeeCanViewShopFloor(employee),
+                canBuildShopEstimate: personnel.employeeCanBuildShopEstimate(employee),
+                isTechnician: personnel.employeeIsTechnician(employee)
             }
         });
     } catch (e) {
@@ -1197,11 +1199,357 @@ router.post('/shop/jobs/:id/send-portal-link', authenticatePosEmployee, async (r
     }
 });
 
+router.post('/shop/jobs/:id/send-review', authenticatePosEmployee, async (req, res) => {
+    try {
+        const result = await customerWorkflow.sendReviewRequest(req.pool, {
+            jobId: req.params.id,
+            channel: req.body?.channel,
+            phone: req.body?.phone,
+            email: req.body?.email,
+            reviewUrl: req.body?.reviewUrl
+        });
+        res.json(result);
+    } catch (e) {
+        logger.error('POS send review error:', e);
+        res.status(500).json({ error: 'Failed to send review request' });
+    }
+});
+
+router.post('/shop/jobs/:id/media', authenticatePosEmployee, (req, res) => {
+    const fs = require('fs');
+    const path = require('path');
+    const multer = require('multer');
+    const GoogleDriveOAuthService = require('../services/google-drive-oauth');
+    const googleDriveService = require('../services/google-drive');
+
+    const uploadDir = path.join(__dirname, '..', 'uploads', 'shop-jobs', String(req.params.id));
+    fs.mkdirSync(uploadDir, { recursive: true });
+    const upload = multer({
+        storage: multer.diskStorage({
+            destination: (_req, _file, cb) => cb(null, uploadDir),
+            filename: (_req, file, cb) => {
+                const ext = path.extname(file.originalname || '').toLowerCase() || '.jpg';
+                const safe = ['.jpg', '.jpeg', '.png', '.webp', '.gif'].includes(ext) ? ext : '.jpg';
+                cb(null, `job-${Date.now()}-${Math.random().toString(36).slice(2, 8)}${safe}`);
+            }
+        }),
+        limits: { fileSize: 8 * 1024 * 1024 },
+        fileFilter: (_req, file, cb) => {
+            if (/^image\/(jpeg|png|webp|gif)$/i.test(file.mimetype)) cb(null, true);
+            else cb(new Error('Only images allowed'));
+        }
+    }).single('image');
+
+    const cleanupFile = (file) => {
+        if (file?.path) {
+            try {
+                fs.unlinkSync(file.path);
+            } catch {
+                /* ignore */
+            }
+        }
+    };
+
+    upload(req, res, async (err) => {
+        if (err) return res.status(400).json({ error: err.message });
+        try {
+            if (!req.file) return res.status(400).json({ error: 'No image uploaded' });
+
+            const tag = String(req.body?.tag || 'intake').trim() || 'intake';
+            const caption = String(req.body?.caption || '').trim();
+            const annotated = req.body?.annotated === '1' || req.body?.annotated === true;
+            const workItemId = String(req.body?.workItemId || '').trim() || null;
+            const workItemLabel = String(req.body?.workItemLabel || '').trim() || null;
+
+            const jobResult = await shopJobs.getJob(req.pool, req.params.id);
+            if (!jobResult.job) {
+                cleanupFile(req.file);
+                return res.status(404).json({ error: 'Job not found' });
+            }
+            const job = jobResult.job;
+            const jobLabel = String(job.roNumber || job.id || req.params.id).trim();
+
+            const driveConnected = await GoogleDriveOAuthService.isConfigured(req.pool);
+            if (driveConnected) {
+                try {
+                    const buffer = fs.readFileSync(req.file.path);
+                    const uploaded = await googleDriveService.uploadJobPhoto(req.pool, req, {
+                        buffer,
+                        mimeType: req.file.mimetype || 'image/jpeg',
+                        fileName: `${tag}-${Date.now()}${path.extname(req.file.filename) || '.jpg'}`,
+                        jobLabel,
+                        workItemLabel,
+                        caption
+                    });
+                    cleanupFile(req.file);
+                    const result = await shopJobs.appendJobPhoto(req.pool, req.params.id, {
+                        url: uploaded.url,
+                        driveFileId: uploaded.driveFileId,
+                        storage: 'drive',
+                        caption,
+                        tag,
+                        annotated,
+                        workItemId
+                    });
+                    if (!result.job) return res.status(404).json({ error: result.error || 'Job not found' });
+                    return res.status(201).json({
+                        ...result,
+                        storage: 'drive',
+                        photo: (result.job.photos || []).slice(-1)[0]
+                    });
+                } catch (driveErr) {
+                    cleanupFile(req.file);
+                    const code = driveErr.code === 'DRIVE_FULL' ? 'drive_full' : 'drive_unavailable';
+                    const status = driveErr.code === 'DRIVE_FULL' ? 507 : 503;
+                    logger.warn('POS shop media Drive upload failed; client should use device fallback', {
+                        code,
+                        error: driveErr.message,
+                        jobId: req.params.id
+                    });
+                    return res.status(status).json({
+                        error: code,
+                        message: driveErr.message || 'Google Drive unavailable',
+                        fallback: 'device'
+                    });
+                }
+            }
+
+            // Drive not connected — tell POS to store on device (no server disk / no DB blobs).
+            cleanupFile(req.file);
+            return res.status(503).json({
+                error: 'drive_unavailable',
+                message: 'Google Drive is not connected',
+                fallback: 'device'
+            });
+        } catch (e) {
+            cleanupFile(req.file);
+            logger.error('POS shop media upload error:', e);
+            res.status(500).json({ error: 'Failed to upload media', fallback: 'device' });
+        }
+    });
+});
+
+/** Register device-stored photo metadata on the job (no image bytes). */
+router.post('/shop/jobs/:id/media/device', authenticatePosEmployee, async (req, res) => {
+    try {
+        const deviceKey = String(req.body?.deviceKey || '').trim();
+        if (!deviceKey) return res.status(400).json({ error: 'deviceKey is required' });
+        const result = await shopJobs.appendJobPhoto(req.pool, req.params.id, {
+            id: req.body?.id || `ph-${Date.now()}`,
+            url: '',
+            deviceKey,
+            storage: 'device',
+            caption: String(req.body?.caption || '').trim(),
+            tag: String(req.body?.tag || 'intake').trim() || 'intake',
+            annotated: Boolean(req.body?.annotated),
+            workItemId: String(req.body?.workItemId || '').trim() || null
+        });
+        if (!result.job) return res.status(404).json({ error: result.error || 'Job not found' });
+        res.status(201).json({
+            ...result,
+            storage: 'device',
+            photo: (result.job.photos || []).slice(-1)[0]
+        });
+    } catch (e) {
+        logger.error('POS shop device media meta error:', e);
+        res.status(500).json({ error: 'Failed to save photo metadata' });
+    }
+});
+
+router.get('/shop/packages', authenticatePosEmployee, async (req, res) => {
+    try {
+        const settings = await loadPosShopSettings(req.pool);
+        const vertical = String(req.query.jobType || req.query.vertical || '').toLowerCase();
+        res.json({
+            packages: vertical ? settings.packages?.[vertical] || [] : settings.packages
+        });
+    } catch (e) {
+        res.status(500).json({ error: 'Failed to load packages' });
+    }
+});
+
+router.get('/shop/appointments', authenticatePosEmployee, async (req, res) => {
+    try {
+        const shopAppointments = require('../services/shopAppointments');
+        const result = await shopAppointments.listAppointments(req.pool, {
+            from: req.query.from,
+            to: req.query.to,
+            jobType: req.query.jobType
+        });
+        res.json(result);
+    } catch (e) {
+        logger.error('POS appointments list error:', e);
+        res.status(500).json({ error: 'Failed to list appointments' });
+    }
+});
+
+router.get('/shop/technicians', authenticatePosEmployee, async (req, res) => {
+    try {
+        const shopAppointments = require('../services/shopAppointments');
+        const result = await shopAppointments.getAvailableTechnicians(req.pool, {
+            date: req.query.date,
+            time: req.query.time,
+            durationMins: req.query.durationMins
+        });
+        res.json(result);
+    } catch (e) {
+        logger.error('POS technicians list error:', e);
+        res.status(500).json({ error: 'Failed to list technicians' });
+    }
+});
+
+router.get('/shop/bay-availability', authenticatePosEmployee, async (req, res) => {
+    try {
+        const shopAppointments = require('../services/shopAppointments');
+        const result = await shopAppointments.getBayAvailability(req.pool, {
+            date: req.query.date,
+            time: req.query.time,
+            durationMins: req.query.durationMins,
+            jobType: req.query.jobType || req.query.job_type
+        });
+        res.json(result);
+    } catch (e) {
+        logger.error('POS bay availability error:', e);
+        res.status(500).json({ error: 'Failed to load bay availability' });
+    }
+});
+
+router.post('/shop/appointments', authenticatePosEmployee, async (req, res) => {
+    try {
+        const shopAppointments = require('../services/shopAppointments');
+        const body = req.body || {};
+        const jobType = String(body.jobType || body.job_type || '').toLowerCase();
+        // Contractor estimate visits may be booked from POS (schedule-first leads).
+        // Other verticals remain admin-only for bay/tech scheduling.
+        if (jobType !== 'contractor') {
+            return res.status(403).json({
+                error: 'Book and edit appointments in merchant admin. POS calendar is view-only except contractor estimate visits.',
+                code: 'BOOKING_ADMIN_ONLY'
+            });
+        }
+        const result = await shopAppointments.createAppointment(req.pool, body);
+        if (result.error) {
+            return res.status(result.status || 400).json({ error: result.error, code: result.code });
+        }
+        const jobId = body.jobId || body.job_id;
+        if (jobId && result.appointment?.id) {
+            try {
+                const shopJobs = require('../services/shopJobs');
+                await shopJobs.updateJob(req.pool, jobId, {
+                    appointmentId: result.appointment.id,
+                    appointmentDate: result.appointment.date || body.date,
+                    appointmentTime: result.appointment.startTime || body.startTime
+                });
+            } catch (linkErr) {
+                logger.warn('POS appointment created but job link failed', { error: linkErr.message, jobId });
+            }
+        }
+        res.status(201).json(result);
+    } catch (e) {
+        logger.error('POS create appointment error:', e);
+        res.status(500).json({ error: e.message || 'Failed to create appointment' });
+    }
+});
+
+router.patch('/shop/appointments/:id', authenticatePosEmployee, async (req, res) => {
+    return res.status(403).json({
+        error: 'Book and edit appointments in merchant admin. POS calendar is view-only.',
+        code: 'BOOKING_ADMIN_ONLY'
+    });
+});
+
+router.get('/shop/jobs/:id/recommendations', authenticatePosEmployee, async (req, res) => {
+    try {
+        const settings = await loadPosShopSettings(req.pool);
+        const jobResult = await shopJobs.getJob(req.pool, req.params.id);
+        const job = jobResult.job;
+        if (!job) return res.status(404).json({ error: 'Job not found' });
+        const mileage = Number(String(job.mileage || '').replace(/[^\d.]/g, '')) || 0;
+        const prior = await shopJobs.findPriorJobsForVehicle(req.pool, {
+            phone: job.phone,
+            email: job.email,
+            vehicle: job.vehicle,
+            excludeId: job.dbId
+        });
+        const suggestions = [];
+        for (const interval of settings.serviceIntervals || []) {
+            const last = prior.find((p) =>
+                (p.lines || []).some((l) => String(l.sku || '').toUpperCase() === String(interval.sku || '').toUpperCase())
+            );
+            const lastMiles = Number(String(last?.mileage || '').replace(/[^\d.]/g, '')) || 0;
+            const due =
+                !last ||
+                (mileage > 0 && lastMiles > 0 && mileage - lastMiles >= Number(interval.miles || 0)) ||
+                (!lastMiles && mileage >= Number(interval.miles || 0));
+            if (due) {
+                suggestions.push({
+                    type: 'interval',
+                    ...interval,
+                    reason: last
+                        ? `Last at ~${lastMiles} mi; interval ${interval.miles} mi`
+                        : `Due around every ${interval.miles} miles`
+                });
+            }
+        }
+        const warrantyFlags = [];
+        const days = Number(settings.warrantyDays) || 30;
+        const cutoff = Date.now() - days * 86400000;
+        for (const p of prior) {
+            if (!p.paid && p.status !== 'ready') continue;
+            const t = new Date(p.updatedAt || p.createdAt).getTime();
+            if (t < cutoff) continue;
+            const sameConcern =
+                job.concern &&
+                p.concern &&
+                String(job.concern).toLowerCase().includes(String(p.concern).toLowerCase().slice(0, 12));
+            if (sameConcern || (job.concern && String(p.concern || '').toLowerCase() === String(job.concern).toLowerCase())) {
+                warrantyFlags.push({
+                    priorRo: p.roNumber,
+                    priorId: p.id,
+                    at: p.updatedAt,
+                    concern: p.concern
+                });
+            }
+        }
+        res.json({ suggestions, warrantyFlags, expressTargetMinutes: settings.expressTargetMinutes });
+    } catch (e) {
+        logger.error('POS recommendations error:', e);
+        res.status(500).json({ error: 'Failed to load recommendations' });
+    }
+});
+
+router.get('/shop/analytics/alignment', authenticatePosEmployee, async (req, res) => {
+    try {
+        const result = await shopJobs.listJobs(req.pool, { jobType: 'tire' });
+        let quoted = 0;
+        let completed = 0;
+        let declined = 0;
+        let tpmsQuoted = 0;
+        let tpmsDone = 0;
+        for (const job of result.jobs || []) {
+            const t = job.alignmentType || 'none';
+            if (t === '2wheel' || t === '4wheel') {
+                quoted += 1;
+                if (job.alignmentDone) completed += 1;
+                else if (job.alignmentSkipped) declined += 1;
+            }
+            if (job.tpms) {
+                tpmsQuoted += 1;
+                if (job.tpmsDone) tpmsDone += 1;
+            }
+        }
+        res.json({ alignment: { quoted, completed, declined }, tpms: { quoted: tpmsQuoted, done: tpmsDone } });
+    } catch (e) {
+        res.status(500).json({ error: 'Failed to load analytics' });
+    }
+});
+
 router.post('/timesheet/clock-in', authenticatePosEmployee, async (req, res) => {
     try {
         const shiftSessionId = req.body?.shiftSessionId ? Number(req.body.shiftSessionId) : null;
-        const id = await personnel.clockIn(req.pool, req.posEmployee.id, shiftSessionId);
-        res.json({ success: true, timeEntryId: id });
+        const bay = req.body?.bay != null ? String(req.body.bay).trim() : '';
+        const id = await personnel.clockIn(req.pool, req.posEmployee.id, shiftSessionId, { bay });
+        res.json({ success: true, timeEntryId: id, bay: bay || null });
     } catch (e) {
         res.status(400).json({ error: e.message, code: e.code });
     }
@@ -1225,7 +1573,8 @@ router.get('/timesheet/current', authenticatePosEmployee, async (req, res) => {
             entry: {
                 id: entry.id,
                 clockIn: entry.clock_in,
-                shiftSessionId: entry.shift_session_id
+                shiftSessionId: entry.shift_session_id,
+                bay: entry.bay || null
             }
         });
     } catch (e) {

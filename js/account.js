@@ -378,7 +378,7 @@ class AccountManager {
         const fmt = (v) => `$${parseFloat(v || 0).toFixed(2)}`;
         const tenderLabels = {
             loyalty_cash: 'Store credit',
-            loyalty_points: 'Points',
+            loyalty_points: 'Loyalty points',
             gift_card: 'Gift card',
             cash: 'Cash',
             card_terminal: 'Card',
@@ -395,13 +395,26 @@ class AccountManager {
         const tendersToShow = (payment_tenders || []).length ? payment_tenders : fallbackTender;
         const tendersHtml = tendersToShow.length
             ? `<div style="margin:0 0 1rem;padding:0.75rem 1rem;background:var(--gray-50,#f9fafb);border-radius:8px;">
-                <div style="font-weight:600;margin-bottom:0.35rem;">Payment</div>
+                <div style="font-weight:600;margin-bottom:0.35rem;">${tendersToShow.length > 1 ? 'Payment breakdown' : 'Payment'}</div>
                 ${tendersToShow.map((t) => {
-                    const label = tenderLabels[t.tender_type] || t.tender_type;
-                    const extra = t.tender_type === 'loyalty_points' && t.loyalty_points
-                        ? ` (${t.loyalty_points} pts)`
-                        : '';
-                    return `<div style="font-size:0.9rem;">${esc(label)}: ${fmt(t.amount)}${extra}</div>`;
+                    const type = String(t.tender_type || t.type || '').toLowerCase();
+                    const label = tenderLabels[type] || type;
+                    let extra = '';
+                    if (type === 'loyalty_points' && t.loyalty_points) {
+                        extra = ` (${t.loyalty_points} pts)`;
+                    }
+                    if (type === 'check' && t.check_number) {
+                        extra = ` #${esc(t.check_number)}`;
+                    }
+                    if (type === 'cash' && t.cash_tendered != null) {
+                        extra = ` (tendered ${fmt(t.cash_tendered)}`;
+                        if (Number(t.cash_change) > 0) extra += `, change ${fmt(t.cash_change)}`;
+                        extra += ')';
+                    }
+                    if ((type === 'card_terminal' || type === 'credit_card' || type === 'debit_card') && t.terminal_last_four) {
+                        extra = ` (•••• ${esc(String(t.terminal_last_four))})`;
+                    }
+                    return `<div style="font-size:0.9rem;display:flex;justify-content:space-between;gap:0.5rem;"><span>${esc(label)}${extra}</span><span>${fmt(t.amount)}</span></div>`;
                 }).join('')}
                </div>`
             : '';

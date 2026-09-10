@@ -25,6 +25,8 @@ function shouldSkipMerchantResolve(req) {
     if (path.startsWith('/api/platform/tenants') || path.startsWith('/api/platform/directory')) return true;
     // Customer portal + pay-by-link (token auth only)
     if (path.startsWith('/api/shop/') || path === '/api/shop') return true;
+    // US address type-ahead (storefront + POS contractor job site) — public, rate-limited
+    if (path === '/api/address-suggest' || path.startsWith('/api/address-suggest?')) return true;
     if (req.method === 'GET' && !path.startsWith('/api/')) return true;
     // Admin login before merchant context exists on the token
     if (path === '/api/admin/login' || path === '/api/auth/login') return true;

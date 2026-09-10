@@ -1,4 +1,4 @@
-﻿/* Accessibility Enhancements for Your Store */
+﻿/* Accessibility Enhancements for Business One */
 /* WCAG 2.1 AA Compliance and Universal Design */
 
 /* Screen Reader Only Content */
@@ -675,7 +675,7 @@ img {
 }
 
 .hm-a11y-toolbar-toggle:focus-visible {
-  outline: 3px solid var(--primary-green-dark, #047857);
+  outline: 3px solid var(--primary-green-dark, #ff9b1f);
   outline-offset: 2px;
 }
 

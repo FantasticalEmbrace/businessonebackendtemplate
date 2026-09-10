@@ -1,6 +1,6 @@
 # Loyalty Program Template
 
-Standalone backup of the Your Store customer loyalty / rewards system, extracted from [hmherbs-main](../hmherbs-main).
+Standalone backup of the Business One customer loyalty / rewards system, extracted from [hmherbs-main](../hmherbs-main).
 
 **Backed up:** June 12, 2026
 
@@ -75,4 +75,4 @@ Requires existing `users` table. Admin auth middleware for admin routes. Optiona
 
 ## Source project
 
-Extracted from `hmherbs-main` — Your Store e-commerce platform.
+Extracted from `hmherbs-main` — Business One e-commerce platform.

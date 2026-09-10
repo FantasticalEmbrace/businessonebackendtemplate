@@ -4,7 +4,7 @@
  *
  * Usage (repo root):
  *   node scripts/seo-migration/generate-sitemap.js
- *   node scripts/seo-migration/generate-sitemap.js --base-url https://hmherbs.com
+ *   node scripts/seo-migration/generate-sitemap.js --base-url https://businessonecomprehensive.com
  *
  * Env: backend/.env DB_* ; optional SITE_BASE_URL or STOREFRONT_PUBLIC_URL
  */
@@ -36,7 +36,7 @@ function resolveBaseUrl() {
         process.env.SITE_BASE_URL ||
             process.env.STOREFRONT_PUBLIC_URL ||
             process.env.FRONTEND_URL ||
-            'https://hmherbs.com'
+            'https://businessonecomprehensive.com'
     ).trim();
     base = base.replace(/\/+$/, '');
     return base;

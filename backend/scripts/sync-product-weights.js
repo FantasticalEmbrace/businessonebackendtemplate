@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Fill product weights from names/descriptions and hmherbs.com product pages.
+ * Fill product weights from names/descriptions and example.com product pages.
  * Only updates rows where weight IS NULL (does not overwrite existing weights).
  *
  * Usage: node scripts/sync-product-weights.js [--dry-run] [--limit=100] [--fetch]
@@ -60,7 +60,7 @@ function resolveProductUrl(product, urlIndex) {
         return urlIndex.get(`name:${String(product.name).toLowerCase()}`);
     }
     if (product.slug) {
-        return `https://hmherbs.com/index.php/products/${product.slug}`;
+        return `https://businessonecomprehensive.com/index.php/products/${product.slug}`;
     }
     return null;
 }

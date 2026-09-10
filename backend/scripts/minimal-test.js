@@ -3,7 +3,7 @@ const https = require('https');
 const fs = require('fs').promises;
 const path = require('path');
 
-const imageUrl = 'https://i0.wp.com/hmherbs.com/application/files/cache/thumbnails/advanced-blood-pressure-cherry-16b990287119135911b07a9185adfa14.jpg';
+const imageUrl = 'https://i0.wp.com/example.com/application/files/cache/thumbnails/advanced-blood-pressure-cherry-16b990287119135911b07a9185adfa14.jpg';
 
 console.log('Testing image download...');
 console.log('URL:', imageUrl);
@@ -18,7 +18,7 @@ const options = {
     headers: {
         'User-Agent': 'Mozilla/5.0',
         'Accept': 'image/*',
-        'Referer': 'https://hmherbs.com/'
+        'Referer': 'https://businessonecomprehensive.com/'
     },
     timeout: 10000 // 10 second timeout
 };

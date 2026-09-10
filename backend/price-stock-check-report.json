@@ -20,7 +20,7 @@
         "is_active": 1,
         "brand_name": "Now Foods"
       },
-      "url": "https://hmherbs.com/index.php/products/now-foods-magtein-magnesium-l-threonate",
+      "url": "https://www.example.com/index.php/products/now-foods-magtein-magnesium-l-threonate",
       "database": {
         "price": 0,
         "stock": 100
@@ -46,7 +46,7 @@
         "is_active": 1,
         "brand_name": "Standard Enzyme"
       },
-      "url": "https://hmherbs.com/index.php/products/standard-enzyme-morning-sickness",
+      "url": "https://www.example.com/index.php/products/standard-enzyme-morning-sickness",
       "database": {
         "price": 29.5,
         "stock": 0
@@ -401,7 +401,7 @@
         "is_active": 1,
         "brand_name": "Nature's Sunshine"
       },
-      "url": "https://hmherbs.com/index.php/products/aivia-carb-blocker",
+      "url": "https://www.example.com/index.php/products/aivia-carb-blocker",
       "database": {
         "price": 35.4,
         "stock": 0
@@ -425,7 +425,7 @@
         "is_active": 1,
         "brand_name": "BioNeurix"
       },
-      "url": "https://hmherbs.com/index.php/products/bioneurix-amoryn",
+      "url": "https://www.example.com/index.php/products/bioneurix-amoryn",
       "database": {
         "price": 34.95,
         "stock": 0
@@ -449,7 +449,7 @@
         "is_active": 1,
         "brand_name": "Buried Treasure"
       },
-      "url": "https://hmherbs.com/index.php/products/buried-treasure-acf-ext-strength-pm",
+      "url": "https://www.example.com/index.php/products/buried-treasure-acf-ext-strength-pm",
       "database": {
         "price": 0,
         "stock": 100
@@ -473,7 +473,7 @@
         "is_active": 1,
         "brand_name": "Buried Treasure"
       },
-      "url": "https://hmherbs.com/index.php/products/buried-treasure-acf-pm",
+      "url": "https://www.example.com/index.php/products/buried-treasure-acf-pm",
       "database": {
         "price": 0,
         "stock": 100
@@ -497,7 +497,7 @@
         "is_active": 1,
         "brand_name": "Edom Labs"
       },
-      "url": "https://hmherbs.com/index.php/products/edom-chiro-klenz-w-green-tea",
+      "url": "https://www.example.com/index.php/products/edom-chiro-klenz-w-green-tea",
       "database": {
         "price": 18,
         "stock": 0
@@ -521,7 +521,7 @@
         "is_active": 1,
         "brand_name": "Global Healing"
       },
-      "url": "https://hmherbs.com/index.php/products/global-healing-candida-balance",
+      "url": "https://www.example.com/index.php/products/global-healing-candida-balance",
       "database": {
         "price": 35.99,
         "stock": 0
@@ -545,7 +545,7 @@
         "is_active": 1,
         "brand_name": "Global Healing"
       },
-      "url": "https://hmherbs.com/index.php/products/global-healing-oxy-powder",
+      "url": "https://www.example.com/index.php/products/global-healing-oxy-powder",
       "database": {
         "price": 49.95,
         "stock": 0
@@ -569,7 +569,7 @@
         "is_active": 1,
         "brand_name": "Global Healing"
       },
-      "url": "https://hmherbs.com/index.php/products/global-healing-toxin-binder",
+      "url": "https://www.example.com/index.php/products/global-healing-toxin-binder",
       "database": {
         "price": 34.95,
         "stock": 0
@@ -593,7 +593,7 @@
         "is_active": 1,
         "brand_name": "Irwin Naturals"
       },
-      "url": "https://hmherbs.com/index.php/products/irwin-libido-max-red",
+      "url": "https://www.example.com/index.php/products/irwin-libido-max-red",
       "database": {
         "price": 0,
         "stock": 100
@@ -617,7 +617,7 @@
         "is_active": 1,
         "brand_name": "Irwin Naturals"
       },
-      "url": "https://hmherbs.com/index.php/products/irwin-magnesium-pm",
+      "url": "https://www.example.com/index.php/products/irwin-magnesium-pm",
       "database": {
         "price": 0,
         "stock": 100
@@ -641,7 +641,7 @@
         "is_active": 1,
         "brand_name": "Life Extension"
       },
-      "url": "https://hmherbs.com/index.php/products/life-ext",
+      "url": "https://www.example.com/index.php/products/life-ext",
       "database": {
         "price": 0,
         "stock": 100
@@ -665,7 +665,7 @@
         "is_active": 1,
         "brand_name": "Life Extension"
       },
-      "url": "https://hmherbs.com/index.php/products/life-ext-d-l-phenylalanine-500mg",
+      "url": "https://www.example.com/index.php/products/life-ext-d-l-phenylalanine-500mg",
       "database": {
         "price": 0,
         "stock": 100
@@ -689,7 +689,7 @@
         "is_active": 1,
         "brand_name": "Life Extension"
       },
-      "url": "https://hmherbs.com/index.php/products/life-ext-enhanced-sleep",
+      "url": "https://www.example.com/index.php/products/life-ext-enhanced-sleep",
       "database": {
         "price": 0,
         "stock": 100
@@ -713,7 +713,7 @@
         "is_active": 1,
         "brand_name": "Life Extension"
       },
-      "url": "https://hmherbs.com/index.php/products/life-ext-immune-packs-c-d-zine-probiotic",
+      "url": "https://www.example.com/index.php/products/life-ext-immune-packs-c-d-zine-probiotic",
       "database": {
         "price": 0,
         "stock": 100
@@ -737,7 +737,7 @@
         "is_active": 1,
         "brand_name": "Life Extension"
       },
-      "url": "https://hmherbs.com/index.php/products/life-ext-vitamin-b3-niacin",
+      "url": "https://www.example.com/index.php/products/life-ext-vitamin-b3-niacin",
       "database": {
         "price": 0,
         "stock": 100
@@ -761,7 +761,7 @@
         "is_active": 1,
         "brand_name": "Life Extension"
       },
-      "url": "https://hmherbs.com/index.php/products/life-extension-vitamin-c-liposomal",
+      "url": "https://www.example.com/index.php/products/life-extension-vitamin-c-liposomal",
       "database": {
         "price": 0,
         "stock": 100
@@ -785,7 +785,7 @@
         "is_active": 1,
         "brand_name": "Life-Flo"
       },
-      "url": "https://hmherbs.com/index.php/products/life-flo-pure-magnesium-oil-spray",
+      "url": "https://www.example.com/index.php/products/life-flo-pure-magnesium-oil-spray",
       "database": {
         "price": 0,
         "stock": 100
@@ -809,7 +809,7 @@
         "is_active": 1,
         "brand_name": "Nature's Plus"
       },
-      "url": "https://hmherbs.com/index.php/products/natures-plus-ght-male",
+      "url": "https://www.example.com/index.php/products/natures-plus-ght-male",
       "database": {
         "price": 59.29,
         "stock": 0
@@ -833,7 +833,7 @@
         "is_active": 1,
         "brand_name": "Now Foods"
       },
-      "url": "https://hmherbs.com/index.php/products/now-foods-coq10-100mg",
+      "url": "https://www.example.com/index.php/products/now-foods-coq10-100mg",
       "database": {
         "price": 0,
         "stock": 100
@@ -857,7 +857,7 @@
         "is_active": 1,
         "brand_name": "Now Foods"
       },
-      "url": "https://hmherbs.com/index.php/products/now-foods-nutraflora-fos",
+      "url": "https://www.example.com/index.php/products/now-foods-nutraflora-fos",
       "database": {
         "price": 0,
         "stock": 100
@@ -881,7 +881,7 @@
         "is_active": 1,
         "brand_name": "Now Foods"
       },
-      "url": "https://hmherbs.com/index.php/products/now-glutathione-250mg",
+      "url": "https://www.example.com/index.php/products/now-glutathione-250mg",
       "database": {
         "price": 0,
         "stock": 100
@@ -905,7 +905,7 @@
         "is_active": 1,
         "brand_name": "Now Foods"
       },
-      "url": "https://hmherbs.com/index.php/products/now-liquid-chlorophyll-mint-4oz",
+      "url": "https://www.example.com/index.php/products/now-liquid-chlorophyll-mint-4oz",
       "database": {
         "price": 0,
         "stock": 100
@@ -929,7 +929,7 @@
         "is_active": 1,
         "brand_name": "Regal Labs"
       },
-      "url": "https://hmherbs.com/index.php/products/regal-labs-vsextra",
+      "url": "https://www.example.com/index.php/products/regal-labs-vsextra",
       "database": {
         "price": 0,
         "stock": 100
@@ -953,7 +953,7 @@
         "is_active": 1,
         "brand_name": "Standard Enzyme"
       },
-      "url": "https://hmherbs.com/index.php/products/standard-enzyme-thyro-plus",
+      "url": "https://www.example.com/index.php/products/standard-enzyme-thyro-plus",
       "database": {
         "price": 41,
         "stock": 0
@@ -977,7 +977,7 @@
         "is_active": 1,
         "brand_name": "Terry Naturally"
       },
-      "url": "https://hmherbs.com/index.php/products/terry-naturally-urinary-tract-intensive-support",
+      "url": "https://www.example.com/index.php/products/terry-naturally-urinary-tract-intensive-support",
       "database": {
         "price": 0,
         "stock": 100

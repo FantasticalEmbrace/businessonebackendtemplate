@@ -118,7 +118,7 @@ function formatBookingRow(booking) {
         status: booking.status,
         notes: booking.notes,
         createdAt: booking.created_at,
-        location: '1140 Battlefield Pkwy, Fort Oglethorpe, GA 30742',
+        location: 'Business One — see businessonecomprehensive.com',
         customerRequestType: requestType,
         customerRequestNotes: booking.customer_request_notes || null,
         requestedDate: booking.requested_date || null,

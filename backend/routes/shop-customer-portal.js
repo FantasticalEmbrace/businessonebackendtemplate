@@ -20,17 +20,19 @@ router.get('/track/:token', async (req, res) => {
         if (!job) {
             return res.status(404).json({ error: 'Repair order not found for this link.' });
         }
-        const [wfConfig, store, receipt] = await Promise.all([
+        const [wfConfig, store, receipt, shopSettings] = await Promise.all([
             workflow.loadCustomerWorkflowConfig(req.pool),
             loadPosStoreConfig(req.pool),
-            loadPosReceiptSettings(req.pool, null)
+            loadPosReceiptSettings(req.pool, null),
+            loadPosShopSettings(req.pool)
         ]);
         const vertical = job.jobType || job.mode || 'auto';
         const template = wfConfig.verticals?.[vertical] || workflow.DEFAULT_WORKFLOWS.auto;
         res.json(
             workflow.buildPortalPayload(job, template, {
                 storeName: store.storeName,
-                phone: receipt.storePhone || ''
+                phone: receipt.storePhone || '',
+                reviewUrl: shopSettings.reviewUrl || ''
             })
         );
     } catch (e) {
@@ -47,27 +49,56 @@ router.post('/track/:token/decision', async (req, res) => {
         const result = await shopJobs.recordCustomerDecision(req.pool, token, {
             approved,
             notes,
-            selectedLineIds: req.body?.selectedLineIds
+            selectedLineIds: req.body?.selectedLineIds,
+            declinedLineIds: req.body?.declinedLineIds
         });
         if (!result?.job) {
             return res.status(404).json({ error: result?.error || 'Repair order not found.' });
         }
         const wfConfig = await workflow.loadCustomerWorkflowConfig(req.pool);
-        const [store, receipt] = await Promise.all([
+        const [store, receipt, shopSettings] = await Promise.all([
             loadPosStoreConfig(req.pool),
-            loadPosReceiptSettings(req.pool, null)
+            loadPosReceiptSettings(req.pool, null),
+            loadPosShopSettings(req.pool)
         ]);
         const vertical = result.job.jobType || result.job.mode || 'auto';
         const template = wfConfig.verticals?.[vertical] || workflow.DEFAULT_WORKFLOWS.auto;
         res.json(
             workflow.buildPortalPayload(result.job, template, {
                 storeName: store.storeName,
-                phone: receipt.storePhone || ''
+                phone: receipt.storePhone || '',
+                reviewUrl: shopSettings.reviewUrl || ''
             })
         );
     } catch (e) {
         logger.error('Customer portal decision error:', e);
         res.status(500).json({ error: 'Could not save decision' });
+    }
+});
+
+router.post('/track/:token/question', async (req, res) => {
+    try {
+        const token = String(req.params.token || '').trim();
+        const result = await shopJobs.recordCustomerQuestion(req.pool, token, req.body?.question);
+        if (!result?.job) return res.status(404).json({ error: result?.error || 'Not found' });
+        const wfConfig = await workflow.loadCustomerWorkflowConfig(req.pool);
+        const [store, receipt, shopSettings] = await Promise.all([
+            loadPosStoreConfig(req.pool),
+            loadPosReceiptSettings(req.pool, null),
+            loadPosShopSettings(req.pool)
+        ]);
+        const vertical = result.job.jobType || result.job.mode || 'auto';
+        const template = wfConfig.verticals?.[vertical] || workflow.DEFAULT_WORKFLOWS.auto;
+        res.json(
+            workflow.buildPortalPayload(result.job, template, {
+                storeName: store.storeName,
+                phone: receipt.storePhone || '',
+                reviewUrl: shopSettings.reviewUrl || ''
+            })
+        );
+    } catch (e) {
+        logger.error('Customer portal question error:', e);
+        res.status(500).json({ error: 'Could not save question' });
     }
 });
 

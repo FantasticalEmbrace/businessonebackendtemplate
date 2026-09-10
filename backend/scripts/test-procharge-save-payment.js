@@ -13,7 +13,7 @@ const { createPool } = require('../utils/dbConfig');
       paymentToken: 'smoke-test-token-not-real',
       cardholderName: 'Smoke Test',
       billingEmail: 'test@example.com',
-      businessName: 'HM Herbs Test'
+      businessName: 'Business One Test'
     });
     console.log('SAVE_OK', JSON.stringify(saved));
   } catch (e) {

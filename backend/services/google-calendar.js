@@ -166,7 +166,7 @@ class GoogleCalendarService {
                 }),
                 start: buildStoreCalendarDateTime(preferredDate, preferredTime),
                 end: buildStoreCalendarEnd(preferredDate, preferredTime, 1),
-                location: '1140 Battlefield Pkwy, Fort Oglethorpe, GA 30742',
+                location: 'Business One — see businessonecomprehensive.com',
                 colorId: '10',
                 ...this.calendarEventOptions(email),
             };

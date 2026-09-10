@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { URL } = require('url');
 
-const imageUrl = 'https://i0.wp.com/hmherbs.com/application/files/cache/thumbnails/advanced-blood-pressure-cherry-16b990287119135911b07a9185adfa14.jpg';
+const imageUrl = 'https://i0.wp.com/example.com/application/files/cache/thumbnails/advanced-blood-pressure-cherry-16b990287119135911b07a9185adfa14.jpg';
 
 console.log('Testing download of ONE image...');
 console.log('URL:', imageUrl);

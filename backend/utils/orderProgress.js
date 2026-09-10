@@ -3,7 +3,7 @@
 const { formatOrderStatus, formatPaymentStatus } = require('./orderStatus');
 const { resolveCarrier } = require('./trackingUrl');
 
-const GREEN = '#047857';
+const GREEN = '#ff9b1f';
 const GRAY = '#d1d5db';
 const TEXT = '#111827';
 const MUTED = '#6b7280';

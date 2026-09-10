@@ -1,4 +1,4 @@
-// CSRF Protection Middleware for Your Store
+// CSRF Protection Middleware for Business One
 // Prevents Cross-Site Request Forgery attacks
 
 const crypto = require('crypto');

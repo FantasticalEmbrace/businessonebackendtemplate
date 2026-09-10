@@ -1,4 +1,4 @@
-# Your Store - robots.txt
+# Business One - robots.txt
 # Regenerate sitemaps: npm run seo:generate-sitemap
 
 User-agent: *
@@ -45,6 +45,6 @@ Disallow: /
 User-agent: DotBot
 Disallow: /
 
-Sitemap: https://www.example.com/sitemap.xml
-Sitemap: https://www.example.com/sitemap-pages.xml
-Sitemap: https://www.example.com/sitemap-products.xml
+Sitemap: https://businessonecomprehensive.com/sitemap.xml
+Sitemap: https://businessonecomprehensive.com/sitemap-pages.xml
+Sitemap: https://businessonecomprehensive.com/sitemap-products.xml

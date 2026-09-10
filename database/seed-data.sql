@@ -67,7 +67,7 @@ INSERT INTO product_categories (name, slug, description, sort_order) VALUES
 
 -- Insert system settings
 INSERT INTO settings (key_name, value, description, type) VALUES
-('site_name', 'Your Store', 'Website name', 'string'),
+('site_name', 'Business One', 'Website name', 'string'),
 ('site_description', 'Your trusted source for premium natural health products, herbs, vitamins, and wellness supplements.', 'Website description', 'string'),
 ('free_shipping_threshold', '25.00', 'Minimum order amount for free shipping', 'number'),
 ('tax_rate', '0.08', 'Default tax rate', 'number'),
@@ -78,7 +78,7 @@ INSERT INTO settings (key_name, value, description, type) VALUES
 
 -- Insert default admin user (password should be changed immediately)
 INSERT INTO admin_users (email, password_hash, first_name, last_name, role) VALUES
-('admin@example.com', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj6hsxq5S/kS', 'Admin', 'User', 'admin');
+('info@businessonecomprehensive.com', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj6hsxq5S/kS', 'Admin', 'User', 'admin');
 
 -- Insert email templates
 INSERT INTO email_templates (name, subject, html_content, text_content, variables) VALUES
@@ -92,7 +92,7 @@ INSERT INTO email_templates (name, subject, html_content, text_content, variable
 'Your EDSA appointment has been confirmed. Date: {{appointment_date}} Time: {{appointment_time}}', 
 '["customer_name", "appointment_date", "appointment_time"]'),
 
-('welcome_email', 'Welcome to Your Store!', 
+('welcome_email', 'Welcome to Business One!', 
 '<h1>Welcome {{customer_name}}!</h1><p>Thank you for creating an account with us.</p>', 
 'Welcome {{customer_name}}! Thank you for creating an account with us.', 
 '["customer_name"]');

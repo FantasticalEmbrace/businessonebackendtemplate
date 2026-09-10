@@ -25,7 +25,7 @@ const ITEMS = [
     image: 'https://i.ebayimg.com/images/g/z9IAAOSwU8ljxazx/s-l1600.webp' },
   { name: 'REGALABS HAPPY FOOT CREAM', sku: '2070', brand: 'Regal Labs', category: 'Herbs & Vitamins', price: 21.99, cost: null, web_price: 32.0, show_on_web: 1,
     desc: 'Advanced foot-care cream with urea, allantoin, and herbal extracts to soothe tired feet, exfoliate, and support circulation.',
-    image: 'https://hmherbs.com/application/files/5017/4155/8831/Regalabs_Happy_Feet_8oz_tube.jpg' },
+    image: 'https://businessonecomprehensive.com/application/files/5017/4155/8831/Regalabs_Happy_Feet_8oz_tube.jpg' },
   { name: "Doctor's Blend Reds & Greens Complete", sku: '850044885138', brand: "Doctor's Blend", category: 'Herbs & Vitamins', price: 25.99, cost: null, web_price: 28.99, show_on_web: 1,
     desc: 'One-capsule daily blend of fruit and vegetable phytonutrients (Phytoserv) equivalent to several produce servings.',
     image: null },

@@ -71,7 +71,7 @@ router.get('/', async (req, res) => {
         const page = Math.max(1, parseInt(req.query.page || '1', 10));
         const limit = Math.min(200, Math.max(1, parseInt(req.query.limit || '50', 10)));
         const offset = (page - 1) * limit;
-        const { search, status, card_type, customer_id } = req.query;
+        const { search, status, card_type, customer_id, sort, dir } = req.query;
 
         const where = [];
         const params = [];
@@ -86,6 +86,20 @@ router.get('/', async (req, res) => {
 
         const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
 
+        const sortDir = String(dir || '').toLowerCase() === 'asc' ? 'ASC' : 'DESC';
+        const sortMap = {
+            code: `gc.code ${sortDir}`,
+            type: `gc.card_type ${sortDir}`,
+            status: `gc.status ${sortDir}`,
+            initial: `gc.initial_balance ${sortDir}`,
+            balance: `gc.current_balance ${sortDir}`,
+            customer: `u.last_name ${sortDir}, u.first_name ${sortDir}`,
+            recipient: `COALESCE(gc.recipient_email, gc.recipient_name) ${sortDir}`,
+            issued: `gc.issued_at ${sortDir}`,
+            created_at: `gc.created_at ${sortDir}`,
+        };
+        const orderBy = sortMap[String(sort || '')] || 'gc.created_at DESC';
+
         const limitSql = String(Math.min(200, Math.max(1, parseInt(String(limit), 10) || 1)));
         const offsetSql = String(Math.max(0, parseInt(String(offset), 10) || 0));
 
@@ -97,7 +111,7 @@ router.get('/', async (req, res) => {
                FROM gift_cards gc
                LEFT JOIN users u ON u.id = gc.customer_id
                ${whereSql}
-              ORDER BY gc.created_at DESC
+              ORDER BY ${orderBy}
               LIMIT ${limitSql} OFFSET ${offsetSql}`,
             params
         );

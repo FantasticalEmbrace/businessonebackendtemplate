@@ -1,4 +1,4 @@
-// Your Store Public API Routes
+// Business One Public API Routes
 // Routes accessible without authentication for frontend functionality
 
 const express = require('express');
@@ -261,7 +261,7 @@ router.get('/health', (req, res) => {
     res.json({
         status: 'healthy',
         timestamp: new Date().toISOString(),
-        service: 'Your Store Public API'
+        service: 'Business One Public API'
     });
 });
 

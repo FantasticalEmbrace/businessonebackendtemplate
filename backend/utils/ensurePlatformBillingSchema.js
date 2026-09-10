@@ -409,7 +409,7 @@ async function syncDefaultBillingAccount(pool) {
     }
 }
 
-/** Custom monthly rates for the principal account (e.g. HM Herbs) — never shown on public signup. */
+/** Custom monthly rates for the principal account (e.g. Business One) — never shown on public signup. */
 async function syncPrincipalAccountRates(pool, accountId) {
     const accountKey = String(process.env.BILLING_PRINCIPAL_ACCOUNT_KEY || 'default').trim();
     const posMonthly = Number(process.env.BILLING_PRINCIPAL_POS_MONTHLY || 100);

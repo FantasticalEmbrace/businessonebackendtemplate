@@ -16,6 +16,7 @@ const ORDER_PATCHES = [
     { column: 'shippo_rate_id', sql: 'ALTER TABLE orders ADD COLUMN shippo_rate_id VARCHAR(64) NULL' },
     { column: 'shippo_transaction_id', sql: 'ALTER TABLE orders ADD COLUMN shippo_transaction_id VARCHAR(64) NULL' },
     { column: 'label_url', sql: 'ALTER TABLE orders ADD COLUMN label_url VARCHAR(500) NULL' },
+    { column: 'label_printed_at', sql: 'ALTER TABLE orders ADD COLUMN label_printed_at TIMESTAMP NULL' },
     { column: 'package_weight_oz', sql: 'ALTER TABLE orders ADD COLUMN package_weight_oz DECIMAL(10,2) NULL' },
     { column: 'shipping_box_id', sql: 'ALTER TABLE orders ADD COLUMN shipping_box_id INT NULL' },
     { column: 'payment_method', sql: 'ALTER TABLE orders ADD COLUMN payment_method VARCHAR(32) NULL' },

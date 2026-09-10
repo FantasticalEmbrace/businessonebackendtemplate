@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <meta name="description"
-        content="Complete your order at Your Store - Secure checkout for natural health products">
-    <title>Checkout - Your Store</title>
+        content="Complete your order at Business One - Secure checkout for natural health products">
+    <title>Checkout - Business One</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -606,8 +606,8 @@
         <div class="main-header">
             <div class="container">
                 <nav class="navbar" role="navigation" aria-label="Main navigation">
-                    <a href="index.html" class="logo" aria-label="Your Store - Home">
-                        <img src="images/logo.png" alt="Your Store" class="logo-wordmark" loading="eager">
+                    <a href="index.html" class="logo" aria-label="Business One - Home">
+                        <img src="images/logo.png" alt="Business One" class="logo-wordmark" loading="eager">
                     </a>
 
                     <button class="mobile-menu-toggle" aria-expanded="false" aria-controls="nav-menu"
@@ -809,19 +809,33 @@
                             </p>
                             <div class="form-group" id="checkout-store-credit-group" style="display:none;">
                                 <label for="checkout-loyalty-cash">Store credit ($)</label>
-                                <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
-                                    <input type="number" id="checkout-loyalty-cash" class="form-input" min="0" step="0.01" inputmode="decimal" style="max-width:8rem">
+                                <div class="loyalty-pct-row" role="group" aria-label="Store credit percent of available" style="display:flex;gap:0.35rem;flex-wrap:wrap;margin-bottom:0.5rem;">
+                                    <button type="button" class="btn btn-secondary btn-sm" data-loyalty-cash-pct="25">25%</button>
+                                    <button type="button" class="btn btn-secondary btn-sm" data-loyalty-cash-pct="50">50%</button>
+                                    <button type="button" class="btn btn-secondary btn-sm" data-loyalty-cash-pct="75">75%</button>
+                                    <button type="button" class="btn btn-secondary btn-sm" data-loyalty-cash-pct="100">100%</button>
                                     <button type="button" class="btn btn-secondary btn-sm" id="checkout-loyalty-cash-max">Use max</button>
+                                </div>
+                                <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+                                    <input type="number" id="checkout-loyalty-cash" class="form-input" min="0" step="0.01" inputmode="decimal" style="max-width:8rem" placeholder="Manual $">
                                     <span id="checkout-loyalty-cash-available" class="form-help"></span>
                                 </div>
+                                <p class="form-help" style="margin-top:0.35rem;">Choose a percent of available credit (capped by order balance), or enter a manual amount.</p>
                             </div>
                             <div class="form-group" id="checkout-points-group" style="display:none;">
                                 <label for="checkout-loyalty-points">Loyalty points</label>
-                                <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
-                                    <input type="number" id="checkout-loyalty-points" class="form-input" min="0" step="1" inputmode="numeric" style="max-width:8rem">
+                                <div class="loyalty-pct-row" role="group" aria-label="Loyalty points percent of available" style="display:flex;gap:0.35rem;flex-wrap:wrap;margin-bottom:0.5rem;">
+                                    <button type="button" class="btn btn-secondary btn-sm" data-loyalty-points-pct="25">25%</button>
+                                    <button type="button" class="btn btn-secondary btn-sm" data-loyalty-points-pct="50">50%</button>
+                                    <button type="button" class="btn btn-secondary btn-sm" data-loyalty-points-pct="75">75%</button>
+                                    <button type="button" class="btn btn-secondary btn-sm" data-loyalty-points-pct="100">100%</button>
                                     <button type="button" class="btn btn-secondary btn-sm" id="checkout-loyalty-max">Use max</button>
+                                </div>
+                                <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+                                    <input type="number" id="checkout-loyalty-points" class="form-input" min="0" step="1" inputmode="numeric" style="max-width:8rem" placeholder="Manual pts">
                                     <span id="checkout-loyalty-worth" class="form-help"></span>
                                 </div>
+                                <p class="form-help" style="margin-top:0.35rem;">Choose a percent of available points (capped by order balance), or enter a manual amount.</p>
                             </div>
                             <div class="form-group" id="checkout-gc-account-group" style="display:none;">
                                 <label for="checkout-giftcard-select">Gift card</label>
@@ -1049,6 +1063,7 @@
                                 <span>Rewards &amp; gift cards</span>
                                 <span id="checkout-rewards-applied-value">−$0.00</span>
                             </div>
+                            <div id="checkout-rewards-detail" style="display:none;font-size:0.9rem;color:#166534;margin:-0.25rem 0 0.5rem;"></div>
                             <div class="order-total-row final">
                                 <span id="checkout-total-label">Total</span>
                                 <span id="total">$0.00</span>
@@ -1088,11 +1103,11 @@
             <div class="footer-content">
                 <!-- Company Info & Social -->
                 <div class="footer-section">
-                    <h3>Your Store</h3>
+                    <h3>Business One</h3>
                     <p>Your trusted source for premium natural health products. We're committed to providing
                         the highest quality herbs, vitamins, and supplements to support your wellness journey.</p>
                     <div class="social-links">
-                        <a href="https://facebook.com/yourstore" target="_blank" rel="noopener noreferrer"
+                        <a href="https://businessonecomprehensive.com" target="_blank" rel="noopener noreferrer"
                             aria-label="Follow us on Facebook">
                             <span class="social-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg"
                                     viewBox="0 0 24 24" fill="currentColor">
@@ -1100,7 +1115,7 @@
                                         d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                                 </svg></span>
                         </a>
-                        <a href="https://instagram.com/yourstore" target="_blank" rel="noopener noreferrer"
+                        <a href="https://businessonecomprehensive.com" target="_blank" rel="noopener noreferrer"
                             aria-label="Follow us on Instagram">
                             <span class="social-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg"
                                     viewBox="0 0 24 24" fill="currentColor">
@@ -1108,7 +1123,7 @@
                                         d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 11-2.881 0 1.44 1.44 0 012.881 0z" />
                                 </svg></span>
                         </a>
-                        <a href="https://twitter.com/yourstore" target="_blank" rel="noopener noreferrer"
+                        <a href="https://businessonecomprehensive.com" target="_blank" rel="noopener noreferrer"
                             aria-label="Follow us on X">
                             <span class="social-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg"
                                     viewBox="0 0 24 24" fill="currentColor">
@@ -1116,7 +1131,7 @@
                                         d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                                 </svg></span>
                         </a>
-                        <a href="https://youtube.com/@yourstore" target="_blank" rel="noopener noreferrer"
+                        <a href="https://businessonecomprehensive.com" target="_blank" rel="noopener noreferrer"
                             aria-label="Subscribe to our YouTube channel">
                             <span class="social-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg"
                                     viewBox="0 0 24 24" fill="currentColor">
@@ -1129,20 +1144,18 @@
 
                 <!-- Visit Us -->
                 <div class="footer-section">
-                    <h4>Visit Us</h4>
+                    <h4>Online</h4>
                     <div class="footer-contact">
                         <div class="footer-address">
-                            <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                            <i class="fas fa-globe" aria-hidden="true"></i>
                             <div class="address-text">
-                                <p>1140 Battlefield Pkwy</p>
-                                <p>Fort Oglethorpe, GA 30742</p>
-                                <p>United States</p>
+                                <p>Business One</p>
+                                <p>businessonecomprehensive.com</p>
                             </div>
                         </div>
                         <p class="footer-link">
-                            <a href="https://maps.google.com/?q=1140+Battlefield+Pkwy,+Fort+Oglethorpe,+GA+30742"
-                                target="_blank" rel="noopener noreferrer">
-                                Get Directions <svg class="external-link-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="14" height="14" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5 4.75A2.25 2.25 0 0 0 2.75 7v8A2.25 2.25 0 0 0 5 17.25h8A2.25 2.25 0 0 0 15.25 15V11a.75.75 0 0 1 1.5 0v4A3.75 3.75 0 0 1 13 18.75H5A3.75 3.75 0 0 1 1.25 15V7A3.75 3.75 0 0 1 5 3.25h4a.75.75 0 0 1 0 1.5H5Z" clip-rule="evenodd"/><path fill-rule="evenodd" d="M10.5 1.25a.75.75 0 0 0 0 1.5h5.69l-8.97 8.97a.75.75 0 1 0 1.06 1.06l8.97-8.97V9.5a.75.75 0 0 0 1.5 0v-7a.75.75 0 0 0-.75-.75h-7Z" clip-rule="evenodd"/></svg>
+                            <a href="https://businessonecomprehensive.com" target="_blank" rel="noopener noreferrer">
+                                Visit Website
                             </a>
                         </p>
                     </div>
@@ -1154,11 +1167,11 @@
                     <div class="footer-get-in-touch">
                         <div class="footer-get-in-touch__row">
                             <i class="fas fa-phone footer-get-in-touch__icon" aria-hidden="true"></i>
-                            <a class="footer-get-in-touch__link" href="tel:+17068619454">706-861-9454</a>
+                            <a class="footer-get-in-touch__link" href="tel:+18502902084">(850) 290-2084</a>
                         </div>
                         <div class="footer-get-in-touch__row">
                             <i class="fas fa-envelope footer-get-in-touch__icon" aria-hidden="true"></i>
-                            <a class="footer-get-in-touch__link" href="mailto:store@example.com">store@example.com</a>
+                            <a class="footer-get-in-touch__link" href="mailto:info@businessonecomprehensive.com">info@businessonecomprehensive.com</a>
                         </div>
                     </div>
                 </div>
@@ -1207,7 +1220,7 @@
                     </ul>
                 </div>
                 <div class="footer-bottom-content">
-                    <p>&copy; 2024 Your Store. All rights reserved.</p>
+                    <p>&copy; 2026 Business One. All rights reserved.</p>
                     <div class="footer-bottom-links">
                         <a href="privacy-policy.html">Privacy Policy</a>
                         <span class="separator">|</span>

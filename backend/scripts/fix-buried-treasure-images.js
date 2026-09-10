@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Buried Treasure ACF line: hmherbs.com PDPs have no real product art (empty / generic placeholder).
+ * Buried Treasure ACF line: example.com PDPs have no real product art (empty / generic placeholder).
  * Pull official pack shots from Buried Treasure Liquid Nutrients (Shopify CDN).
  *
  * Usage (from backend/): node scripts/fix-buried-treasure-images.js

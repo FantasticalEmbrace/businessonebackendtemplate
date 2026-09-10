@@ -37,7 +37,7 @@ async function resolveBrandId(pool) {
 
     const [r] = await pool.execute(
         `INSERT INTO brands (name, slug, description, is_active)
-         VALUES ('H&M Herbs', 'hm-herbs', 'H&M Herbs & Vitamins', 1)`
+         VALUES ('Business One', 'hm-herbs', 'Business One', 1)`
     );
     return r.insertId;
 }

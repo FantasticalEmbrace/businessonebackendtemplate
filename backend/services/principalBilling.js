@@ -22,8 +22,12 @@ function parsePrincipalMeta(raw) {
 
 function defaultPrincipalContact() {
     return {
-        businessName: String(process.env.BILLING_PRINCIPAL_BUSINESS_NAME || 'Your Store').trim(),
-        billingEmail: String(process.env.BILLING_PRINCIPAL_BILLING_EMAIL || '').trim()
+        businessName: String(process.env.BILLING_PRINCIPAL_BUSINESS_NAME || 'Business One').trim(),
+        billingEmail: String(
+            process.env.BILLING_PRINCIPAL_BILLING_EMAIL ||
+                process.env.STORE_EMAIL ||
+                'info@businessonecomprehensive.com'
+        ).trim()
     };
 }
 

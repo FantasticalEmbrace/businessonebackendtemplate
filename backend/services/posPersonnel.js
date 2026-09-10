@@ -64,7 +64,7 @@ function verifyEmployeeToken(token) {
 async function findEmployeeByPin(pool, pin) {
     const [rows] = await pool.execute(
         `SELECT id, employee_code, first_name, last_name, email, pin_hash, is_active, admin_user_id,
-                can_authorize, can_process_refunds, can_open_drawer, allow_manual_discounts, can_view_cost, can_view_shop_floor
+                can_authorize, can_process_refunds, can_open_drawer, allow_manual_discounts, can_view_cost, can_view_shop_floor, can_build_shop_estimate, is_technician
          FROM pos_employees WHERE is_active = 1`
     );
     for (const row of rows) {
@@ -185,10 +185,26 @@ function employeeCanViewShopFloor(employee) {
     return Number(employee.can_view_shop_floor) !== 0;
 }
 
+function employeeIsTechnician(employee) {
+    if (!employee) return false;
+    if (employee.is_technician != null && employee.is_technician !== undefined) {
+        return Number(employee.is_technician) !== 0;
+    }
+    return false;
+}
+
+function employeeCanBuildShopEstimate(employee) {
+    if (!employee) return false;
+    if (employee.can_build_shop_estimate != null && employee.can_build_shop_estimate !== undefined) {
+        return Number(employee.can_build_shop_estimate) !== 0;
+    }
+    return Boolean(employee.can_authorize);
+}
+
 async function getEmployeeById(pool, id) {
     const [rows] = await pool.execute(
         `SELECT id, employee_code, first_name, last_name, email, is_active, hourly_rate, admin_user_id,
-                can_authorize, can_process_refunds, can_open_drawer, allow_manual_discounts, can_view_cost, can_view_shop_floor,
+                can_authorize, can_process_refunds, can_open_drawer, allow_manual_discounts, can_view_cost, can_view_shop_floor, can_build_shop_estimate, is_technician,
                 created_at, updated_at
          FROM pos_employees WHERE id = ? LIMIT 1`,
         [id]
@@ -265,7 +281,9 @@ async function loginWithPin(pool, pin, context = {}) {
             canOpenDrawer: Boolean(employee.can_open_drawer),
             allowManualDiscounts: employeeAllowManualDiscounts(employee),
             canViewCost: employeeCanViewCost(employee),
-            canViewShopFloor: employeeCanViewShopFloor(employee)
+            canViewShopFloor: employeeCanViewShopFloor(employee),
+            canBuildShopEstimate: employeeCanBuildShopEstimate(employee),
+            isTechnician: employeeIsTechnician(employee)
         },
         hasAdminAccess,
         adminEmail,
@@ -302,12 +320,25 @@ async function createEmployee(pool, data, adminId) {
                   ? 1
                   : 0
               : 0;
+    const canBuildShopEstimate =
+        data.canBuildShopEstimate === true || data.can_build_shop_estimate === true || data.canBuildShopEstimate === 1
+            ? 1
+            : data.canBuildShopEstimate === false ||
+                data.can_build_shop_estimate === false ||
+                data.canBuildShopEstimate === 0 ||
+                data.can_build_shop_estimate === 0
+              ? 0
+              : null;
+    const isTechnician =
+        data.isTechnician === true || data.is_technician === true || data.isTechnician === 1 || data.is_technician === 1
+            ? 1
+            : 0;
     const [result] = await pool.execute(
         `INSERT INTO pos_employees (
             employee_code, first_name, last_name, email, pin_hash, hourly_rate, admin_user_id,
-            can_authorize, can_process_refunds, can_open_drawer, allow_manual_discounts, can_view_cost, can_view_shop_floor
+            can_authorize, can_process_refunds, can_open_drawer, allow_manual_discounts, can_view_cost, can_view_shop_floor, can_build_shop_estimate, is_technician
          )
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
             code,
             String(data.firstName || data.first_name || '').trim(),
@@ -321,7 +352,9 @@ async function createEmployee(pool, data, adminId) {
             canOpenDrawer,
             allowManualDiscounts,
             canViewCost,
-            canViewShopFloor
+            canViewShopFloor,
+            canBuildShopEstimate,
+            isTechnician
         ]
     );
     return getEmployeeById(pool, result.insertId);
@@ -393,6 +426,15 @@ async function updateEmployee(pool, id, data) {
         updates.push('can_view_shop_floor = ?');
         params.push(data.canViewShopFloor || data.can_view_shop_floor ? 1 : 0);
     }
+    if (data.canBuildShopEstimate != null || data.can_build_shop_estimate != null) {
+        updates.push('can_build_shop_estimate = ?');
+        const raw = data.canBuildShopEstimate ?? data.can_build_shop_estimate;
+        params.push(raw === true || raw === 1 || raw === '1' || raw === 'true' ? 1 : 0);
+    }
+    if (data.isTechnician != null || data.is_technician != null) {
+        updates.push('is_technician = ?');
+        params.push(data.isTechnician || data.is_technician ? 1 : 0);
+    }
     if (!updates.length) return getEmployeeById(pool, id);
     params.push(id);
     await pool.execute(`UPDATE pos_employees SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`, params);
@@ -402,7 +444,7 @@ async function updateEmployee(pool, id, data) {
 async function listEmployees(pool) {
     const [rows] = await pool.execute(
         `SELECT id, employee_code, first_name, last_name, email, is_active, hourly_rate, admin_user_id,
-                can_authorize, can_process_refunds, can_open_drawer, allow_manual_discounts, can_view_cost, can_view_shop_floor,
+                can_authorize, can_process_refunds, can_open_drawer, allow_manual_discounts, can_view_cost, can_view_shop_floor, can_build_shop_estimate, is_technician,
                 created_at, updated_at
          FROM pos_employees ORDER BY last_name, first_name`
     );
@@ -455,6 +497,12 @@ async function upsertRegisterForAdminUser(pool, adminUserId, data) {
     }
     if (data.canViewShopFloor != null || data.can_view_shop_floor != null) {
         payload.canViewShopFloor = Boolean(data.canViewShopFloor || data.can_view_shop_floor);
+    }
+    if (data.canBuildShopEstimate != null || data.can_build_shop_estimate != null) {
+        payload.canBuildShopEstimate = Boolean(data.canBuildShopEstimate || data.can_build_shop_estimate);
+    }
+    if (data.isTechnician != null || data.is_technician != null) {
+        payload.isTechnician = Boolean(data.isTechnician || data.is_technician);
     }
 
     if (existing) {
@@ -605,7 +653,7 @@ async function closeShiftSession(pool, { shiftSessionId, closingCash, notes, emp
     return updated[0];
 }
 
-async function clockIn(pool, employeeId, shiftSessionId) {
+async function clockIn(pool, employeeId, shiftSessionId, options = {}) {
     const [open] = await pool.execute(
         `SELECT id FROM pos_time_entries WHERE employee_id = ? AND clock_out IS NULL ORDER BY clock_in DESC LIMIT 1`,
         [employeeId]
@@ -616,9 +664,16 @@ async function clockIn(pool, employeeId, shiftSessionId) {
         err.timeEntryId = open[0].id;
         throw err;
     }
+    const bay = String(options.bay || '').trim() || null;
+    const employee = await getEmployeeById(pool, employeeId);
+    if (employeeIsTechnician(employee) && !bay) {
+        const err = new Error('Select a bay before clocking in');
+        err.code = 'BAY_REQUIRED';
+        throw err;
+    }
     const [result] = await pool.execute(
-        `INSERT INTO pos_time_entries (employee_id, shift_session_id, clock_in, source) VALUES (?, ?, NOW(), 'pos')`,
-        [employeeId, shiftSessionId || null]
+        `INSERT INTO pos_time_entries (employee_id, shift_session_id, clock_in, bay, source) VALUES (?, ?, NOW(), ?, 'pos')`,
+        [employeeId, shiftSessionId || null, bay]
     );
     return result.insertId;
 }
@@ -639,13 +694,25 @@ async function clockOut(pool, employeeId) {
 
 async function getOpenTimeEntry(pool, employeeId) {
     const [rows] = await pool.execute(
-        `SELECT id, employee_id, shift_session_id, clock_in, clock_out, source
+        `SELECT id, employee_id, shift_session_id, clock_in, clock_out, bay, source
          FROM pos_time_entries
          WHERE employee_id = ? AND clock_out IS NULL
          ORDER BY clock_in DESC LIMIT 1`,
         [employeeId]
     );
     return rows[0] || null;
+}
+
+async function listOpenTimeEntriesWithBay(pool) {
+    const [rows] = await pool.execute(
+        `SELECT t.id, t.employee_id, t.shift_session_id, t.clock_in, t.bay, t.source,
+                e.employee_code, e.first_name, e.last_name, e.is_technician
+         FROM pos_time_entries t
+         JOIN pos_employees e ON e.id = t.employee_id
+         WHERE t.clock_out IS NULL AND t.bay IS NOT NULL AND t.bay != ''
+         ORDER BY t.clock_in DESC LIMIT 200`
+    );
+    return rows || [];
 }
 
 async function createScheduledShift(pool, data, adminId) {
@@ -742,6 +809,8 @@ module.exports = {
     employeeAllowManualDiscounts,
     employeeCanViewCost,
     employeeCanViewShopFloor,
+    employeeCanBuildShopEstimate,
+    employeeIsTechnician,
     verifyEmployeeToken,
     createEmployee,
     updateEmployee,
@@ -760,6 +829,7 @@ module.exports = {
     clockIn,
     clockOut,
     getOpenTimeEntry,
+    listOpenTimeEntriesWithBay,
     createScheduledShift,
     listScheduledShifts,
     listTimeEntries,

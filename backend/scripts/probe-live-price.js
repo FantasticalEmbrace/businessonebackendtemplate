@@ -2,10 +2,10 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 
 const urls = [
-    'https://hmherbs.com/index.php/products/buried-treasure-acf-pm',
-    'https://hmherbs.com/index.php/products/buried-treasure-acf-pm-sku-28710',
-    'https://hmherbs.com/index.php/products/regal-labs-biotin-10000',
-    'https://hmherbs.com/index.php/products/newton-labs-incontinence'
+    'https://businessonecomprehensive.com/index.php/products/buried-treasure-acf-pm',
+    'https://businessonecomprehensive.com/index.php/products/buried-treasure-acf-pm-sku-28710',
+    'https://businessonecomprehensive.com/index.php/products/regal-labs-biotin-10000',
+    'https://businessonecomprehensive.com/index.php/products/newton-labs-incontinence'
 ];
 
 (async () => {

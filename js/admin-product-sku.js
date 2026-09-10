@@ -88,7 +88,7 @@
         fallbackBtn.type = 'button';
         fallbackBtn.className = 'btn btn-secondary btn-sm';
         fallbackBtn.textContent = 'Custom SKU';
-        fallbackBtn.title = 'Generate a temporary HM Herbs SKU if no manufacturer code exists';
+        fallbackBtn.title = 'Generate a temporary Business One SKU if no manufacturer code exists';
 
         btnRow.appendChild(lookupBtn);
         btnRow.appendChild(fallbackBtn);

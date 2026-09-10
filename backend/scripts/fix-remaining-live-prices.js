@@ -30,7 +30,7 @@ function extractPrice($) {
         ].filter((v, i, a) => v && a.indexOf(v) === i);
         let updated = false;
         for (const slug of candidates) {
-            const url = `https://hmherbs.com/index.php/products/${slug}`;
+            const url = `https://businessonecomprehensive.com/index.php/products/${slug}`;
             try {
                 const res = await axios.get(url, { headers: HEADERS, timeout: 15000, validateStatus: (s) => s < 500 });
                 if (res.status === 404) continue;

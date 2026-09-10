@@ -1,8 +1,8 @@
-# Your Store Complete Database Setup Script
+# Business One Complete Database Setup Script
 # This script will create the database, run schema, and update .env file
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "Your Store Complete Database Setup" -ForegroundColor Cyan
+Write-Host "Business One Complete Database Setup" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -141,7 +141,7 @@ PORT=3001
 NODE_ENV=development
 FRONTEND_URL=http://localhost:8000
 JWT_SECRET=hmherbs_jwt_secret_key_2024_secure_random_string_change_in_production
-ADMIN_EMAIL=store@example.com
+ADMIN_EMAIL=info@businessonecomprehensive.com
 ADMIN_PASSWORD=admin123
 "@
     $envContent | Set-Content $envPath

@@ -487,7 +487,8 @@ async function purchaseLabel(pool, orderId, { rateId, boxId, packageWeightOz, it
 
     const txn = await shippo.createTransaction({
         rate: resolvedRateId,
-        label_file_type: 'PDF',
+        // 4×6 portrait thermal label — not 8.5×11 PDF (labels render sideways in browser/printer).
+        label_file_type: 'PDF_4x6',
     });
 
     const status = String(txn.status || txn.object_status || '').toUpperCase();

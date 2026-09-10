@@ -1,4 +1,4 @@
-// Advanced Device-Adaptive Performance Manager for Your Store
+// Advanced Device-Adaptive Performance Manager for Business One
 // Device-specific optimizations and adaptive loading strategies
 
 class DeviceAdaptiveManager {

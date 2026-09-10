@@ -17,7 +17,7 @@ function pathsForSlug(slug) {
     const allHits = [];
     for (const slug of CBD_PRODUCT_SLUGS) {
         for (const pathSlug of pathsForSlug(slug)) {
-            const url = `https://hmherbs.com/index.php/products/${pathSlug}`;
+            const url = `https://businessonecomprehensive.com/index.php/products/${pathSlug}`;
             try {
                 const res = await fetch(url, {
                     redirect: 'follow',

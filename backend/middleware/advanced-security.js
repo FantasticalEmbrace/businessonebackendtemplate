@@ -1,4 +1,4 @@
-// Advanced Security Headers and Content Security Policy for Your Store
+// Advanced Security Headers and Content Security Policy for Business One
 // Enterprise-level security implementation with comprehensive protection
 
 class AdvancedSecurityManager {
@@ -369,7 +369,7 @@ class AdvancedSecurityManager {
     getTrustedDomains() {
         return [
             'example.com',
-            'www.example.com',
+            'businessonecomprehensive.com',
             'api.example.com',
             'cdn.example.com'
         ];

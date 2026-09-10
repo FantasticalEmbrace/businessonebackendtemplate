@@ -1,6 +1,6 @@
 'use strict';
 
-/** Tracks one in-flight HM Herbs product scrape for admin cancel + SSE cleanup. */
+/** Tracks one in-flight Business One product scrape for admin cancel + SSE cleanup. */
 let active = null;
 
 function registerScraper(scraper, res) {

@@ -1,8 +1,8 @@
-# Your Store Database Setup Script
+# Business One Database Setup Script
 # This script will create the database and run the schema
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "Your Store Database Setup" -ForegroundColor Cyan
+Write-Host "Business One Database Setup" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 

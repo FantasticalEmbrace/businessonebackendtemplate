@@ -58,7 +58,10 @@
                 this.apiRequest('/admin/shop/customer-workflows'),
                 this.apiRequest('/admin/products?limit=500&fields=id,sku,name').catch(() => ({ products: [] }))
             ]);
-            this._shopWfConfig = configRes || { paymentLinkEnabled: true, verticals: {} };
+            this._shopWfConfig =
+                configRes && typeof configRes === 'object' && configRes.verticals
+                    ? configRes
+                    : { paymentLinkEnabled: true, verticals: {} };
             this._shopWfProducts = productsRes?.products || productsRes?.items || [];
             if (this.demoMode && typeof window !== 'undefined') {
                 try {
@@ -285,7 +288,7 @@
     const origShowSection = AdminApp.prototype.showSection;
     AdminApp.prototype.showSection = function (section) {
         const result = origShowSection.apply(this, arguments);
-        if (section === 'pos-settings') {
+        if (section === 'pos') {
             setTimeout(() => this.initShopCustomerWorkflows(), 0);
         }
         return result;

@@ -10,7 +10,7 @@ const HmChoiceToggles = {
 
     inferSize(input) {
         const key = `${input.name || ''} ${input.id || ''}`.toLowerCase();
-        if (/canauthorize|canprocessrefunds|allowmanualdiscounts|canviewcost|canopendrawer|tax.exempt|tax_exempt/.test(key)) return 'lg';
+        if (/canauthorize|canprocessrefunds|allowmanualdiscounts|canviewcost|canopendrawer|canviewshopfloor|tax.exempt|tax_exempt/.test(key)) return 'lg';
         if (
             /pos_receipt_|pos_payment_|pos_scan_|pos_show_|pos_display_|pos_large_|pos_sign_|pos_require_|pos_eod_|pos_daily_|promo-form-|inventory-|compactview|showdescriptions/.test(
                 key
@@ -192,10 +192,22 @@ const HmChoiceToggles = {
 
     scheduleScan(node) {
         if (!this.nodeNeedsScan(node)) return;
+        if (!this._pendingScanRoots) this._pendingScanRoots = new Set();
+        this._pendingScanRoots.add(node);
         if (this._scanTimer) clearTimeout(this._scanTimer);
         this._scanTimer = setTimeout(() => {
             this._scanTimer = null;
-            this.scan(node);
+            const roots = this._pendingScanRoots;
+            this._pendingScanRoots = null;
+            // Prefer one document scan when many sibling rows were injected at once
+            // (e.g. loyalty tier table) so every checkbox becomes a toggle.
+            if (roots.size > 1) {
+                this.scan(document);
+                return;
+            }
+            for (const root of roots) {
+                this.scan(root);
+            }
         }, 30);
     },
 

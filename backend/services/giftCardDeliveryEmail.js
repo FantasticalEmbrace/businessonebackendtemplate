@@ -6,9 +6,9 @@ const { sendMail } = require('../utils/mailTransporter');
 
 /** Matches css/brand-tokens.css — keep in sync with storefront brand colors. */
 const BRAND = {
-    primary: '#047857',
+    primary: '#ff9b1f',
     primaryDark: '#065f46',
-    headerFrom: '#047857',
+    headerFrom: '#ff9b1f',
     headerTo: '#065f46',
     lightGreen: '#ecfdf5',
     sageBorder: '#bbf7d0',
@@ -84,7 +84,7 @@ function wrapStoreEmail({ headline, bodyHtml, preheader = '' }) {
         <tr>
           <td style="padding:24px 24px 16px;text-align:center;background:#ffffff;border-bottom:3px solid ${BRAND.primary};">
             <a href="${escapeHtml(base)}/index.html" style="text-decoration:none;">
-              <img src="${escapeHtml(logoUrl())}" alt="Your Store" width="200" style="display:block;margin:0 auto;max-width:200px;height:auto;border:0;" />
+              <img src="${escapeHtml(logoUrl())}" alt="Business One" width="200" style="display:block;margin:0 auto;max-width:200px;height:auto;border:0;" />
             </a>
             <p style="margin:10px 0 0;font-family:${BRAND.font};font-size:13px;line-height:1.4;color:${BRAND.textMuted};letter-spacing:0.04em;text-transform:uppercase;">Premium natural health products since 1995</p>
           </td>
@@ -100,7 +100,7 @@ function wrapStoreEmail({ headline, bodyHtml, preheader = '' }) {
             <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-top:1px solid ${BRAND.border};">
               <tr>
                 <td style="padding-top:20px;font-family:${BRAND.font};font-size:13px;line-height:1.6;color:${BRAND.footerMuted};text-align:center;">
-                  <p style="margin:0 0 6px;"><strong style="color:${BRAND.primaryDark};">${escapeHtml(process.env.STORE_NAME || 'Your Store')}</strong></p>
+                  <p style="margin:0 0 6px;"><strong style="color:${BRAND.primaryDark};">${escapeHtml(process.env.STORE_NAME || 'Business One')}</strong></p>
                   <p style="margin:0 0 6px;">${STORE_PHONE ? `${escapeHtml(STORE_PHONE)} · ` : ''}Questions? Reply to this email or visit our store.</p>
                   <p style="margin:0;">
                     <a href="${escapeHtml(base)}/index.html" style="color:${BRAND.primaryDark};text-decoration:none;">our store</a>
@@ -165,12 +165,12 @@ function buildGiftCardBodyHtml({
     return `
         <p style="margin:0 0 12px;font-family:${BRAND.font};font-size:16px;line-height:1.6;color:${BRAND.text};">Hello ${first},</p>
         <p style="margin:0 0 8px;font-family:${BRAND.font};font-size:16px;line-height:1.6;color:${BRAND.text};">
-          <strong>${from}</strong> sent you a <strong>${amountStr}</strong> Your Store ${isDigital ? 'digital' : 'physical'} gift card.
+          <strong>${from}</strong> sent you a <strong>${amountStr}</strong> Business One ${isDigital ? 'digital' : 'physical'} gift card.
         </p>
         ${messageBlock}
         ${codeBlock}
         ${accountBlock}
-        <p style="margin:24px 0 0;font-family:${BRAND.font};font-size:15px;line-height:1.6;color:${BRAND.textMuted};">Thank you for choosing Your Store.</p>`;
+        <p style="margin:24px 0 0;font-family:${BRAND.font};font-size:15px;line-height:1.6;color:${BRAND.textMuted};">Thank you for choosing Business One.</p>`;
 }
 
 function buildStyledGiftEmailHtml(opts) {

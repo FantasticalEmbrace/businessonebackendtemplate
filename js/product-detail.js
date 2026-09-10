@@ -135,11 +135,11 @@ class ProductDetailPage {
 
         const metaTitle =
             (this.product.meta_title && String(this.product.meta_title).trim()) ||
-            `${this.product.name} - Your Store`;
+            `${this.product.name} - Business One`;
         const metaDescription =
             (this.product.meta_description && String(this.product.meta_description).trim()) ||
             (this.product.short_description && String(this.product.short_description).trim()) ||
-            `Shop ${this.product.name} at Your Store.`;
+            `Shop ${this.product.name} at Business One.`;
 
         document.title = metaTitle;
 

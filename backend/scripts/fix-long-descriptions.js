@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Re-fetch hmherbs.com product pages and update long_description (and short_description when needed).
+ * Re-fetch example.com product pages and update long_description (and short_description when needed).
  * Uses scrape-hmherbs.js extractors (.store-product-description vs .store-product-detailed-description).
  *
  * Usage (from backend/):
@@ -20,9 +20,9 @@ require('dotenv').config({ path: path.join(__dirname, '../.env') });
 const { createPool } = require('../utils/dbConfig');
 const { loadScraper } = require('../utils/businessone-scraper');
 const CatalogScraper = loadScraper();
-const SCRAPE_DOMAIN = process.env.CATALOG_SCRAPE_DOMAIN || 'https://hmherbs.com';
+const SCRAPE_DOMAIN = process.env.CATALOG_SCRAPE_DOMAIN || 'https://businessonecomprehensive.com';
 
-const BASE = 'https://hmherbs.com';
+const BASE = 'https://businessonecomprehensive.com';
 const DELAY_MS = 350;
 
 const DEFAULT_HEADERS = {

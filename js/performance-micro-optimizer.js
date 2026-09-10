@@ -1,4 +1,4 @@
-// Performance Micro-Optimizer for Your Store
+// Performance Micro-Optimizer for Business One
 // Ultimate performance refinements for perfection-level optimization
 
 class PerformanceMicroOptimizer {

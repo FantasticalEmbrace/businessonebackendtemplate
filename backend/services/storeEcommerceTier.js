@@ -9,7 +9,7 @@ const ACTIVE_SUB_STATUSES = new Set(['active', 'trial', 'past_due']);
 
 /**
  * Whether this store may offer customer product subscriptions.
- * Ecommerce build tier only — Your Store principal account is always ecommerce.
+ * Ecommerce build tier only — Business One principal account is always ecommerce.
  */
 async function resolveStoreProductSubscriptionsAccess(pool) {
     const account = await ensureDefaultAccount(pool);

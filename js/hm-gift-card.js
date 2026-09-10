@@ -1,5 +1,5 @@
 /**
- * Your Store branded gift card markup — matches css/hm-gift-card.css and brand-tokens.css
+ * Business One branded gift card markup — matches css/hm-gift-card.css and brand-tokens.css
  */
 (function (global) {
     'use strict';
@@ -70,7 +70,7 @@
                 ${recipientLine}
                 ${codeLine}
                 <div class="hm-gift-card__footer">
-                    <span class="hm-gift-card__brand">Your Store</span>
+                    <span class="hm-gift-card__brand">Business One</span>
                     ${compact ? '' : '<span class="hm-gift-card__tagline">Premium natural health since 1995</span>'}
                 </div>
             </div>

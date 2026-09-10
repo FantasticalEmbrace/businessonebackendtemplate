@@ -2,7 +2,7 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 
 async function checkBreadcrumbs() {
-    const url = 'https://hmherbs.com/index.php/products/1lifescience-glp-1-pro';
+    const url = 'https://businessonecomprehensive.com/index.php/products/1lifescience-glp-1-pro';
     try {
         const res = await axios.get(url, {
             headers: {

@@ -1,13 +1,13 @@
 'use strict';
 
 /**
- * Business One platform palette for ecommerce merchant stores.
- * NOT HM Herbs storefront colors — use for non-principal billing accounts / future signups.
+ * Business One platform palette (marketing + merchant defaults).
+ * Matches css/brand-tokens.css and business-one-webpage styles.
  * Override via BO_BRAND_PRIMARY, BO_BRAND_PRIMARY_DARK, BO_BRAND_ACCENT in backend/.env.
  */
 module.exports = {
-    PRIMARY: String(process.env.BO_BRAND_PRIMARY || '#1e3a5f').trim(),
-    PRIMARY_DARK: String(process.env.BO_BRAND_PRIMARY_DARK || '#152a45').trim(),
-    ACCENT: String(process.env.BO_BRAND_ACCENT || '#2563eb').trim(),
-    LIGHT_BG: '#eef2ff',
+    PRIMARY: String(process.env.BO_BRAND_PRIMARY || '#ff9b1f').trim(),
+    PRIMARY_DARK: String(process.env.BO_BRAND_PRIMARY_DARK || '#e8890f').trim(),
+    ACCENT: String(process.env.BO_BRAND_ACCENT || '#1f82ff').trim(),
+    LIGHT_BG: '#fff7ed',
 };

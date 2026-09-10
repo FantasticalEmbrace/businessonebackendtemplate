@@ -112,7 +112,7 @@
             const stepDetailText = stepDetail(order, step);
             return `
             <div style="display:flex;gap:0.75rem;align-items:flex-start;margin-bottom:0.5rem;">
-                <span style="width:10px;height:10px;border-radius:50%;margin-top:0.35rem;flex-shrink:0;background:${step.done ? 'var(--primary-green,#047857)' : 'var(--gray-300,#d1d5db)'};"></span>
+                <span style="width:10px;height:10px;border-radius:50%;margin-top:0.35rem;flex-shrink:0;background:${step.done ? 'var(--primary-green,#ff9b1f)' : 'var(--gray-300,#d1d5db)'};"></span>
                 <div>
                     <div style="font-weight:${step.done ? '600' : '400'};color:${step.done ? 'var(--gray-800,#1f2937)' : 'var(--gray-500,#6b7280)'};">${esc(step.label)}</div>
                     ${step.at ? `<div style="font-size:0.8rem;color:var(--gray-500,#6b7280);">${esc(formatDate(step.at))}</div>` : ''}

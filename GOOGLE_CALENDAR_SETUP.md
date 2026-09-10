@@ -1,18 +1,18 @@
-# Google Calendar Integration Setup Guide for Your Store
+# Google Calendar Integration Setup Guide for Business One
 
-This guide explains how to set up Google Calendar integration so that EDSA bookings automatically sync to Your Store' Google Calendar.
+This guide explains how to set up Google Calendar integration so that EDSA bookings automatically sync to Business One' Google Calendar.
 
 ## Overview
 
 When a customer books an EDSA session through the website, the system will:
 1. Save the booking to the database
-2. Automatically create an event in Your Store' Google Calendar
-3. Send email notifications to both the customer and Your Store
-4. Allow Your Store to see all bookings directly in their calendar
+2. Automatically create an event in Business One' Google Calendar
+3. Send email notifications to both the customer and Business One
+4. Allow Business One to see all bookings directly in their calendar
 
 ## Prerequisites
 
-- A Google account for Your Store (e.g., store@example.com)
+- A Google account for Business One (e.g., info@businessonecomprehensive.com)
 - Access to Google Cloud Console
 - Node.js backend server
 
@@ -20,7 +20,7 @@ When a customer books an EDSA session through the website, the system will:
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Click "Select a project" → "New Project"
-3. Name it "Your Store Calendar Integration"
+3. Name it "Business One Calendar Integration"
 4. Click "Create"
 
 ## Step 2: Enable Google Calendar API
@@ -34,7 +34,7 @@ When a customer books an EDSA session through the website, the system will:
 1. Go to "APIs & Services" → "Credentials"
 2. Click "Create Credentials" → "Service Account"
 3. Fill in:
-   - **Name**: Your Store Calendar Service
+   - **Name**: Business One Calendar Service
    - **Description**: Service account for calendar integration
 4. Click "Create and Continue"
 5. Skip role assignment (click "Continue")
@@ -67,7 +67,7 @@ Add to your `.env` file or environment:
 
 ```env
 # Google Calendar Configuration
-GOOGLE_CALENDAR_ID=store@example.com
+GOOGLE_CALENDAR_ID=info@businessonecomprehensive.com
 # OR use the calendar ID from Google Calendar settings
 # GOOGLE_CALENDAR_ID=primary
 
@@ -98,14 +98,14 @@ npm install googleapis
 
 ## Admin panel: Connect Google Calendar (OAuth)
 
-The admin **Settings → Google Calendar** flow uses OAuth (not the service account JSON above). If you see **Error 403: access_denied** when signing in with `store@example.com`:
+The admin **Settings → Google Calendar** flow uses OAuth (not the service account JSON above). If you see **Error 403: access_denied** when signing in with `info@businessonecomprehensive.com`:
 
 ### Fix in Google Cloud Console
 
 1. Open [Google Cloud Console](https://console.cloud.google.com/) → the project that owns client ID `266596824943-...`.
 2. **APIs & Services → Library** — enable **Google Calendar API**.
 3. **APIs & Services → OAuth consent screen**
-   - If **Publishing status** is **Testing**, add **store@example.com** under **Test users** (exact address you sign in with).
+   - If **Publishing status** is **Testing**, add **info@businessonecomprehensive.com** under **Test users** (exact address you sign in with).
    - Add scope `https://www.googleapis.com/auth/calendar` if prompted.
 4. **APIs & Services → Credentials** → your **OAuth 2.0 Client ID** (type **Web application**)
    - Under **Authorized redirect URIs**, add exactly:

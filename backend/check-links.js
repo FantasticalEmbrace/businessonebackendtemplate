@@ -2,7 +2,7 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 
 async function checkLinks() {
-    const url = 'https://hmherbs.com/';
+    const url = 'https://businessonecomprehensive.com/';
     try {
         const res = await axios.get(url, {
             headers: {

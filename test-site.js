@@ -1,4 +1,4 @@
-// Your Store Site Functionality Test Script
+// Business One Site Functionality Test Script
 // Checks if all components are properly set up and working
 
 const fs = require('fs');
@@ -86,7 +86,7 @@ function testBackendAPI(endpoint, description) {
 }
 
 async function runTests() {
-    log('\n=== Your Store Site Functionality Test ===\n', 'blue');
+    log('\n=== Business One Site Functionality Test ===\n', 'blue');
 
     let passed = 0;
     let failed = 0;

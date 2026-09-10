@@ -127,6 +127,9 @@ router.get('/', async (req, res) => {
             orders_desc:   'u.total_orders DESC',
             last_order:    'u.last_order_at DESC',
             name_asc:      'u.last_name ASC, u.first_name ASC',
+            name_desc:     'u.last_name DESC, u.first_name DESC',
+            loyalty_desc:  'COALESCE(cl.points_balance, 0) DESC, u.last_name ASC',
+            loyalty_asc:   'COALESCE(cl.points_balance, 0) ASC, u.last_name ASC',
         };
         const orderBy = sortOptions[sort] || 'u.created_at DESC';
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Your Store Quick Start — runs the API server without spawning npm (avoids Windows
+ * Business One Quick Start — runs the API server without spawning npm (avoids Windows
  * spawn EINVAL with npm.cmd + shell:false and Node DEP0190 with shell:true).
  */
 
@@ -11,7 +11,7 @@ const path = require('path');
 const backendDir = path.join(__dirname, 'backend');
 const serverEntry = path.join(backendDir, 'server.js');
 
-console.log('🌿 Starting Your Store Backend Server...');
+console.log('🌿 Starting Business One Backend Server...');
 
 const server = spawn(process.execPath, [serverEntry], {
     cwd: backendDir,

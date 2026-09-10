@@ -15,8 +15,8 @@ async function countProducts() {
     for (let page = 1; page <= 37; page++) {
         try {
             const url = page === 1 
-                ? 'https://hmherbs.com/index.php/products'
-                : `https://hmherbs.com/index.php/products?ccm_paging_p=${page}`;
+                ? 'https://businessonecomprehensive.com/index.php/products'
+                : `https://businessonecomprehensive.com/index.php/products?ccm_paging_p=${page}`;
             
             console.log(`📄 Checking page ${page}...`);
             

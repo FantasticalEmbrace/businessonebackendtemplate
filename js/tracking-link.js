@@ -57,7 +57,7 @@
         if (!num || isPlaceholderTracking(num)) return empty;
 
         const url = resolveTrackingUrl(order);
-        const style = opts.linkStyle || 'color:var(--primary-green,#047857);font-weight:600;text-decoration:underline;';
+        const style = opts.linkStyle || 'color:var(--primary-green,#ff9b1f);font-weight:600;text-decoration:underline;';
         if (url) {
             return `<a href="${esc(url)}" target="_blank" rel="noopener" style="${style}">${esc(num)}</a>`;
         }

@@ -540,8 +540,8 @@ function isShippoTestMode() {
 
 function getShippoStoreOrigin() {
     return {
-        name: resolve('cred_shippo_from_name') || 'H&M Herbs & Vitamins',
-        company: resolve('cred_shippo_from_name') || 'H&M Herbs & Vitamins',
+        name: resolve('cred_shippo_from_name') || 'Business One',
+        company: resolve('cred_shippo_from_name') || 'Business One',
         street1: resolve('cred_shippo_from_street1'),
         street2: resolve('cred_shippo_from_street2'),
         city: resolve('cred_shippo_from_city'),

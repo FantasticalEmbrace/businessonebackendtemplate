@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Verify product SKUs against manufacturer brand websites (not hmherbs.com).
+ * Verify product SKUs against manufacturer brand websites (not example.com).
  * Uses DuckDuckGo/Brave site search + JSON-LD sku/mpn on brand PDPs.
  *
  * Usage:

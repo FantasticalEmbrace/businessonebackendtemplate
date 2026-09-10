@@ -1,4 +1,4 @@
-/* Browser Compatibility Enhancement for HM Herbs */
+/* Browser Compatibility Enhancement for Business One */
 /* Adds vendor prefixes for older browser support */
 
 /* CSS Variables fallbacks for IE11 */
@@ -126,8 +126,8 @@
 @media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
   /* IE11 specific styles */
   .btn-primary {
-    background-color: #047857;
-    border-color: #047857;
+    background-color: #ff9b1f;
+    border-color: #ff9b1f;
   }
   
   .btn-primary:hover {

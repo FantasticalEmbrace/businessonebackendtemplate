@@ -1,4 +1,4 @@
-# Quick Start Guide - Your Store Website
+# Quick Start Guide - Business One Website
 
 ## 🚀 Fastest Way to Get Running
 

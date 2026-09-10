@@ -55,6 +55,8 @@ const POS_SETTING_KEYS = Object.freeze([
     'pos_personnel_mode',
     'pos_receipt_return_policy',
     'pos_show_cost_in_cart',
+    'pos_shop_hide_free_diagnostic',
+    'pos_shop_hide_billable_diagnostic',
     'pos_hardware_printer',
     'pos_display_card_checkout',
     'pos_poi_device_id',
@@ -118,6 +120,14 @@ const POS_SETTING_META = Object.freeze({
     pos_personnel_mode: { description: 'POS personnel mode', type: 'string' },
     pos_receipt_return_policy: { description: 'Return policy on POS receipts', type: 'string' },
     pos_show_cost_in_cart: { description: 'Show product cost in POS cart', type: 'boolean' },
+    pos_shop_hide_free_diagnostic: {
+        description: 'Hide complimentary diagnostic cards on shop repair estimates',
+        type: 'boolean'
+    },
+    pos_shop_hide_billable_diagnostic: {
+        description: 'Hide billable diagnostic cards on shop repair estimates',
+        type: 'boolean'
+    },
     pos_hardware_printer: { description: 'POS receipt printer: auto, elo_star, star_android, or browser', type: 'string' },
     pos_display_card_checkout: { description: 'NMI terminal card checkout enabled', type: 'boolean' },
     pos_poi_device_id: { description: 'NMI POI device ID for A3700', type: 'string' },

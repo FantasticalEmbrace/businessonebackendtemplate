@@ -62,41 +62,41 @@ const PRODUCT_COA_MAP = [
     }
 ];
 
-/** Old hmherbs.com download_file URLs to pull into /images/coa/ */
+/** Old example.com download_file URLs to pull into /images/coa/ */
 const OLD_SITE_COA_DOWNLOADS = [
     {
         dest: 'hippie-jacks-yummy-hemp-gummie-coa.pdf',
-        url: 'https://hmherbs.com/index.php/download_file/view/106032a6-4e0b-4ff2-8491-df15966240c2/4066',
+        url: 'https://businessonecomprehensive.com/index.php/download_file/view/106032a6-4e0b-4ff2-8491-df15966240c2/4066',
         slug: 'hippie-jack-s-yummy-hemp-gummie'
     },
     {
         dest: 'hippie-jacks-extreme-pain-cream-coa.pdf',
-        url: 'https://hmherbs.com/index.php/download_file/view/cfacb2e3-1615-49ae-ad74-d916f674ae15/3236',
+        url: 'https://businessonecomprehensive.com/index.php/download_file/view/cfacb2e3-1615-49ae-ad74-d916f674ae15/3236',
         slug: 'hippie-jack-s-cbd-extreme-1000mg-pain-cream'
     },
     {
         dest: 'hemp-bombs-cbd-gummies-w-mushroom-coa-1.pdf',
-        url: 'https://hmherbs.com/index.php/download_file/view/a4d15538-f6e3-4350-b9b9-8735a5a98e00/839',
+        url: 'https://businessonecomprehensive.com/index.php/download_file/view/a4d15538-f6e3-4350-b9b9-8735a5a98e00/839',
         slug: 'hemp-bombs-cbd-gummies-w-mushroom'
     },
     {
         dest: 'hemp-bombs-cbd-gummies-w-mushroom-coa-2.pdf',
-        url: 'https://hmherbs.com/index.php/download_file/view/5e15abc1-d2be-47fb-83c9-a4298a39646a/839',
+        url: 'https://businessonecomprehensive.com/index.php/download_file/view/5e15abc1-d2be-47fb-83c9-a4298a39646a/839',
         slug: 'hemp-bombs-cbd-gummies-w-mushroom'
     },
     {
         dest: 'regal-hemp-seed-oil-5mg-coa.pdf',
-        url: 'https://hmherbs.com/index.php/download_file/view/53ef5af5-8df0-40d0-899a-edc26fd842fb/4725',
+        url: 'https://businessonecomprehensive.com/index.php/download_file/view/53ef5af5-8df0-40d0-899a-edc26fd842fb/4725',
         slug: 'regalabs-organic-cbd-oils'
     },
     {
         dest: 'regal-hemp-seed-oil-silver-10mg-coa.pdf',
-        url: 'https://hmherbs.com/index.php/download_file/view/3b6d5b9d-3588-4158-bd28-dbe9e5c3e8b0/4725',
+        url: 'https://businessonecomprehensive.com/index.php/download_file/view/3b6d5b9d-3588-4158-bd28-dbe9e5c3e8b0/4725',
         slug: 'regalabs-organic-cbd-oils'
     },
     {
         dest: 'regal-cannabis-care-coa.pdf',
-        url: 'https://hmherbs.com/index.php/download_file/view/1e430c85-ce28-4801-9b5f-2acbc07a31d4/4741',
+        url: 'https://businessonecomprehensive.com/index.php/download_file/view/1e430c85-ce28-4801-9b5f-2acbc07a31d4/4741',
         slug: 'regalabs-cannabis-care-cream-free-shipping'
     }
 ];

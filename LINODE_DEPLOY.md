@@ -1,10 +1,10 @@
-# Your Store — Linode / Akamai Cloud deployment
+# Business One — Linode / Akamai Cloud deployment
 
 Deploy the static storefront + Node API on a **Linode**, with **Managed MySQL** for the database. Use a **NodeBalancer** as the public entry point.
 
 > **Region (required):** Use a **core** region with **private IP + NodeBalancer backends** — e.g. **Miami, FL (`us-mia`)** or **Washington, DC (`us-east`)**.
 >
-> **Do not use Atlanta** for new Your Store stacks: NodeBalancer backends need a private IP or VPC, and Atlanta supports neither. See [deploy/MIAMI-MIGRATION.md](deploy/MIAMI-MIGRATION.md) if you already deployed elsewhere.
+> **Do not use Atlanta** for new Business One stacks: NodeBalancer backends need a private IP or VPC, and Atlanta supports neither. See [deploy/MIAMI-MIGRATION.md](deploy/MIAMI-MIGRATION.md) if you already deployed elsewhere.
 
 ## Architecture
 
@@ -153,7 +153,7 @@ NMI_SANDBOX=1
 Sign-in is configured on the server via `GBP_CLIENT_ID` / `GBP_CLIENT_SECRET` (`deploy/sync-linode-env.ps1`). You must also register **Authorized redirect URIs** in Google Cloud Console — see **[deploy/GOOGLE_OAUTH_REDIRECT_URIS.md](deploy/GOOGLE_OAUTH_REDIRECT_URIS.md)** for:
 
 - Temp Linode (`172-238-208-164.sslip.io`) — active underwriting URL until `example.com` DNS
-- Production (`www.example.com`) — add before DNS cutover
+- Production (`businessonecomprehensive.com`) — add before DNS cutover
 - Optional `go.example.com` and local dev URLs
 
 Quick check after adding URIs:

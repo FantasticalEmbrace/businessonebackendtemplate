@@ -1,4 +1,4 @@
-// Business One Admin Panel - Customers & Gift Cards module.
+// Business One Admin — Customers & Gift Cards module.
 /* global AdminApp */
 // Augments AdminApp.prototype with the methods used by the Customers and
 // Gift Cards admin sections. This file must load AFTER admin-app.js.
@@ -40,14 +40,14 @@
     };
     const phoneInputValue = (stored) => {
         const raw = stored == null ? '' : String(stored);
-        if (window.STORE_PHONE_US || window.HMHERBS_PHONE_US) {
-            const d = (window.STORE_PHONE_US || window.HMHERBS_PHONE_US).digitsOnly(raw);
-            return esc(d ? (window.STORE_PHONE_US || window.HMHERBS_PHONE_US).formatDigitsToDisplay(d) : '');
+        if (window.HMHERBS_PHONE_US) {
+            const d = HMHERBS_PHONE_US.digitsOnly(raw);
+            return esc(d ? HMHERBS_PHONE_US.formatDigitsToDisplay(d) : '');
         }
         return esc(raw);
     };
     const initPhoneFields = (root) => {
-        if ((window.STORE_PHONE_US || window.HMHERBS_PHONE_US) && root) (window.STORE_PHONE_US || window.HMHERBS_PHONE_US).init(root);
+        if (window.HMHERBS_PHONE_US && root) HMHERBS_PHONE_US.init(root);
     };
 
     function debounce(fn, ms = 300) {
@@ -167,7 +167,8 @@
 
         const container = $('customersTable');
         if (!container) return;
-        container.innerHTML = '<div class="loading"><div class="spinner"></div>Loading customers...</div>';
+        container.classList.add('loading');
+        container.innerHTML = '<div class="spinner"></div>Loading customers...';
 
         const s = this._customerState();
         const customersSearchEl = $('customersSearchInput');
@@ -183,63 +184,59 @@
 
         try {
             const data = await this.apiRequest(`/admin/customers?${params}`);
-            if (!data) return;
+            if (!data) {
+                container.classList.remove('loading');
+                return;
+            }
 
             if (!data.customers || data.customers.length === 0) {
-                container.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--gray-500);"><i class="fas fa-users" style="font-size:3rem;opacity:0.3;display:block;margin-bottom:1rem;"></i><p>No customers found.</p></div>';
+                container.classList.remove('loading');
+                container.innerHTML = '<div class="customers-empty">No customers found.</div>';
                 $('customersPagination').innerHTML = '';
                 return;
             }
 
+            container.classList.remove('loading');
             this._lastCustomersPage = data.customers;
 
+            const sortToHeader = {
+                recent: { key: 'joined', dir: 'desc' },
+                oldest: { key: 'joined', dir: 'asc' },
+                spent_desc: { key: 'spent', dir: 'desc' },
+                spent_asc: { key: 'spent', dir: 'asc' },
+                name_asc: { key: 'name', dir: 'asc' },
+                name_desc: { key: 'name', dir: 'desc' },
+                loyalty_desc: { key: 'loyalty', dir: 'desc' },
+                loyalty_asc: { key: 'loyalty', dir: 'asc' },
+            };
+            const headerSort = sortToHeader[s.sort] || { key: 'joined', dir: 'desc' };
+
             container.innerHTML = `
-                <p class="admin-table-scroll-hint" style="margin:0 0 0.75rem;font-size:0.85rem;color:var(--gray-500);">
-                    <i class="fas fa-arrows-alt-h" aria-hidden="true"></i> Scroll horizontally to see all columns (including Customer #).
-                </p>
                 <div class="admin-wide-table-wrap table-container" tabindex="0" role="region" aria-label="Customer list">
                     <table class="table">
                         <colgroup>
-                            <col style="width:6.5rem">
-                            <col style="width:9rem">
-                            <col style="width:14rem">
-                            <col style="width:7.5rem">
-                            <col style="width:5.5rem">
-                            <col style="width:5rem">
-                            <col style="width:5.5rem">
-                            <col style="width:7.5rem">
-                            <col style="width:7rem">
-                            <col style="width:6.75rem">
-                            <col style="width:7.5rem">
+                            <col style="width:28%">
+                            <col style="width:16%">
+                            <col style="width:18%">
+                            <col style="width:16%">
+                            <col style="width:8rem">
                         </colgroup>
                         <thead>
                             <tr>
-                                <th>Customer #</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Status</th>
-                                <th>Orders</th>
-                                <th>Spent</th>
-                                <th>Loyalty</th>
-                                <th>Gift Cards</th>
-                                <th>Joined</th>
-                                <th>Actions</th>
+                                <th data-sort="name" data-sort-type="text" data-sort-default="asc">Name</th>
+                                <th data-sort="spent" data-sort-type="number" data-sort-default="desc">Spent</th>
+                                <th data-sort="loyalty" data-sort-type="number" data-sort-default="desc">Loyalty</th>
+                                <th data-sort="joined" data-sort-type="date" data-sort-default="desc">Joined</th>
+                                <th class="col-actions">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${data.customers.map(c => `
                                 <tr>
-                                    <td><code style="font-size:0.85em;">${esc(c.customer_number || '—')}</code></td>
-                                    <td><strong>${esc((c.first_name || '') + ' ' + (c.last_name || ''))}</strong></td>
-                                    <td><span class="cell-ellipsis" title="${esc(c.email)}">${esc(c.email)}</span></td>
-                                    <td>${esc(c.phone || '—')}</td>
-                                    <td>${this._statusBadge(c.customer_status)}</td>
-                                    <td>${fmtNumber(c.total_orders)}</td>
-                                    <td>${fmtMoney(c.lifetime_value)}</td>
-                                    <td>${fmtNumber(c.points_balance || 0)} pts ${c.tier ? `<small style="color:var(--gray-500);">(${esc(c.tier)})</small>` : ''}</td>
-                                    <td>${c.gift_card_count > 0 ? `${c.gift_card_count} (${fmtMoney(c.gift_card_balance)})` : '—'}</td>
-                                    <td>${fmtDate(c.created_at)}</td>
+                                    <td data-sort-value="${esc((c.last_name || '') + ' ' + (c.first_name || ''))}"><strong>${esc((c.first_name || '') + ' ' + (c.last_name || ''))}</strong></td>
+                                    <td data-sort-value="${Number(c.lifetime_value) || 0}">${fmtMoney(c.lifetime_value)}</td>
+                                    <td data-sort-value="${Number(c.points_balance) || 0}">${fmtNumber(c.points_balance || 0)} pts ${c.tier ? `<small style="color:var(--gray-500);">(${esc(c.tier)})</small>` : ''}</td>
+                                    <td data-sort-value="${esc(c.created_at || '')}">${fmtDate(c.created_at)}</td>
                                     <td class="col-actions">
                                         <div class="admin-row-actions">
                                             <button type="button" class="btn btn-sm btn-secondary" onclick="adminApp.showCustomerProfile(${c.id})" title="View profile">
@@ -257,12 +254,37 @@
             const wrap = container.querySelector('.admin-wide-table-wrap');
             if (wrap) wrap.scrollLeft = 0;
 
+            const customersTableEl = container.querySelector('table');
+            if (customersTableEl && window.AdminTableSort) {
+                AdminTableSort.bind(customersTableEl, {
+                    mode: 'server',
+                    key: headerSort.key,
+                    dir: headerSort.dir,
+                    onSort: (key, dir) => {
+                        const map = {
+                            name: dir === 'asc' ? 'name_asc' : 'name_desc',
+                            spent: dir === 'asc' ? 'spent_asc' : 'spent_desc',
+                            loyalty: dir === 'asc' ? 'loyalty_asc' : 'loyalty_desc',
+                            joined: dir === 'asc' ? 'oldest' : 'recent',
+                        };
+                        const next = map[key] || 'recent';
+                        const st = this._customerState();
+                        st.sort = next;
+                        st.page = 1;
+                        const sortSel = $('customersSortFilter');
+                        if (sortSel) sortSel.value = next;
+                        this.loadCustomers();
+                    },
+                });
+            }
+
             this._renderPagination('customersPagination', data.pagination, (page) => {
                 this._customerState().page = page;
                 this.loadCustomers();
             });
         } catch (err) {
-            container.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--error);">Failed to load customers: ${esc(err.message)}</div>`;
+            container.classList.remove('loading');
+            container.innerHTML = `<div class="customers-empty customers-empty--error">Failed to load customers: ${esc(err.message)}</div>`;
         }
     };
 
@@ -296,8 +318,12 @@
         if (!el || !pagination) return;
         const { page, totalPages } = pagination;
         if (totalPages <= 1) { el.innerHTML = ''; return; }
+
+        if (!this._paginationHandlers) this._paginationHandlers = {};
+        this._paginationHandlers[containerId] = onPage;
+
         const btn = (label, target, disabled, active) =>
-            `<button class="btn btn-sm ${active ? 'btn-primary' : 'btn-secondary'}" ${disabled ? 'disabled' : ''} onclick="(${onPage.toString()})(${target})">${label}</button>`;
+            `<button type="button" class="btn btn-sm ${active ? 'btn-primary' : 'btn-secondary'}" ${disabled ? 'disabled' : ''} data-page="${target}">${label}</button>`;
         let html = '';
         html += btn('« First', 1, page === 1);
         html += btn('‹ Prev', page - 1, page === 1);
@@ -307,6 +333,18 @@
         html += btn('Next ›', page + 1, page === totalPages);
         html += btn('Last »', totalPages, page === totalPages);
         el.innerHTML = html;
+
+        if (!el._paginationBound) {
+            el._paginationBound = true;
+            el.addEventListener('click', (e) => {
+                const button = e.target.closest('button[data-page]');
+                if (!button || button.disabled) return;
+                const targetPage = parseInt(button.getAttribute('data-page'), 10);
+                if (!Number.isFinite(targetPage) || targetPage < 1) return;
+                const handler = this._paginationHandlers?.[containerId];
+                if (typeof handler === 'function') handler(targetPage);
+            });
+        }
     };
 
     // -----------------------------------------------------------------------
@@ -331,9 +369,15 @@
             </div>
 
             <div style="border-bottom:1px solid var(--gray-200);padding:0 1.5rem;display:flex;gap:0;overflow-x:auto;">
-                ${['profile','addresses','orders','gift-cards','loyalty','communications'].map((tab, i) => `
+                ${(() => {
+                    const shop = this._isShopAdminView?.() ?? false;
+                    const tabs = shop
+                        ? ['profile', 'addresses', 'orders', 'communications']
+                        : ['profile', 'addresses', 'orders', 'gift-cards', 'loyalty', 'communications'];
+                    return tabs.map((tab, i) => `
                     <button class="cust-tab" data-tab="${tab}" style="background:none;border:none;padding:1rem 1.25rem;cursor:pointer;font-weight:500;color:${i===0?'var(--primary-green)':'var(--gray-600)'};border-bottom:3px solid ${i===0?'var(--primary-green)':'transparent'};text-transform:capitalize;white-space:nowrap;">${tab.replace('-',' ')}</button>
-                `).join('')}
+                `).join('');
+                })()}
             </div>
 
             <div id="custTabContent" style="padding:1.5rem;"></div>
@@ -366,7 +410,7 @@
                     <div class="form-group"><label for="cust-${c.id}-last_name">Last Name</label><input class="form-input" id="cust-${c.id}-last_name" name="last_name" value="${esc(c.last_name||'')}"></div>
                     <div class="form-group"><label for="cust-${c.id}-preferred_name">Preferred Name</label><input class="form-input" id="cust-${c.id}-preferred_name" name="preferred_name" value="${esc(c.preferred_name||'')}"></div>
                     <div class="form-group"><label for="cust-${c.id}-email">Email</label><input class="form-input" id="cust-${c.id}-email" type="email" name="email" value="${esc(c.email||'')}"></div>
-                    <div class="form-group"><label for="cust-${c.id}-phone">Phone</label><input class="form-input" id="cust-${c.id}-phone" name="phone" type="tel" data-phone-us maxlength="14" inputmode="numeric" placeholder="(555) 555-0100" value="${phoneInputValue(c.phone)}"></div>
+                    <div class="form-group"><label for="cust-${c.id}-phone">Phone</label><input class="form-input" id="cust-${c.id}-phone" name="phone" type="tel" data-phone-us maxlength="14" inputmode="numeric" placeholder="(555) 555-5555" value="${phoneInputValue(c.phone)}"></div>
                     <div class="form-group"><label for="cust-${c.id}-dob">Date of Birth</label><input class="form-input" id="cust-${c.id}-dob" type="date" name="date_of_birth" value="${toDateInputValue(c.date_of_birth)}"></div>
                     <div class="form-group"><label for="cust-${c.id}-gender">Gender</label>
                         <select class="form-input" id="cust-${c.id}-gender" name="gender">
@@ -446,24 +490,48 @@
                 </table></div>` : '<p style="color:var(--gray-500);">No addresses on file.</p>'}`;
         }
         if (tab === 'orders') {
-            const channelLabel = (ch) => {
-                const labels = { online: 'Online', in_store: 'In-store', mobile: 'Mobile', phone: 'Phone', other: 'Other' };
-                const key = String(ch || 'online').toLowerCase();
-                return labels[key] || key;
-            };
-            return data.orders.length ? `
+            const shop = window.adminApp?._isShopOrdersView?.() ?? false;
+            if (shop) {
+                return data.orders.length ? `
                 <div class="table-container"><table class="table">
-                    <thead><tr><th>Order #</th><th>Channel</th><th>Status</th><th>Payment</th><th>Total</th><th>Date</th><th></th></tr></thead>
+                    <thead><tr><th>Job #</th><th>Payment</th><th>Total</th><th>Date</th><th></th></tr></thead>
                     <tbody>${data.orders.map(o => `
                         <tr>
-                            <td><strong>${esc(o.order_number)}</strong></td>
-                            <td>${esc(channelLabel(o.sales_channel))}</td>
-                            <td><span style="text-transform:capitalize;">${esc(o.status)}</span></td>
+                            <td><code>${esc(o.order_number || o.id)}</code></td>
                             <td>${esc(o.payment_status||'-')}</td>
                             <td>${fmtMoney(o.total_amount)}</td>
                             <td>${fmtDateTime(o.created_at)}</td>
                             <td><button type="button" class="btn btn-sm btn-secondary" onclick="viewOrder(${o.id})" title="View order"><i class="fas fa-eye"></i></button></td>
                         </tr>`).join('')}</tbody>
+                </table></div>` : '<p style="color:var(--gray-500);">No repair orders yet.</p>';
+            }
+            return data.orders.length ? `
+                <div class="table-container"><table class="table">
+                    <thead><tr><th>Status</th><th>Label</th><th>Payment</th><th>Total</th><th>Date</th><th></th></tr></thead>
+                    <tbody>${data.orders.map(o => {
+                const labelCell = (() => {
+                    if (o.label_url) {
+                        return o.label_printed_at
+                            ? '<span class="badge badge-success">Printed</span>'
+                            : '<span class="badge badge-warning">Ready to print</span>';
+                    }
+                    const ch = String(o.sales_channel || 'online').toLowerCase();
+                    if (ch === 'in_store') return '<span style="color:var(--gray-400);">—</span>';
+                    if (String(o.payment_status || '').toLowerCase() === 'paid') {
+                        return '<span class="badge badge-secondary">Needs label</span>';
+                    }
+                    return '<span style="color:var(--gray-400);">—</span>';
+                })();
+                return `
+                        <tr>
+                            <td><span style="text-transform:capitalize;">${esc(o.status)}</span></td>
+                            <td>${labelCell}</td>
+                            <td>${esc(o.payment_status||'-')}</td>
+                            <td>${fmtMoney(o.total_amount)}</td>
+                            <td>${fmtDateTime(o.created_at)}</td>
+                            <td><button type="button" class="btn btn-sm btn-secondary" onclick="viewOrder(${o.id})" title="View order"><i class="fas fa-eye"></i></button></td>
+                        </tr>`;
+            }).join('')}</tbody>
                 </table></div>` : '<p style="color:var(--gray-500);">No orders yet.</p>';
         }
         if (tab === 'gift-cards') {
@@ -763,7 +831,7 @@
                     <div class="form-group"><label for="admin-new-cust-first_name">First Name *</label><input class="form-input" id="admin-new-cust-first_name" name="first_name" required></div>
                     <div class="form-group"><label for="admin-new-cust-last_name">Last Name *</label><input class="form-input" id="admin-new-cust-last_name" name="last_name" required></div>
                     <div class="form-group"><label for="admin-new-cust-email">Email *</label><input class="form-input" id="admin-new-cust-email" type="email" name="email" required></div>
-                    <div class="form-group"><label for="admin-new-cust-phone">Phone</label><input class="form-input" id="admin-new-cust-phone" name="phone" type="tel" data-phone-us maxlength="14" inputmode="numeric" placeholder="(555) 555-0100"></div>
+                    <div class="form-group"><label for="admin-new-cust-phone">Phone</label><input class="form-input" id="admin-new-cust-phone" name="phone" type="tel" data-phone-us maxlength="14" inputmode="numeric" placeholder="(555) 555-5555"></div>
                     <div class="form-group"><label for="admin-new-cust-dob">Date of Birth</label><input class="form-input" id="admin-new-cust-dob" type="date" name="date_of_birth"></div>
                     <div class="form-group"><label for="admin-new-cust-type">Type</label>
                         <select class="form-input" id="admin-new-cust-type" name="customer_type">
@@ -822,7 +890,7 @@
 
     AdminApp.prototype._giftCardState = function () {
         if (!this.giftCardsState) {
-            this.giftCardsState = { page: 1, limit: 25, total: 0, search: '', card_type: '', status: '' };
+            this.giftCardsState = { page: 1, limit: 25, total: 0, search: '', card_type: '', status: '', sort: 'issued', dir: 'desc' };
         }
         return this.giftCardsState;
     };
@@ -888,6 +956,8 @@
         if (s.search) params.set('search', s.search);
         if (s.card_type) params.set('card_type', s.card_type);
         if (s.status) params.set('status', s.status);
+        if (s.sort) params.set('sort', s.sort);
+        if (s.dir) params.set('dir', s.dir);
 
         try {
             const data = await this.apiRequest(`/admin/gift-cards?${params}`);
@@ -901,23 +971,45 @@
                 <div class="table-container">
                     <table class="table">
                         <thead><tr>
-                            <th>Code</th><th>Type</th><th>Status</th><th>Initial</th><th>Balance</th>
-                            <th>Customer</th><th>Recipient</th><th>Issued</th><th></th>
+                            <th data-sort="code" data-sort-type="text" data-sort-default="asc">Code</th>
+                            <th data-sort="type" data-sort-type="text" data-sort-default="asc">Type</th>
+                            <th data-sort="status" data-sort-type="text" data-sort-default="asc">Status</th>
+                            <th data-sort="initial" data-sort-type="number" data-sort-default="desc">Initial</th>
+                            <th data-sort="balance" data-sort-type="number" data-sort-default="desc">Balance</th>
+                            <th data-sort="customer" data-sort-type="text" data-sort-default="asc">Customer</th>
+                            <th data-sort="recipient" data-sort-type="text" data-sort-default="asc">Recipient</th>
+                            <th data-sort="issued" data-sort-type="date" data-sort-default="desc">Issued</th>
+                            <th></th>
                         </tr></thead>
                         <tbody>${data.gift_cards.map(g => `
                             <tr>
-                                <td><code>${esc(g.code)}</code>${g.physical_serial_number?`<br><small style="color:var(--gray-500);">SN: ${esc(g.physical_serial_number)}</small>`:''}</td>
-                                <td><span style="text-transform:capitalize;">${esc(g.card_type)}</span></td>
-                                <td>${this._gcStatusBadge(g.status)}</td>
-                                <td>${fmtMoney(g.initial_balance, g.currency)}</td>
-                                <td><strong>${fmtMoney(g.current_balance, g.currency)}</strong></td>
-                                <td>${g.customer_id ? `<a href="#" onclick="event.preventDefault();adminApp.showCustomerProfile(${g.customer_id})">${esc(g.customer_first_name||'')} ${esc(g.customer_last_name||'')}</a>` : '—'}</td>
-                                <td>${esc(g.recipient_email||g.recipient_name||'—')}</td>
-                                <td>${fmtDate(g.issued_at)}</td>
+                                <td data-sort-value="${esc(g.code || '')}"><code>${esc(g.code)}</code>${g.physical_serial_number?`<br><small style="color:var(--gray-500);">SN: ${esc(g.physical_serial_number)}</small>`:''}</td>
+                                <td data-sort-value="${esc(g.card_type || '')}"><span style="text-transform:capitalize;">${esc(g.card_type)}</span></td>
+                                <td data-sort-value="${esc(g.status || '')}">${this._gcStatusBadge(g.status)}</td>
+                                <td data-sort-value="${Number(g.initial_balance) || 0}">${fmtMoney(g.initial_balance, g.currency)}</td>
+                                <td data-sort-value="${Number(g.current_balance) || 0}"><strong>${fmtMoney(g.current_balance, g.currency)}</strong></td>
+                                <td data-sort-value="${esc((g.customer_last_name || '') + ' ' + (g.customer_first_name || ''))}">${g.customer_id ? `<a href="#" onclick="event.preventDefault();adminApp.showCustomerProfile(${g.customer_id})">${esc(g.customer_first_name||'')} ${esc(g.customer_last_name||'')}</a>` : '—'}</td>
+                                <td data-sort-value="${esc(g.recipient_email||g.recipient_name||'')}">${esc(g.recipient_email||g.recipient_name||'—')}</td>
+                                <td data-sort-value="${esc(g.issued_at || '')}">${fmtDate(g.issued_at)}</td>
                                 <td><button class="btn btn-sm btn-secondary" onclick="adminApp.showGiftCardDetail(${g.id})"><i class="fas fa-eye"></i></button></td>
                             </tr>`).join('')}</tbody>
                     </table>
                 </div>`;
+            const gcTable = container.querySelector('table');
+            if (gcTable && window.AdminTableSort) {
+                AdminTableSort.bind(gcTable, {
+                    mode: 'server',
+                    key: s.sort || 'issued',
+                    dir: s.dir || 'desc',
+                    onSort: (key, dir) => {
+                        const st = this._giftCardState();
+                        st.sort = key;
+                        st.dir = dir;
+                        st.page = 1;
+                        this.loadGiftCards();
+                    },
+                });
+            }
             this._renderPagination('giftCardsPagination', data.pagination, (page) => {
                 this._giftCardState().page = page;
                 this.loadGiftCards();

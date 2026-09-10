@@ -1,5 +1,5 @@
 /**
- * Your Store — unified dismiss controls (red square + white X + hover/active).
+ * Business One — unified dismiss controls (red square + white X + hover/active).
  * Load AFTER other site CSS (and before page inline <style> if any) so generic
  * `button { padding }` rules and legacy overrides cannot flatten these controls.
  */

@@ -32,7 +32,7 @@ function sanitizePromoBannerPayload(raw) {
         linkLabel: String(parsed.linkLabel || '').trim().slice(0, 80),
         icon: String(parsed.icon || '').trim().slice(0, 12),
         iconUrl,
-        customBg: hex(parsed.customBg, '#047857'),
+        customBg: hex(parsed.customBg, '#ff9b1f'),
         customText: hex(parsed.customText, '#ffffff'),
         customAccent: hex(parsed.customAccent, '#d4af37'),
     };

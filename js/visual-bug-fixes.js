@@ -1,4 +1,4 @@
-// Visual Bug Fixes for Your Store
+// Visual Bug Fixes for Business One
 // Addresses carousel flickering, scroll bar issues, and image loading problems
 
 function hmHerbsIsCheckoutPage() {

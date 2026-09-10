@@ -84,6 +84,7 @@ const TABLES = {
             shift_session_id INT NULL,
             clock_in DATETIME NOT NULL,
             clock_out DATETIME NULL,
+            bay VARCHAR(64) NULL,
             source ENUM('pos', 'admin') NOT NULL DEFAULT 'pos',
             notes VARCHAR(500) NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -206,6 +207,23 @@ async function ensurePersonnelSchema(pool) {
             column: 'can_view_shop_floor',
             sql: `ALTER TABLE pos_employees ADD COLUMN can_view_shop_floor TINYINT(1) NOT NULL DEFAULT 0
                   COMMENT 'May view all ongoing shop jobs and WIP board on the register'`,
+        },
+        {
+            column: 'can_build_shop_estimate',
+            sql: `ALTER TABLE pos_employees ADD COLUMN can_build_shop_estimate TINYINT(1) NULL DEFAULT NULL
+                  COMMENT 'May add parts/labor on shop repair orders; NULL inherits from can_authorize'`,
+        },
+        {
+            column: 'is_technician',
+            sql: `ALTER TABLE pos_employees ADD COLUMN is_technician TINYINT(1) NOT NULL DEFAULT 0
+                  COMMENT 'Shop-floor technician — may station at a bay on clock-in; assignable on appointments server-side'`,
+        },
+    ]);
+    await applyColumnPatches(pool, 'pos_time_entries', [
+        {
+            column: 'bay',
+            sql: `ALTER TABLE pos_time_entries ADD COLUMN bay VARCHAR(64) NULL
+                  COMMENT 'Bay/booth/rack where technician is stationed for this clock-in'`,
         },
     ]);
     try {

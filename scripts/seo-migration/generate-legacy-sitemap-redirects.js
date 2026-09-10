@@ -84,7 +84,7 @@ async function main() {
 
     const outPath = path.join(rootDir, 'redirects-legacy-sitemap.csv');
     const header = [
-        '# Legacy clean URLs from the old hmherbs.com sitemap (not covered by Concrete /index.php rules).',
+        '# Legacy clean URLs from the old example.com sitemap (not covered by Concrete /index.php rules).',
         '# Loaded automatically with redirects-301.csv. Regenerate:',
         '#   node scripts/seo-migration/generate-legacy-sitemap-redirects.js',
         '#'

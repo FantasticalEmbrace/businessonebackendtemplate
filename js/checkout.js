@@ -2430,6 +2430,18 @@ class CheckoutManager {
         document.getElementById('checkout-loyalty-max')?.addEventListener('click', () => this.applyMaxCheckoutLoyaltyPoints());
         document.getElementById('checkout-giftcard-max')?.addEventListener('click', () => this.applyMaxCheckoutGiftCard());
         document.getElementById('checkout-giftcard-select')?.addEventListener('change', () => this.onCheckoutGiftCardSelected());
+        document.querySelectorAll('[data-loyalty-cash-pct]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const pct = Number(btn.getAttribute('data-loyalty-cash-pct'));
+                if (Number.isFinite(pct) && pct > 0) this.applyCheckoutLoyaltyCashPercent(pct);
+            });
+        });
+        document.querySelectorAll('[data-loyalty-points-pct]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const pct = Number(btn.getAttribute('data-loyalty-points-pct'));
+                if (Number.isFinite(pct) && pct > 0) this.applyCheckoutLoyaltyPointsPercent(pct);
+            });
+        });
     }
 
     async loadCheckoutRewards() {
@@ -2562,12 +2574,37 @@ class CheckoutManager {
         const due = this.getCheckoutAmountDue();
         const row = document.getElementById('checkout-rewards-applied-row');
         const val = document.getElementById('checkout-rewards-applied-value');
+        const detail = document.getElementById('checkout-rewards-detail');
         const dueRow = document.getElementById('checkout-card-due-row');
         const dueVal = document.getElementById('checkout-card-due-value');
         const totalLabel = document.getElementById('checkout-total-label');
+        const tenders = this.getCheckoutStoreTenders();
+        const tenderLabels = {
+            loyalty_cash: 'Store credit',
+            loyalty_points: 'Loyalty points',
+            gift_card: 'Gift card'
+        };
         if (row && val) {
             row.style.display = applied > 0.005 ? 'flex' : 'none';
             val.textContent = `−$${applied.toFixed(2)}`;
+        }
+        if (detail) {
+            if (tenders.length) {
+                detail.style.display = 'block';
+                detail.innerHTML = tenders
+                    .map((t) => {
+                        const label = tenderLabels[t.type] || t.type;
+                        const extra =
+                            t.type === 'loyalty_points' && t.points
+                                ? ` (${t.points} pts)`
+                                : '';
+                        return `<div style="display:flex;justify-content:space-between;gap:0.5rem;"><span>${label}${extra}</span><span>−$${Number(t.amount).toFixed(2)}</span></div>`;
+                    })
+                    .join('');
+            } else {
+                detail.style.display = 'none';
+                detail.innerHTML = '';
+            }
         }
         if (dueRow && dueVal) {
             dueRow.style.display = applied > 0.005 && due > 0.005 ? 'flex' : 'none';
@@ -2602,6 +2639,16 @@ class CheckoutManager {
         this.updateCheckoutRewardsSummary();
     }
 
+    applyCheckoutLoyaltyCashPercent(percent) {
+        const pct = Math.min(100, Math.max(0, Number(percent) || 0)) / 100;
+        const bal = Number(this.loyaltyProfile?.cash_balance) || 0;
+        const room = this.checkoutTenderRoom('loyalty_cash');
+        const usable = Math.min(bal, room);
+        const el = document.getElementById('checkout-loyalty-cash');
+        if (el) el.value = (Math.round(usable * pct * 100) / 100).toFixed(2);
+        this.updateCheckoutRewardsSummary();
+    }
+
     applyMaxCheckoutLoyaltyPoints() {
         const bal = Number(this.loyaltyProfile?.points_balance) || 0;
         const dollarPerPoint = Number(this.loyaltySettings?.dollarPerPoint) || 0.01;
@@ -2609,6 +2656,17 @@ class CheckoutManager {
         const maxPts = Math.min(bal, Math.floor(room / dollarPerPoint));
         const el = document.getElementById('checkout-loyalty-points');
         if (el) el.value = String(maxPts);
+        this.updateCheckoutRewardsSummary();
+    }
+
+    applyCheckoutLoyaltyPointsPercent(percent) {
+        const pct = Math.min(100, Math.max(0, Number(percent) || 0)) / 100;
+        const bal = Number(this.loyaltyProfile?.points_balance) || 0;
+        const dollarPerPoint = Number(this.loyaltySettings?.dollarPerPoint) || 0.01;
+        const room = this.checkoutTenderRoom('loyalty_points');
+        const maxPts = Math.min(bal, Math.floor(room / dollarPerPoint));
+        const el = document.getElementById('checkout-loyalty-points');
+        if (el) el.value = String(Math.floor(maxPts * pct));
         this.updateCheckoutRewardsSummary();
     }
 
@@ -2883,7 +2941,7 @@ class CheckoutManager {
             right: 20px;
             background: ${
                 type === 'success'
-                    ? '#047857'
+                    ? '#ff9b1f'
                     : type === 'error'
                       ? '#ef4444'
                       : type === 'warning'

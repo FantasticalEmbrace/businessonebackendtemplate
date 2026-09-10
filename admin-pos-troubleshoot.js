@@ -17,7 +17,7 @@
 
     function loadNetworkClientState() {
         try {
-            let raw = localStorage.getItem('bo_pos_network_setup_v1') || localStorage.getItem('hmherbs_pos_network_setup_v1');
+            const raw = localStorage.getItem('bo_pos_network_setup_v1');
             const parsed = raw ? JSON.parse(raw) : {};
             return {
                 skipped: Array.isArray(parsed.skipped) ? parsed.skipped : [],
@@ -194,7 +194,8 @@
         const hub = window.AdminPosHub;
         if (!hub) return;
 
-        const goTab = actionId.startsWith('go_') ? actionId.replace('go_', '') : meta.tab || null;
+        let goTab = actionId.startsWith('go_') ? actionId.replace('go_', '') : meta.tab || null;
+        if (goTab === 'general') goTab = 'operations';
         if (goTab && hub.switchPosTab) {
             hub.switchPosTab(goTab);
         }

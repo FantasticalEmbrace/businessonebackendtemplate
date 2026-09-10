@@ -1,4 +1,4 @@
-// Security Utilities for Your Store
+// Security Utilities for Business One
 // Provides secure DOM manipulation and input sanitization
 
 class SecurityUtils {

@@ -1,6 +1,6 @@
 'use strict';
 
-/** Store appointments are always in Eastern Time (Fort Oglethorpe, GA). */
+/** Store appointments default to Eastern Time (Business One). */
 const STORE_TIMEZONE = 'America/New_York';
 
 function normalizeTimeHm(value) {

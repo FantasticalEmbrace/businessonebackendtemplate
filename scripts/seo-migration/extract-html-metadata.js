@@ -4,7 +4,7 @@
  * Usage: node scripts/seo-migration/extract-html-metadata.js
  *         node scripts/seo-migration/extract-html-metadata.js --write
  *
- * Does not replace a Screaming Frog crawl of https://hmherbs.com — use both.
+ * Does not replace a Screaming Frog crawl of https://businessonecomprehensive.com — use both.
  */
 
 const fs = require('fs');
@@ -12,7 +12,7 @@ const path = require('path');
 
 const root = path.join(__dirname, '..', '..');
 const write = process.argv.includes('--write');
-const base = 'https://hmherbs.com';
+const base = 'https://businessonecomprehensive.com';
 
 const SKIP_NAMES = new Set([
     'check-upload.html',
@@ -80,7 +80,7 @@ function main() {
         const outFile = path.join(outDir, 'html-metadata-from-repo.csv');
         fs.writeFileSync(outFile, csv, 'utf8');
         console.log('Wrote', outFile, `(${names.length} files)`);
-        console.log('Tip: merge with live crawl; clean URLs on hmherbs.com may omit .html');
+        console.log('Tip: merge with live crawl; clean URLs on example.com may omit .html');
     } else {
         console.log(csv);
     }

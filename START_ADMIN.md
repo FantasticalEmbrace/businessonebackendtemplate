@@ -11,7 +11,7 @@ npm start
 
 You should see:
 ```
-Your Store API Server running on port 3001
+Business One API Server running on port 3001
 Environment: development
 Frontend URL: http://localhost:8000
 ```
@@ -25,7 +25,7 @@ Frontend URL: http://localhost:8000
 
 ## Step 3: Login
 
-- **Email:** `store@example.com`
+- **Email:** `info@businessonecomprehensive.com`
 - **Password:** `admin1`
 
 ---

@@ -35,7 +35,7 @@ const PRODUCT_IMPORT_TEMPLATE_SAMPLE = [
     '24.99',
     '25',
     '8.0',
-    'https://example.com/images/sample-vitamin-c.jpg',
+    'https://businessonecomprehensive.com/images/sample-vitamin-c.jpg',
     'true',
     'true',
     'true',

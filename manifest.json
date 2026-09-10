@@ -1,15 +1,15 @@
 {
-  "name": "Your Store",
-  "short_name": "Your Store",
-  "description": "Premium natural health products, herbs, vitamins, and wellness supplements organized by health conditions.",
+  "name": "Business One",
+  "short_name": "Business One",
+  "description": "Business One — POS, ecommerce, payments, phones, and managed business solutions.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#10b981",
+  "theme_color": "#ff9b1f",
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "en-US",
-  "categories": ["health", "wellness", "shopping", "medical"],
+  "categories": ["business", "productivity", "shopping"],
   "icons": [
     {
       "src": "/images/icon-72x72.png",

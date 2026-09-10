@@ -1,6 +1,6 @@
 /**
  * MX browser-side 3-way payment helper.
- * Card data is posted directly to MX — never through Your Store servers.
+ * Card data is posted directly to MX — never through Business One servers.
  */
 (function (global) {
     'use strict';

@@ -5,7 +5,7 @@ const path = require('path');
 
 class QuickImageDownloader {
     constructor() {
-        this.baseUrl = 'https://hmherbs.com';
+        this.baseUrl = 'https://businessonecomprehensive.com';
         this.imagesDir = path.join(__dirname, '../../images/products');
         this.downloadedImages = new Map();
         this.stats = {

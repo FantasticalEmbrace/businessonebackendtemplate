@@ -2643,7 +2643,7 @@ class AdminApp {
                 const v = (document.getElementById('promo-icon-url')?.value || '').trim().slice(0, 200);
                 return /^\/uploads\/promo-icons\/[a-zA-Z0-9._-]+$/.test(v) ? v : '';
             })(),
-            customBg: (document.getElementById('promo-custom-bg')?.value || '#047857').trim(),
+            customBg: (document.getElementById('promo-custom-bg')?.value || '#ff9b1f').trim(),
             customText: (document.getElementById('promo-custom-text')?.value || '#ffffff').trim(),
             customAccent: (document.getElementById('promo-custom-accent')?.value || '#d4af37').trim(),
         };
@@ -2665,7 +2665,7 @@ class AdminApp {
         if (el('promo-link-label')) el('promo-link-label').value = cfg.linkLabel || '';
         if (el('promo-icon')) el('promo-icon').value = cfg.icon || '';
         if (el('promo-icon-url')) el('promo-icon-url').value = cfg.iconUrl || '';
-        if (el('promo-custom-bg')) el('promo-custom-bg').value = cfg.customBg || '#047857';
+        if (el('promo-custom-bg')) el('promo-custom-bg').value = cfg.customBg || '#ff9b1f';
         if (el('promo-custom-text')) el('promo-custom-text').value = cfg.customText || '#ffffff';
         if (el('promo-custom-accent')) el('promo-custom-accent').value = cfg.customAccent || '#d4af37';
         this._togglePromoCustomColors();
@@ -4097,7 +4097,7 @@ class AdminApp {
                 // eslint-disable-next-line no-new
                 new URL(value);
             } catch {
-                const errMsg = 'Enter a full http(s) URL (e.g. https://store.example.com).';
+                const errMsg = 'Enter a full http(s) URL (e.g. https://businessonecomprehensive.com).';
                 if (msg) {
                     msg.textContent = errMsg;
                     msg.style.color = 'var(--error)';
@@ -11438,7 +11438,7 @@ async function matchProductsToBrands() {
     const proceed = await app.showAdminConfirm({
         title: 'Match products to brands?',
         message:
-            'Your Store will match catalog products to brands using name prefixes. Many product rows may be updated. Continue?',
+            'Business One will match catalog products to brands using name prefixes. Many product rows may be updated. Continue?',
         confirmLabel: 'Run match',
         cancelLabel: 'Cancel',
     });
@@ -13392,7 +13392,7 @@ function createBrandModal(title, formId, isEdit = false) {
     urlInput.setAttribute('type', 'url');
     urlInput.id = `${isEdit ? 'edit' : 'add'}-brand-logo`;
     urlInput.setAttribute('name', 'logo_url');
-    urlInput.setAttribute('placeholder', 'Or enter logo URL (https://example.com/logo.png)');
+    urlInput.setAttribute('placeholder', 'Or enter logo URL (https://businessonecomprehensive.com/logo.png)');
     urlInput.style.width = '100%';
     urlInput.style.marginTop = '0.5rem';
     urlInput.style.padding = '0.75rem';
@@ -13451,7 +13451,7 @@ function createBrandModal(title, formId, isEdit = false) {
     linksSection.appendChild(logoSection);
 
     const urlFields = [
-        { type: 'input', label: 'Website URL', id: `${isEdit ? 'edit' : 'add'}-brand-website`, name: 'website_url', inputType: 'url', placeholder: 'https://example.com' }
+        { type: 'input', label: 'Website URL', id: `${isEdit ? 'edit' : 'add'}-brand-website`, name: 'website_url', inputType: 'url', placeholder: 'https://businessonecomprehensive.com' }
     ];
 
     urlFields.forEach(field => {
@@ -14014,7 +14014,7 @@ function createCategoryModal(title, formId, isEdit = false) {
     imageInput.setAttribute('type', 'url');
     imageInput.id = `${isEdit ? 'edit' : 'add'}-category-image`;
     imageInput.setAttribute('name', 'image_url');
-    imageInput.setAttribute('placeholder', 'https://example.com/image.png');
+    imageInput.setAttribute('placeholder', 'https://businessonecomprehensive.com/image.png');
     imageInput.style.width = '100%';
     imageGroup.appendChild(imageInput);
     mediaSection.appendChild(imageGroup);
@@ -14386,7 +14386,7 @@ async function matchProductsToCategories() {
     const go = await app.showAdminConfirm({
         title: 'Match products to categories?',
         message:
-            'Your Store will match catalog products to categories using names and descriptions. Many rows may be updated. Continue?',
+            'Business One will match catalog products to categories using names and descriptions. Many rows may be updated. Continue?',
         confirmLabel: 'Run match',
         cancelLabel: 'Cancel',
     });

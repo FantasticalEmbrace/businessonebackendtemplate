@@ -59,13 +59,30 @@ class GoogleBusinessProfileService {
     }
 
     hasClientCredentials() {
-        return Boolean(process.env.GBP_CLIENT_ID && process.env.GBP_CLIENT_SECRET);
+        const id = (
+            process.env.GOOGLE_OAUTH_CLIENT_ID ||
+            process.env.GBP_CLIENT_ID ||
+            process.env.GCAL_CLIENT_ID ||
+            ''
+        ).trim();
+        const secret = (
+            process.env.GOOGLE_OAUTH_CLIENT_SECRET ||
+            process.env.GBP_CLIENT_SECRET ||
+            process.env.GCAL_CLIENT_SECRET ||
+            ''
+        ).trim();
+        return Boolean(id && secret);
     }
 
     /** Cloud project number from OAuth client id (e.g. 123456789-abc.apps.googleusercontent.com). */
     getOAuthProjectNumber() {
-        const id = process.env.GBP_CLIENT_ID || '';
-        const m = /^(\d+)-/.exec(id.trim());
+        const id = (
+            process.env.GOOGLE_OAUTH_CLIENT_ID ||
+            process.env.GBP_CLIENT_ID ||
+            process.env.GCAL_CLIENT_ID ||
+            ''
+        ).trim();
+        const m = /^(\d+)-/.exec(id);
         return m ? m[1] : null;
     }
 
@@ -159,9 +176,21 @@ class GoogleBusinessProfileService {
     }
 
     _oauthClient(redirectUri) {
+        const clientId = (
+            process.env.GOOGLE_OAUTH_CLIENT_ID ||
+            process.env.GBP_CLIENT_ID ||
+            process.env.GCAL_CLIENT_ID ||
+            ''
+        ).trim();
+        const clientSecret = (
+            process.env.GOOGLE_OAUTH_CLIENT_SECRET ||
+            process.env.GBP_CLIENT_SECRET ||
+            process.env.GCAL_CLIENT_SECRET ||
+            ''
+        ).trim();
         return new google.auth.OAuth2(
-            process.env.GBP_CLIENT_ID,
-            process.env.GBP_CLIENT_SECRET,
+            clientId,
+            clientSecret,
             redirectUri || process.env.GBP_REDIRECT_URI || 'http://localhost:3001/api/admin/settings/google-business/callback'
         );
     }
@@ -200,6 +229,19 @@ class GoogleBusinessProfileService {
             locationName = (await this._getSetting(pool, SETTINGS_KEYS.locationName)) || '';
             connectedEmail = (await this._getSetting(pool, SETTINGS_KEYS.connectedEmail)) || '';
             connectedAt = (await this._getSetting(pool, SETTINGS_KEYS.connectedAt)) || '';
+            if (!refreshToken) {
+                try {
+                    const googleAccountOAuth = require('./google-account-oauth');
+                    refreshToken = await googleAccountOAuth.getSharedRefreshToken(pool);
+                    if (refreshToken && !connectedEmail) {
+                        const shared = await googleAccountOAuth.loadCredentials(pool);
+                        connectedEmail = shared.connectedEmail || '';
+                        connectedAt = shared.connectedAt || connectedAt;
+                    }
+                } catch (_) {
+                    /* optional shared account */
+                }
+            }
         }
 
         if (!refreshToken && process.env.GBP_REFRESH_TOKEN) {

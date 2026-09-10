@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
 /**
- * HM Herbs Admin Password Reset Utility
+ * Business One Admin Password Reset Utility
  * 
- * This script allows you to reset the admin password for the HM Herbs application.
+ * This script allows you to reset the admin password for the Business One application.
  * 
  * Usage:
  *   node scripts/reset-admin-password.js
- *   node scripts/reset-admin-password.js --email hmherbs1@gmail.com --password newpassword123
+ *   node scripts/reset-admin-password.js --email info@businessonecomprehensive.com --password newpassword123
  */
 
 const bcrypt = require('bcrypt');
@@ -29,7 +29,7 @@ function question(prompt) {
 }
 
 async function resetAdminPassword() {
-    console.log('🔑 HM Herbs Admin Password Reset Utility\n');
+    console.log('🔑 Business One Admin Password Reset Utility\n');
     
     try {
         // Parse command line arguments
@@ -49,9 +49,9 @@ async function resetAdminPassword() {
         
         // Get email if not provided
         if (!email) {
-            email = await question('Enter admin email (default: hmherbs1@gmail.com): ');
+            email = await question('Enter admin email (default: info@businessonecomprehensive.com): ');
             if (!email.trim()) {
-                email = 'hmherbs1@gmail.com';
+                email = 'info@businessonecomprehensive.com';
             }
         }
         

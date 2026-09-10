@@ -215,7 +215,6 @@
                 if (tab === 'shifts') {
                     loadShiftEmployeeSelect();
                     loadScheduledShifts();
-                    loadShiftSessions();
                 }
             });
         });
@@ -265,6 +264,9 @@
             if (fromEl && !fromEl.value) fromEl.value = weekAgo.toISOString().slice(0, 10);
             if (toEl && !toEl.value) toEl.value = today.toISOString().slice(0, 10);
             if (dayEl && !dayEl.value) dayEl.value = today.toISOString().slice(0, 10);
+            if (document.getElementById('pos-shift-sessions-list')) {
+                loadShiftSessions();
+            }
         },
         loadTimesheets,
         loadShiftSessions,

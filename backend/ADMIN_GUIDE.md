@@ -16,7 +16,7 @@ npm start
 ```
 
 ### 2. Admin Login
-- **Default Admin**: store@example.com
+- **Default Admin**: info@businessonecomprehensive.com
 - **Password**: Use the hashed password from seed data or create new admin
 - **Login URL**: `POST /api/admin/auth/login`
 
@@ -116,7 +116,7 @@ The import tool supports flexible CSV column mapping. Use these column headers:
 ### Sample CSV Row
 ```csv
 sku,name,brand,category,price,health_categories,images
-TN-CURA-375,Terry Naturally Cura Med 375mg,Terry Naturally,Herbs & Botanicals,69.95,"Joint & Arthritis,Anti-Aging",https://example.com/image.jpg
+TN-CURA-375,Terry Naturally Cura Med 375mg,Terry Naturally,Herbs & Botanicals,69.95,"Joint & Arthritis,Anti-Aging",https://businessonecomprehensive.com/image.jpg
 ```
 
 ### Health Categories
@@ -273,4 +273,4 @@ For technical support with the admin panel or import tools:
 
 **Built for Scale and Efficiency**
 
-This admin system is designed to handle Your Store' complete 10,000+ product catalog with professional-grade tools for inventory management, order processing, and EDSA service coordination.
+This admin system is designed to handle Business One' complete 10,000+ product catalog with professional-grade tools for inventory management, order processing, and EDSA service coordination.

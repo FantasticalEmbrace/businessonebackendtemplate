@@ -200,6 +200,9 @@ const googleCalendarService = require('../services/google-calendar');
 const { resolveCanManageStoreHours } = require('../utils/storeHoursAccess');
 const { TaxLedgerService, toDateKey } = require('../services/taxLedger');
 const { TaxAccountantReportService } = require('../services/taxAccountantReport');
+const storeTaxSettings = require('../services/storeTaxSettings');
+const { resolveEcommerceStoreAccess } = require('../services/storeEcommerceTier');
+const { isPrincipalStore } = require('../services/storeBranding');
 
 async function loadGoogleBusinessStoreHours(pool) {
     const keys = [...GBP_STORE_HOUR_KEYS];
@@ -544,12 +547,12 @@ router.post('/auth/forgot-password', adminAuthLimiter, async (req, res) => {
                 const first = String(admin.first_name || '').trim() || 'there';
                 const result = await sendMail({
                     to: admin.email,
-                    subject: 'H&M Herbs Admin — reset your password',
+                    subject: 'Business One Admin — reset your password',
                     html: `
                         <h2>Password reset</h2>
                         <p>Hello ${first},</p>
-                        <p>You requested to reset your Your Store admin password.</p>
-                        <p><a href="${resetUrl}" style="background:#10b981;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;display:inline-block;">Choose a new password</a></p>
+                        <p>You requested to reset your Business One admin password.</p>
+                        <p><a href="${resetUrl}" style="background:#ff9b1f;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;display:inline-block;">Choose a new password</a></p>
                         <p>Or copy this link into your browser:</p>
                         <p style="word-break:break-all;">${resetUrl}</p>
                         <p>This link expires in one hour. If you did not ask for this, you can ignore this email.</p>
@@ -628,6 +631,12 @@ router.post('/auth/reset-password', adminAuthLimiter, async (req, res) => {
 router.get('/auth/me', ...adminAuth, async (req, res) => {
     const role = normalizeAdminRole(req.admin.role);
     const canHours = await resolveCanManageStoreHours(req.pool, role, req.admin.id);
+    const ecommerceAccess = await resolveEcommerceStoreAccess(req.pool);
+    const principalStore = await isPrincipalStore(req.pool);
+    let allowedSections = allowedSectionsForRole(role);
+    if (!ecommerceAccess.enabled && Array.isArray(allowedSections)) {
+        allowedSections = allowedSections.filter((section) => section !== 'marketing');
+    }
     res.json({
         admin: {
             id: req.admin.id,
@@ -637,11 +646,14 @@ router.get('/auth/me', ...adminAuth, async (req, res) => {
             role,
             roleLabel: ROLE_LABELS[role] || role,
         },
-        allowedSections: allowedSectionsForRole(role),
+        allowedSections,
         defaultSection: defaultSectionForRole(role),
         roles: ADMIN_ROLES.map((r) => ({ id: r, label: ROLE_LABELS[r] || r })),
         canManageStoreHours: canHours,
         canManageStoreHoursDelegation: canManageStoreHours(role),
+        ecommerceStore: Boolean(ecommerceAccess.enabled),
+        ecommerceAccessReason: ecommerceAccess.reason,
+        isPrincipalStore: Boolean(principalStore),
     });
 });
 
@@ -835,7 +847,7 @@ router.get('/products', ...adminAuth, async (req, res) => {
             throw tableError; // Re-throw if it's a different error
         }
 
-        const { page = 1, limit = 20, search, brand, category, status } = req.query;
+        const { page = 1, limit = 20, search, brand, category, status, sort, dir } = req.query;
         // Ensure page and limit are integers
         const pageInt = parseInt(page, 10) || 1;
         const limitInt = parseInt(limit, 10) || 20;
@@ -901,9 +913,19 @@ router.get('/products', ...adminAuth, async (req, res) => {
             return res.status(400).json({ error: 'Invalid pagination parameters' });
         }
 
-        // Add ORDER BY, LIMIT, and OFFSET - embed values directly (MySQL2 has issues with LIMIT/OFFSET placeholders)
-        // Ensure values are safe integers (already validated above)
-        query += ' ORDER BY p.created_at DESC LIMIT ' + String(limitParam) + ' OFFSET ' + String(offsetParam);
+        const sortDir = String(dir || '').toLowerCase() === 'asc' ? 'ASC' : 'DESC';
+        const productSortMap = {
+            sku: `p.sku ${sortDir}`,
+            name: `p.name ${sortDir}`,
+            brand: `b.name ${sortDir}`,
+            price: `p.price ${sortDir}`,
+            cost: `p.cost_price ${sortDir}`,
+            stock: `p.inventory_quantity ${sortDir}`,
+            created_at: `p.created_at ${sortDir}`,
+        };
+        const productOrderBy = productSortMap[String(sort || '')] || 'p.created_at DESC';
+
+        query += ' ORDER BY ' + productOrderBy + ' LIMIT ' + String(limitParam) + ' OFFSET ' + String(offsetParam);
 
         // Use queryParams directly (no LIMIT/OFFSET params needed)
         const finalParams = queryParams;
@@ -3411,13 +3433,13 @@ router.delete('/settings/pos-devices/:id', ...adminAuth, requirePermission('mana
     }
 });
 
-// Cancel in-flight catalog scrape (admin UI Cancel button)
+// Cancel in-flight Business One scrape (admin UI Cancel button)
 router.post('/scrape-products/cancel', ...adminAuth, requirePermission('manager'), async (req, res) => {
     const cancelled = activeScrapeJobs.cancelActive('Cancelled from admin panel');
     res.json({ cancelled, message: cancelled ? 'Scrape cancellation requested' : 'No scrape is running' });
 });
 
-// Scrape products from source website
+// Scrape Products from Business One Website
 router.post('/scrape-products', ...adminAuth, requirePermission('manager'), async (req, res) => {
     // Check if client wants SSE (Server-Sent Events) for progress updates
     const useSSE = (req.headers.accept && req.headers.accept.includes('text/event-stream')) || req.query.progress === 'true';
@@ -3485,7 +3507,7 @@ router.post('/scrape-products', ...adminAuth, requirePermission('manager'), asyn
         };
 
         try {
-            console.log('Starting website catalog scraping...');
+            console.log('Starting Business One website scraping...');
 
             // Send initial progress immediately
             sendProgress({
@@ -4644,10 +4666,44 @@ router.get('/tax-ledger/overview', ...adminAuth, async (req, res) => {
         const date = String(req.query.date || toDateKey()).slice(0, 10);
         const service = new TaxLedgerService(req.pool);
         const overview = await service.getDailyOverview(date);
-        res.json({ overview });
+        const principalStore = await isPrincipalStore(req.pool);
+        const taxSettings = await storeTaxSettings.buildApiPayload(req.pool, {
+            isPrincipalStore: principalStore,
+        });
+        const accountantEmail = await storeTaxSettings.getAccountantEmail(req.pool, {
+            isPrincipalStore: principalStore,
+        });
+        res.json({ overview, taxSettings, accountantEmail, isPrincipalStore: principalStore });
     } catch (error) {
         logger.error('Get tax ledger overview error:', error);
         res.status(500).json({ error: 'Failed to load tax ledger overview' });
+    }
+});
+
+router.get('/tax-settings', ...adminAuth, requirePermission('manager'), async (req, res) => {
+    try {
+        const principalStore = await isPrincipalStore(req.pool);
+        const settings = await storeTaxSettings.buildApiPayload(req.pool, {
+            isPrincipalStore: principalStore,
+        });
+        res.json({ success: true, settings, isPrincipalStore: principalStore });
+    } catch (error) {
+        logger.error('Get tax settings error:', error);
+        res.status(500).json({ error: 'Failed to load tax settings' });
+    }
+});
+
+router.put('/tax-settings', ...adminAuth, requirePermission('manager'), async (req, res) => {
+    try {
+        const principalStore = await isPrincipalStore(req.pool);
+        const result = await storeTaxSettings.saveTaxSettings(req.pool, req.body || {}, {
+            isPrincipalStore: principalStore,
+        });
+        res.json({ success: true, ...result });
+    } catch (error) {
+        logger.error('Save tax settings error:', error);
+        const status = error.code === 'INVALID_EMAIL' ? 400 : 500;
+        res.status(status).json({ error: error.message || 'Failed to save tax settings' });
     }
 });
 
@@ -4797,8 +4853,10 @@ function teamRolesForActor(actorRole) {
 }
 
 function assertCanAssignRole(actorRole, targetRole) {
-    if (targetRole === 'developer' && !isDeveloperRole(actorRole)) {
-        const err = new Error('Only a Developer account can assign the Developer role');
+    if (normalizeAdminRole(targetRole) === 'developer' && !isDeveloperRole(actorRole)) {
+        const err = new Error(
+            'The Developer role is reserved for platform staff and cannot be assigned to store owners or personnel'
+        );
         err.status = 403;
         throw err;
     }
@@ -4844,6 +4902,7 @@ router.get('/team', ...adminAuth, requirePermission('admin'), async (req, res) =
                 allowManualDiscounts: Boolean(row.allow_manual_discounts),
                 canViewCost: Boolean(row.can_view_cost),
                 canViewShopFloor: row.can_view_shop_floor == null ? false : Boolean(row.can_view_shop_floor),
+                canBuildShopEstimate: personnel.employeeCanBuildShopEstimate(row),
             };
             if (row.admin_user_id) registerByAdmin.set(row.admin_user_id, reg);
             else registerOnlyEmployees.push(reg);
@@ -4924,6 +4983,7 @@ router.post('/team', ...adminAuth, requirePermission('admin'), async (req, res) 
 
 function mapTeamRegisterRow(employee) {
     if (!employee) return null;
+    const personnel = require('../services/posPersonnel');
     return {
         id: employee.id,
         employeeCode: employee.employee_code,
@@ -4938,6 +4998,7 @@ function mapTeamRegisterRow(employee) {
         allowManualDiscounts: Boolean(employee.allow_manual_discounts),
         canViewCost: Boolean(employee.can_view_cost),
         canViewShopFloor: employee.can_view_shop_floor == null ? false : Boolean(employee.can_view_shop_floor),
+        canBuildShopEstimate: personnel.employeeCanBuildShopEstimate(employee),
     };
 }
 

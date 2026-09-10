@@ -22,14 +22,14 @@ require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 const { loadScraper } = require('../utils/businessone-scraper');
 const CatalogScraper = loadScraper();
-const SCRAPE_DOMAIN = process.env.CATALOG_SCRAPE_DOMAIN || 'https://hmherbs.com';
+const SCRAPE_DOMAIN = process.env.CATALOG_SCRAPE_DOMAIN || 'https://businessonecomprehensive.com';
 const {
     effectivePrimaryImageUrl,
     catalogPrimaryImageForProduct,
     canonicalSkuForCatalog
 } = require('../utils/catalogOverrides');
 
-const BASE = 'https://hmherbs.com';
+const BASE = 'https://businessonecomprehensive.com';
 const REPO_ROOT = path.join(__dirname, '..', '..');
 const IMAGES_DIR = path.join(REPO_ROOT, 'images', 'products');
 

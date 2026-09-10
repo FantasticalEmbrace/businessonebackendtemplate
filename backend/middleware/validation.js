@@ -1,4 +1,4 @@
-// Enhanced Input Validation Middleware for Your Store
+// Enhanced Input Validation Middleware for Business One
 // Comprehensive validation using express-validator
 
 const { body, param, query, validationResult } = require('express-validator');

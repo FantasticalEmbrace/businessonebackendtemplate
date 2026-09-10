@@ -1,4 +1,4 @@
-// Advanced Caching Strategy for Your Store
+// Advanced Caching Strategy for Business One
 // Multi-layer caching with intelligent cache management
 
 const crypto = require('crypto');

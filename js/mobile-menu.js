@@ -206,7 +206,7 @@
                 '<div class="hm-mobile-nav-brand-inner">',
                 '  <span class="hm-mobile-nav-brand-icon" aria-hidden="true"><i class="fas fa-leaf"></i></span>',
                 '  <div class="hm-mobile-nav-brand-text">',
-                '    <span class="hm-mobile-nav-brand-name">Your Store</span>',
+                '    <span class="hm-mobile-nav-brand-name">Business One</span>',
                 '    <span class="hm-mobile-nav-brand-tag">&amp; Vitamins</span>',
                 '  </div>',
                 '</div>',
@@ -242,9 +242,9 @@
             footer.className = 'hm-mobile-nav-footer';
             footer.setAttribute('aria-hidden', 'true');
             footer.innerHTML = [
-                '<a href="tel:+17068619454" class="hm-mobile-nav-phone">',
+                '<a href="tel:+18502902084" class="hm-mobile-nav-phone">',
                 '  <i class="fas fa-phone" aria-hidden="true"></i>',
-                '  <span>706-861-9454</span>',
+                '  <span>(850) 290-2084</span>',
                 '</a>',
                 '<a href="products.html" class="hm-mobile-nav-cta-btn">Shop All Products</a>'
             ].join('');

@@ -1,6 +1,6 @@
 /**
- * Your Store branded pre-prompt before the browser notification permission dialog.
- * The native browser prompt cannot be styled; this gives users Your Store context first.
+ * Business One branded pre-prompt before the browser notification permission dialog.
+ * The native browser prompt cannot be styled; this gives users Business One context first.
  */
 (function () {
     const AGE_KEY = 'hmherbs_age_verified_21';
@@ -56,11 +56,11 @@
                 '<div class="hm-notify-perm__brand">' +
                 '<img class="hm-notify-perm__logo" src="' +
                 LOGO_SRC +
-                '" alt="Your Store" width="176" height="40" loading="lazy">' +
+                '" alt="Business One" width="176" height="40" loading="lazy">' +
                 '<span class="hm-notify-perm__icon" aria-hidden="true"><i class="fas fa-bell"></i></span>' +
                 '</div>' +
                 '<h2 id="hm-notify-perm-title" class="hm-notify-perm__title">Stay in the loop</h2>' +
-                '<p class="hm-notify-perm__text">Get gentle alerts for order updates, restocks, and exclusive wellness offers from Your Store.' +
+                '<p class="hm-notify-perm__text">Get gentle alerts for order updates, restocks, and exclusive wellness offers from Business One.' +
                 '<span class="hm-notify-perm__hint">Your browser will ask you to confirm — choose Allow to enable.</span></p>' +
                 '<div class="hm-notify-perm__actions">' +
                 '<button type="button" class="hm-notify-perm__allow" id="hm-notify-perm-allow">Enable notifications</button>' +
@@ -110,7 +110,7 @@
     }
 
     /**
-     * Show Your Store prompt, then the browser permission dialog if user accepts.
+     * Show Business One prompt, then the browser permission dialog if user accepts.
      * @returns {Promise<NotificationPermission>}
      */
     async function requestWithBrandedPrompt() {

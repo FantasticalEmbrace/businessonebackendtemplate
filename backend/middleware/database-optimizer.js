@@ -1,4 +1,4 @@
-// Database Query Optimization Middleware for Your Store
+// Database Query Optimization Middleware for Business One
 // Advanced database performance optimization and monitoring
 
 const { performance } = require('perf_hooks');

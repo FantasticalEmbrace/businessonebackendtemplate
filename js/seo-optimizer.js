@@ -1,4 +1,4 @@
-// Advanced SEO Optimizer for Your Store
+// Advanced SEO Optimizer for Business One
 // Next-level SEO enhancements and Core Web Vitals micro-optimizations
 
 class SEOOptimizer {
@@ -178,7 +178,7 @@ class SEOOptimizer {
         const importantOrigins = [
             'https://fonts.googleapis.com',
             'https://fonts.gstatic.com',
-            'https://www.example.com'
+            'https://businessonecomprehensive.com'
         ];
 
         importantOrigins.forEach(origin => {
@@ -880,17 +880,17 @@ class SEOOptimizer {
         const schema = {
             "@context": "https://schema.org",
             "@type": "LocalBusiness",
-            "name": "Your Store",
+            "name": "Business One",
             "address": {
                 "@type": "PostalAddress",
-                "streetAddress": "1140 Battlefield Pkwy",
-                "addressLocality": "Fort Oglethorpe",
+                "streetAddress": "Business One",
+                "addressLocality": "United States",
                 "addressRegion": "GA",
                 "postalCode": "30742",
                 "addressCountry": "US"
             },
-            "telephone": "+1-706-861-9454",
-            "email": "store@example.com",
+            "telephone": "+1-(850) 290-2084",
+            "email": "info@businessonecomprehensive.com",
             "url": window.location.origin
         };
         this.addStructuredData(schema);
@@ -900,20 +900,20 @@ class SEOOptimizer {
         const schema = {
             "@context": "https://schema.org",
             "@type": "Organization",
-            "name": "Your Store",
+            "name": "Business One",
             "url": window.location.origin,
             "logo": `${window.location.origin}/images/logo.png`,
             "description": "Premium natural health products, herbs, and vitamins for optimal wellness",
             "contactPoint": {
                 "@type": "ContactPoint",
-                "telephone": "+1-706-861-9454",
+                "telephone": "+1-(850) 290-2084",
                 "contactType": "customer service",
                 "availableLanguage": "English"
             },
             "sameAs": [
-                "https://facebook.com/yourstore",
-                "https://twitter.com/yourstore",
-                "https://www.instagram.com/yourstore1"
+                "https://businessonecomprehensive.com",
+                "https://businessonecomprehensive.com",
+                "https://businessonecomprehensive.com1"
             ]
         };
 
@@ -943,7 +943,7 @@ class SEOOptimizer {
                         "availability": "https://schema.org/InStock",
                         "seller": {
                             "@type": "Organization",
-                            "name": "Your Store"
+                            "name": "Business One"
                         }
                     }
                 };

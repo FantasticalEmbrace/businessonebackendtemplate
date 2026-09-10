@@ -34,7 +34,7 @@ async function fixMetadata() {
         const productMetadata = new Map(); // url -> { category, brand }
 
         // 3. Scan category pages to get "ground truth" for categories
-        const baseUrl = 'https://hmherbs.com';
+        const baseUrl = 'https://businessonecomprehensive.com';
         console.log('🔍 Scanning home page for category/brand links...');
         try {
             const homeRes = await axios.get(baseUrl, { headers });

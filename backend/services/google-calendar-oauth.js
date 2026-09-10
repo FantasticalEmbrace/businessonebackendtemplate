@@ -24,18 +24,18 @@ const SETTINGS_KEYS = {
 
 function getClientId() {
     return (
+        process.env.GOOGLE_OAUTH_CLIENT_ID ||
         process.env.GCAL_CLIENT_ID ||
         process.env.GBP_CLIENT_ID ||
-        process.env.GOOGLE_OAUTH_CLIENT_ID ||
         ''
     ).trim();
 }
 
 function getClientSecret() {
     return (
+        process.env.GOOGLE_OAUTH_CLIENT_SECRET ||
         process.env.GCAL_CLIENT_SECRET ||
         process.env.GBP_CLIENT_SECRET ||
-        process.env.GOOGLE_OAUTH_CLIENT_SECRET ||
         ''
     ).trim();
 }
@@ -101,6 +101,19 @@ class GoogleCalendarOAuthService {
             calendarId = (await this._getSetting(pool, SETTINGS_KEYS.calendarId)) || '';
             connectedEmail = (await this._getSetting(pool, SETTINGS_KEYS.connectedEmail)) || '';
             connectedAt = (await this._getSetting(pool, SETTINGS_KEYS.connectedAt)) || '';
+            if (!refreshToken) {
+                try {
+                    const googleAccountOAuth = require('./google-account-oauth');
+                    refreshToken = await googleAccountOAuth.getSharedRefreshToken(pool);
+                    if (refreshToken && !connectedEmail) {
+                        const shared = await googleAccountOAuth.loadCredentials(pool);
+                        connectedEmail = shared.connectedEmail || '';
+                        connectedAt = shared.connectedAt || connectedAt;
+                    }
+                } catch (_) {
+                    /* optional shared account */
+                }
+            }
         }
 
         if (!refreshToken && process.env.GCAL_REFRESH_TOKEN) {

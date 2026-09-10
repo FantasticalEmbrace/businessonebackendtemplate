@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Non-destructive HM Herbs inventory enrichment / import.
+ * Non-destructive Business One inventory enrichment / import.
  *
  * Purpose: load the full POS catalog CSV (Acadia export) WITHOUT undoing any
  * manual edits made in the admin (Mr. Harold's curated web catalog).
@@ -179,7 +179,7 @@ const stats = {
 };
 
 async function main() {
-    console.log(`\n=== HM Herbs enrichment import ===`);
+    console.log(`\n=== Business One enrichment import ===`);
     console.log(`File:    ${CSV_FILE}`);
     console.log(`Mode:    ${COMMIT ? 'COMMIT (writing)' : 'DRY RUN (no writes)'}`);
     console.log(`Images:  ${DO_IMAGES ? 'download enabled' : 'disabled'}`);

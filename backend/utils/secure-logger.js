@@ -1,4 +1,4 @@
-// Secure Logger for HM Herbs Backend
+// Secure Logger for Business One Backend
 // Provides secure logging that doesn't expose sensitive information
 
 const winston = require('winston');

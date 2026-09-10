@@ -186,7 +186,7 @@ app.use(helmet({
                 // Apple Pay button / wallet SDK (Collect.js) loads fonts from applepay.cdn-apple.com
                 "https://applepay.cdn-apple.com"
             ],
-            imgSrc: ["'self'", "data:", "https:", "blob:", "http:", "https://images.unsplash.com", "https://hmherbs.com", "https://*.hmherbs.com"],
+            imgSrc: ["'self'", "data:", "https:", "blob:", "http:", "https://images.unsplash.com", "https://businessonecomprehensive.com", "https://*.businessonecomprehensive.com"],
             connectSrc: [
                 "'self'",
                 // Development: Allow localhost connections on all common ports
@@ -202,8 +202,8 @@ app.use(helmet({
                 "https://fonts.googleapis.com",
                 "https://fonts.gstatic.com",
                 "https://cdnjs.cloudflare.com",
-                "https://hmherbs.com",
-                "https://*.hmherbs.com",
+                "https://businessonecomprehensive.com",
+                "https://*.businessonecomprehensive.com",
                 "https://images.unsplash.com",
                 // NMI tokenization / gateway (Collect.js inline + API)
                 "https://secure.nmi.com",
@@ -311,7 +311,7 @@ if (process.env.PRODUCTION_DOMAIN) {
     allowedOrigins.push(`http://${process.env.PRODUCTION_DOMAIN}`);
 }
 
-// Business One POS PWA origins (comma-separated), e.g. http://localhost:8080,https://pos.hmherbs.com
+// Business One POS PWA origins (comma-separated), e.g. http://localhost:8080,https://pos.businessonecomprehensive.com
 if (process.env.POS_ALLOWED_ORIGINS) {
     process.env.POS_ALLOWED_ORIGINS.split(',')
         .map((o) => o.trim())
@@ -931,12 +931,12 @@ app.post('/api/auth/forgot-password', authLimiter, userForgotPasswordValidation,
                 const first = String(u.first_name || '').trim() || 'there';
                 const result = await sendMail({
                     to: u.email,
-                    subject: 'H&M Herbs — reset your password',
+                    subject: 'Business One — reset your password',
                     html: `
                         <h2>Password reset</h2>
                         <p>Hello ${first},</p>
                         <p>We received a request to reset the password for your store account.</p>
-                        <p><a href="${resetUrl}" style="background:#10b981;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;display:inline-block;">Choose a new password</a></p>
+                        <p><a href="${resetUrl}" style="background:#ff9b1f;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;display:inline-block;">Choose a new password</a></p>
                         <p>Or copy this link into your browser:</p>
                         <p style="word-break:break-all;">${resetUrl}</p>
                         <p>This link expires in one hour. If you did not ask for this, you can ignore this email.</p>
@@ -1825,10 +1825,18 @@ const {
 /** req.pool is attached at app init (right after createPool). */
 
 const { requirePermission: requireAdminPermissionLevel } = require('./middleware/adminAuth');
+const { requireEcommerceStoreAccess } = require('./middleware/requireEcommerceStore');
 
 // Marketing hub (Mailchimp signup URL / headline) — registered on the main app so `/api/admin/marketing-settings`
 // is never missed by the catch-all 404 (some deployments had only this path fail from the admin router).
-app.get('/api/admin/marketing-settings', authenticateAdmin, requireAdminPermissionLevel('manager'), (req, res) => {
+app.use(
+    '/api/admin/loyalty',
+    authenticateAdmin,
+    requireAdminPermissionLevel('manager'),
+    require('./routes/loyalty-admin')
+);
+
+app.get('/api/admin/marketing-settings', authenticateAdmin, requireAdminPermissionLevel('manager'), requireEcommerceStoreAccess, (req, res) => {
     try {
         const stored = marketingSettingsSvc.readConfig();
         const effective = marketingSettingsSvc.mergedPublicConfig();
@@ -1839,7 +1847,7 @@ app.get('/api/admin/marketing-settings', authenticateAdmin, requireAdminPermissi
     }
 });
 
-app.put('/api/admin/marketing-settings', authenticateAdmin, requireAdminPermissionLevel('manager'), (req, res) => {
+app.put('/api/admin/marketing-settings', authenticateAdmin, requireAdminPermissionLevel('manager'), requireEcommerceStoreAccess, (req, res) => {
     try {
         const { signupLandingUrl, headline } = req.body || {};
         const saved = marketingSettingsSvc.saveConfig({ signupLandingUrl, headline });
@@ -2008,6 +2016,10 @@ app.use('/api/*', (req, res) => {
         await ensurePlatformSupportSchema(pool);
         await ensurePersonnelSchema(pool);
         await ensureShopJobsSchema(pool);
+        const { ensureLoyaltyTiersSchema } = require('./utils/ensureLoyaltyTiersSchema');
+        const { seedDefaultTiersIfEmpty } = require('./services/loyaltyTierProgram');
+        await ensureLoyaltyTiersSchema(pool);
+        await seedDefaultTiersIfEmpty(pool);
     } catch (e) {
         logger.error(`ensureShippingSchema failed: ${logger.formatMysqlError(e)}`);
     }
@@ -2083,7 +2095,7 @@ app.use('/api/*', (req, res) => {
 
     const server = app.listen(PORT, () => {
         const { isSmtpConfigured } = require('./utils/smtpConfig');
-        console.log(`H&M Herbs API Server running on port ${PORT}`);
+        console.log(`Business One API Server running on port ${PORT}`);
         if (servePosUi && fsSync.existsSync(posAppPath)) {
             console.log(`Business One POS (local dev): http://127.0.0.1:${PORT}/pos/`);
         } else {

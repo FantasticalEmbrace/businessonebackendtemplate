@@ -549,8 +549,7 @@
 
     function loadSetupClientState() {
         try {
-            let raw = localStorage.getItem(SETUP_STORAGE_KEY);
-            if (!raw) raw = localStorage.getItem('hmherbs_pos_network_setup_v1'); // legacy key alias
+            const raw = localStorage.getItem(SETUP_STORAGE_KEY);
             const parsed = raw ? JSON.parse(raw) : {};
             return {
                 skipped: Array.isArray(parsed.skipped) ? parsed.skipped : [],
@@ -1364,8 +1363,12 @@
         document.querySelectorAll('[data-pos-tab]').forEach((btn) => {
             btn.addEventListener('click', () => {
                 const tab = btn.getAttribute('data-pos-tab');
-                document.querySelectorAll('[data-pos-tab]').forEach((b) => b.classList.remove('active'));
+                document.querySelectorAll('[data-pos-tab]').forEach((b) => {
+                    b.classList.remove('active');
+                    b.setAttribute('aria-selected', 'false');
+                });
                 btn.classList.add('active');
+                btn.setAttribute('aria-selected', 'true');
                 document.querySelectorAll('[data-pos-panel]').forEach((p) => {
                     p.style.display = p.getAttribute('data-pos-panel') === tab ? '' : 'none';
                 });
@@ -1377,6 +1380,9 @@
                     window.adminApp.loadPosDevices();
                 }
                 if (tab === 'license' && window.adminApp?.loadPosLicense) {
+                    window.adminApp.loadPosLicense();
+                }
+                if (tab === 'payments' && window.adminApp?.loadPosLicense) {
                     window.adminApp.loadPosLicense();
                 }
             });

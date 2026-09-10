@@ -231,32 +231,8 @@ function validateTendersForSale(tenders, saleTotal, options = {}) {
 }
 
 function formatTenderNotes(tenders) {
-    const lines = [];
-    for (const t of tenders || []) {
-        if (t.type === 'loyalty_cash') lines.push(`Store credit: $${t.amount.toFixed(2)}`);
-        else if (t.type === 'loyalty_points') {
-            lines.push(`Points redeemed: ${t.loyaltyPoints} pts ($${t.amount.toFixed(2)})`);
-        } else if (t.type === 'gift_card') lines.push(`Gift card: $${t.amount.toFixed(2)}`);
-        else if (t.type === 'cash') {
-            let line = `Cash: $${t.amount.toFixed(2)}`;
-            if (t.cashTendered != null) {
-                line += ` (tendered $${roundMoney(t.cashTendered).toFixed(2)}`;
-                if (t.cashChange > 0) line += `, change $${roundMoney(t.cashChange).toFixed(2)}`;
-                line += ')';
-            }
-            lines.push(line);
-        } else if (t.type === 'card_terminal') {
-            const brand = t.terminalCardBrand || 'card';
-            const lastFour = String(t.terminalLastFour || '').replace(/\D/g, '');
-            lines.push(
-                lastFour.length === 4
-                    ? `Card: $${t.amount.toFixed(2)} (${brand} •••• ${lastFour})`
-                    : `Card: $${t.amount.toFixed(2)} (terminal approved)`
-            );
-        } else if (t.type === 'check') {
-            lines.push(`Check: $${t.amount.toFixed(2)}${t.checkNumber ? ` #${t.checkNumber}` : ''}`);
-        }
-    }
+    const { formatTenderLines } = require('../utils/paymentTenderLines');
+    const lines = formatTenderLines(tenders);
     if (lines.length > 1) {
         return `Split payment:\n${lines.join('\n')}`;
     }

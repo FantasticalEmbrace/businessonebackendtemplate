@@ -21,7 +21,7 @@ async function trySend(label, options) {
         const info = await transporter.sendMail({
             from: process.env.SMTP_FROM || user,
             to,
-            subject: `HM Herbs SMTP test (${label})`,
+            subject: `Business One SMTP test (${label})`,
             text: 'If you received this, SMTP is working.'
         });
         console.log(`[${label}] sent`, info.messageId);

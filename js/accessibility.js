@@ -1,5 +1,5 @@
 /**
- * Your Store accessibility preferences toolbar.
+ * Business One accessibility preferences toolbar.
  * Options: text size, high contrast, underlined links, reduce motion.
  */
 (function () {

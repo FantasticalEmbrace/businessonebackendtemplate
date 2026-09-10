@@ -1,11 +1,11 @@
 'use strict';
 
-/** Canonical HM Herbs brand colors (match css/brand-tokens.css). */
+/** Canonical Business One brand colors (match css/brand-tokens.css). */
 module.exports = {
-    PRIMARY: '#047857',
-    PRIMARY_LIGHT: '#059669',
-    PRIMARY_DARK: '#065f46',
-    SIDEBAR_FROM: '#047857',
-    SIDEBAR_TO: '#065f46',
-    ACCENT_GOLD: '#d4af37',
+    PRIMARY: '#ff9b1f',
+    PRIMARY_LIGHT: '#ffb347',
+    PRIMARY_DARK: '#e8890f',
+    SIDEBAR_FROM: '#0f172a',
+    SIDEBAR_TO: '#1e293b',
+    ACCENT_GOLD: '#ff9b1f',
 };

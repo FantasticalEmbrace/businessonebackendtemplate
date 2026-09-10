@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Edom Chiro-Klenz line: fetch script sometimes matched wrong PDP or brand-grid order.
- * Apply hmherbs.com cache thumbnails that match each SKU (from scraped brand pages, Apr 2026).
+ * Apply example.com cache thumbnails that match each SKU (from scraped brand pages, Apr 2026).
  *
  * Usage (from backend/): node scripts/fix-chiro-klenz-images.js
  */
@@ -19,19 +19,19 @@ const DEFAULT_HEADERS = {
     'User-Agent':
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     Accept: 'image/webp,image/apng,image/*,*/*;q=0.8',
-    Referer: 'https://hmherbs.com/'
+    Referer: 'https://businessonecomprehensive.com/'
 };
 
 /** Known-good hmherbs CDN thumbnails per SKU */
 const SKU_TO_IMAGE_URL = {
     '16627':
-        'https://i0.wp.com/hmherbs.com/application/files/cache/thumbnails/product-main-img-16627-90bdcc0e9c14a7c95942b1405d8f3c64.jpg',
+        'https://i0.wp.com/example.com/application/files/cache/thumbnails/product-main-img-16627-90bdcc0e9c14a7c95942b1405d8f3c64.jpg',
     'E286C-0001':
-        'https://i0.wp.com/hmherbs.com/application/files/cache/thumbnails/chiro-klenz-tea-cinnamon-skinnyme-30-bags-5c49e6f5e000d2a23b301bfb5b8bf3c7.jpg',
+        'https://i0.wp.com/example.com/application/files/cache/thumbnails/chiro-klenz-tea-cinnamon-skinnyme-30-bags-5c49e6f5e000d2a23b301bfb5b8bf3c7.jpg',
     'E286L-0001':
-        'https://i0.wp.com/hmherbs.com/application/files/cache/thumbnails/chiro-klenz-tea-lemon-skinnyme-30-bags-2bafd8ee8ed25f594055212c106648bb.jpg',
+        'https://i0.wp.com/example.com/application/files/cache/thumbnails/chiro-klenz-tea-lemon-skinnyme-30-bags-2bafd8ee8ed25f594055212c106648bb.jpg',
     'E286-0001':
-        'https://i0.wp.com/hmherbs.com/application/files/cache/thumbnails/chiro-klenz-tea-original-skinnyme-30-bags-37eafa29a6eaa2d985aeea1c7d39773b.jpg'
+        'https://i0.wp.com/example.com/application/files/cache/thumbnails/chiro-klenz-tea-original-skinnyme-30-bags-37eafa29a6eaa2d985aeea1c7d39773b.jpg'
 };
 
 function safeSlugSegment(s) {

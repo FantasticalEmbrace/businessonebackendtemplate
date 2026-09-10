@@ -71,14 +71,26 @@ async function resolveStoreBranding(pool) {
         }
     }
 
-    const name = pickSetting(map, 'store_name') || storeName || 'Your Store';
+    const name =
+        pickSetting(map, 'store_name') ||
+        storeName ||
+        process.env.STORE_NAME ||
+        process.env.POS_STORE_NAME ||
+        'Business One';
     const logoUrl =
         pickSetting(map, 'store_logo_url') ||
         pickSetting(map, 'pos_store_logo_url') ||
         posLogo ||
-        '';
-    const phone = pickSetting(map, 'store_phone') || '';
-    const email = pickSetting(map, 'store_email') || '';
+        '/images/logo.png';
+    const phone =
+        pickSetting(map, 'store_phone') ||
+        process.env.STORE_PHONE ||
+        '(850) 290-2084';
+    const email =
+        pickSetting(map, 'store_email') ||
+        process.env.STORE_EMAIL ||
+        process.env.SMTP_USER ||
+        'info@businessonecomprehensive.com';
 
     const primary = normalizeHex(pickSetting(map, 'store_brand_primary'), palette.primary);
     const primaryDark = normalizeHex(pickSetting(map, 'store_brand_primary_dark'), palette.primaryDark);

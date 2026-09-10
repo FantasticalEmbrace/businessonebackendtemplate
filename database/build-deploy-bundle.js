@@ -121,7 +121,7 @@ for (const filename of extraMigrations) {
 }
 
 const header = `-- =============================================================================
--- HM Herbs — STAGING DEPLOY BUNDLE (auto-generated)
+-- Business One — STAGING DEPLOY BUNDLE (auto-generated)
 -- Generated: ${new Date().toISOString()}
 -- DO NOT EDIT BY HAND — run: npm run db:build-staging
 --

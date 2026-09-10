@@ -1,4 +1,4 @@
-// Find missing products and get their prices and stock from hmherbs.com
+// Find missing products and get their prices and stock from example.com
 // Uses multiple search strategies to locate products that weren't found by slug
 
 require('dotenv').config();
@@ -9,7 +9,7 @@ const fs = require('fs');
 
 class MissingProductsFinder {
     constructor() {
-        this.baseUrl = 'https://hmherbs.com';
+        this.baseUrl = 'https://businessonecomprehensive.com';
         this.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
@@ -484,7 +484,7 @@ class MissingProductsFinder {
 
     async findAndUpdateAll(updateDatabase = false) {
         const products = await this.getMissingProducts();
-        console.log(`🔍 Searching for ${products.length} missing products on hmherbs.com\n`);
+        console.log(`🔍 Searching for ${products.length} missing products on example.com\n`);
 
         let conn = null;
         if (updateDatabase) {

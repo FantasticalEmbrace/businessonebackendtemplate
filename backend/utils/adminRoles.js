@@ -114,18 +114,15 @@ function canManageStoreHours(role) {
 
 
 
-/** Next rank up (assistant_manager → manager → admin → developer). */
+/** Merchant promotion path only — Developer is platform staff, never promoted from Admin/owner. */
+const MERCHANT_PROMOTION_CHAIN = Object.freeze(['assistant_manager', 'manager', 'admin']);
 
+/** Next rank up (assistant_manager → manager → admin). */
 function getNextRole(role) {
-
     const normalized = normalizeAdminRole(role);
-
-    const idx = ADMIN_ROLES.indexOf(normalized);
-
-    if (idx <= 0) return null;
-
-    return ADMIN_ROLES[idx - 1];
-
+    const idx = MERCHANT_PROMOTION_CHAIN.indexOf(normalized);
+    if (idx < 0 || idx >= MERCHANT_PROMOTION_CHAIN.length - 1) return null;
+    return MERCHANT_PROMOTION_CHAIN[idx + 1];
 }
 
 
@@ -184,6 +181,8 @@ const SECTION_ACCESS = Object.freeze({
 
         'pos',
 
+        'reports',
+
         'settings',
 
     ],
@@ -196,10 +195,28 @@ const SECTION_ACCESS = Object.freeze({
 
 
 
-function canAccessAdminSection(role, sectionId) {
+const DEVELOPER_ONLY_SECTIONS = Object.freeze(['developer-tools']);
+
+/** Reserved for principal-store-only admin sections (schedule/EDSA is available to all merchants). */
+const PRINCIPAL_ONLY_SECTIONS = Object.freeze([]);
+
+function filterAllowedSectionsForStore(sections, { isPrincipalStore = false } = {}) {
+    if (isPrincipalStore || sections === null || sections === undefined) {
+        return sections;
+    }
+    const drop = new Set(PRINCIPAL_ONLY_SECTIONS);
+    return sections.filter((section) => !drop.has(section));
+}
+
+function canAccessAdminSection(role, sectionId, options = {}) {
+    if (DEVELOPER_ONLY_SECTIONS.includes(sectionId)) {
+        return isDeveloperRole(role);
+    }
+    if (PRINCIPAL_ONLY_SECTIONS.includes(sectionId) && !options.isPrincipalStore) {
+        return false;
+    }
 
     const normalized = normalizeAdminRole(role);
-
     const allowed = SECTION_ACCESS[normalized];
 
     if (allowed === null) return true;
@@ -207,7 +224,6 @@ function canAccessAdminSection(role, sectionId) {
     if (!allowed) return false;
 
     return allowed.includes(sectionId);
-
 }
 
 
@@ -256,6 +272,14 @@ module.exports = {
     getNextRole,
 
     canAccessAdminSection,
+
+    DEVELOPER_ONLY_SECTIONS,
+
+    PRINCIPAL_ONLY_SECTIONS,
+
+    filterAllowedSectionsForStore,
+
+    MERCHANT_PROMOTION_CHAIN,
 
     defaultSectionForRole,
 

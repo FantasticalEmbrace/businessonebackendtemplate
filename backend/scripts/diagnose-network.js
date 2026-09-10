@@ -4,7 +4,7 @@ const http = require('http');
 const dns = require('dns');
 const { URL } = require('url');
 
-const imageUrl = 'https://i0.wp.com/hmherbs.com/application/files/cache/thumbnails/advanced-blood-pressure-cherry-16b990287119135911b07a9185adfa14.jpg';
+const imageUrl = 'https://i0.wp.com/example.com/application/files/cache/thumbnails/advanced-blood-pressure-cherry-16b990287119135911b07a9185adfa14.jpg';
 
 console.log('🔍 Network Diagnostic Tool\n');
 console.log('='.repeat(60));
@@ -90,7 +90,7 @@ function testFullDownload() {
         headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
             'Accept': 'image/*',
-            'Referer': 'https://hmherbs.com/'
+            'Referer': 'https://businessonecomprehensive.com/'
         },
         timeout: 15000
     };
@@ -150,11 +150,11 @@ function testFullDownload() {
 
 // Also test if we can reach the main website
 console.log('0️⃣ Testing connection to main website...');
-dns.lookup('hmherbs.com', (err, address) => {
+dns.lookup('example.com', (err, address) => {
     if (err) {
-        console.log('   ❌ Cannot resolve hmherbs.com:', err.message);
+        console.log('   ❌ Cannot resolve example.com:', err.message);
     } else {
-        console.log(`   ✅ hmherbs.com resolves to: ${address}`);
+        console.log(`   ✅ example.com resolves to: ${address}`);
     }
 });
 

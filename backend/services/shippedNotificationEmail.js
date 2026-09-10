@@ -74,22 +74,22 @@ async function sendShippedNotificationEmail(pool, orderId) {
 
     const trackButton = trackingUrl
         ? `<p style="margin:0 0 16px;text-align:center;">
-                <a href="${escapeHtml(trackingUrl)}" style="display:inline-block;padding:12px 22px;background:#10b981;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;">Track My Package</a>
+                <a href="${escapeHtml(trackingUrl)}" style="display:inline-block;padding:12px 22px;background:#ff9b1f;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;">Track My Package</a>
            </p>`
         : '';
 
     const html = `
         <div style="font-family:Inter,system-ui,sans-serif;color:#111827;max-width:560px;">
-            <h2 style="color:#10b981;margin:0 0 8px;">Your order has shipped!</h2>
+            <h2 style="color:#ff9b1f;margin:0 0 8px;">Your order has shipped!</h2>
             <p>Hello ${escapeHtml(first)},</p>
-            <p>Great news — your Your Store order <strong>${escapeHtml(orderNumber)}</strong> is on its way via <strong>${escapeHtml(carrier)}</strong>.</p>
+            <p>Great news — your Business One order <strong>${escapeHtml(orderNumber)}</strong> is on its way via <strong>${escapeHtml(carrier)}</strong>.</p>
             ${progressHtml}
             ${trackButton}
-            <p>You can also view this order anytime in <a href="${escapeHtml(accountUrl)}" style="color:#10b981;">your account</a>.</p>
+            <p>You can also view this order anytime in <a href="${escapeHtml(accountUrl)}" style="color:#ff9b1f;">your account</a>.</p>
             <p style="font-size:13px;color:#6b7280;margin-top:20px;">
                 Please allow up to 24 hours for the carrier to scan your package and update tracking information.
             </p>
-            <p style="margin-top:24px;color:#6b7280;font-size:13px;">Thank you for shopping with Your Store.</p>
+            <p style="margin-top:24px;color:#6b7280;font-size:13px;">Thank you for shopping with Business One.</p>
         </div>
     `;
 
@@ -105,7 +105,7 @@ async function sendShippedNotificationEmail(pool, orderId) {
     await mail.transporter.sendMail({
         from: mail.from,
         to: email,
-        subject: `Your Your Store order ${orderNumber} has shipped`,
+        subject: `Your Business One order ${orderNumber} has shipped`,
         html,
     });
     logger.info(`Shipped notification sent for order ${orderNumber} → ${email}`);
@@ -153,22 +153,22 @@ async function sendLabelCreatedNotificationEmail(pool, orderId) {
 
     const trackButton = trackingUrl
         ? `<p style="margin:0 0 16px;text-align:center;">
-                <a href="${escapeHtml(trackingUrl)}" style="display:inline-block;padding:12px 22px;background:#10b981;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;">Track My Package</a>
+                <a href="${escapeHtml(trackingUrl)}" style="display:inline-block;padding:12px 22px;background:#ff9b1f;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;">Track My Package</a>
            </p>`
         : '';
 
     const html = `
         <div style="font-family:Inter,system-ui,sans-serif;color:#111827;max-width:560px;">
-            <h2 style="color:#10b981;margin:0 0 8px;">Your order is ready to ship</h2>
+            <h2 style="color:#ff9b1f;margin:0 0 8px;">Your order is ready to ship</h2>
             <p>Hello ${escapeHtml(first)},</p>
-            <p>We created a shipping label for your Your Store order <strong>${escapeHtml(orderNumber)}</strong>. Your package will ship via <strong>${escapeHtml(carrier)}</strong> soon.</p>
+            <p>We created a shipping label for your Business One order <strong>${escapeHtml(orderNumber)}</strong>. Your package will ship via <strong>${escapeHtml(carrier)}</strong> soon.</p>
             ${progressHtml}
             ${trackButton}
-            <p>You can also view this order anytime in <a href="${escapeHtml(accountUrl)}" style="color:#10b981;">your account</a>.</p>
+            <p>You can also view this order anytime in <a href="${escapeHtml(accountUrl)}" style="color:#ff9b1f;">your account</a>.</p>
             <p style="font-size:13px;color:#6b7280;margin-top:20px;">
                 Carrier tracking may take up to 24 hours to show movement after your package is picked up.
             </p>
-            <p style="margin-top:24px;color:#6b7280;font-size:13px;">Thank you for shopping with Your Store.</p>
+            <p style="margin-top:24px;color:#6b7280;font-size:13px;">Thank you for shopping with Business One.</p>
         </div>
     `;
 
@@ -184,7 +184,7 @@ async function sendLabelCreatedNotificationEmail(pool, orderId) {
     await mail.transporter.sendMail({
         from: mail.from,
         to: email,
-        subject: `Tracking for your Your Store order ${orderNumber}`,
+        subject: `Tracking for your Business One order ${orderNumber}`,
         html,
     });
     logger.info(`Label tracking notification sent for order ${orderNumber} → ${email}`);

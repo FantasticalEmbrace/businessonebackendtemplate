@@ -44,7 +44,7 @@ async function main() {
     street1: '1140 Battlefield Pkwy',
     city: 'Fort Oglethorpe',
     state: 'GA',
-    description: 'HM Herbs / Business One billing connectivity test'
+    description: 'Business One / Business One billing connectivity test'
   });
   console.log('CHARGE', charge.ok ? 'OK' : 'FAIL', charge.responseCode, charge.responseText, charge.transactionId || '');
   const reachedProcessor =

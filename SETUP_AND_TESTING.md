@@ -1,6 +1,6 @@
-# Your Store - Complete Setup & Testing Guide
+# Business One - Complete Setup & Testing Guide
 
-This guide will help you set up and test all functionality of the Your Store website.
+This guide will help you set up and test all functionality of the Business One website.
 
 ## 📋 Prerequisites Checklist
 
@@ -74,17 +74,17 @@ FRONTEND_URL=http://localhost:8000
 JWT_SECRET=your_super_secret_jwt_key_change_this_in_production
 
 # Admin Configuration
-ADMIN_EMAIL=store@example.com
+ADMIN_EMAIL=info@businessonecomprehensive.com
 ADMIN_PASSWORD=your_admin_password
 
 # Google Calendar (Optional - for EDSA booking)
-GOOGLE_CALENDAR_ID=store@example.com
+GOOGLE_CALENDAR_ID=info@businessonecomprehensive.com
 GOOGLE_CREDENTIALS_PATH=backend/config/google-credentials.json
 
 # Email Configuration (Optional)
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USER=store@example.com
+SMTP_USER=info@businessonecomprehensive.com
 SMTP_PASSWORD=your_app_password
 
 # Stripe (Optional - for payments)
@@ -224,7 +224,7 @@ curl -X POST http://localhost:3001/api/edsa/book \
 curl -X POST http://localhost:3001/api/admin/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "store@example.com",
+    "email": "info@businessonecomprehensive.com",
     "password": "your_admin_password"
   }'
 ```

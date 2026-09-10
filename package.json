@@ -53,7 +53,7 @@
     "express",
     "mysql"
   ],
-  "author": "Your Store",
+  "author": "Business One",
   "license": "MIT",
   "engines": {
     "node": ">=16.0.0",

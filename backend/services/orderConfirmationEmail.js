@@ -46,7 +46,8 @@ async function sendOrderConfirmationEmail(pool, orderId) {
 
     const [orders] = await pool.execute(
         `SELECT id, order_number, email, total_amount, tracking_number, tracking_url,
-                shipping_carrier, shipping_first_name, shipping_last_name, payment_status, status
+                shipping_carrier, shipping_first_name, shipping_last_name, payment_status, status,
+                payment_method, discount_amount, promo_code, subtotal, tax_amount, shipping_amount
            FROM orders WHERE id = ? LIMIT 1`,
         [oid]
     );
@@ -61,6 +62,35 @@ async function sendOrderConfirmationEmail(pool, orderId) {
         `SELECT product_name, quantity, total FROM order_items WHERE order_id = ? ORDER BY id`,
         [oid]
     );
+
+    let paymentTenders = [];
+    try {
+        const [tenderRows] = await pool.execute(
+            `SELECT tender_type, amount, loyalty_points, gift_card_id,
+                    cash_tendered, cash_change, check_number,
+                    terminal_last_four, terminal_auth_code, payment_reference
+               FROM order_payment_tenders
+              WHERE order_id = ?
+              ORDER BY id ASC`,
+            [oid]
+        );
+        paymentTenders = tenderRows || [];
+    } catch (e) {
+        if (e.code !== 'ER_NO_SUCH_TABLE') throw e;
+    }
+
+    const { formatTenderLines } = require('../utils/paymentTenderLines');
+    const tenderLines = formatTenderLines(paymentTenders);
+    const paymentBlock = tenderLines.length
+        ? `<div style="margin:16px 0;padding:12px 16px;background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb;">
+            <strong style="display:block;margin-bottom:6px;">Payment</strong>
+            ${tenderLines.map((line) => `<div style="font-size:14px;">${escapeHtml(line)}</div>`).join('')}
+            ${order.promo_code ? `<div style="font-size:13px;margin-top:6px;color:#6b7280;">Promo: ${escapeHtml(order.promo_code)}</div>` : ''}
+            ${Number(order.discount_amount) > 0 ? `<div style="font-size:13px;color:#166534;">Discount: −${formatMoney(order.discount_amount)}</div>` : ''}
+           </div>`
+        : `${Number(order.discount_amount) > 0 || order.promo_code
+            ? `<p style="font-size:14px;">${order.promo_code ? `Promo: <strong>${escapeHtml(order.promo_code)}</strong><br>` : ''}${Number(order.discount_amount) > 0 ? `Discount: −${formatMoney(order.discount_amount)}` : ''}</p>`
+            : ''}`;
 
     const first = String(order.shipping_first_name || '').trim() || 'there';
     const orderNumber = String(order.order_number || oid);
@@ -82,18 +112,19 @@ async function sendOrderConfirmationEmail(pool, orderId) {
     const trackingBlock = tracking && trackingUrl
         ? `<p style="margin:16px 0;padding:12px 16px;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0;">
             <strong>Tracking:</strong>
-            <a href="${escapeHtml(trackingUrl)}" style="color:#10b981;font-weight:600;text-decoration:none;">${escapeHtml(tracking)}</a><br>
-            <a href="${escapeHtml(trackingUrl)}" style="display:inline-block;margin-top:10px;padding:10px 18px;background:#10b981;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;">Track your shipment</a>
+            <a href="${escapeHtml(trackingUrl)}" style="color:#ff9b1f;font-weight:600;text-decoration:none;">${escapeHtml(tracking)}</a><br>
+            <a href="${escapeHtml(trackingUrl)}" style="display:inline-block;margin-top:10px;padding:10px 18px;background:#ff9b1f;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;">Track your shipment</a>
            </p>`
         : '';
 
     const html = `
         <div style="font-family:Inter,system-ui,sans-serif;color:#111827;max-width:560px;">
-            <h2 style="color:#10b981;margin:0 0 8px;">Thank you for your order!</h2>
+            <h2 style="color:#ff9b1f;margin:0 0 8px;">Thank you for your order!</h2>
             <p>Hello ${escapeHtml(first)},</p>
             <p>We have received your payment and are preparing your order for shipment.</p>
             <p><strong>Order number:</strong> ${escapeHtml(orderNumber)}<br>
                <strong>Order total:</strong> ${formatMoney(order.total_amount)}</p>
+            ${paymentBlock}
             ${trackingBlock}
             <table style="width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;">
                 <thead>
@@ -105,7 +136,7 @@ async function sendOrderConfirmationEmail(pool, orderId) {
                 </thead>
                 <tbody>${itemRows || '<tr><td colspan="3">Your order items</td></tr>'}</tbody>
             </table>
-            <p><a href="${escapeHtml(confirmUrl)}" style="background:#10b981;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;display:inline-block;">View order confirmation</a></p>
+            <p><a href="${escapeHtml(confirmUrl)}" style="background:#ff9b1f;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;display:inline-block;">View order confirmation</a></p>
             <p style="font-size:13px;color:#6b7280;">Questions? Call us at (706) 861-9454 or reply to this email.</p>
         </div>`;
 
@@ -113,6 +144,7 @@ async function sendOrderConfirmationEmail(pool, orderId) {
         `Thank you for your order, ${first}!`,
         `Order number: ${orderNumber}`,
         `Total: ${formatMoney(order.total_amount)}`,
+        ...tenderLines,
         tracking ? `Tracking number: ${tracking}` : '',
         trackingUrl ? `Track: ${trackingUrl}` : '',
         `Confirmation: ${confirmUrl}`
@@ -141,7 +173,7 @@ async function sendOrderConfirmationEmail(pool, orderId) {
         await mail.transporter.sendMail({
             from: mail.from,
             to: email,
-            subject: `H&M Herbs — order confirmation ${orderNumber}`,
+            subject: `Business One — order confirmation ${orderNumber}`,
             text,
             html
         });

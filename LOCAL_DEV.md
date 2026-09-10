@@ -40,13 +40,13 @@ Open http://127.0.0.1:3001 — uses **`backend/.env`**, not production.
 
 Copy from `backend/.env.example` if you need new env keys after an update.
 
-## POS register (separate platform — not on Your Store)
+## POS register (separate platform — not on Business One)
 
 The register UI lives in **`https://github.com/FantasticalEmbrace/business-one-pos`**. Production host:
 
 **`https://pos.businessonecomprehensive.com`** — its own Linode + domain.
 
-Each merchant opens that site, enters **their store URL** (e.g. `https://www.example.com`) and **device key**. Your Store only runs the **POS API** (`/api/pos/v1`), not the register UI.
+Each merchant opens that site, enters **their store URL** (e.g. `https://businessonecomprehensive.com`) and **device key**. Business One only runs the **POS API** (`/api/pos/v1`), not the register UI.
 
 Deploy POS platform: `../business-one-pos/deploy/sync-pos-linode.ps1`
 

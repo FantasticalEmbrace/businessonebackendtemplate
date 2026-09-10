@@ -11,13 +11,13 @@ const descriptions = {
     'dr-tonys': "Dr. Tony's delivers doctor-formulated liquid multivitamins and targeted wellness blends created by Dr. Tony O’Donnell.",
     'enzymedica': 'Enzymedica offers high-quality digestive enzymes and gut health solutions to support nutrient absorption and comfort.',
     'formor': 'ForMor International offers nutritional supplements and functional beverages focused on everyday wellness and energy support.',
-    'hm-herbs': 'H&M Herbs house line featuring Cardio Amaze and related heart health and nitric oxide support formulas.',
+    'hm-herbs': 'Business One house line featuring Cardio Amaze and related heart health and nitric oxide support formulas.',
     'hemp-bombs': 'Hemp Bombs produces hemp-derived CBD gummies, oils, capsules, and topicals for relaxation and recovery.',
     'herbs-for-life': 'Herbs For Life creates herbal tinctures and nutritional formulas rooted in traditional botanical wellness.',
     'hi-tech-pharmaceuticals': 'Hi-Tech Pharmaceuticals manufactures sports nutrition, thermogenic, and performance supplements using advanced delivery systems.',
     'highland-labs': 'Highland Labs produces vitamins, minerals, and specialty supplements with an emphasis on bioavailable forms.',
     'hippie-jacks': 'Hippie Jacks offers botanical wellness blends and herbal supplements inspired by natural living.',
-    'hm-enterprise': 'HM Enterprise provides HM Herbs-branded vitamins, minerals, and wellness products curated for everyday health.',
+    'hm-enterprise': 'HM Enterprise provides Business One-branded vitamins, minerals, and wellness products curated for everyday health.',
     'host-defence': 'Host Defense, founded by mycologist Paul Stamets, delivers organic mushroom supplements for immune and overall wellness.',
     'irwin-naturals': 'Irwin Naturals creates softgel-based nutritional supplements targeting energy, weight management, and daily wellness.',
     'life-flo': 'Life-Flo offers natural body care, magnesium, progesterone creams, and skin-support formulas made with clean ingredients.',
@@ -36,7 +36,7 @@ const descriptions = {
     'oxy-life': 'Oxy Life provides oxygen-enhanced supplements, liquid vitamins, and specialty formulas to support energy and overall health.',
     "perrin-s-naturals": 'Perrin\'s Naturals creates skin care balms and creams using botanicals like red clover to support healthy-looking skin.',
     'powerthin-phase-ii': 'Powerthin Phase II is a thermogenic weight-management formula designed to promote energy, metabolism, and focus.',
-    'unknown': 'Miscellaneous items and unbranded products curated by HM Herbs.'
+    'unknown': 'Miscellaneous items and unbranded products curated by Business One.'
 };
 
 async function run() {

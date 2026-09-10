@@ -1,4 +1,4 @@
-// Structured Data (Schema.org) Implementation for Your Store
+// Structured Data (Schema.org) Implementation for Business One
 // Enhances SEO with rich snippets and better search engine understanding
 
 class StructuredDataManager {
@@ -56,26 +56,26 @@ class StructuredDataManager {
         const organizationSchema = {
             "@context": "https://schema.org",
             "@type": "Organization",
-            "name": "Your Store",
-            "alternateName": "Your Store",
+            "name": "Business One",
+            "alternateName": "Business One",
             "description": "Premium natural health products, herbs, vitamins, and wellness supplements organized by health conditions and brands.",
             "url": this.baseUrl,
             "logo": `${this.baseUrl}/images/logo.png`,
             "image": `${this.baseUrl}/images/og-image.jpg`,
-            "telephone": "+1-706-861-9454",
-            "email": "store@example.com",
+            "telephone": "+1-(850) 290-2084",
+            "email": "info@businessonecomprehensive.com",
             "address": {
                 "@type": "PostalAddress",
-                "streetAddress": "1140 Battlefield Pkwy",
-                "addressLocality": "Fort Oglethorpe",
+                "streetAddress": "Business One",
+                "addressLocality": "United States",
                 "addressRegion": "GA",
                 "postalCode": "30742",
                 "addressCountry": "US"
             },
             "sameAs": [
-                "https://www.facebook.com/yourstore",
-                "https://www.instagram.com/yourstore",
-                "https://twitter.com/yourstore"
+                "https://businessonecomprehensive.com",
+                "https://businessonecomprehensive.com",
+                "https://businessonecomprehensive.com"
             ],
             "foundingDate": "1995-05-01",
             "slogan": "Your trusted source for natural wellness",
@@ -97,12 +97,12 @@ class StructuredDataManager {
         const websiteSchema = {
             "@context": "https://schema.org",
             "@type": "WebSite",
-            "name": "Your Store",
+            "name": "Business One",
             "url": this.baseUrl,
             "description": "Premium natural health products, herbs, vitamins, and wellness supplements organized by health conditions and brands.",
             "publisher": {
                 "@type": "Organization",
-                "name": "Your Store"
+                "name": "Business One"
             },
             "potentialAction": {
                 "@type": "SearchAction",
@@ -145,15 +145,15 @@ class StructuredDataManager {
         const localBusinessSchema = {
             "@context": "https://schema.org",
             "@type": "HealthAndBeautyBusiness",
-            "name": "Your Store",
+            "name": "Business One",
             "description": "Premium natural health products, herbs, vitamins, and wellness supplements store.",
             "url": this.baseUrl,
-            "telephone": "+1-706-861-9454",
-            "email": "store@example.com",
+            "telephone": "+1-(850) 290-2084",
+            "email": "info@businessonecomprehensive.com",
             "address": {
                 "@type": "PostalAddress",
-                "streetAddress": "1140 Battlefield Pkwy",
-                "addressLocality": "Fort Oglethorpe",
+                "streetAddress": "Business One",
+                "addressLocality": "United States",
                 "addressRegion": "GA",
                 "postalCode": "30742",
                 "addressCountry": "US"
@@ -249,7 +249,7 @@ class StructuredDataManager {
         const homepageSchema = {
             "@context": "https://schema.org",
             "@type": "WebPage",
-            "name": "Your Store - Premium Natural Health Products",
+            "name": "Business One - One Source. Comprehensive Solutions.",
             "description": "Premium herbs, vitamins, and natural health supplements organized by health conditions. EDSA wellness testing available in-store.",
             "url": this.baseUrl,
             "mainEntity": {
@@ -276,7 +276,7 @@ class StructuredDataManager {
             },
             "about": {
                 "@type": "Thing",
-                "name": "Natural Health Products",
+                "name": "Business Solutions",
                 "description": "Comprehensive selection of herbs, vitamins, supplements, and wellness products"
             },
             "mentions": [
@@ -348,7 +348,7 @@ class StructuredDataManager {
                 "availability": productData.inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
                 "seller": {
                     "@type": "Organization",
-                    "name": "Your Store"
+                    "name": "Business One"
                 }
             },
             "aggregateRating": productData.rating ? {
@@ -370,12 +370,12 @@ class StructuredDataManager {
             "url": `${this.baseUrl}/#edsa-service`,
             "provider": {
                 "@type": "Organization",
-                "name": "Your Store"
+                "name": "Business One"
             },
             "serviceType": "Health Assessment",
             "areaServed": {
                 "@type": "City",
-                "name": "Fort Oglethorpe",
+                "name": "Online",
                 "containedInPlace": {
                     "@type": "State",
                     "name": "Georgia"
@@ -427,7 +427,7 @@ class StructuredDataManager {
             "@type": "Review",
             "itemReviewed": {
                 "@type": "Organization",
-                "name": "Your Store"
+                "name": "Business One"
             },
             "author": {
                 "@type": "Person",

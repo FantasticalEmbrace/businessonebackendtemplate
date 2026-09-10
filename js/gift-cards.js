@@ -64,7 +64,7 @@ class GiftCardsPage {
                         <span class="hm-gift-card__amount">Select amount</span>
                     </div>
                     <div class="hm-gift-card__footer">
-                        <span class="hm-gift-card__brand">Your Store</span>
+                        <span class="hm-gift-card__brand">Business One</span>
                         <span class="hm-gift-card__tagline">Premium natural health since 1995</span>
                     </div>
                 </div>

@@ -42,7 +42,7 @@ function checkFiles() {
         throw new Error('sitemap.xml must reference sitemap-pages.xml and sitemap-products.xml');
     }
     if (index.includes('localhost')) {
-        console.warn('WARN: sitemap.xml still references localhost — run npm run seo:generate-sitemap -- --base-url https://hmherbs.com');
+        console.warn('WARN: sitemap.xml still references localhost — run npm run seo:generate-sitemap -- --base-url https://businessonecomprehensive.com');
     }
     console.log('OK   Required SEO files present');
 }

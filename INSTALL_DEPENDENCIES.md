@@ -1,6 +1,6 @@
-# Install All Dependencies - Your Store
+# Install All Dependencies - Business One
 
-This guide will help you install all required dependencies for the Your Store website.
+This guide will help you install all required dependencies for the Business One website.
 
 ## 📦 Required Dependencies
 

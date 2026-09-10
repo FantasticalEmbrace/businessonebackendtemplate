@@ -75,7 +75,7 @@ function buildTroubleshootStatusReport(snapshot) {
               title: primaryMissing.label,
               summary: primaryMissing.detail || '',
               category: primaryMissing.category,
-              tab: primaryMissing.tab || 'general'
+              tab: primaryMissing.tab || 'operations'
           }
         : null;
 
@@ -305,7 +305,7 @@ async function buildStoreTroubleshootReport(pool, clientState = {}) {
             label: 'Support phone not set',
             detail: 'Staff can call this number from the POS help screen.',
             actionId: 'go_general',
-            tab: 'general'
+            tab: 'operations'
         });
         categories.general += 1;
     }

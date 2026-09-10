@@ -701,7 +701,7 @@ a.auth-btn:focus-visible {
 .auth-switch-text a.auth-link--prompt {
     text-decoration: underline;
     font-weight: 700;
-    color: var(--brand-primary-dark, #047857);
+    color: var(--brand-primary-dark, #ff9b1f);
 }
 
 .btn-full-width {

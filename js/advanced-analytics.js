@@ -1,4 +1,4 @@
-// Advanced Analytics and Performance Monitoring for Your Store
+// Advanced Analytics and Performance Monitoring for Business One
 // Real User Monitoring (RUM), Core Web Vitals, and comprehensive analytics
 
 class AdvancedAnalytics {

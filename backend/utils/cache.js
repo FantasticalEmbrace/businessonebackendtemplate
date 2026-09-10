@@ -1,5 +1,5 @@
 /**
- * Cache utility for HM Herbs & Vitamins
+ * Cache utility for Business One & Vitamins
  * Provides Redis-based caching with fallback to in-memory cache
  */
 

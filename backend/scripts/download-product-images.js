@@ -1,4 +1,4 @@
-// Download Product Images from HM Herbs Website
+// Download Product Images from Business One Website
 // Downloads all product images and saves them locally
 
 const axios = require('axios');
@@ -9,7 +9,7 @@ const http = require('http');
 
 class ProductImageDownloader {
     constructor() {
-        this.baseUrl = 'https://hmherbs.com';
+        this.baseUrl = 'https://businessonecomprehensive.com';
         this.imagesDir = path.join(__dirname, '../../images/products');
         this.downloadedImages = new Map(); // Track downloaded images to avoid duplicates
         this.failedDownloads = [];
@@ -51,7 +51,7 @@ class ProductImageDownloader {
             const { loadScraper } = require('../utils/businessone-scraper');
             const CatalogScraper = loadScraper();
             const scraper = new CatalogScraper({
-                domain: process.env.CATALOG_SCRAPE_DOMAIN || 'https://hmherbs.com'
+                domain: process.env.CATALOG_SCRAPE_DOMAIN || 'https://businessonecomprehensive.com'
             });
             await scraper.scrapeAllProducts();
             

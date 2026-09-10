@@ -60,7 +60,7 @@
    ```
 
 2. **Verify server is running:**
-   - Check console for: "H&M Herbs API Server running on port 3001"
+   - Check console for: "Business One API Server running on port 3001"
    - No error messages should appear
 
 3. **Test admin login:**

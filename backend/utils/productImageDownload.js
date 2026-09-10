@@ -6,7 +6,7 @@ const fsp = require('fs').promises;
 const path = require('path');
 const axios = require('axios');
 
-const BASE = process.env.CATALOG_SCRAPE_DOMAIN || 'https://hmherbs.com';
+const BASE = process.env.CATALOG_SCRAPE_DOMAIN || 'https://businessonecomprehensive.com';
 
 const DEFAULT_HEADERS = {
     'User-Agent':

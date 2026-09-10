@@ -1,8 +1,8 @@
-# MySQL Database Dump Script for Your Store
+# MySQL Database Dump Script for Business One
 # Creates a backup of your MySQL database
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "Your Store Database Dump Utility" -ForegroundColor Cyan
+Write-Host "Business One Database Dump Utility" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 

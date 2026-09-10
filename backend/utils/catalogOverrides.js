@@ -136,7 +136,7 @@ const CATALOG_PRICE_BY_SKU = {
     '28699': 59.99,
     '2394': 59.99,
     '26671': 59.99,
-    /** NOW Foods — hmherbs.com lists $0; typical retail (verify periodically) */
+    /** NOW Foods — example.com lists $0; typical retail (verify periodically) */
     '28673': 14.99,
     '28696': 22.99,
     '28709': 14.99

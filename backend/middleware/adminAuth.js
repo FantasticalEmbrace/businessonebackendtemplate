@@ -68,12 +68,33 @@ function requireDeveloperRole(req, res, next) {
     next();
 }
 
+const { isPrincipalStore } = require('../services/storeBranding');
+
+async function requirePrincipalStore(req, res, next) {
+    try {
+        const principal = await isPrincipalStore(req.pool);
+        if (!principal) {
+            return res.status(403).json({
+                error: 'This feature is only available on the principal Business One store.',
+                code: 'PRINCIPAL_STORE_REQUIRED',
+            });
+        }
+        next();
+    } catch (error) {
+        logger.error('Principal store check failed:', error);
+        return res.status(500).json({ error: 'Failed to verify store account' });
+    }
+}
+
 /** Chain used on admin routes */
 const adminAuth = [authenticateAdmin];
+const principalAuth = [...adminAuth, requirePrincipalStore];
 
 module.exports = {
     authenticateAdmin,
     requirePermission,
     requireDeveloperRole,
+    requirePrincipalStore,
     adminAuth,
+    principalAuth,
 };

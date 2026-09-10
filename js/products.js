@@ -535,7 +535,7 @@ class ProductsPage {
             titleEl.textContent = `Search Results: ${this.currentFilters.search}`;
             if (subtitleEl) subtitleEl.textContent = `Found ${this.filteredProducts.length} products matching your search`;
         } else {
-            titleEl.textContent = 'Natural Health Products';
+            titleEl.textContent = 'Business Solutions';
             if (subtitleEl) subtitleEl.textContent = 'Discover our complete collection of premium herbs, vitamins, and natural supplements';
         }
     }

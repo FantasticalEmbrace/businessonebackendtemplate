@@ -14,7 +14,7 @@ Use this when switching from the old Concrete CMS site to the Node + static stor
   ```
 - [ ] Regenerate sitemaps from the current catalog:
   ```bash
-  npm run seo:generate-sitemap -- --base-url https://www.example.com
+  npm run seo:generate-sitemap -- --base-url https://businessonecomprehensive.com
   ```
 - [ ] Regenerate legacy URL redirects (old sitemap clean URLs):
   ```bash
@@ -42,8 +42,8 @@ The API server loads all four automatically. Later files win if the same `from_p
 
 ```bash
 NODE_ENV=production
-FRONTEND_URL=https://www.example.com
-STOREFRONT_PUBLIC_URL=https://www.example.com
+FRONTEND_URL=https://businessonecomprehensive.com
+STOREFRONT_PUBLIC_URL=https://businessonecomprehensive.com
 # STAGING_BLOCK_INDEXING must be unset or false on production
 ```
 
@@ -59,15 +59,15 @@ STOREFRONT_PUBLIC_URL=https://www.example.com
 1. [ ] Remove or set `STAGING_BLOCK_INDEXING=false` on production.
 2. [ ] Restart the Node process so env and redirect CSVs load.
 3. [ ] Confirm redirects:
-   - `https://www.example.com/index.php/products/{slug}` → `product.html?slug=...`
-   - `https://www.example.com/categories/herbs` → `categories.html`
-4. [ ] Confirm `https://www.example.com/robots.txt` lists three sitemaps.
-5. [ ] Confirm `https://www.example.com/sitemap.xml` opens the sitemap index.
+   - `https://businessonecomprehensive.com/index.php/products/{slug}` → `product.html?slug=...`
+   - `https://businessonecomprehensive.com/categories/herbs` → `categories.html`
+4. [ ] Confirm `https://businessonecomprehensive.com/robots.txt` lists three sitemaps.
+5. [ ] Confirm `https://businessonecomprehensive.com/sitemap.xml` opens the sitemap index.
 
 ## Google Search Console
 
-1. [ ] Add / verify `https://www.example.com` property.
-2. [ ] Submit sitemap: `https://www.example.com/sitemap.xml`
+1. [ ] Add / verify `https://businessonecomprehensive.com` property.
+2. [ ] Submit sitemap: `https://businessonecomprehensive.com/sitemap.xml`
 3. [ ] Inspect a few legacy URLs (old product, brand, category) — expect **URL is on Google** to update after redirects are crawled.
 4. [ ] Monitor **Pages** and **Indexing** for 404 spikes during the first 2–4 weeks.
 
@@ -75,7 +75,7 @@ STOREFRONT_PUBLIC_URL=https://www.example.com
 
 | Task | Command |
 |------|---------|
-| New products / catalog changes | `npm run seo:generate-sitemap -- --base-url https://www.example.com` and `npm run seo:product-redirects` |
+| New products / catalog changes | `npm run seo:generate-sitemap -- --base-url https://businessonecomprehensive.com` and `npm run seo:product-redirects` |
 | New brands or health categories | `npm run seo:legacy-redirects` |
 | Re-test all redirects | `npm run seo:verify` |
 

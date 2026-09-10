@@ -1,4 +1,4 @@
-// Business One Admin Panel - Customer Groups module.
+// Business One Admin — Customer Groups module.
 /* global AdminApp */
 (function () {
     'use strict';
@@ -45,15 +45,18 @@
     }
 
     function discountFieldsHtml(prefix, data = {}) {
+        const shop = window.adminApp?._isShopAdminView?.() ?? false;
         const type = data.type || data.discount_type || 'none';
         const value = data.value != null ? data.value : data.discount_value != null ? data.discount_value : '';
         const label = data.label || data.discount_label || '';
-        const appliesWeb = data.applies_web !== false && data.applies_web !== 0 && data.discount_applies_web !== 0;
+        const appliesWeb = shop ? false : data.applies_web !== false && data.applies_web !== 0 && data.discount_applies_web !== 0;
         const appliesPos = data.applies_pos !== false && data.applies_pos !== 0 && data.discount_applies_pos !== 0;
         return `
             <div class="form-group" style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--gray-200);">
                 <h4 style="margin:0 0 0.75rem 0;font-size:1rem;">Standing discount</h4>
-                <p class="form-help" style="margin:0 0 0.75rem 0;">Automatically applied for members of this group at checkout and on the register (after promo codes on web).</p>
+                <p class="form-help" style="margin:0 0 0.75rem 0;">${shop
+                    ? 'Automatically applied for members of this group at the POS register.'
+                    : 'Automatically applied for members of this group at checkout and on the register (after promo codes on web).'}</p>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
                     <div class="form-group" style="margin:0;">
                         <label for="${prefix}-discount-type">Discount type</label>
@@ -73,9 +76,9 @@
                     <input class="form-input" id="${prefix}-discount-label" name="discount_label" maxlength="100" value="${esc(label)}" placeholder="e.g. Wholesale 10%">
                 </div>
                 <div style="display:flex;flex-wrap:wrap;gap:1rem;margin-top:0.5rem;">
-                    <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
+                    ${shop ? '' : `<label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
                         <input type="checkbox" id="${prefix}-discount-web" name="discount_applies_web"${appliesWeb ? ' checked' : ''}> Website checkout
-                    </label>
+                    </label>`}
                     <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
                         <input type="checkbox" id="${prefix}-discount-pos" name="discount_applies_pos"${appliesPos ? ' checked' : ''}> In-store POS
                     </label>
@@ -84,6 +87,7 @@
     }
 
     function linkedPromotionsHtml(prefix, promotions, linked = []) {
+        if (window.adminApp?._isShopAdminView?.()) return '';
         const linkedMap = new Map(
             (linked || []).map((item) => [Number(item.promotionId ?? item.promotion_id), Boolean(item.autoApply ?? item.auto_apply)])
         );
@@ -205,11 +209,11 @@
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Members</th>
-                                <th>Discounts</th>
-                                <th>Channels</th>
-                                <th>Status</th>
+                                <th data-sort="name" data-sort-type="text" data-sort-default="asc">Name</th>
+                                <th data-sort="members" data-sort-type="number" data-sort-default="desc">Members</th>
+                                <th data-sort="discounts" data-sort-type="text" data-sort-default="asc">Discounts</th>
+                                <th data-sort="channels" data-sort-type="text" data-sort-default="asc">Channels</th>
+                                <th data-sort="status" data-sort-type="text" data-sort-default="asc">Status</th>
                                 ${canEdit ? '<th>Actions</th>' : ''}
                             </tr>
                         </thead>
@@ -232,11 +236,11 @@
                                         .join(' · ') || '—';
                                     return `
                                 <tr>
-                                    <td><strong>${esc(g.name)}</strong>${g.description ? `<br><small style="color:var(--gray-500);">${esc(g.description)}</small>` : ''}</td>
-                                    <td>${Number(g.member_count) || 0}</td>
-                                    <td style="font-size:0.88rem;">${esc(discountBits)}</td>
-                                    <td style="font-size:0.88rem;">${esc(channels)}</td>
-                                    <td>
+                                    <td data-sort-value="${esc(g.name || '')}"><strong>${esc(g.name)}</strong>${g.description ? `<br><small style="color:var(--gray-500);">${esc(g.description)}</small>` : ''}</td>
+                                    <td data-sort-value="${Number(g.member_count) || 0}">${Number(g.member_count) || 0}</td>
+                                    <td data-sort-value="${esc(discountBits)}" style="font-size:0.88rem;">${esc(discountBits)}</td>
+                                    <td data-sort-value="${esc(channels)}" style="font-size:0.88rem;">${esc(channels)}</td>
+                                    <td data-sort-value="${g.is_active ? '1' : '0'}">
                                         <span class="badge ${g.is_active ? 'badge-success' : 'badge-danger'}">
                                             ${g.is_active ? 'Active' : 'Inactive'}
                                         </span>
@@ -256,6 +260,10 @@
                         </tbody>
                     </table>
                 </div>`;
+            const groupsTable = container.querySelector('table');
+            if (groupsTable && window.AdminTableSort) {
+                AdminTableSort.bind(groupsTable, { mode: 'client' });
+            }
         } catch (err) {
             container.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--error);">Failed to load groups: ${esc(err.message)}</div>`;
         }

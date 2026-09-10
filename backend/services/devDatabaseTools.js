@@ -94,7 +94,7 @@ async function streamMysqldump(config, caPath, writeChunk) {
 }
 
 async function streamNodeBackup(pool, databaseName, writeChunk) {
-    const header = `-- Your Store node backup\n-- Database: ${databaseName}\n-- Generated: ${new Date().toISOString()}\n\nSET FOREIGN_KEY_CHECKS=0;\n\n`;
+    const header = `-- Business One node backup\n-- Database: ${databaseName}\n-- Generated: ${new Date().toISOString()}\n\nSET FOREIGN_KEY_CHECKS=0;\n\n`;
     writeChunk(Buffer.from(header, 'utf8'));
 
     const [tables] = await pool.query('SHOW TABLES');

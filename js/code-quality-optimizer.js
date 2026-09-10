@@ -1,4 +1,4 @@
-// Advanced Code Quality Optimizer for Your Store
+// Advanced Code Quality Optimizer for Business One
 // Final polish for maintainability, performance, and developer experience
 
 class CodeQualityOptimizer {

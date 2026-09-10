@@ -91,7 +91,7 @@ function clearSiteMessage() {
 }
 
 const STORE_PHONE_DIGITS = '7068619454';
-const STORE_PHONE_TEL = '+17068619454';
+const STORE_PHONE_TEL = '+18502902084';
 
 function storePhoneDisplay() {
     if (window.HMHERBS_PHONE_US && typeof HMHERBS_PHONE_US.formatDigitsToDisplay === 'function') {
@@ -127,7 +127,7 @@ function ensureCallStoreModal() {
                 </button>
             </div>
             <div class="edsa-modal-body call-store-modal-body">
-                <p class="call-store-lead">Your Store</p>
+                <p class="call-store-lead">Business One</p>
                 <a href="tel:${STORE_PHONE_TEL}" class="call-store-phone-btn">
                     <i class="fas fa-phone" aria-hidden="true"></i>
                     <span>${storePhoneDisplay()}</span>

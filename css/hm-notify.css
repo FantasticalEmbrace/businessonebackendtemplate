@@ -79,7 +79,7 @@
 }
 
 .hm-toast--info {
-  background: #2563eb;
+  background: var(--brand-primary-dark);
 }
 
 .hm-toast__row {

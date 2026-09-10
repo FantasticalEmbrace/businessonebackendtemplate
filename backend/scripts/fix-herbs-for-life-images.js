@@ -12,7 +12,7 @@ const path = require('path');
 const mysql = require('mysql2/promise');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
-const BASE = 'https://hmherbs.com';
+const BASE = 'https://businessonecomprehensive.com';
 const REPO_ROOT = path.join(__dirname, '..', '..');
 const IMAGES_DIR = path.join(REPO_ROOT, 'images', 'products');
 
@@ -23,16 +23,16 @@ const DEFAULT_HEADERS = {
     Referer: `${BASE}/`
 };
 
-/** Primary product photo per SKU (from hmherbs.com / scraped-products.json) */
+/** Primary product photo per SKU (from example.com / scraped-products.json) */
 const SKU_TO_IMAGE_URL = {
     '04592':
-        'https://i0.wp.com/hmherbs.com/application/files/cache/thumbnails/herbs-for-life-cbd-gummies-30mg-900mg-per-bottle-e449babf3c65d85ead81a2f1ac0613d4.jpg',
+        'https://i0.wp.com/example.com/application/files/cache/thumbnails/herbs-for-life-cbd-gummies-30mg-900mg-per-bottle-e449babf3c65d85ead81a2f1ac0613d4.jpg',
     '58172-CB':
-        'https://hmherbs.com/application/files/5517/4172/5177/1ADEBF3A-9B46-4106-A423-95343A2E5914.webp',
+        'https://businessonecomprehensive.com/application/files/5517/4172/5177/1ADEBF3A-9B46-4106-A423-95343A2E5914.webp',
     '4778':
-        'https://i0.wp.com/hmherbs.com/application/files/cache/thumbnails/herbs-for-life-delta-8-gummies-25mg-30-ct-b7d32860c2e82cf0d52261f0d4845c61.jpg',
+        'https://i0.wp.com/example.com/application/files/cache/thumbnails/herbs-for-life-delta-8-gummies-25mg-30-ct-b7d32860c2e82cf0d52261f0d4845c61.jpg',
     '08851':
-        'https://i0.wp.com/hmherbs.com/application/files/cache/thumbnails/herbs-for-life-delta-9-gummies-10mg-40ct-2f7035d0b0f032da6c9bd35c9263cd82.jpg'
+        'https://i0.wp.com/example.com/application/files/cache/thumbnails/herbs-for-life-delta-9-gummies-10mg-40ct-2f7035d0b0f032da6c9bd35c9263cd82.jpg'
 };
 
 function safeSlugSegment(s) {

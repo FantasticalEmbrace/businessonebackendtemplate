@@ -93,6 +93,8 @@ function mapPosEmployeeRow(e) {
         allowManualDiscounts: Boolean(e.allow_manual_discounts),
         canViewCost: Boolean(e.can_view_cost),
         canViewShopFloor: e.can_view_shop_floor == null ? false : Boolean(e.can_view_shop_floor),
+        canBuildShopEstimate: personnel.employeeCanBuildShopEstimate(e),
+        isTechnician: personnel.employeeIsTechnician(e),
         createdAt: e.created_at,
         updatedAt: e.updated_at,
     };

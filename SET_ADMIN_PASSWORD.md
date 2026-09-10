@@ -9,7 +9,7 @@ I've created a SQL script that will update the admin password. Run this in your 
 UPDATE admin_users 
 SET password_hash = '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj6hsxq5S/kS',
     updated_at = NOW()
-WHERE email = 'store@example.com';
+WHERE email = 'info@businessonecomprehensive.com';
 ```
 
 **OR** run the SQL file:
@@ -39,13 +39,13 @@ node -e "const bcrypt=require('bcrypt');bcrypt.hash('admin1',12).then(h=>console
 UPDATE admin_users 
 SET password_hash = '<paste_hash_here>',
     updated_at = NOW()
-WHERE email = 'store@example.com';
+WHERE email = 'info@businessonecomprehensive.com';
 ```
 
 ## After Updating
 
 **Admin Credentials:**
-- **Email:** `store@example.com`
+- **Email:** `info@businessonecomprehensive.com`
 - **Password:** `admin1`
 
 Access the admin panel at: `admin.html`

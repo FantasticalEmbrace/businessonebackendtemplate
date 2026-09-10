@@ -41,7 +41,7 @@ async function thoroughBrandRepair() {
             { name: 'Edom Labs', keywords: ['Edom Labs', 'Edom'] },
             { name: 'Unicity', keywords: ['Unicity'] },
             { name: 'Host Defence', keywords: ['Host Defence', 'Host Defense'] },
-            { name: 'HM Enterprise', keywords: ['HM Enterprise', 'H&M Herbs', 'HM Herbs'] },
+            { name: 'HM Enterprise', keywords: ['HM Enterprise', 'Business One', 'Business One'] },
             { name: 'MD Science', keywords: ['MD Science', 'M.D. Science', 'Swiss Navy'] },
             { name: 'Life-Flo', keywords: ['Life-Flo', 'Life Flo'] },
             { name: 'Michael\'s Health', keywords: ['Michael\'s Health', 'Michael\'s'] },

@@ -129,6 +129,8 @@ function parseNominatimItem(item) {
         state,
         postalCode,
         label: String(item.display_name || line1).trim(),
+        lat: Number(item.lat),
+        lon: Number(item.lon)
     };
 }
 
@@ -153,6 +155,8 @@ function parseCensusMatch(match) {
         state,
         postalCode,
         label: String(match.matchedAddress || line1).trim(),
+        lat: Number(match?.coordinates?.y),
+        lon: Number(match?.coordinates?.x)
     };
 }
 

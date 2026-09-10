@@ -6,7 +6,7 @@ Local-only copy of the merchant stack for **admin + POS**. There is **no public 
 
 ## Branding
 
-Admin chrome and default tokens follow **Business One** (`businessonecomprehensive.com`): orange `#ff9b1f`, slate/navy sidebar — **not** Your Store green. See `css/brand-tokens.css` and `data/branding.json`.
+Admin chrome and default tokens follow **Business One** (`businessonecomprehensive.com`): orange `#ff9b1f`, slate/navy sidebar — **not** Business One green. See `css/brand-tokens.css` and `data/branding.json`.
 
 Remote support for technicians is on **Business One ops admin** (marketing site), not this merchant admin.
 

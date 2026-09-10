@@ -27,7 +27,7 @@ const suites = [
 ];
 
 console.log(`\n${'='.repeat(60)}`);
-console.log('HM Herbs — full payment test battery');
+console.log('Business One — full payment test battery');
 console.log(`Base: ${base}`);
 console.log(`${'='.repeat(60)}\n`);
 

@@ -5,6 +5,8 @@ const logger = require('../utils/logger');
 const { isSmtpConfigured } = require('../utils/smtpConfig');
 const { TaxLedgerService, toDateKey } = require('./taxLedger');
 const { resolveCounty } = require('../utils/zipCountyLookup');
+const storeTaxSettings = require('./storeTaxSettings');
+const { isPrincipalStore } = require('./storeBranding');
 
 const TARGET_STATE_ORDER = ['GA', 'IN', 'MI', 'NC', 'OH'];
 const STATE_LABELS = {
@@ -28,8 +30,13 @@ const DETAIL_HEADERS = [
 
 const MONEY_FMT = '"$"#,##0.00';
 
+function trim(value) {
+    return value != null ? String(value).trim() : '';
+}
+
+/** @deprecated Prefer storeTaxSettings.getAccountantEmail(pool, { isPrincipalStore }). */
 function getAccountantEmail() {
-    return String(process.env.TAX_ACCOUNTANT_EMAIL || '').trim();
+    return trim(process.env.TAX_ACCOUNTANT_EMAIL || '');
 }
 
 function getPreviousMonthRange(referenceDate = new Date()) {
@@ -444,21 +451,30 @@ class TaxAccountantReportService {
 
     async sendReportEmail({ startDate, endDate, files, rowCount, recipientEmail }) {
         const mail = await getMailTransporter();
-        const to = recipientEmail || getAccountantEmail();
+        const to = trim(recipientEmail);
+        if (!to) {
+            return {
+                sent: false,
+                skipped: true,
+                reason: 'Accountant email is not configured',
+                to: '',
+                filenames: [],
+            };
+        }
         const periodLabel = `${startDate} through ${endDate}`;
-        const subject = `Your Store Online Sales Tax — ${periodLabel}`;
+        const subject = `Business One Online Sales Tax — ${periodLabel}`;
         const stateList = (files || []).map((f) => f.stateLabel).join(', ') || 'none';
         const attachmentCount = (files || []).length;
         const html = `
             <p>Hello,</p>
-            <p>Attached are <strong>${attachmentCount}</strong> separate Excel workbook(s) for Your Store <strong>online (website) sales tax</strong> for <strong>${periodLabel}</strong>.</p>
+            <p>Attached are <strong>${attachmentCount}</strong> separate Excel workbook(s) for Business One <strong>online (website) sales tax</strong> for <strong>${periodLabel}</strong>.</p>
             <p>States included: <strong>${stateList}</strong>. In-store/POS sales are <em>not</em> included — those are handled separately at the register.</p>
             <p>Each file is for one state, with transaction detail and county summaries for filing.</p>
             <p>Online transaction count: <strong>${rowCount}</strong></p>
-            <p>— Your Store automated tax report</p>
+            <p>— Business One automated tax report</p>
         `.trim();
         const text = [
-            `Your Store online sales tax for ${periodLabel}.`,
+            `Business One online sales tax for ${periodLabel}.`,
             `${attachmentCount} Excel file(s): ${stateList}.`,
             `Online transactions: ${rowCount}. In-store sales excluded.`,
             'One spreadsheet per state is attached.'
@@ -516,10 +532,15 @@ class TaxAccountantReportService {
         syncBeforeExport = true
     }) {
         const range = parseDateRange(startDate, endDate);
-        const to = recipientEmail || getAccountantEmail();
+        const principal = await isPrincipalStore(this.pool);
+        const to =
+            trim(recipientEmail) ||
+            (await storeTaxSettings.getAccountantEmail(this.pool, { isPrincipalStore: principal }));
 
         if (!to) {
-            throw new Error('Accountant email is not configured');
+            throw new Error(
+                'Accountant email is not configured. Save your accountant email under Sales Tax Reporting first.'
+            );
         }
 
         if (skipIfScheduledAlreadySent && triggerType === 'scheduled') {

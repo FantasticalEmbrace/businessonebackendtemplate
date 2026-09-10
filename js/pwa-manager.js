@@ -1,4 +1,4 @@
-// Advanced PWA Manager for Your Store
+// Advanced PWA Manager for Business One
 // Enhanced Progressive Web App features with offline sync and push notifications
 
 class PWAManager {
@@ -381,7 +381,7 @@ class PWAManager {
             return Notification.permission;
         }
 
-        // Branded Your Store pre-prompt, then the browser permission dialog
+        // Branded Business One pre-prompt, then the browser permission dialog
         const permission =
             typeof window.hmRequestNotificationPermission === 'function'
                 ? await window.hmRequestNotificationPermission()
@@ -528,7 +528,7 @@ class PWAManager {
         installText.className = 'install-text';
 
         const title = document.createElement('h3');
-        title.textContent = 'Install Your Store App';
+        title.textContent = 'Install Business One App';
 
         const description = document.createElement('p');
         description.textContent = 'Get quick access to our products and exclusive mobile features';

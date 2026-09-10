@@ -1,4 +1,4 @@
-// Security Enhancements for Your Store
+// Security Enhancements for Business One
 // Additional security measures beyond helmet.js
 
 const rateLimit = require('express-rate-limit');

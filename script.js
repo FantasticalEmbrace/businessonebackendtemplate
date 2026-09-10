@@ -1,4 +1,4 @@
-// Your Store - Interactive JavaScript
+// Business One - Interactive JavaScript
 // Modern, accessible, and feature-rich functionality
 
 /** Cart drawer top offset = sticky header height (taller on index with top bar). */
@@ -87,7 +87,7 @@ class HMHerbsApp {
             await this.renderSpotlightProducts();
             this.updateCartDisplay();
 
-            // Your Store app initialized successfully
+            // Business One app initialized successfully
         } catch (error) {
             Logger.error('Error initializing app:', error);
             this.showNotification('Unable to load the application. Please refresh the page or try again later.', 'error');

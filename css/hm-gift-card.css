@@ -1,10 +1,10 @@
 /**
- * Branded Your Store gift card — shared by gift-cards page, account, checkout.
+ * Branded Business One gift card — shared by gift-cards page, account, checkout.
  * Colors from css/brand-tokens.css
  */
 
 .hm-gift-card {
-    --hm-gc-from: var(--brand-sidebar-from, #047857);
+    --hm-gc-from: var(--brand-sidebar-from, #ff9b1f);
     --hm-gc-to: var(--brand-sidebar-to, #065f46);
     --hm-gc-accent: var(--brand-primary, var(--brand-primary));
     --hm-gc-light: var(--light-green, #ecfdf5);
