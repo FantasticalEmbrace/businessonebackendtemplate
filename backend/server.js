@@ -1827,6 +1827,36 @@ const {
 const { requirePermission: requireAdminPermissionLevel } = require('./middleware/adminAuth');
 const { requireEcommerceStoreAccess } = require('./middleware/requireEcommerceStore');
 
+// Health tags list for admin (Categories → Health Tags tab + product tagging filters).
+// Registered on the main app so it is never missed by router mount / catch-all 404 issues.
+app.get('/api/admin/health-categories', authenticateAdmin, async (req, res) => {
+    try {
+        const [categories] = await pool.execute(`
+            SELECT
+                hc.id,
+                hc.name,
+                hc.slug,
+                hc.description,
+                hc.image_url,
+                hc.sort_order,
+                hc.is_active,
+                hc.created_at,
+                COUNT(DISTINCT phc.product_id) AS product_count
+            FROM health_categories hc
+            LEFT JOIN product_health_categories phc ON phc.health_category_id = hc.id
+            GROUP BY hc.id
+            ORDER BY hc.sort_order ASC, hc.name ASC
+        `);
+        res.json(categories);
+    } catch (error) {
+        if (/doesn't exist|ER_NO_SUCH_TABLE/i.test(error.message || '')) {
+            return res.json([]);
+        }
+        logger.error('Admin health categories fetch error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 // Marketing hub (Mailchimp signup URL / headline) — registered on the main app so `/api/admin/marketing-settings`
 // is never missed by the catch-all 404 (some deployments had only this path fail from the admin router).
 app.use(
