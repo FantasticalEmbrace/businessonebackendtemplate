@@ -1,4 +1,4 @@
-// H&M Herbs & Vitamins - Interactive JavaScript
+// Your Store - Interactive JavaScript
 // Modern, accessible, and feature-rich functionality
 
 /** Cart drawer top offset = sticky header height (taller on index with top bar). */
@@ -87,7 +87,7 @@ class HMHerbsApp {
             await this.renderSpotlightProducts();
             this.updateCartDisplay();
 
-            // H&M Herbs app initialized successfully
+            // Your Store app initialized successfully
         } catch (error) {
             Logger.error('Error initializing app:', error);
             this.showNotification('Unable to load the application. Please refresh the page or try again later.', 'error');

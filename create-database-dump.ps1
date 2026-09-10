@@ -1,8 +1,8 @@
-# MySQL Database Dump Script for H&M Herbs
+# MySQL Database Dump Script for Your Store
 # Creates a backup of your MySQL database
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "H&M Herbs Database Dump Utility" -ForegroundColor Cyan
+Write-Host "Your Store Database Dump Utility" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 

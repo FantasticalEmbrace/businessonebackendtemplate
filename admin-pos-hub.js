@@ -38,8 +38,8 @@
     let setupAiCoachedSteps = new Set();
     let setupAiCoachLoading = false;
     let setupLastBriefingFingerprint = '';
-    const SETUP_STORAGE_KEY = 'hmherbs_pos_network_setup_v1';
-    const SETUP_CHAT_STORAGE_KEY = 'hmherbs_pos_network_setup_chat_v1';
+    const SETUP_STORAGE_KEY = 'bo_pos_network_setup_v1';
+    const SETUP_CHAT_STORAGE_KEY = 'bo_pos_network_setup_chat_v1';
 
     function typeMeta(id) {
         return equipmentTypes.find((t) => t.id === id) || null;
@@ -549,7 +549,8 @@
 
     function loadSetupClientState() {
         try {
-            const raw = localStorage.getItem(SETUP_STORAGE_KEY);
+            let raw = localStorage.getItem(SETUP_STORAGE_KEY);
+            if (!raw) raw = localStorage.getItem('hmherbs_pos_network_setup_v1'); // legacy key alias
             const parsed = raw ? JSON.parse(raw) : {};
             return {
                 skipped: Array.isArray(parsed.skipped) ? parsed.skipped : [],

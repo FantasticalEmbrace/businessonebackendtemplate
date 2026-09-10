@@ -1,4 +1,4 @@
-// Advanced PWA Manager for HM Herbs
+// Advanced PWA Manager for Your Store
 // Enhanced Progressive Web App features with offline sync and push notifications
 
 class PWAManager {
@@ -381,7 +381,7 @@ class PWAManager {
             return Notification.permission;
         }
 
-        // Branded HM Herbs pre-prompt, then the browser permission dialog
+        // Branded Your Store pre-prompt, then the browser permission dialog
         const permission =
             typeof window.hmRequestNotificationPermission === 'function'
                 ? await window.hmRequestNotificationPermission()
@@ -528,7 +528,7 @@ class PWAManager {
         installText.className = 'install-text';
 
         const title = document.createElement('h3');
-        title.textContent = 'Install HM Herbs App';
+        title.textContent = 'Install Your Store App';
 
         const description = document.createElement('p');
         description.textContent = 'Get quick access to our products and exclusive mobile features';

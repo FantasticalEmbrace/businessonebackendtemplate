@@ -1,4 +1,4 @@
-// Advanced Analytics and Performance Monitoring for HM Herbs
+// Advanced Analytics and Performance Monitoring for Your Store
 // Real User Monitoring (RUM), Core Web Vitals, and comprehensive analytics
 
 class AdvancedAnalytics {

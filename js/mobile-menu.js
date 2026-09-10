@@ -206,7 +206,7 @@
                 '<div class="hm-mobile-nav-brand-inner">',
                 '  <span class="hm-mobile-nav-brand-icon" aria-hidden="true"><i class="fas fa-leaf"></i></span>',
                 '  <div class="hm-mobile-nav-brand-text">',
-                '    <span class="hm-mobile-nav-brand-name">H&amp;M Herbs</span>',
+                '    <span class="hm-mobile-nav-brand-name">Your Store</span>',
                 '    <span class="hm-mobile-nav-brand-tag">&amp; Vitamins</span>',
                 '  </div>',
                 '</div>',

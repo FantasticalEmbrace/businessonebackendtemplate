@@ -1,6 +1,6 @@
 @echo off
 echo ========================================
-echo HM Herbs Database Setup
+echo Your Store Database Setup
 echo ========================================
 echo.
 

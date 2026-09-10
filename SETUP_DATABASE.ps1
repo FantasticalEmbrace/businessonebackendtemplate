@@ -1,8 +1,8 @@
-# HM Herbs Database Setup Script
+# Your Store Database Setup Script
 # This script will create the database and run the schema
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "HM Herbs Database Setup" -ForegroundColor Cyan
+Write-Host "Your Store Database Setup" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 

@@ -1,4 +1,4 @@
-// Visual Bug Fixes for HM Herbs
+// Visual Bug Fixes for Your Store
 // Addresses carousel flickering, scroll bar issues, and image loading problems
 
 function hmHerbsIsCheckoutPage() {
@@ -254,7 +254,7 @@ class VisualBugFixer {
             return; // Skip preloading in file:// protocol
         }
 
-        // Same-origin spotlight assets only — old hmherbs.com /application/files/... URLs 404 (HTML) and trigger CORB when used as images
+        // Same-origin spotlight assets only — old example.com /application/files/... URLs 404 (HTML) and trigger CORB when used as images
         const criticalImageUrls = [
             '/images/products/nature-s-puls-probiotic-mega.jpg',
             '/images/products/nature-s-plus-ageloss-kidney-support.jpg',

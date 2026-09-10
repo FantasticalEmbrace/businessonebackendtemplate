@@ -17,7 +17,7 @@
 
     function loadNetworkClientState() {
         try {
-            const raw = localStorage.getItem('hmherbs_pos_network_setup_v1');
+            let raw = localStorage.getItem('bo_pos_network_setup_v1') || localStorage.getItem('hmherbs_pos_network_setup_v1');
             const parsed = raw ? JSON.parse(raw) : {};
             return {
                 skipped: Array.isArray(parsed.skipped) ? parsed.skipped : [],
@@ -37,7 +37,7 @@
     let troubleshootLastFingerprint = '';
     let troubleshootLoading = false;
 
-    const CHAT_STORAGE_KEY = 'hmherbs_pos_troubleshoot_chat_v1';
+    const CHAT_STORAGE_KEY = 'bo_pos_troubleshoot_chat_v1';
 
     function loadChatHistory() {
         try {

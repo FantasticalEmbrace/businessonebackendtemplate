@@ -893,7 +893,7 @@ ALTER TABLE admin_users
 -- Source: 20260602_social_oauth.sql
 
 -- =============================================================================
--- H&M Herbs - Social OAuth (Google / Apple) for customers and admins
+-- Store - Social OAuth (Google / Apple) for customers and admins
 -- Migration: 20260602
 -- =============================================================================
 
@@ -916,7 +916,7 @@ CREATE INDEX idx_admin_users_oauth ON admin_users (auth_provider, oauth_subject)
 -- Source: 20260601_tax_accountant_report.sql
 
 -- =============================================================================
--- H&M Herbs - Tax accountant monthly report (county + delivery log)
+-- Store - Tax accountant monthly report (county + delivery log)
 -- Migration: 20260601
 -- =============================================================================
 

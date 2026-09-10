@@ -166,7 +166,7 @@ async function searchNominatim(query) {
 
     const response = await fetch(url.toString(), {
         headers: {
-            'User-Agent': 'HMHerbsStorefront/1.0 (address-autocomplete)',
+            'User-Agent': 'BusinessOneStorefront/1.0 (address-autocomplete)',
             Accept: 'application/json',
         },
     });

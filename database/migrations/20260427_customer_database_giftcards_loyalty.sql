@@ -1,5 +1,5 @@
 -- =============================================================================
--- H&M Herbs - Customer Database, Gift Cards, and Loyalty/Rewards
+-- Store - Customer Database, Gift Cards, and Loyalty/Rewards
 -- Migration: 20260427
 -- =============================================================================
 -- Adds:

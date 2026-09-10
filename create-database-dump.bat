@@ -1,9 +1,9 @@
 @echo off
-REM MySQL Database Dump Script for H&M Herbs
+REM MySQL Database Dump Script for Your Store
 REM Creates a backup of your MySQL database
 
 echo ========================================
-echo H&M Herbs Database Dump Utility
+echo Your Store Database Dump Utility
 echo ========================================
 echo.
 

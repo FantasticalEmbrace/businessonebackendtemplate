@@ -1,4 +1,4 @@
-/* Performance Optimizations for HM Herbs */
+/* Performance Optimizations for Your Store */
 /* Critical rendering path optimizations and performance enhancements */
 
 /* Critical CSS - Above the fold content */
@@ -158,7 +158,7 @@
 /* Add these to HTML head:
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="dns-prefetch" href="https://api.hmherbs.com">
+<link rel="dns-prefetch" href="https://api.example.com">
 <link rel="preload" href="/styles.css" as="style">
 <link rel="preload" href="/script.js" as="script">
 */

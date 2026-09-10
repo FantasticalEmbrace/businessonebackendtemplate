@@ -15,7 +15,7 @@ From [Google’s quota docs](https://developers.google.com/my-business/content/l
 | **0** requests/minute | Pending (or not applied) |
 | **300** requests/minute | Approved — listing/sync should work |
 
-HM Herbs OAuth project number (from `GBP_CLIENT_ID`): **266596824943**
+Your Store OAuth project number (from `GBP_CLIENT_ID`): **266596824943**
 
 ---
 
@@ -25,7 +25,7 @@ Prerequisites ([official guide](https://developers.google.com/my-business/conten
 
 - A **verified** Business Profile active **60+ days**
 - A **website** on that profile matching the business
-- Apply with an email that is an **owner/manager** on the profile (e.g. `hmherbs1@gmail.com`)
+- Apply with an email that is an **owner/manager** on the profile (e.g. `store@example.com`)
 
 1. Open the [GBP API access request form](https://support.google.com/business/contact/api_default)
 2. Choose **Application for Basic API Access**
@@ -49,7 +49,7 @@ In [API Library](https://console.cloud.google.com/apis/library) for the same pro
 |--------|-----------|
 | Redirect URI | `http://localhost:3001/api/admin/settings/google-business/callback` |
 | Scope | `https://www.googleapis.com/auth/business.manage` |
-| Test users | `hmherbs1@gmail.com` while app is in **Testing** |
+| Test users | `store@example.com` while app is in **Testing** |
 
 ```env
 GBP_CLIENT_ID=...

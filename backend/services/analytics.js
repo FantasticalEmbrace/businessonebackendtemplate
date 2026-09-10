@@ -1,4 +1,4 @@
-// HM Herbs Analytics and Monitoring Service
+// Store analytics and monitoring service
 // Comprehensive monitoring and reporting for all integrations
 
 class AnalyticsService {

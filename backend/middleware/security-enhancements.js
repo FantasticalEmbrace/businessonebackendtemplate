@@ -1,4 +1,4 @@
-// Security Enhancements for HM Herbs
+// Security Enhancements for Your Store
 // Additional security measures beyond helmet.js
 
 const rateLimit = require('express-rate-limit');

@@ -1,6 +1,6 @@
 # Business One Platform Billing (NMI)
 
-**Business One bills merchants** (you collect revenue). **HM Herbs is a merchant store** — it does not own this billing UI.
+**Business One bills merchants** (you collect revenue). **Your Store is a merchant store** — it does not own this billing UI.
 
 | What | Where |
 |------|--------|
@@ -8,9 +8,9 @@
 | **Public signup** | `business-one-webpage/pos-signup.html` |
 | **Billing API** | Hub backend — deploy on **signup.businessonecomprehensive.com** Linode |
 | **Credentials UI** | Business One Admin → **Payments** (proxies to hub) |
-| **HM Herbs admin** | License tab links out to Business One billing |
+| **Your Store admin** | License tab links out to Business One billing |
 
-Form styles use `business-one-webpage/css/platform-billing.css` — **not** HM Herbs admin CSS.
+Form styles use `business-one-webpage/css/platform-billing.css` — **not** Your Store admin CSS.
 
 ## Payment processors (clarified)
 

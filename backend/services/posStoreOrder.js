@@ -84,7 +84,7 @@ function parseTaxExemptSale(payload) {
 }
 
 function getInStoreEmail() {
-    return String(process.env.POS_IN_STORE_EMAIL || 'pos-instore@hmherbs.local').trim();
+    return String(process.env.POS_IN_STORE_EMAIL || 'pos-instore@store.local').trim();
 }
 
 function parseCustomerId(payload) {

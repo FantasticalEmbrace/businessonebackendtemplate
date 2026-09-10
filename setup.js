@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 /**
- * HM Herbs Complete Setup Script
+ * Your Store Complete Setup Script
  * 
- * This script handles the complete setup of the HM Herbs application:
+ * This script handles the complete setup of the Your Store application:
  * - Installs dependencies
  * - Sets up environment variables
  * - Creates database and tables
@@ -71,7 +71,7 @@ async function setupEnvironment() {
             console.log('✅ Created .env file from template');
         } else {
             // Create basic .env file with improved configuration
-            const envContent = `# HM Herbs Environment Configuration
+            const envContent = `# Your Store Environment Configuration
 PORT=3001
 NODE_ENV=development
 FRONTEND_URL=http://localhost:8000
@@ -183,7 +183,7 @@ async function createVSCodeConfig() {
         "version": "2.0.0",
         "tasks": [
             {
-                "label": "Start HM Herbs Backend",
+                "label": "Start Your Store Backend",
                 "type": "shell",
                 "command": "npm",
                 "args": ["start"],
@@ -231,7 +231,7 @@ async function createVSCodeConfig() {
         "version": "0.2.0",
         "configurations": [
             {
-                "name": "Start HM Herbs Backend",
+                "name": "Start Your Store Backend",
                 "type": "node",
                 "request": "launch",
                 "program": "${workspaceFolder:Backend}/server.js",
@@ -276,14 +276,14 @@ async function createStartupScript() {
     const startScript = `#!/usr/bin/env node
 
 /**
- * HM Herbs Quick Start Script
+ * Your Store Quick Start Script
  * Run this to start the backend server
  */
 
 const { spawn } = require('child_process');
 const path = require('path');
 
-console.log('🌿 Starting HM Herbs Backend Server...');
+console.log('🌿 Starting Your Store Backend Server...');
 
 const server = spawn('npm', ['start'], {
     cwd: path.join(__dirname, 'backend'),
@@ -339,8 +339,8 @@ process.on('SIGINT', () => {
 }
 
 async function main() {
-    console.log('🌿 HM Herbs Complete Setup\n');
-    console.log('This script will set up everything you need to run HM Herbs locally.\n');
+    console.log('🌿 Your Store Complete Setup\n');
+    console.log('This script will set up everything you need to run Your Store locally.\n');
     
     try {
         // Install dependencies
@@ -365,7 +365,7 @@ async function main() {
         console.log('\n2. 🚀 Start the server:');
         console.log('   npm start');
         console.log('   OR press F5 in VS Code');
-        console.log('   OR Ctrl+Shift+P → "Run Task" → "Start HM Herbs Backend"');
+        console.log('   OR Ctrl+Shift+P → "Run Task" → "Start Your Store Backend"');
         console.log('\n3. 🌐 Access your website:');
         console.log('   Frontend: http://localhost:8000');
         console.log('   Admin Panel: http://localhost:8000/admin.html');
@@ -373,7 +373,7 @@ async function main() {
         const startNow = await question('\n🚀 Would you like to start the server now? (y/n): ');
         
         if (startNow.toLowerCase() === 'y' || startNow.toLowerCase() === 'yes') {
-            console.log('\n🌿 Starting HM Herbs Backend Server...');
+            console.log('\n🌿 Starting Your Store Backend Server...');
             
             const server = spawn('npm', ['start'], {
                 cwd: path.join(__dirname, 'backend'),

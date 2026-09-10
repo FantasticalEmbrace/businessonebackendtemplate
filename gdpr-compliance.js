@@ -1,4 +1,4 @@
-// GDPR Compliance System for H&M Herbs & Vitamins
+// GDPR Compliance System for Your Store
 // Handles cookie consent, privacy preferences, and data management
 
 const GDPR_CLOSE_ICON_SVG = '<svg class="cart-close-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12 5.7 16.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4z"/></svg>';
@@ -53,7 +53,7 @@ class GDPRCompliance {
 
     isAgeVerified() {
         try {
-            return localStorage.getItem('hmherbs_age_verified_21') === 'true';
+            return localStorage.getItem('store_age_verified_21') === 'true';
         } catch (_) {
             return false;
         }
@@ -74,7 +74,7 @@ class GDPRCompliance {
             callback();
             return;
         }
-        window.addEventListener('hmherbs:age-verified', callback, { once: true });
+        window.addEventListener('store:age-verified', callback, { once: true });
     }
 
     whenNewsletterPopupDone(callback) {
@@ -82,7 +82,7 @@ class GDPRCompliance {
             callback();
             return;
         }
-        window.addEventListener('hmherbs:newsletter-popup-done', callback, { once: true });
+        window.addEventListener('store:newsletter-popup-done', callback, { once: true });
     }
 
     scheduleCookiePopup() {
@@ -573,20 +573,20 @@ class GDPRCompliance {
         try {
             // Check if localStorage is available (not available in file:// protocol)
             if (typeof Storage !== 'undefined' && window.location.protocol !== 'file:') {
-                localStorage.setItem('hmherbs_gdpr_consent', JSON.stringify(consentData));
+                localStorage.setItem('store_gdpr_consent', JSON.stringify(consentData));
                 this.consentGiven = true;
                 this.consentTimestamp = consentData.timestamp;
             } else {
                 // Fallback: use sessionStorage or in-memory storage for file:// protocol
                 if (typeof sessionStorage !== 'undefined') {
-                    sessionStorage.setItem('hmherbs_gdpr_consent', JSON.stringify(consentData));
+                    sessionStorage.setItem('store_gdpr_consent', JSON.stringify(consentData));
                 }
                 // Store in memory as fallback
                 this.consentGiven = true;
                 this.consentTimestamp = consentData.timestamp;
                 // Store in window object as last resort
                 if (typeof window !== 'undefined') {
-                    window.hmherbs_gdpr_consent = consentData;
+                    window.store_gdpr_consent = consentData;
                 }
             }
         } catch (error) {
@@ -595,7 +595,7 @@ class GDPRCompliance {
             this.consentGiven = true;
             this.consentTimestamp = consentData.timestamp;
             if (typeof window !== 'undefined') {
-                window.hmherbs_gdpr_consent = consentData;
+                window.store_gdpr_consent = consentData;
             }
         }
     }
@@ -606,17 +606,17 @@ class GDPRCompliance {
 
             // Try localStorage first
             if (typeof Storage !== 'undefined' && window.location.protocol !== 'file:') {
-                savedConsent = localStorage.getItem('hmherbs_gdpr_consent');
+                savedConsent = localStorage.getItem('store_gdpr_consent');
             }
 
             // Fallback to sessionStorage
             if (!savedConsent && typeof sessionStorage !== 'undefined') {
-                savedConsent = sessionStorage.getItem('hmherbs_gdpr_consent');
+                savedConsent = sessionStorage.getItem('store_gdpr_consent');
             }
 
             // Fallback to window object (for file:// protocol)
-            if (!savedConsent && typeof window !== 'undefined' && window.hmherbs_gdpr_consent) {
-                savedConsent = JSON.stringify(window.hmherbs_gdpr_consent);
+            if (!savedConsent && typeof window !== 'undefined' && window.store_gdpr_consent) {
+                savedConsent = JSON.stringify(window.store_gdpr_consent);
             }
 
             if (savedConsent) {
@@ -634,13 +634,13 @@ class GDPRCompliance {
                 } else {
                     // Consent expired, remove it
                     if (typeof Storage !== 'undefined' && window.location.protocol !== 'file:') {
-                        localStorage.removeItem('hmherbs_gdpr_consent');
+                        localStorage.removeItem('store_gdpr_consent');
                     }
                     if (typeof sessionStorage !== 'undefined') {
-                        sessionStorage.removeItem('hmherbs_gdpr_consent');
+                        sessionStorage.removeItem('store_gdpr_consent');
                     }
-                    if (typeof window !== 'undefined' && window.hmherbs_gdpr_consent) {
-                        delete window.hmherbs_gdpr_consent;
+                    if (typeof window !== 'undefined' && window.store_gdpr_consent) {
+                        delete window.store_gdpr_consent;
                     }
                 }
             }
@@ -895,7 +895,7 @@ class GDPRCompliance {
                     keysToRemove.forEach(k => localStorage.removeItem(k));
                     sessionStorage.removeItem('checkout_cart');
                 } catch (e) {
-                    localStorage.removeItem('hmherbs_gdpr_consent');
+                    localStorage.removeItem('store_gdpr_consent');
                     localStorage.removeItem('hmherbs_cart');
                     localStorage.removeItem('hmherbs_customer_token');
                     localStorage.removeItem('hmherbs_customer_user');

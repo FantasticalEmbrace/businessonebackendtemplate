@@ -1,4 +1,4 @@
-# HM Herbs Admin Panel & Import Tools Guide
+# Business One Admin Panel & Import Tools Guide
 
 Complete guide for managing your 10,000+ product catalog, orders, customers, and EDSA bookings.
 
@@ -16,7 +16,7 @@ npm start
 ```
 
 ### 2. Admin Login
-- **Default Admin**: hmherbs1@gmail.com
+- **Default Admin**: store@example.com
 - **Password**: Use the hashed password from seed data or create new admin
 - **Login URL**: `POST /api/admin/auth/login`
 
@@ -273,4 +273,4 @@ For technical support with the admin panel or import tools:
 
 **Built for Scale and Efficiency**
 
-This admin system is designed to handle HM Herbs' complete 10,000+ product catalog with professional-grade tools for inventory management, order processing, and EDSA service coordination.
+This admin system is designed to handle Your Store' complete 10,000+ product catalog with professional-grade tools for inventory management, order processing, and EDSA service coordination.

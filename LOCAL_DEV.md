@@ -1,6 +1,6 @@
 # Local development (keeps working after GitHub sync)
 
-This repo is **`https://github.com/FantasticalEmbrace/HMHerbs`**. Production deploys use Miami Linode; your PC is for day-to-day testing.
+This repo is **`https://github.com/FantasticalEmbrace/businessonebackendtemplate`**. Local only until you choose to deploy.
 
 ## What stays on your machine only (never committed)
 
@@ -8,14 +8,14 @@ This repo is **`https://github.com/FantasticalEmbrace/HMHerbs`**. Production dep
 |------|---------|
 | `backend/.env` | Local DB, JWT, NMI, SMTP, Google OAuth |
 | `deploy/db-connection.env` | Miami managed MySQL credentials |
-| `deploy/hmherbs-miami-ca-certificate.crt` | DB SSL CA |
+| (optional DB SSL CA) | DB SSL CA |
 
 These are listed in `.gitignore`. Pulling or pushing from GitHub does **not** overwrite them.
 
 ## After `git pull` on your PC
 
 ```powershell
-cd "C:\Users\donal\Desktop\Web SItes\hmherbs-main"
+cd "C:\Users\donal\Desktop\Web SItes\business-one-merchant-platform"
 npm install
 cd backend
 npm install
@@ -40,13 +40,13 @@ Open http://127.0.0.1:3001 — uses **`backend/.env`**, not production.
 
 Copy from `backend/.env.example` if you need new env keys after an update.
 
-## POS register (separate platform — not on HM Herbs)
+## POS register (separate platform — not on Your Store)
 
 The register UI lives in **`https://github.com/FantasticalEmbrace/business-one-pos`**. Production host:
 
 **`https://pos.businessonecomprehensive.com`** — its own Linode + domain.
 
-Each merchant opens that site, enters **their store URL** (e.g. `https://www.hmherbs.com`) and **device key**. HM Herbs only runs the **POS API** (`/api/pos/v1`), not the register UI.
+Each merchant opens that site, enters **their store URL** (e.g. `https://www.example.com`) and **device key**. Your Store only runs the **POS API** (`/api/pos/v1`), not the register UI.
 
 Deploy POS platform: `../business-one-pos/deploy/sync-pos-linode.ps1`
 

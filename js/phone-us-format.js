@@ -131,6 +131,8 @@
         refresh: init,
     };
 
+    global.STORE_PHONE_US = api;
+    // Legacy alias (older admin scripts)
     global.HMHERBS_PHONE_US = api;
 
     document.addEventListener('input', onDelegatedInput, true);

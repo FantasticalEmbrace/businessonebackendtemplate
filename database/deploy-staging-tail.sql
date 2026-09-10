@@ -230,7 +230,7 @@ WHERE slug = 'regalabs-organic-cbd-oils';
 -- Source: 20260427_customer_database_giftcards_loyalty.sql
 
 -- =============================================================================
--- H&M Herbs - Customer Database, Gift Cards, and Loyalty/Rewards
+-- Store - Customer Database, Gift Cards, and Loyalty/Rewards
 -- Migration: 20260427
 -- =============================================================================
 -- Adds:
@@ -695,7 +695,7 @@ DROP PROCEDURE IF EXISTS hmherbs_fix_wishlist_indexes;
 -- Source: 20260508_tax_reserve_ledger.sql
 
 -- =============================================================================
--- H&M Herbs - Daily Tax Reserve Ledger
+-- Store - Daily Tax Reserve Ledger
 -- Migration: 20260508
 -- =============================================================================
 
@@ -1620,7 +1620,7 @@ ALTER TABLE admin_users
 -- Source: 20260602_social_oauth.sql
 
 -- =============================================================================
--- H&M Herbs - Social OAuth (Google / Apple) for customers and admins
+-- Store - Social OAuth (Google / Apple) for customers and admins
 -- Migration: 20260602
 -- =============================================================================
 
@@ -1643,7 +1643,7 @@ CREATE INDEX idx_admin_users_oauth ON admin_users (auth_provider, oauth_subject)
 -- Source: 20260601_tax_accountant_report.sql
 
 -- =============================================================================
--- H&M Herbs - Tax accountant monthly report (county + delivery log)
+-- Store - Tax accountant monthly report (county + delivery log)
 -- Migration: 20260601
 -- =============================================================================
 

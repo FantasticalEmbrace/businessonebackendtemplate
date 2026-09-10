@@ -1,4 +1,4 @@
-// Security Utilities for HM Herbs
+// Security Utilities for Your Store
 // Provides secure DOM manipulation and input sanitization
 
 class SecurityUtils {

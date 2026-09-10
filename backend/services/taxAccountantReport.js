@@ -29,7 +29,7 @@ const DETAIL_HEADERS = [
 const MONEY_FMT = '"$"#,##0.00';
 
 function getAccountantEmail() {
-    return String(process.env.TAX_ACCOUNTANT_EMAIL || 'wandaforto@aol.com').trim();
+    return String(process.env.TAX_ACCOUNTANT_EMAIL || '').trim();
 }
 
 function getPreviousMonthRange(referenceDate = new Date()) {
@@ -176,7 +176,7 @@ function addDetailSheet(workbook, sheetName, rows) {
 
 async function buildStateAccountantWorkbook(stateCode, rows) {
     const workbook = new ExcelJS.Workbook();
-    workbook.creator = 'H&M Herbs';
+    workbook.creator = 'Store Tax Report';
     workbook.created = new Date();
     const label = STATE_LABELS[stateCode] || stateCode;
 
@@ -229,7 +229,7 @@ async function buildAccountantWorkbooksByState(rows, { startDate, endDate } = {}
         files.push({
             stateCode: code,
             stateLabel: label,
-            filename: `hmherbs-tax-${code}-${periodSuffix}.xlsx`,
+            filename: `store-tax-${code}-${periodSuffix}.xlsx`,
             buffer,
             rowCount: stateRows.length
         });
@@ -245,7 +245,7 @@ async function buildAccountantWorkbooksByState(rows, { startDate, endDate } = {}
         files.push({
             stateCode: code,
             stateLabel: code,
-            filename: `hmherbs-tax-${code}-${periodSuffix}.xlsx`,
+            filename: `store-tax-${code}-${periodSuffix}.xlsx`,
             buffer,
             rowCount: stateRows.length
         });
@@ -257,7 +257,7 @@ async function buildAccountantWorkbooksByState(rows, { startDate, endDate } = {}
 /** @deprecated Combined workbook — prefer buildAccountantWorkbooksByState for filing. */
 async function buildAccountantWorkbook(rows) {
     const workbook = new ExcelJS.Workbook();
-    workbook.creator = 'H&M Herbs';
+    workbook.creator = 'Store Tax Report';
     workbook.created = new Date();
 
     addDetailSheet(workbook, 'All Transactions', rows);
@@ -335,7 +335,7 @@ async function getMailTransporter() {
             auth: { user: smtpUser, pass: smtpPass }
         }),
         from: {
-            name: 'HM Herbs',
+            name: process.env.STORE_NAME || process.env.SMTP_FROM_NAME || 'Store',
             address: String(process.env.SMTP_FROM || process.env.EMAIL_FROM || smtpUser).trim()
         }
     };
@@ -446,19 +446,19 @@ class TaxAccountantReportService {
         const mail = await getMailTransporter();
         const to = recipientEmail || getAccountantEmail();
         const periodLabel = `${startDate} through ${endDate}`;
-        const subject = `H&M Herbs Online Sales Tax — ${periodLabel}`;
+        const subject = `Your Store Online Sales Tax — ${periodLabel}`;
         const stateList = (files || []).map((f) => f.stateLabel).join(', ') || 'none';
         const attachmentCount = (files || []).length;
         const html = `
             <p>Hello,</p>
-            <p>Attached are <strong>${attachmentCount}</strong> separate Excel workbook(s) for H&amp;M Herbs <strong>online (website) sales tax</strong> for <strong>${periodLabel}</strong>.</p>
+            <p>Attached are <strong>${attachmentCount}</strong> separate Excel workbook(s) for Your Store <strong>online (website) sales tax</strong> for <strong>${periodLabel}</strong>.</p>
             <p>States included: <strong>${stateList}</strong>. In-store/POS sales are <em>not</em> included — those are handled separately at the register.</p>
             <p>Each file is for one state, with transaction detail and county summaries for filing.</p>
             <p>Online transaction count: <strong>${rowCount}</strong></p>
-            <p>— H&amp;M Herbs automated tax report</p>
+            <p>— Your Store automated tax report</p>
         `.trim();
         const text = [
-            `H&M Herbs online sales tax for ${periodLabel}.`,
+            `Your Store online sales tax for ${periodLabel}.`,
             `${attachmentCount} Excel file(s): ${stateList}.`,
             `Online transactions: ${rowCount}. In-store sales excluded.`,
             'One spreadsheet per state is attached.'

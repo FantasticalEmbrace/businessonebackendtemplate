@@ -1,4 +1,4 @@
-// HM Herbs Admin Panel - Customers & Gift Cards module.
+// Business One Admin Panel - Customers & Gift Cards module.
 /* global AdminApp */
 // Augments AdminApp.prototype with the methods used by the Customers and
 // Gift Cards admin sections. This file must load AFTER admin-app.js.
@@ -40,14 +40,14 @@
     };
     const phoneInputValue = (stored) => {
         const raw = stored == null ? '' : String(stored);
-        if (window.HMHERBS_PHONE_US) {
-            const d = HMHERBS_PHONE_US.digitsOnly(raw);
-            return esc(d ? HMHERBS_PHONE_US.formatDigitsToDisplay(d) : '');
+        if (window.STORE_PHONE_US || window.HMHERBS_PHONE_US) {
+            const d = (window.STORE_PHONE_US || window.HMHERBS_PHONE_US).digitsOnly(raw);
+            return esc(d ? (window.STORE_PHONE_US || window.HMHERBS_PHONE_US).formatDigitsToDisplay(d) : '');
         }
         return esc(raw);
     };
     const initPhoneFields = (root) => {
-        if (window.HMHERBS_PHONE_US && root) HMHERBS_PHONE_US.init(root);
+        if ((window.STORE_PHONE_US || window.HMHERBS_PHONE_US) && root) (window.STORE_PHONE_US || window.HMHERBS_PHONE_US).init(root);
     };
 
     function debounce(fn, ms = 300) {

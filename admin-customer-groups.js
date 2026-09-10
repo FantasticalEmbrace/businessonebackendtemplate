@@ -1,4 +1,4 @@
-// HM Herbs Admin Panel - Customer Groups module.
+// Business One Admin Panel - Customer Groups module.
 /* global AdminApp */
 (function () {
     'use strict';

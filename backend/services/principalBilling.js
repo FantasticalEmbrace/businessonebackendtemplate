@@ -22,8 +22,8 @@ function parsePrincipalMeta(raw) {
 
 function defaultPrincipalContact() {
     return {
-        businessName: String(process.env.BILLING_PRINCIPAL_BUSINESS_NAME || 'H&M Herbs & Vitamins').trim(),
-        billingEmail: String(process.env.BILLING_PRINCIPAL_BILLING_EMAIL || 'hmherbs1@gmail.com').trim()
+        businessName: String(process.env.BILLING_PRINCIPAL_BUSINESS_NAME || 'Your Store').trim(),
+        billingEmail: String(process.env.BILLING_PRINCIPAL_BILLING_EMAIL || '').trim()
     };
 }
 
@@ -64,7 +64,7 @@ async function updatePrincipalMeta(pool, accountId, patch) {
     return merged;
 }
 
-/** Seed HM Herbs business name + billing email when missing. */
+/** Seed principal business name + billing email when missing. */
 async function syncPrincipalContact(pool, accountId) {
     const { getAccountById, updateAccount } = require('./platformBillingAccount');
     const account = await getAccountById(pool, accountId);
@@ -97,7 +97,7 @@ async function syncPrincipalContact(pool, accountId) {
     }
 }
 
-/** Seed build-balance metadata once for the principal merchant (HM Herbs). */
+/** Seed build-balance metadata once for the principal merchant. */
 async function syncPrincipalMeta(pool, accountId) {
     await syncPrincipalContact(pool, accountId);
     const [rows] = await pool.execute(

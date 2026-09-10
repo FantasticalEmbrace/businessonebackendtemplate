@@ -1,4 +1,4 @@
-// Advanced SEO Optimizer for HM Herbs
+// Advanced SEO Optimizer for Your Store
 // Next-level SEO enhancements and Core Web Vitals micro-optimizations
 
 class SEOOptimizer {
@@ -178,7 +178,7 @@ class SEOOptimizer {
         const importantOrigins = [
             'https://fonts.googleapis.com',
             'https://fonts.gstatic.com',
-            'https://hmherbs.com'
+            'https://www.example.com'
         ];
 
         importantOrigins.forEach(origin => {
@@ -880,7 +880,7 @@ class SEOOptimizer {
         const schema = {
             "@context": "https://schema.org",
             "@type": "LocalBusiness",
-            "name": "H&M Herbs & Vitamins",
+            "name": "Your Store",
             "address": {
                 "@type": "PostalAddress",
                 "streetAddress": "1140 Battlefield Pkwy",
@@ -890,7 +890,7 @@ class SEOOptimizer {
                 "addressCountry": "US"
             },
             "telephone": "+1-706-861-9454",
-            "email": "hmherbs1@gmail.com",
+            "email": "store@example.com",
             "url": window.location.origin
         };
         this.addStructuredData(schema);
@@ -900,7 +900,7 @@ class SEOOptimizer {
         const schema = {
             "@context": "https://schema.org",
             "@type": "Organization",
-            "name": "H&M Herbs & Vitamins",
+            "name": "Your Store",
             "url": window.location.origin,
             "logo": `${window.location.origin}/images/logo.png`,
             "description": "Premium natural health products, herbs, and vitamins for optimal wellness",
@@ -911,9 +911,9 @@ class SEOOptimizer {
                 "availableLanguage": "English"
             },
             "sameAs": [
-                "https://facebook.com/hmherbs",
-                "https://twitter.com/hmherbs",
-                "https://www.instagram.com/hmherbs1"
+                "https://facebook.com/yourstore",
+                "https://twitter.com/yourstore",
+                "https://www.instagram.com/yourstore1"
             ]
         };
 
@@ -943,7 +943,7 @@ class SEOOptimizer {
                         "availability": "https://schema.org/InStock",
                         "seller": {
                             "@type": "Organization",
-                            "name": "H&M Herbs & Vitamins"
+                            "name": "Your Store"
                         }
                     }
                 };

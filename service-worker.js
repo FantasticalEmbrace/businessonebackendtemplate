@@ -1,4 +1,4 @@
-// H&M Herbs & Vitamins - Service Worker
+// Your Store - Service Worker
 // Progressive Web App functionality with offline support
 
 const STATIC_CACHE = 'hmherbs-static-v1.0.50';
@@ -119,7 +119,7 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Business One POS is a separate PWA under /pos/ — never intercept it with the HM Herbs SW.
+  // Business One POS is a separate PWA under /pos/ — never intercept it with the Your Store SW.
   if (url.pathname === '/pos' || url.pathname.startsWith('/pos/')) {
     return;
   }
@@ -286,7 +286,7 @@ async function handleNavigationRequest(request) {
       <!DOCTYPE html>
       <html>
       <head>
-        <title>H&M Herbs - Offline</title>
+        <title>Your Store - Offline</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
           body { 

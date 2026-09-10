@@ -127,7 +127,7 @@ function ensureCallStoreModal() {
                 </button>
             </div>
             <div class="edsa-modal-body call-store-modal-body">
-                <p class="call-store-lead">H&amp;M Herbs &amp; Vitamins</p>
+                <p class="call-store-lead">Your Store</p>
                 <a href="tel:${STORE_PHONE_TEL}" class="call-store-phone-btn">
                     <i class="fas fa-phone" aria-hidden="true"></i>
                     <span>${storePhoneDisplay()}</span>

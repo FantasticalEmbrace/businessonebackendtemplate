@@ -1,4 +1,4 @@
-// HM Herbs Vendor Management Service
+// Vendor management service
 // Comprehensive vendor management with catalog import and synchronization
 
 const fs = require('fs').promises;

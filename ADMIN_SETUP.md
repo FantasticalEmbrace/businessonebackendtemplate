@@ -101,7 +101,7 @@ The admin panel automatically detects the correct API URL:
 - [ ] Database configured in `backend/.env`
 - [ ] Backend server running (`cd backend && npm start`)
 - [ ] Access admin panel at `http://localhost:3001/admin.html`
-- [ ] Login with: `hmherbs1@gmail.com` / `admin1`
+- [ ] Login with: `store@example.com` / `admin1`
 
 ## 📝 Notes
 

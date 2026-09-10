@@ -532,7 +532,7 @@ class BrandsCategoriesPage {
             { name: 'Go Out', slug: 'go-out', description: 'Natural supplements designed to support an active lifestyle and outdoor wellness activities.' },
             { name: 'Herbs for Life', slug: 'herbs-for-life', description: 'Traditional herbal remedies and supplements based on centuries of natural healing wisdom.' },
             { name: 'High Tech Pharmaceuticals', slug: 'high-tech-pharmaceuticals', description: 'Advanced nutritional supplements utilizing pharmaceutical-grade ingredients and cutting-edge formulations.' },
-            { name: 'HM Enterprise', slug: 'hm-enterprise', description: 'H&M Herbs proprietary formulations and exclusive products developed for optimal health and wellness.' },
+            { name: 'HM Enterprise', slug: 'hm-enterprise', description: 'Your Store proprietary formulations and exclusive products developed for optimal health and wellness.' },
             { name: 'Host Defence', slug: 'host-defence', description: 'Mushroom-based immune support supplements featuring organic, sustainably grown medicinal mushrooms.' },
             { name: 'Life\'s Fortune', slug: 'lifes-fortune', description: 'Anti-aging and longevity supplements designed to support healthy aging and vitality throughout life.' },
             { name: 'Natures Balance', slug: 'natures-balance', description: 'Natural vitamins and supplements formulated to help restore and maintain your body\'s natural balance.' },

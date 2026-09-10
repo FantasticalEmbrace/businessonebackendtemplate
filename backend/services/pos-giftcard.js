@@ -1,4 +1,4 @@
-// HM Herbs POS Gift Card Integration Service
+// POS gift card integration service
 // Sync and manage gift cards from connected POS systems
 
 class POSGiftCardService {

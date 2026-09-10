@@ -1,4 +1,4 @@
-# H&M Herbs & Vitamins - robots.txt
+# Your Store - robots.txt
 # Regenerate sitemaps: npm run seo:generate-sitemap
 
 User-agent: *
@@ -45,6 +45,6 @@ Disallow: /
 User-agent: DotBot
 Disallow: /
 
-Sitemap: https://hmherbs.com/sitemap.xml
-Sitemap: https://hmherbs.com/sitemap-pages.xml
-Sitemap: https://hmherbs.com/sitemap-products.xml
+Sitemap: https://www.example.com/sitemap.xml
+Sitemap: https://www.example.com/sitemap-pages.xml
+Sitemap: https://www.example.com/sitemap-products.xml

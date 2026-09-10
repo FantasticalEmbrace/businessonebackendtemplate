@@ -36,7 +36,7 @@
     "health",
     "wellness"
   ],
-  "author": "H&M Herbs & Vitamins",
+  "author": "Your Store",
   "license": "MIT",
   "dependencies": {
     "axios": "^1.6.0",

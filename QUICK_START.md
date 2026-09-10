@@ -1,4 +1,4 @@
-# Quick Start Guide - HM Herbs Website
+# Quick Start Guide - Your Store Website
 
 ## 🚀 Fastest Way to Get Running
 

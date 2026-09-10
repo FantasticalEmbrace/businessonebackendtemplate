@@ -1,5 +1,5 @@
 -- =============================================================================
--- H&M Herbs - Social OAuth (Google / Apple) for customers and admins
+-- Store - Social OAuth (Google / Apple) for customers and admins
 -- Migration: 20260602
 -- =============================================================================
 

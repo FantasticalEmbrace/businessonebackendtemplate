@@ -164,7 +164,7 @@ function flatRateOptions(merchandiseSubtotal) {
             label: 'Free Standard Shipping',
             description: `Free on orders $${FREE_SHIPPING_THRESHOLD.toFixed(2)}+`,
             amount: 0,
-            carrier: 'HM Herbs',
+            carrier: process.env.STORE_NAME || 'Store',
             provider: 'standard',
             estimated_days: '3–7 business days',
         });

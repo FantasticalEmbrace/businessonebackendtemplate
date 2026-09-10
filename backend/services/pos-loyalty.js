@@ -1,4 +1,4 @@
-// HM Herbs POS Loyalty Program Integration Service
+// POS loyalty program integration service
 // Sync and manage loyalty programs from connected POS systems
 
 class POSLoyaltyService {

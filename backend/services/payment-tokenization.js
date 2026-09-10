@@ -333,7 +333,7 @@ class PaymentTokenizationService {
                 payment_method: card.payment_method_id,
                 description: description,
                 confirm: true,
-                return_url: process.env.PAYMENT_RETURN_URL || 'https://hmherbs.com/account#orders',
+                return_url: process.env.PAYMENT_RETURN_URL || '/account#orders',
             });
 
             return {

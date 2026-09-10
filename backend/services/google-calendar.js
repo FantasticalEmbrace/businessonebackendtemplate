@@ -417,7 +417,7 @@ class GoogleCalendarService {
         }
 
         description += `\n---\n`;
-        description += `Created automatically from the HM Herbs website booking system.`;
+        description += `Created automatically from the store website booking system.`;
 
         return description;
     }

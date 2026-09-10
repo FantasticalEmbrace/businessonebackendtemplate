@@ -1,4 +1,4 @@
--- H&M Herbs & Vitamins - Complete E-commerce Database Schema
+-- Business One merchant platform — database schema
 -- Designed to handle 10,000+ products with dual categorization (health conditions + brands)
 
 -- Users table for customer accounts

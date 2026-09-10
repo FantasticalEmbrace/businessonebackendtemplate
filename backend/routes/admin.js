@@ -1,4 +1,4 @@
-// Admin Panel Routes for HM Herbs
+// Admin panel routes
 // Complete admin interface for managing products, orders, customers, and EDSA bookings
 
 const express = require('express');
@@ -548,7 +548,7 @@ router.post('/auth/forgot-password', adminAuthLimiter, async (req, res) => {
                     html: `
                         <h2>Password reset</h2>
                         <p>Hello ${first},</p>
-                        <p>You requested to reset your H&amp;M Herbs admin password.</p>
+                        <p>You requested to reset your Your Store admin password.</p>
                         <p><a href="${resetUrl}" style="background:#10b981;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;display:inline-block;">Choose a new password</a></p>
                         <p>Or copy this link into your browser:</p>
                         <p style="word-break:break-all;">${resetUrl}</p>
@@ -3411,13 +3411,13 @@ router.delete('/settings/pos-devices/:id', ...adminAuth, requirePermission('mana
     }
 });
 
-// Cancel in-flight HM Herbs scrape (admin UI Cancel button)
+// Cancel in-flight catalog scrape (admin UI Cancel button)
 router.post('/scrape-products/cancel', ...adminAuth, requirePermission('manager'), async (req, res) => {
     const cancelled = activeScrapeJobs.cancelActive('Cancelled from admin panel');
     res.json({ cancelled, message: cancelled ? 'Scrape cancellation requested' : 'No scrape is running' });
 });
 
-// Scrape Products from HM Herbs Website
+// Scrape products from source website
 router.post('/scrape-products', ...adminAuth, requirePermission('manager'), async (req, res) => {
     // Check if client wants SSE (Server-Sent Events) for progress updates
     const useSSE = (req.headers.accept && req.headers.accept.includes('text/event-stream')) || req.query.progress === 'true';
@@ -3485,7 +3485,7 @@ router.post('/scrape-products', ...adminAuth, requirePermission('manager'), asyn
         };
 
         try {
-            console.log('Starting HM Herbs website scraping...');
+            console.log('Starting website catalog scraping...');
 
             // Send initial progress immediately
             sendProgress({
@@ -3575,7 +3575,7 @@ router.post('/scrape-products', ...adminAuth, requirePermission('manager'), asyn
     } else {
         // Original synchronous endpoint (for backwards compatibility)
         try {
-            console.log('Starting HM Herbs website scraping...');
+            console.log('Starting website catalog scraping...');
 
             const scraper = new HMHerbsScraper();
             await scraper.scrapeAllProducts();
@@ -4709,8 +4709,8 @@ router.get('/tax-ledger/export/accountant.xlsx', ...adminAuth, requirePermission
         );
 
         const filename = exportedState
-            ? `hmherbs-tax-${exportedState}-${startDate}-to-${endDate}.xlsx`
-            : `hmherbs-tax-online-${startDate}-to-${endDate}.xlsx`;
+            ? `store-tax-${exportedState}-${startDate}-to-${endDate}.xlsx`
+            : `store-tax-online-${startDate}-to-${endDate}.xlsx`;
 
         res.setHeader(
             'Content-Type',

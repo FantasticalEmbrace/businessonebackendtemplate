@@ -1,4 +1,4 @@
-// Advanced Device-Adaptive Performance Manager for HM Herbs
+// Advanced Device-Adaptive Performance Manager for Your Store
 // Device-specific optimizations and adaptive loading strategies
 
 class DeviceAdaptiveManager {

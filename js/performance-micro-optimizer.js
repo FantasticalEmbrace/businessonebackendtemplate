@@ -1,4 +1,4 @@
-// Performance Micro-Optimizer for HM Herbs
+// Performance Micro-Optimizer for Your Store
 // Ultimate performance refinements for perfection-level optimization
 
 class PerformanceMicroOptimizer {

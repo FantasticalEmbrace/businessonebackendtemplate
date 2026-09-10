@@ -1,4 +1,4 @@
-// HM Herbs POS Discount Integration Service
+// POS discount integration service
 // Sync and manage discounts from connected POS systems
 
 class POSDiscountService {

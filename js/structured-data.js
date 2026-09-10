@@ -1,4 +1,4 @@
-// Structured Data (Schema.org) Implementation for HM Herbs
+// Structured Data (Schema.org) Implementation for Your Store
 // Enhances SEO with rich snippets and better search engine understanding
 
 class StructuredDataManager {
@@ -56,14 +56,14 @@ class StructuredDataManager {
         const organizationSchema = {
             "@context": "https://schema.org",
             "@type": "Organization",
-            "name": "H&M Herbs & Vitamins",
-            "alternateName": "HM Herbs",
+            "name": "Your Store",
+            "alternateName": "Your Store",
             "description": "Premium natural health products, herbs, vitamins, and wellness supplements organized by health conditions and brands.",
             "url": this.baseUrl,
             "logo": `${this.baseUrl}/images/logo.png`,
             "image": `${this.baseUrl}/images/og-image.jpg`,
             "telephone": "+1-706-861-9454",
-            "email": "hmherbs1@gmail.com",
+            "email": "store@example.com",
             "address": {
                 "@type": "PostalAddress",
                 "streetAddress": "1140 Battlefield Pkwy",
@@ -73,9 +73,9 @@ class StructuredDataManager {
                 "addressCountry": "US"
             },
             "sameAs": [
-                "https://www.facebook.com/hmherbs",
-                "https://www.instagram.com/hmherbs",
-                "https://twitter.com/hmherbs"
+                "https://www.facebook.com/yourstore",
+                "https://www.instagram.com/yourstore",
+                "https://twitter.com/yourstore"
             ],
             "foundingDate": "1995-05-01",
             "slogan": "Your trusted source for natural wellness",
@@ -97,12 +97,12 @@ class StructuredDataManager {
         const websiteSchema = {
             "@context": "https://schema.org",
             "@type": "WebSite",
-            "name": "H&M Herbs & Vitamins",
+            "name": "Your Store",
             "url": this.baseUrl,
             "description": "Premium natural health products, herbs, vitamins, and wellness supplements organized by health conditions and brands.",
             "publisher": {
                 "@type": "Organization",
-                "name": "H&M Herbs & Vitamins"
+                "name": "Your Store"
             },
             "potentialAction": {
                 "@type": "SearchAction",
@@ -145,11 +145,11 @@ class StructuredDataManager {
         const localBusinessSchema = {
             "@context": "https://schema.org",
             "@type": "HealthAndBeautyBusiness",
-            "name": "H&M Herbs & Vitamins",
+            "name": "Your Store",
             "description": "Premium natural health products, herbs, vitamins, and wellness supplements store.",
             "url": this.baseUrl,
             "telephone": "+1-706-861-9454",
-            "email": "hmherbs1@gmail.com",
+            "email": "store@example.com",
             "address": {
                 "@type": "PostalAddress",
                 "streetAddress": "1140 Battlefield Pkwy",
@@ -249,7 +249,7 @@ class StructuredDataManager {
         const homepageSchema = {
             "@context": "https://schema.org",
             "@type": "WebPage",
-            "name": "H&M Herbs & Vitamins - Premium Natural Health Products",
+            "name": "Your Store - Premium Natural Health Products",
             "description": "Premium herbs, vitamins, and natural health supplements organized by health conditions. EDSA wellness testing available in-store.",
             "url": this.baseUrl,
             "mainEntity": {
@@ -348,7 +348,7 @@ class StructuredDataManager {
                 "availability": productData.inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
                 "seller": {
                     "@type": "Organization",
-                    "name": "H&M Herbs & Vitamins"
+                    "name": "Your Store"
                 }
             },
             "aggregateRating": productData.rating ? {
@@ -370,7 +370,7 @@ class StructuredDataManager {
             "url": `${this.baseUrl}/#edsa-service`,
             "provider": {
                 "@type": "Organization",
-                "name": "H&M Herbs & Vitamins"
+                "name": "Your Store"
             },
             "serviceType": "Health Assessment",
             "areaServed": {
@@ -427,7 +427,7 @@ class StructuredDataManager {
             "@type": "Review",
             "itemReviewed": {
                 "@type": "Organization",
-                "name": "H&M Herbs & Vitamins"
+                "name": "Your Store"
             },
             "author": {
                 "@type": "Person",

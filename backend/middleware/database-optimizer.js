@@ -1,4 +1,4 @@
-// Database Query Optimization Middleware for HM Herbs
+// Database Query Optimization Middleware for Your Store
 // Advanced database performance optimization and monitoring
 
 const { performance } = require('perf_hooks');

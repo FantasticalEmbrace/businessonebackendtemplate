@@ -1,6 +1,6 @@
 {
-  "name": "H&M Herbs & Vitamins",
-  "short_name": "HM Herbs",
+  "name": "Your Store",
+  "short_name": "Your Store",
   "description": "Premium natural health products, herbs, vitamins, and wellness supplements organized by health conditions.",
   "start_url": "/",
   "display": "standalone",

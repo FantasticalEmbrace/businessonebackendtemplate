@@ -2,11 +2,11 @@
 
 Local-only copy of the merchant stack for **admin + POS**. There is **no public website face by default**.
 
-**Do not deploy** this template until you explicitly decide to. Do not edit `hmherbs-main` — this folder is the Business One fork.
+**Do not deploy** this template until you explicitly decide to. Keep this template separate from the HM Herbs production store repo.
 
 ## Branding
 
-Admin chrome and default tokens follow **Business One** (`businessonecomprehensive.com`): orange `#ff9b1f`, slate/navy sidebar — **not** HM Herbs green. See `css/brand-tokens.css` and `data/branding.json`.
+Admin chrome and default tokens follow **Business One** (`businessonecomprehensive.com`): orange `#ff9b1f`, slate/navy sidebar — **not** Your Store green. See `css/brand-tokens.css` and `data/branding.json`.
 
 Remote support for technicians is on **Business One ops admin** (marketing site), not this merchant admin.
 

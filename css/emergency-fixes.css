@@ -1,4 +1,4 @@
-/* Emergency Visual Bug Fixes for HM Herbs */
+/* Emergency Visual Bug Fixes for Your Store */
 /* These styles fix critical rendering issues and should load immediately */
 
 /* FLICKER PREVENTION - Hardware acceleration for smooth rendering */
@@ -32,7 +32,7 @@
 }
 
 /*
- * Do NOT apply translateZ(0) to all elements — it inflates document scroll height
+ * Do NOT apply translateZ(0) to all elements ï¿½ it inflates document scroll height
  * and breaks position:fixed overlays (modals center in document height, not viewport).
  */
 .btn,
@@ -137,7 +137,7 @@ canvas {
     }
 }
 
-/* Testimonials carousel — keep cards transform-free; JS sets translateX on the track only */
+/* Testimonials carousel ï¿½ keep cards transform-free; JS sets translateX on the track only */
 .testimonials-carousel-container,
 .testimonials-carousel {
     overflow: hidden;

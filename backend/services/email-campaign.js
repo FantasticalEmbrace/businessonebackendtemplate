@@ -1,4 +1,4 @@
-// HM Herbs Email Campaign Service
+// Store email campaign service
 // Manage email collection campaigns and subscriber lists
 
 class EmailCampaignService {

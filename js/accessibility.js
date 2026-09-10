@@ -1,5 +1,5 @@
 /**
- * H&M Herbs accessibility preferences toolbar.
+ * Your Store accessibility preferences toolbar.
  * Options: text size, high contrast, underlined links, reduce motion.
  */
 (function () {

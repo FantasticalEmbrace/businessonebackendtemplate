@@ -1,6 +1,6 @@
-# Install All Dependencies - HM Herbs
+# Install All Dependencies - Your Store
 
-This guide will help you install all required dependencies for the HM Herbs website.
+This guide will help you install all required dependencies for the Your Store website.
 
 ## 📦 Required Dependencies
 

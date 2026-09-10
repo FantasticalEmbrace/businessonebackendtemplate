@@ -360,7 +360,7 @@
         if (looksLikeMerchantHubUrl(hubUrlInput?.value)) {
             if (loginError) {
                 loginError.textContent =
-                    'Use your Business One support hub URL — not a merchant store website like HM Herbs.';
+                    'Use your Business One support hub URL — not a merchant store website like Your Store.';
             }
             return;
         }
@@ -385,7 +385,7 @@
         if (looksLikeMerchantHubUrl(hubUrlInput?.value)) {
             if (loginError) {
                 loginError.textContent =
-                    'Use your Business One support hub URL — not a merchant store website like HM Herbs.';
+                    'Use your Business One support hub URL — not a merchant store website like Your Store.';
             }
             return;
         }

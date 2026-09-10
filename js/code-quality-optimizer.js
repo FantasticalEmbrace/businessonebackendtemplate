@@ -1,4 +1,4 @@
-// Advanced Code Quality Optimizer for HM Herbs
+// Advanced Code Quality Optimizer for Your Store
 // Final polish for maintainability, performance, and developer experience
 
 class CodeQualityOptimizer {

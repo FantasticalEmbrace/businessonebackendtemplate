@@ -1,4 +1,4 @@
-// Advanced Security Headers and Content Security Policy for HM Herbs
+// Advanced Security Headers and Content Security Policy for Your Store
 // Enterprise-level security implementation with comprehensive protection
 
 class AdvancedSecurityManager {
@@ -368,10 +368,10 @@ class AdvancedSecurityManager {
 
     getTrustedDomains() {
         return [
-            'hmherbs.com',
-            'www.hmherbs.com',
-            'api.hmherbs.com',
-            'cdn.hmherbs.com'
+            'example.com',
+            'www.example.com',
+            'api.example.com',
+            'cdn.example.com'
         ];
     }
 

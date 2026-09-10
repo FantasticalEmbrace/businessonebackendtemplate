@@ -1,5 +1,5 @@
 -- =============================================================================
--- H&M Herbs - Tax accountant monthly report (county + delivery log)
+-- Store - Tax accountant monthly report (county + delivery log)
 -- Migration: 20260601
 -- =============================================================================
 

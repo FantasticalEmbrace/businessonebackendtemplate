@@ -17,7 +17,7 @@
   <circle cx="350" cy="42" r="72" fill="rgba(255,255,255,0.08)"/>
   <circle cx="48" cy="210" r="56" fill="rgba(212,175,55,0.12)"/>
   <rect x="20" y="188" width="34" height="24" rx="5" fill="url(#chip)" stroke="rgba(255,255,255,0.35)"/>
-  <text x="24" y="34" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">H&amp;M Herbs &amp; Vitamins</text>
+  <text x="24" y="34" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">Your Store</text>
   <rect x="300" y="22" width="96" height="28" rx="14" fill="rgba(255,255,255,0.22)" stroke="rgba(255,255,255,0.34)"/>
   <text x="348" y="41" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" text-anchor="middle">Digital</text>
   <text x="24" y="118" fill="rgba(255,255,255,0.72)" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" letter-spacing="0.08em">GIFT CARD VALUE</text>

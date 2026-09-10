@@ -1,4 +1,4 @@
-// Enhanced Input Validation Middleware for HM Herbs
+// Enhanced Input Validation Middleware for Your Store
 // Comprehensive validation using express-validator
 
 const { body, param, query, validationResult } = require('express-validator');

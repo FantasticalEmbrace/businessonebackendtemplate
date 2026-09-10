@@ -1,6 +1,6 @@
 # Gift Card Template
 
-Standalone backup of the H&M Herbs web gift card system, extracted from [hmherbs-main](../hmherbs-main).
+Standalone backup of the Your Store web gift card system, extracted from [hmherbs-main](../hmherbs-main).
 
 **Backed up:** June 12, 2026
 
@@ -85,4 +85,4 @@ Requires existing tables: `users`, `products`, `product_variants`, `orders`, `or
 
 ## Source project
 
-Extracted from `hmherbs-main` — H&M Herbs e-commerce platform.
+Extracted from `hmherbs-main` — Your Store e-commerce platform.

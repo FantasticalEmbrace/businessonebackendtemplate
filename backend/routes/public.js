@@ -1,4 +1,4 @@
-// HM Herbs Public API Routes
+// Your Store Public API Routes
 // Routes accessible without authentication for frontend functionality
 
 const express = require('express');
@@ -261,7 +261,7 @@ router.get('/health', (req, res) => {
     res.json({
         status: 'healthy',
         timestamp: new Date().toISOString(),
-        service: 'HM Herbs Public API'
+        service: 'Your Store Public API'
     });
 });
 

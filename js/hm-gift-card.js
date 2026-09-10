@@ -1,10 +1,10 @@
 /**
- * HM Herbs branded gift card markup — matches css/hm-gift-card.css and brand-tokens.css
+ * Your Store branded gift card markup — matches css/hm-gift-card.css and brand-tokens.css
  */
 (function (global) {
     'use strict';
 
-    const LOGO_SRC = 'images/HM%20Herb%20Logo.png';
+    const LOGO_SRC = 'images/logo.png';
 
     function escapeHtml(str) {
         return String(str || '')
@@ -70,7 +70,7 @@
                 ${recipientLine}
                 ${codeLine}
                 <div class="hm-gift-card__footer">
-                    <span class="hm-gift-card__brand">H&amp;M Herbs &amp; Vitamins</span>
+                    <span class="hm-gift-card__brand">Your Store</span>
                     ${compact ? '' : '<span class="hm-gift-card__tagline">Premium natural health since 1995</span>'}
                 </div>
             </div>

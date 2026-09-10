@@ -49,7 +49,7 @@ class GiftCardsPage {
         const type = cardType === 'physical' ? 'physical' : 'digital';
         const typeLabel = type === 'physical' ? 'Physical' : 'Digital';
         const logoHtml =
-            '<img class="hm-gift-card__logo" src="images/HM%20Herb%20Logo.png" alt="" width="120" height="36" loading="lazy" data-skip-error-handling>';
+            '<img class="hm-gift-card__logo" src="images/logo.png" alt="" width="120" height="36" loading="lazy" data-skip-error-handling>';
         preview.innerHTML = `
             <div class="hm-gift-card hm-gift-card--${type}" role="img" aria-label="${typeLabel} gift card amount not selected">
                 <div class="hm-gift-card__pattern" aria-hidden="true"></div>
@@ -64,7 +64,7 @@ class GiftCardsPage {
                         <span class="hm-gift-card__amount">Select amount</span>
                     </div>
                     <div class="hm-gift-card__footer">
-                        <span class="hm-gift-card__brand">H&amp;M Herbs &amp; Vitamins</span>
+                        <span class="hm-gift-card__brand">Your Store</span>
                         <span class="hm-gift-card__tagline">Premium natural health since 1995</span>
                     </div>
                 </div>

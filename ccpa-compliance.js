@@ -1,4 +1,4 @@
-// H&M Herbs & Vitamins - CCPA Compliance
+// Your Store - CCPA Compliance
 // California Consumer Privacy Act (CCPA) compliance functionality
 
 const CCPA_CLOSE_ICON_SVG = '<svg class="cart-close-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12 5.7 16.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4z"/></svg>';
@@ -100,7 +100,7 @@ class CCPACompliance {
 
     loadCCPAPreferences() {
         try {
-            const stored = localStorage.getItem('hmherbs_ccpa_preferences');
+            const stored = localStorage.getItem('store_ccpa_preferences');
             return stored ? JSON.parse(stored) : {
                 doNotSell: false,
                 optOut: false,
@@ -123,7 +123,7 @@ class CCPACompliance {
     saveCCPAPreferences() {
         try {
             this.ccpaPreferences.timestamp = new Date().toISOString();
-            localStorage.setItem('hmherbs_ccpa_preferences', JSON.stringify(this.ccpaPreferences));
+            localStorage.setItem('store_ccpa_preferences', JSON.stringify(this.ccpaPreferences));
         } catch (error) {
             if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'development') {
                 console.error('Error saving CCPA preferences:', error);

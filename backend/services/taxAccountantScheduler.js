@@ -50,7 +50,7 @@ function startTaxAccountantScheduler(pool) {
             logger.info('[tax-report] Running scheduled accountant report', {
                 source,
                 period: `${range.startDate} to ${range.endDate}`,
-                recipient: process.env.TAX_ACCOUNTANT_EMAIL || 'wandaforto@aol.com'
+                recipient: process.env.TAX_ACCOUNTANT_EMAIL || ''
             });
 
             const result = await service.deliverPreviousMonthReport({

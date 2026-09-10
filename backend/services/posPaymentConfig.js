@@ -27,7 +27,7 @@ const MX_VIRTUAL_ADAPTER = Object.freeze({
     id: MX_PROCESSOR_ID,
     label: `${MX_PROCESSOR_LABEL} (on screen)`,
     description:
-        'Keyed card entry on the register via MX 3-way payment. Card data posts directly to MX — not through HM Herbs servers.',
+        'Keyed card entry on the register via MX 3-way payment. Card data posts directly to MX — not through store servers.',
     integrated: true,
     pciScope: 'SAQ A — card data sent directly to MX Checkout API',
     driverScript: 'js/payment-drivers/mxmerchant.js',

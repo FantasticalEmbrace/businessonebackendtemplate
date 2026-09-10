@@ -1,4 +1,4 @@
-// Advanced Caching Strategy for HM Herbs
+// Advanced Caching Strategy for Your Store
 // Multi-layer caching with intelligent cache management
 
 const crypto = require('crypto');

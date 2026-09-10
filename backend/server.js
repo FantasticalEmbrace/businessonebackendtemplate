@@ -1,4 +1,4 @@
-﻿// Business One merchant platform â€” Backend API (template copy; do not confuse with HM Herbs)
+// Business One merchant platform — Backend API (template copy; do not confuse with single-store production deploys)
 
 const express = require('express');
 const cors = require('cors');
@@ -113,7 +113,7 @@ function shouldLogDatabaseError(errorCode) {
     return false; // Don't log - too soon since last log
 }
 
-// Database connection (local MySQL or Linode Managed MySQL â€” see utils/dbConfig.js)
+// Database connection (local MySQL or Linode Managed MySQL — see utils/dbConfig.js)
 let dbConfig;
 try {
     dbConfig = buildDbConfig();
@@ -136,7 +136,7 @@ if (process.env.NODE_ENV === 'development') {
 
     // Warn if password is missing
     if (!dbConfig.password || dbConfig.password.trim() === '') {
-        logger.warn('âš ï¸ WARNING: DB_PASSWORD is empty or not set in .env file!');
+        logger.warn('⚠️ WARNING: DB_PASSWORD is empty or not set in .env file!');
         logger.warn('   Database connections will fail. Please set DB_PASSWORD in backend/.env');
     }
 }
@@ -417,7 +417,7 @@ const authLimiter = rateLimit({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Static uploads â€” always resolve to backend/uploads (relative "uploads" breaks if cwd is not backend/)
+// Static uploads — always resolve to backend/uploads (relative "uploads" breaks if cwd is not backend/)
 const uploadsDir = path.join(__dirname, 'uploads');
 const rootPath = path.join(__dirname, '..');
 
@@ -436,7 +436,7 @@ app.get('/uploads/products/:filename', async (req, res) => {
     }
 });
 
-// Catalog images under /images/products/ â€” serve only when the file exists (no substitute image).
+// Catalog images under /images/products/ — serve only when the file exists (no substitute image).
 app.get('/images/products/:filename', async (req, res) => {
     const filename = req.params.filename || '';
     if (!filename || filename.includes('..') || /[/\\]/.test(filename)) {
@@ -456,7 +456,7 @@ app.get('/images/products/:filename', async (req, res) => {
 
 app.use('/uploads', express.static(uploadsDir));
 
-// Service worker: dedicated handler (correct MIME, no-cache, scope) â€” avoids flaky registration on :3001
+// Service worker: dedicated handler (correct MIME, no-cache, scope) — avoids flaky registration on :3001
 app.get('/service-worker.js', (req, res, next) => {
     const swPath = path.join(rootPath, 'service-worker.js');
     res.type('application/javascript');
@@ -482,7 +482,7 @@ if (process.env.STAGING_BLOCK_INDEXING === 'true') {
 // Permanent SEO redirects from repo-root redirects-301.csv (see file header).
 app.use(createSeoRedirectMiddleware({ rootPath, logger }));
 
-// Business One POS UI â€” hosted on the dedicated POS platform (pos.businessonecomprehensive.com), not on store servers.
+// Business One POS UI — hosted on the dedicated POS platform (pos.businessonecomprehensive.com), not on store servers.
 // Local dev only: set SERVE_POS_UI=true to serve ../business-one-pos at /pos/ from this server.
 const posAppPath = path.join(rootPath, '..', 'business-one-pos');
 const servePosUi = String(process.env.SERVE_POS_UI || '').toLowerCase() === 'true';
@@ -513,7 +513,7 @@ if (fsSync.existsSync(supportAgentPath)) {
     app.use('/support-agent', express.static(supportAgentPath));
 }
 
-// Business One Support Desk â€” dedicated local URL (not the HM Herbs storefront)
+// Business One Support Desk — dedicated local URL (not the merchant storefront)
 app.get('/support-desk', (req, res) => {
     res.sendFile(path.join(rootPath, 'platform-support.html'));
 });
@@ -673,7 +673,7 @@ app.get('/api/health/ready', async (req, res) => {
     }
 });
 
-// Promo banner (early registration; uses `pool` directly; always 200 â€” see utils/promoBanner.js)
+// Promo banner (early registration; uses `pool` directly; always 200 — see utils/promoBanner.js)
 app.get('/api/promo-banner', async (req, res) => {
     try {
         await handlePromoBannerGet(pool, res, logger);
@@ -931,11 +931,11 @@ app.post('/api/auth/forgot-password', authLimiter, userForgotPasswordValidation,
                 const first = String(u.first_name || '').trim() || 'there';
                 const result = await sendMail({
                     to: u.email,
-                    subject: 'H&M Herbs â€” reset your password',
+                    subject: 'H&M Herbs — reset your password',
                     html: `
                         <h2>Password reset</h2>
                         <p>Hello ${first},</p>
-                        <p>We received a request to reset the password for your H&amp;M Herbs account.</p>
+                        <p>We received a request to reset the password for your store account.</p>
                         <p><a href="${resetUrl}" style="background:#10b981;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;display:inline-block;">Choose a new password</a></p>
                         <p>Or copy this link into your browser:</p>
                         <p style="word-break:break-all;">${resetUrl}</p>
@@ -945,7 +945,7 @@ app.post('/api/auth/forgot-password', authLimiter, userForgotPasswordValidation,
                 });
                 if (!result.sent) {
                     logger.info('Customer password reset (SMTP not configured):', { email: u.email, resetUrl });
-                    console.log('\nðŸ”‘ Customer password reset link (set SMTP_* in backend/.env to send email):\n');
+                    console.log('\n🔑 Customer password reset link (set SMTP_* in backend/.env to send email):\n');
                     console.log(`   ${resetUrl}\n`);
                 }
             } catch (emailErr) {
@@ -1582,7 +1582,7 @@ app.get('/api/products', async (req, res) => {
             }
         }
 
-        // Database unreachable â€” 503 so clients do not treat an empty list as a valid catalog
+        // Database unreachable — 503 so clients do not treat an empty list as a valid catalog
         const dbUnavailable =
             error.code === 'ER_ACCESS_DENIED_ERROR' ||
             error.code === 'ECONNREFUSED' ||
@@ -1826,7 +1826,7 @@ const {
 
 const { requirePermission: requireAdminPermissionLevel } = require('./middleware/adminAuth');
 
-// Marketing hub (Mailchimp signup URL / headline) â€” registered on the main app so `/api/admin/marketing-settings`
+// Marketing hub (Mailchimp signup URL / headline) — registered on the main app so `/api/admin/marketing-settings`
 // is never missed by the catch-all 404 (some deployments had only this path fail from the admin router).
 app.get('/api/admin/marketing-settings', authenticateAdmin, requireAdminPermissionLevel('manager'), (req, res) => {
     try {
@@ -1853,7 +1853,7 @@ app.put('/api/admin/marketing-settings', authenticateAdmin, requireAdminPermissi
     }
 });
 
-// Front-facing display ad playlists â€” registered on the main app (same reliability fix as marketing-settings).
+// Front-facing display ad playlists — registered on the main app (same reliability fix as marketing-settings).
 app.get('/api/admin/pos/front-displays', authenticateAdmin, requireAdminPermissionLevel('manager'), async (req, res) => {
     try {
         const displays = await listFrontDisplays(pool);
@@ -1949,7 +1949,7 @@ app.use('/api/pos/v1', require('./routes/pos-v1'));
 // Customer-facing account API (addresses CRUD, password change, order detail,
 // wishlist collections + items). Mounted AFTER the inline /api/user/* handlers
 // (profile, orders list, addresses GET, loyalty, gift-cards) defined above so
-// those keep working â€” express tries router routes only if no inline match.
+// those keep working — express tries router routes only if no inline match.
 app.use('/api/user', require('./routes/user')({ pool, authenticateToken, logger }));
 
 app.use('/api', publicRoutes);
@@ -2095,7 +2095,7 @@ app.use('/api/*', (req, res) => {
             console.log('EDSA/customer email: SMTP configured (branded appointment emails enabled)');
         } else {
             console.warn(
-                'EDSA/customer email: SMTP not configured â€” set SMTP_HOST, SMTP_USER, SMTP_PASSWORD in backend/.env. ' +
+                'EDSA/customer email: SMTP not configured — set SMTP_HOST, SMTP_USER, SMTP_PASSWORD in backend/.env. ' +
                     'Until then, new bookings rely on Google Calendar guest invites when calendar is connected.'
             );
         }
@@ -2139,9 +2139,9 @@ app.use('/api/*', (req, res) => {
     }).on('error', (error) => {
         logger.error('Server startup error:', error);
         if (error.code === 'EADDRINUSE') {
-            console.error(`âŒ Port ${PORT} is already in use. Please stop the other process or change the port.`);
+            console.error(`❌ Port ${PORT} is already in use. Please stop the other process or change the port.`);
         } else {
-            console.error(`âŒ Failed to start server: ${error.message}`);
+            console.error(`❌ Failed to start server: ${error.message}`);
         }
         process.exit(1);
     });

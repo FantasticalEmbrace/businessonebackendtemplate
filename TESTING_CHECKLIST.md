@@ -1,4 +1,4 @@
-# HM Herbs - Complete Testing Checklist
+# Your Store - Complete Testing Checklist
 
 Use this checklist to verify all functionality of your website.
 
@@ -138,7 +138,7 @@ Use this checklist to verify all functionality of your website.
 - [ ] Form resets after submission
 
 ### Google Calendar Integration (if configured)
-- [ ] Calendar event is created in HM Herbs' Google Calendar
+- [ ] Calendar event is created in Your Store' Google Calendar
 - [ ] Event includes customer information
 - [ ] Event includes correct date and time
 - [ ] Event includes location

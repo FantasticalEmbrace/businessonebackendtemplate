@@ -3704,12 +3704,12 @@
                                         <small id="taxZiptaxKeyStatus" style="display:block; margin-top:0.35rem; color: var(--text-muted, #6b7280);"></small>
                                     </div>
                                     <div>
-                                        <label class="form-label" for="taxHmIgnoreStates">Ignored states (CSV)</label>
-                                        <input type="text" id="taxHmIgnoreStates" class="form-input" placeholder="e.g. AK,DE,MT â€” leave blank if none" maxlength="120">
+                                        <label class="form-label" for="taxStoreExemptStates">Tax exempt states</label>
+                                        <input type="text" id="taxStoreExemptStates" class="form-input" placeholder="e.g. AK,DE,MT â€” leave blank if none" maxlength="120">
                                     </div>
                                     <div>
-                                        <label class="form-label" for="taxHmAccountantEmail">Tax accountant email</label>
-                                        <input type="email" id="taxHmAccountantEmail" class="form-input" placeholder="accountant@example.com" maxlength="255">
+                                        <label class="form-label" for="taxStoreAccountantEmail">Tax accountant email</label>
+                                        <input type="email" id="taxStoreAccountantEmail" class="form-input" placeholder="accountant@example.com" maxlength="255">
                                     </div>
                                     <div>
                                         <button type="button" class="btn btn-primary" onclick="window.adminApp.saveTaxSettings()">
@@ -5517,7 +5517,7 @@
                         </p>
                             <div class="form-group">
                                 <label for="store-info-store-name">Store Name</label>
-                                <input class="form-input" id="store-info-store-name" name="store_name" type="text" maxlength="200" placeholder="H&M Herbs & Vitamins" autocomplete="organization">
+                                <input class="form-input" id="store-info-store-name" name="store_name" type="text" maxlength="200" placeholder="Your Store" autocomplete="organization">
                             </div>
                             <div class="form-group">
                                 <label for="store-info-store-phone">Phone</label>

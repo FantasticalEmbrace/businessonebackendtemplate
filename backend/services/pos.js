@@ -1,4 +1,4 @@
-// HM Herbs POS Integration Service
+// POS integration service
 // Bidirectional POS system integration with real-time inventory sync
 
 const axios = require('axios');
@@ -483,7 +483,7 @@ class POSService {
             timeout,
             headers: {
                 'Content-Type': 'application/json',
-                'User-Agent': 'HMHerbs-POS-Integration/1.0'
+                'User-Agent': 'BusinessOne-POS-Integration/1.0'
             }
         };
 

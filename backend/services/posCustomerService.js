@@ -15,7 +15,7 @@ const {
 const groupDiscount = require('./customerGroupDiscount');
 
 function getInStorePlaceholderEmail() {
-    return String(process.env.POS_IN_STORE_EMAIL || 'pos-instore@hmherbs.local').trim().toLowerCase();
+    return String(process.env.POS_IN_STORE_EMAIL || 'pos-instore@store.local').trim().toLowerCase();
 }
 
 function maskGiftCardCode(code) {
@@ -218,7 +218,7 @@ async function quickEnrollCustomer(pool, data) {
 
     let email = rawEmail;
     if (!email) {
-        email = `pos+${digitsOnly(phone)}@customers.hmherbs.local`;
+        email = `pos+${digitsOnly(phone)}@customers.store.local`;
     }
 
     const [[existing]] = await pool.execute(

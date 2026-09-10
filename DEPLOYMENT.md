@@ -1,4 +1,4 @@
-# 🚀 HM Herbs Deployment Guide
+# 🚀 Your Store Deployment Guide
 
 This guide covers generic production deployment. **For Linode / Akamai (recommended), use [LINODE_DEPLOY.md](./LINODE_DEPLOY.md)** — Linode, NodeBalancer, Managed MySQL, Nginx, PM2, and SSL.
 

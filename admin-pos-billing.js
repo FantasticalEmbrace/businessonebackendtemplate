@@ -1,5 +1,5 @@
 /**
- * HM Herbs admin — in-panel platform billing (principal merchant only).
+ * Business One admin — in-panel platform billing (principal merchant only).
  * Public merchants continue to use businessonecomprehensive.com/billing-portal.html.
  */
 (function () {

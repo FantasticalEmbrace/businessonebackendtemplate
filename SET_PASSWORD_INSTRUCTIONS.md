@@ -34,7 +34,7 @@ USE hmherbs;
 UPDATE admin_users 
 SET password_hash = '<paste_your_generated_hash_here>',
     updated_at = NOW()
-WHERE email = 'hmherbs1@gmail.com';
+WHERE email = 'store@example.com';
 ```
 
 Replace `<paste_your_generated_hash_here>` with the hash you generated.
@@ -56,7 +56,7 @@ node -e "const bcrypt=require('bcrypt');bcrypt.hash('admin1',12).then(h=>console
 UPDATE admin_users 
 SET password_hash = '<hash>',
     updated_at = NOW()
-WHERE email = 'hmherbs1@gmail.com';
+WHERE email = 'store@example.com';
 ```
 
 ## Method 3: Use the Script (If Node.js is in PATH)
@@ -69,7 +69,7 @@ node scripts/set-admin-password.js
 ## After Setting Password
 
 **Login Credentials:**
-- **Email:** `hmherbs1@gmail.com`
+- **Email:** `store@example.com`
 - **Password:** `admin1`
 
 **Access Admin Panel:**
@@ -80,12 +80,12 @@ node scripts/set-admin-password.js
 
 After updating, test the login:
 1. Open `admin.html`
-2. Enter email: `hmherbs1@gmail.com`
+2. Enter email: `store@example.com`
 3. Enter password: `admin1`
 4. Click "Sign In"
 
 If login fails, double-check:
 - The hash was generated correctly (12 rounds)
 - The SQL update ran successfully
-- The email matches exactly: `hmherbs1@gmail.com`
+- The email matches exactly: `store@example.com`
 

@@ -1,4 +1,4 @@
-// CSRF Protection Middleware for HM Herbs
+// CSRF Protection Middleware for Your Store
 // Prevents Cross-Site Request Forgery attacks
 
 const crypto = require('crypto');

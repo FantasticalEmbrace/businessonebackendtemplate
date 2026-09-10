@@ -3082,7 +3082,7 @@ class AdminApp {
         if (!form) return;
 
         const storePhone = form.querySelector('[name="store_phone"]')?.value?.trim() || '';
-        if (storePhone && window.HMHERBS_PHONE_US && !HMHERBS_PHONE_US.isValidDisplay(storePhone, false)) {
+        if (storePhone && (window.STORE_PHONE_US || window.HMHERBS_PHONE_US) && !(window.STORE_PHONE_US || window.HMHERBS_PHONE_US).isValidDisplay(storePhone, false)) {
             this.showToast('Store phone must be formatted as (555) 123-4567', 'error');
             return;
         }
@@ -3319,10 +3319,10 @@ class AdminApp {
         const supportPhoneEl = form.querySelector('[name="pos_support_phone"]');
         if (supportPhoneEl) {
             const rawSupport = String(map.get('pos_support_phone') || '');
-            if (window.HMHERBS_PHONE_US) {
-                const d = HMHERBS_PHONE_US.digitsOnly(rawSupport);
-                supportPhoneEl.value = d ? HMHERBS_PHONE_US.formatDigitsToDisplay(d) : '';
-                HMHERBS_PHONE_US.attach(supportPhoneEl);
+            if (window.STORE_PHONE_US || window.HMHERBS_PHONE_US) {
+                const d = (window.STORE_PHONE_US || window.HMHERBS_PHONE_US).digitsOnly(rawSupport);
+                supportPhoneEl.value = d ? (window.STORE_PHONE_US || window.HMHERBS_PHONE_US).formatDigitsToDisplay(d) : '';
+                (window.STORE_PHONE_US || window.HMHERBS_PHONE_US).attach(supportPhoneEl);
             } else {
                 supportPhoneEl.value = rawSupport;
             }
@@ -3821,7 +3821,7 @@ class AdminApp {
             return;
         }
         const supportPhone = form.querySelector('[name="pos_support_phone"]')?.value?.trim() || '';
-        if (supportPhone && window.HMHERBS_PHONE_US && !HMHERBS_PHONE_US.isValidDisplay(supportPhone, false)) {
+        if (supportPhone && (window.STORE_PHONE_US || window.HMHERBS_PHONE_US) && !(window.STORE_PHONE_US || window.HMHERBS_PHONE_US).isValidDisplay(supportPhone, false)) {
             const errMsg = 'Support phone must be formatted as (555) 555-0100 or left blank.';
             if (msg) {
                 msg.textContent = errMsg;
@@ -4857,9 +4857,9 @@ class AdminApp {
                 const input = form.querySelector(`[name="${key}"]`);
                 if (!input || key === 'store_holiday_schedule') return;
                 let v = map.get(key) || '';
-                if (key === 'store_phone' && window.HMHERBS_PHONE_US && v) {
-                    const d = HMHERBS_PHONE_US.digitsOnly(v);
-                    v = d ? HMHERBS_PHONE_US.formatDigitsToDisplay(d) : '';
+                if (key === 'store_phone' && (window.STORE_PHONE_US || window.HMHERBS_PHONE_US) && v) {
+                    const d = (window.STORE_PHONE_US || window.HMHERBS_PHONE_US).digitsOnly(v);
+                    v = d ? (window.STORE_PHONE_US || window.HMHERBS_PHONE_US).formatDigitsToDisplay(d) : '';
                 }
                 input.value = v;
             });
@@ -4912,7 +4912,7 @@ class AdminApp {
         if (msg) msg.textContent = '';
 
         const storePhone = form.querySelector('[name="store_phone"]')?.value?.trim() || '';
-        if (storePhone && window.HMHERBS_PHONE_US && !HMHERBS_PHONE_US.isValidDisplay(storePhone, false)) {
+        if (storePhone && (window.STORE_PHONE_US || window.HMHERBS_PHONE_US) && !(window.STORE_PHONE_US || window.HMHERBS_PHONE_US).isValidDisplay(storePhone, false)) {
             this.showToast('Store phone must be formatted as (555) 123-4567', 'error');
             return;
         }
@@ -7802,17 +7802,18 @@ class AdminApp {
             }
 
             const settings = response.taxSettings || {};
-            const hmEmail =
+            const storeEmail =
+                settings.storeAccountantEmail ||
                 settings.hmAccountantEmail ||
                 response.accountantEmail ||
-                'wandaforto@aol.com';
-            const hmDisplay = document.getElementById('taxAccountantEmailDisplay');
-            if (hmDisplay) hmDisplay.textContent = hmEmail;
+                '';
+            const storeEmailDisplay = document.getElementById('taxAccountantEmailDisplay');
+            if (storeEmailDisplay) storeEmailDisplay.textContent = storeEmail || '—';
 
             const keyInput = document.getElementById('taxZiptaxApiKey');
             const keyStatus = document.getElementById('taxZiptaxKeyStatus');
-            const hmIgnore = document.getElementById('taxHmIgnoreStates');
-            const hmEmailInput = document.getElementById('taxHmAccountantEmail');
+            const storeExempt = document.getElementById('taxStoreExemptStates');
+            const storeEmailInput = document.getElementById('taxStoreAccountantEmail');
 
             if (keyInput && !keyInput.dataset.dirty) {
                 keyInput.value = '';
@@ -7825,8 +7826,11 @@ class AdminApp {
                     ? `Configured: ${settings.ziptaxApiKey || '[configured]'}`
                     : 'Not configured yet â€” online checkout tax will fail until a key is saved.';
             }
-            if (hmIgnore && !hmIgnore.dataset.dirty) hmIgnore.value = settings.hmIgnoreStates || '';
-            if (hmEmailInput && !hmEmailInput.dataset.dirty) hmEmailInput.value = hmEmail;
+            if (storeExempt && !storeExempt.dataset.dirty) {
+                storeExempt.value =
+                    settings.exemptStates || settings.hmIgnoreStates || settings.hmExemptStates || '';
+            }
+            if (storeEmailInput && !storeEmailInput.dataset.dirty) storeEmailInput.value = storeEmail;
         } catch (error) {
             this.showNotification('Tax ledger endpoint unavailable. Restart backend to load new routes.', 'error');
             console.warn('Tax ledger load failed:', error?.message || error);
@@ -7836,8 +7840,10 @@ class AdminApp {
     async saveTaxSettings() {
         const keyInput = document.getElementById('taxZiptaxApiKey');
         const payload = {
-            hmIgnoreStates: document.getElementById('taxHmIgnoreStates')?.value || '',
-            hmAccountantEmail: document.getElementById('taxHmAccountantEmail')?.value || ''
+            exemptStates: document.getElementById('taxStoreExemptStates')?.value || '',
+            hmIgnoreStates: document.getElementById('taxStoreExemptStates')?.value || '',
+            storeAccountantEmail: document.getElementById('taxStoreAccountantEmail')?.value || '',
+            hmAccountantEmail: document.getElementById('taxStoreAccountantEmail')?.value || ''
         };
         const keyVal = (keyInput?.value || '').trim();
         if (keyVal) payload.ziptaxApiKey = keyVal;
@@ -7851,7 +7857,7 @@ class AdminApp {
             keyInput.value = '';
             delete keyInput.dataset.dirty;
         }
-        ['taxHmIgnoreStates', 'taxHmAccountantEmail'].forEach((id) => {
+        ['taxStoreExemptStates', 'taxStoreAccountantEmail'].forEach((id) => {
             const el = document.getElementById(id);
             if (el) delete el.dataset.dirty;
         });
@@ -11432,7 +11438,7 @@ async function matchProductsToBrands() {
     const proceed = await app.showAdminConfirm({
         title: 'Match products to brands?',
         message:
-            'H&M Herbs will match catalog products to brands using name prefixes. Many product rows may be updated. Continue?',
+            'Your Store will match catalog products to brands using name prefixes. Many product rows may be updated. Continue?',
         confirmLabel: 'Run match',
         cancelLabel: 'Cancel',
     });
@@ -14380,7 +14386,7 @@ async function matchProductsToCategories() {
     const go = await app.showAdminConfirm({
         title: 'Match products to categories?',
         message:
-            'H&M Herbs will match catalog products to categories using names and descriptions. Many rows may be updated. Continue?',
+            'Your Store will match catalog products to categories using names and descriptions. Many rows may be updated. Continue?',
         confirmLabel: 'Run match',
         cancelLabel: 'Cancel',
     });

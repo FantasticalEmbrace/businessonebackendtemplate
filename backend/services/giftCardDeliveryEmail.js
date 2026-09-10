@@ -29,14 +29,14 @@ const GREETING_HEADLINES = {
     custom: null
 };
 
-const STORE_PHONE = '(706) 861-9454';
+const STORE_PHONE = String(process.env.STORE_PHONE || process.env.SUPPORT_PHONE || '').trim();
 
 function storefrontBase() {
     return getStorefrontPublicBaseUrl();
 }
 
 function logoUrl() {
-    return `${storefrontBase()}/images/HM%20Herb%20Logo.png`;
+    return `${storefrontBase()}/images/logo.png`;
 }
 
 function accountSetupUrl(resetToken) {
@@ -51,18 +51,18 @@ function escapeHtml(str) {
         .replace(/"/g, '&quot;');
 }
 
-function hmButton(href, label) {
+function storeButton(href, label) {
     return `<a href="${escapeHtml(href)}" style="display:inline-block;background:${BRAND.primary};color:#ffffff;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:600;font-size:15px;">${escapeHtml(label)}</a>`;
 }
 
-function hmTextLink(href, label) {
+function storeTextLink(href, label) {
     return `<a href="${escapeHtml(href)}" style="color:${BRAND.primaryDark};font-weight:600;text-decoration:none;">${escapeHtml(label)}</a>`;
 }
 
 /**
- * Branded HM Herbs email shell — logo header, content area, store footer.
+ * Branded store email shell — logo header, content area, store footer.
  */
-function wrapHmHerbsEmail({ headline, bodyHtml, preheader = '' }) {
+function wrapStoreEmail({ headline, bodyHtml, preheader = '' }) {
     const base = storefrontBase();
     const heroHeadline = headline
         ? `<tr>
@@ -84,7 +84,7 @@ function wrapHmHerbsEmail({ headline, bodyHtml, preheader = '' }) {
         <tr>
           <td style="padding:24px 24px 16px;text-align:center;background:#ffffff;border-bottom:3px solid ${BRAND.primary};">
             <a href="${escapeHtml(base)}/index.html" style="text-decoration:none;">
-              <img src="${escapeHtml(logoUrl())}" alt="H&amp;M Herbs &amp; Vitamins" width="200" style="display:block;margin:0 auto;max-width:200px;height:auto;border:0;" />
+              <img src="${escapeHtml(logoUrl())}" alt="Your Store" width="200" style="display:block;margin:0 auto;max-width:200px;height:auto;border:0;" />
             </a>
             <p style="margin:10px 0 0;font-family:${BRAND.font};font-size:13px;line-height:1.4;color:${BRAND.textMuted};letter-spacing:0.04em;text-transform:uppercase;">Premium natural health products since 1995</p>
           </td>
@@ -100,10 +100,10 @@ function wrapHmHerbsEmail({ headline, bodyHtml, preheader = '' }) {
             <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-top:1px solid ${BRAND.border};">
               <tr>
                 <td style="padding-top:20px;font-family:${BRAND.font};font-size:13px;line-height:1.6;color:${BRAND.footerMuted};text-align:center;">
-                  <p style="margin:0 0 6px;"><strong style="color:${BRAND.primaryDark};">H&amp;M Herbs &amp; Vitamins</strong></p>
-                  <p style="margin:0 0 6px;">${STORE_PHONE} · Mon–Fri 10am–5pm, Sat 10am–1pm</p>
+                  <p style="margin:0 0 6px;"><strong style="color:${BRAND.primaryDark};">${escapeHtml(process.env.STORE_NAME || 'Your Store')}</strong></p>
+                  <p style="margin:0 0 6px;">${STORE_PHONE ? `${escapeHtml(STORE_PHONE)} · ` : ''}Questions? Reply to this email or visit our store.</p>
                   <p style="margin:0;">
-                    <a href="${escapeHtml(base)}/index.html" style="color:${BRAND.primaryDark};text-decoration:none;">hmherbs.com</a>
+                    <a href="${escapeHtml(base)}/index.html" style="color:${BRAND.primaryDark};text-decoration:none;">our store</a>
                     &nbsp;·&nbsp;
                     <a href="${escapeHtml(base)}/gift-cards.html" style="color:${BRAND.primaryDark};text-decoration:none;">Gift cards</a>
                   </p>
@@ -151,26 +151,26 @@ function buildGiftCardBodyHtml({
                 <p style="margin:0 0 10px;font-family:${BRAND.font};font-size:22px;line-height:1.3;font-weight:700;color:${BRAND.text};">${amountStr}</p>
                 <p style="margin:0 0 6px;font-family:${BRAND.font};font-size:15px;color:${BRAND.text};"><strong>Code:</strong> ${escapeHtml(code)}</p>
                 <p style="margin:0 0 10px;font-family:${BRAND.font};font-size:15px;color:${BRAND.text};"><strong>PIN:</strong> ${escapeHtml(pin)}</p>
-                <p style="margin:0;font-family:${BRAND.font};font-size:14px;line-height:1.5;color:${BRAND.textMuted};">Use this code at checkout on hmherbs.com or sign in to your account to apply it automatically.</p>
+                <p style="margin:0;font-family:${BRAND.font};font-size:14px;line-height:1.5;color:${BRAND.textMuted};">Use this code at checkout on our store or sign in to your account to apply it automatically.</p>
            </div>`
         : `<p style="margin:16px 0;font-family:${BRAND.font};font-size:16px;line-height:1.6;color:${BRAND.text};">Your physical gift card will be mailed soon. Once it arrives, you can check your balance anytime in your account.</p>`;
 
     const accountBlock =
         isNewAccount && resetToken
             ? `<p style="margin:18px 0 12px;font-family:${BRAND.font};font-size:16px;line-height:1.6;color:${BRAND.text};">We created an account for you so you can track your gift card balance online.</p>
-               <p style="margin:0 0 12px;">${hmButton(setupUrl, 'Set up your account')}</p>
+               <p style="margin:0 0 12px;">${storeButton(setupUrl, 'Set up your account')}</p>
                <p style="margin:0;font-family:${BRAND.font};font-size:13px;line-height:1.5;color:${BRAND.footerMuted};word-break:break-all;">Or copy this link: ${escapeHtml(setupUrl)}</p>`
-            : `<p style="margin:18px 0 0;font-family:${BRAND.font};font-size:16px;line-height:1.6;color:${BRAND.text};">${hmTextLink(setupUrl, 'View your gift cards in your account')}</p>`;
+            : `<p style="margin:18px 0 0;font-family:${BRAND.font};font-size:16px;line-height:1.6;color:${BRAND.text};">${storeTextLink(setupUrl, 'View your gift cards in your account')}</p>`;
 
     return `
         <p style="margin:0 0 12px;font-family:${BRAND.font};font-size:16px;line-height:1.6;color:${BRAND.text};">Hello ${first},</p>
         <p style="margin:0 0 8px;font-family:${BRAND.font};font-size:16px;line-height:1.6;color:${BRAND.text};">
-          <strong>${from}</strong> sent you a <strong>${amountStr}</strong> H&amp;M Herbs ${isDigital ? 'digital' : 'physical'} gift card.
+          <strong>${from}</strong> sent you a <strong>${amountStr}</strong> Your Store ${isDigital ? 'digital' : 'physical'} gift card.
         </p>
         ${messageBlock}
         ${codeBlock}
         ${accountBlock}
-        <p style="margin:24px 0 0;font-family:${BRAND.font};font-size:15px;line-height:1.6;color:${BRAND.textMuted};">Thank you for choosing H&amp;M Herbs &amp; Vitamins.</p>`;
+        <p style="margin:24px 0 0;font-family:${BRAND.font};font-size:15px;line-height:1.6;color:${BRAND.textMuted};">Thank you for choosing Your Store.</p>`;
 }
 
 function buildStyledGiftEmailHtml(opts) {
@@ -184,10 +184,10 @@ function buildStyledGiftEmailHtml(opts) {
     const bodyHtml = buildGiftCardBodyHtml(opts);
     const from = String(opts.senderName || '').trim() || 'Someone special';
     const preheader = styled
-        ? `${from} sent you a gift from H&M Herbs`
-        : `You received a gift card from H&M Herbs`;
+        ? `${from} sent you a gift from our store`
+        : `You received a gift card from our store`;
 
-    return wrapHmHerbsEmail({
+    return wrapStoreEmail({
         headline: headline || null,
         preheader,
         bodyHtml
@@ -214,13 +214,13 @@ async function sendGiftCardRecipientEmail({
     const occasion = String(greetingOccasion || '').trim().toLowerCase();
 
     let subject = isDigital
-        ? `You received a $${amount} H&M Herbs gift card from ${from}`
-        : `A $${amount} H&M Herbs gift card is on the way from ${from}`;
+        ? `You received a $${amount} store gift card from ${from}`
+        : `A $${amount} store gift card is on the way from ${from}`;
 
     if (styled && occasion === 'birthday') {
-        subject = `Happy Birthday! ${from} sent you a $${amount} H&M Herbs gift card`;
+        subject = `Happy Birthday! ${from} sent you a $${amount} store gift card`;
     } else if (styled && occasion === 'thank_you') {
-        subject = `Thank you — a $${amount} gift from ${from} at H&M Herbs`;
+        subject = `Thank you — a $${amount} gift from ${from} at our store`;
     }
 
     const html = buildStyledGiftEmailHtml({
@@ -272,16 +272,16 @@ async function sendGiftCardPurchaserConfirmation({ to, purchaserName, lines }) {
         <ul style="margin:0 0 16px;padding-left:20px;">${list}</ul>
         <p style="margin:0;font-family:${BRAND.font};font-size:15px;line-height:1.6;color:${BRAND.textMuted};">Digital cards are delivered by email. Physical cards are prepared for mailing.</p>`;
 
-    const html = wrapHmHerbsEmail({
+    const html = wrapStoreEmail({
         headline: null,
-        preheader: 'Your H&M Herbs gift card order is confirmed',
+        preheader: 'Your gift card order is confirmed',
         bodyHtml
     });
 
     try {
         await sendMail({
             to,
-            subject: 'H&M Herbs — gift card order confirmation',
+            subject: 'Gift card order confirmation',
             html,
             logTag: 'Gift card purchaser email'
         });
@@ -295,6 +295,6 @@ module.exports = {
     sendGiftCardPurchaserConfirmation,
     GREETING_HEADLINES,
     BRAND,
-    wrapHmHerbsEmail,
+    wrapStoreEmail,
     buildStyledGiftEmailHtml
 };
