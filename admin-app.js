@@ -83,6 +83,7 @@ class AdminApp {
         this.allCategories = []; // Store all categories for filtering
         this.allCategoriesForFilter = []; // Store all categories for category section filtering
         this.selectedProductIds = new Set();
+        this.selectedOrderIds = new Set();
         this.holidaySchedule = [];
         this.productsPagination = {
             currentPage: 1,
@@ -547,7 +548,7 @@ class AdminApp {
         }
     }
 
-    _showPopupBlockedGuidance({ orderId, salesChannel, purpose = 'receipt', triggerEl = null } = {}) {
+    _showPopupBlockedGuidance({ orderId, salesChannel, purpose = 'receipt', triggerEl = null, onRetry = null } = {}) {
         document.querySelector('.admin-popup-blocked-dialog')?.remove();
 
         const overlay = document.createElement('div');
@@ -603,6 +604,10 @@ class AdminApp {
         retryBtn.textContent = 'Try again';
         retryBtn.addEventListener('click', () => {
             close();
+            if (typeof onRetry === 'function') {
+                onRetry();
+                return;
+            }
             const printWindow = HMReceiptPrint.openLoading();
             void this.printOrderReceipt(orderId, salesChannel, { printWindow, triggerEl });
         });
@@ -1821,6 +1826,7 @@ class AdminApp {
                 }
                 break;
             case 'orders':
+                this.setupOrdersBulkActions();
                 await this.loadOrders();
                 break;
             case 'tax-ledger':
@@ -7800,9 +7806,11 @@ class AdminApp {
 
             if (response.orders && response.orders.length > 0) {
                 container.innerHTML = this.renderOrdersTable(response.orders);
+                this.syncOrdersSelectAllCheckbox();
             } else {
                 container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--gray-500);"><p>No orders yet.</p><p style="font-size:0.875rem;margin-top:0.5rem;">Orders from checkout will appear here once customers place them.</p></div>';
             }
+            this.updateOrdersBulkSelectBar();
         } catch (error) {
             // Don't show error for authentication issues
             if (error.message === 'Authentication required' || error.message.includes('Invalid admin token')) {
@@ -7810,6 +7818,7 @@ class AdminApp {
             } else {
                 container.innerHTML = `<div style="text-align: center; padding: 2rem; color: var(--error);"><p>Failed to load orders: ${this.escapeHtml(error.message)}</p></div>`;
             }
+            this.updateOrdersBulkSelectBar();
         }
     }
 
@@ -8121,26 +8130,23 @@ class AdminApp {
     }
 
     renderOrdersTable(orders) {
-        return `
-            <div class="table-container">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Order #</th>
-                            <th>Channel</th>
-                            <th>Customer</th>
-                            <th>Email</th>
-                            <th>Status</th>
-                            <th>Payment</th>
-                            <th>Total</th>
-                            <th>Items</th>
-                            <th>Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${orders.map(order => `
-                            <tr>
+        const pageIds = orders.map((o) => Number(o.id)).filter((id) => Number.isFinite(id) && id > 0);
+        const allPageSelected = pageIds.length > 0 && pageIds.every((id) => this.selectedOrderIds.has(id));
+        const rows = orders.map((order) => {
+            const orderId = Number(order.id);
+            const customerName = `${order.shipping_first_name || ''} ${order.shipping_last_name || ''}`.trim() || 'Customer';
+            const orderLabel = order.order_number || String(orderId);
+            const isSelected = this.selectedOrderIds.has(orderId);
+            return `
+                            <tr class="${isSelected ? 'admin-row-selected' : ''}">
+                                <td class="col-select">
+                                    <input type="checkbox" class="order-row-select"
+                                        id="order-row-select-${orderId}"
+                                        name="selected_order_ids"
+                                        value="${orderId}"
+                                        data-order-id="${orderId}"
+                                        aria-label="Select order ${this.escapeHtml(orderLabel)} for ${this.escapeHtml(customerName)}"${isSelected ? ' checked' : ''}>
+                                </td>
                                 <td><code>${this.escapeHtml(order.order_number)}</code></td>
                                 <td>
                                     <span class="badge ${this._salesChannelBadgeClass(order)}">
@@ -8163,16 +8169,278 @@ class AdminApp {
                                 <td data-sort-value="${Number(order.item_count) || 0}">${order.item_count || 0}</td>
                                 <td data-sort-value="${this.escapeHtml(order.created_at || '')}">${new Date(order.created_at).toLocaleDateString()}</td>
                                 <td>
-                                    <button class="btn btn-sm btn-secondary" onclick="viewOrder(${order.id})">
+                                    <button class="btn btn-sm btn-secondary" onclick="viewOrder(${order.id})" title="View order ${this.escapeHtml(orderLabel)}">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                 </td>
-                            </tr>
-                        `).join('')}
+                            </tr>`;
+        }).join('');
+
+        return `
+            <div class="table-container admin-orders-table-wrap"
+                data-page-order-ids="${this.escapeHtml(pageIds.join(','))}">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th class="col-select" scope="col" data-no-sort>
+                                <input type="checkbox" id="ordersSelectAll" name="select_all_orders"
+                                    title="Select all orders on this page"
+                                    aria-label="Select all orders on this page"${allPageSelected ? ' checked' : ''}>
+                            </th>
+                            <th>Order #</th>
+                            <th>Channel</th>
+                            <th>Customer</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Payment</th>
+                            <th>Total</th>
+                            <th>Items</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rows}
                     </tbody>
                 </table>
             </div>
         `;
+    }
+
+    setupOrdersBulkActions() {
+        if (this._ordersBulkBound) return;
+        const ordersSection = document.getElementById('orders');
+        if (!ordersSection) return;
+        this._ordersBulkBound = true;
+
+        ordersSection.addEventListener('change', (e) => {
+            const target = e.target;
+            if (target.classList?.contains('order-row-select')) {
+                const id = Number(target.dataset.orderId);
+                if (!Number.isFinite(id)) return;
+                if (target.checked) this.selectedOrderIds.add(id);
+                else this.selectedOrderIds.delete(id);
+                target.closest('tr')?.classList.toggle('admin-row-selected', target.checked);
+                this.syncOrdersSelectAllCheckbox();
+                this.updateOrdersBulkSelectBar();
+                return;
+            }
+            if (target.id === 'ordersSelectAll') {
+                const wrap = target.closest('.admin-orders-table-wrap');
+                const raw = wrap?.dataset.pageOrderIds || '';
+                const pageIds = raw.split(',').map((v) => Number(v)).filter((id) => Number.isFinite(id) && id > 0);
+                pageIds.forEach((id) => {
+                    if (target.checked) this.selectedOrderIds.add(id);
+                    else this.selectedOrderIds.delete(id);
+                });
+                wrap?.querySelectorAll('.order-row-select').forEach((cb) => {
+                    cb.checked = target.checked;
+                    cb.closest('tr')?.classList.toggle('admin-row-selected', target.checked);
+                });
+                this.syncOrdersSelectAllCheckbox();
+                this.updateOrdersBulkSelectBar();
+            }
+        });
+
+        document.getElementById('ordersBulkPrintReceiptsBtn')?.addEventListener('click', () => {
+            void this.bulkPrintSelectedOrders();
+        });
+        document.getElementById('ordersBulkClearSelectionBtn')?.addEventListener('click', () => {
+            this.clearOrderSelection();
+        });
+        this.updateOrdersBulkSelectBar();
+    }
+
+    syncOrdersSelectAllCheckbox() {
+        const selectAll = document.getElementById('ordersSelectAll');
+        const wrap = document.querySelector('#ordersTable .admin-orders-table-wrap');
+        if (!selectAll || !wrap) return;
+        const raw = wrap.dataset.pageOrderIds || '';
+        const pageIds = raw.split(',').map((v) => Number(v)).filter((id) => Number.isFinite(id) && id > 0);
+        if (pageIds.length === 0) {
+            selectAll.checked = false;
+            selectAll.indeterminate = false;
+            return;
+        }
+        const selectedOnPage = pageIds.filter((id) => this.selectedOrderIds.has(id)).length;
+        selectAll.checked = selectedOnPage === pageIds.length;
+        selectAll.indeterminate = selectedOnPage > 0 && selectedOnPage < pageIds.length;
+    }
+
+    updateOrdersBulkSelectBar() {
+        const bar = document.getElementById('ordersBulkSelectBar');
+        const countEl = document.getElementById('ordersBulkSelectCount');
+        const count = this.selectedOrderIds.size;
+        if (countEl) {
+            countEl.textContent =
+                count === 0
+                    ? 'No orders selected'
+                    : count === 1
+                      ? '1 selected · Print order receipts'
+                      : `${count} selected · Print order receipts`;
+        }
+        if (bar) {
+            bar.hidden = count === 0;
+        }
+        const printBtn = document.getElementById('ordersBulkPrintReceiptsBtn');
+        const clearBtn = document.getElementById('ordersBulkClearSelectionBtn');
+        if (printBtn) printBtn.disabled = count === 0;
+        if (clearBtn) clearBtn.disabled = count === 0;
+    }
+
+    clearOrderSelection() {
+        this.selectedOrderIds.clear();
+        document.querySelectorAll('#ordersTable .order-row-select').forEach((cb) => {
+            cb.checked = false;
+            cb.closest('tr')?.classList.remove('admin-row-selected');
+        });
+        this.syncOrdersSelectAllCheckbox();
+        this.updateOrdersBulkSelectBar();
+    }
+
+    /**
+     * Combine full single-order receipt HTML documents into one print-friendly page
+     * (page break between each order) for a single browser print dialog.
+     */
+    _combineOrderReceiptHtml(htmlDocs) {
+        const docs = (htmlDocs || []).map((h) => String(h || '').trim()).filter(Boolean);
+        if (!docs.length) return '';
+        if (docs.length === 1) return docs[0];
+
+        const parser = new DOMParser();
+        const styleChunks = [];
+        const bodies = [];
+        docs.forEach((html) => {
+            const doc = parser.parseFromString(html, 'text/html');
+            doc.querySelectorAll('script').forEach((s) => s.remove());
+            doc.querySelectorAll('style').forEach((s) => {
+                const css = String(s.textContent || '').trim();
+                if (css) styleChunks.push(css);
+            });
+            const receipt = doc.querySelector('.receipt');
+            const content = receipt ? receipt.outerHTML : (doc.body?.innerHTML || '');
+            bodies.push(`<div class="admin-multi-receipt">${content}</div>`);
+        });
+
+        return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Order receipts (${docs.length})</title>
+<style>
+  body { font-family: Inter, system-ui, sans-serif; color: #111827; margin: 0; padding: 24px; background: #f3f4f6; }
+  .admin-multi-receipt { margin: 0 auto 2rem; }
+  .admin-multi-receipt .receipt { max-width: 520px; margin: 0 auto; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 24px; }
+  @media print {
+    body { background: #fff; padding: 0; }
+    .admin-multi-receipt { margin: 0; page-break-after: always; break-after: page; }
+    .admin-multi-receipt:last-child { page-break-after: auto; break-after: auto; }
+    .admin-multi-receipt .receipt { border: none; border-radius: 0; max-width: none; padding: 0; }
+    .no-print { display: none !important; }
+  }
+  ${styleChunks.join('\n')}
+</style>
+</head>
+<body>
+${bodies.join('\n')}
+</body>
+</html>`;
+    }
+
+    _setOrdersBulkStatus(html, isError = false) {
+        const el = document.getElementById('ordersBulkStatus');
+        if (!el) return;
+        if (!html) {
+            el.style.display = 'none';
+            el.innerHTML = '';
+            return;
+        }
+        el.style.display = 'block';
+        el.style.color = isError ? 'var(--error)' : 'var(--gray-700)';
+        el.innerHTML = html;
+    }
+
+    async bulkPrintSelectedOrders() {
+        const ids = [...this.selectedOrderIds].filter((id) => Number.isFinite(id) && id > 0);
+        if (!ids.length) {
+            this.showToast('Select at least one order', 'error');
+            return;
+        }
+
+        const btn = document.getElementById('ordersBulkPrintReceiptsBtn');
+        const prevDisabled = btn ? btn.disabled : false;
+        if (btn) btn.disabled = true;
+        this._setOrdersBulkStatus(`Loading ${ids.length} order receipt${ids.length === 1 ? '' : 's'}…`);
+
+        // Open print window on the click gesture so the browser allows the popup.
+        const printWindow = HMReceiptPrint.openLoading();
+        if (!printWindow) {
+            this._setOrdersBulkStatus('');
+            if (btn) btn.disabled = prevDisabled;
+            this._showPopupBlockedGuidance({
+                purpose: 'invoice',
+                triggerEl: btn,
+                onRetry: () => {
+                    void this.bulkPrintSelectedOrders();
+                },
+            });
+            return;
+        }
+
+        try {
+            const htmlDocs = [];
+            const failed = [];
+            for (let i = 0; i < ids.length; i++) {
+                const orderId = ids[i];
+                this._setOrdersBulkStatus(`Loading receipt ${i + 1} of ${ids.length}…`);
+                try {
+                    const data = await this.apiRequest(`/admin/orders/${orderId}/receipt`);
+                    const html = String(data?.html || '').trim();
+                    if (!html) {
+                        failed.push(orderId);
+                        continue;
+                    }
+                    htmlDocs.push(html);
+                } catch (err) {
+                    console.warn('Failed to load receipt for order', orderId, err);
+                    failed.push(orderId);
+                }
+            }
+
+            if (!htmlDocs.length) {
+                HMReceiptPrint.closeQuietly(printWindow);
+                this._setOrdersBulkStatus('Could not load any selected order receipts.', true);
+                this.showToast('Could not load order receipts', 'error');
+                return;
+            }
+
+            const combined = this._combineOrderReceiptHtml(htmlDocs);
+            if (!HMReceiptPrint.writeReceipt(printWindow, combined)) {
+                HMReceiptPrint.closeQuietly(printWindow);
+                this._setOrdersBulkStatus('Pop-ups blocked — allow pop-ups and try again.', true);
+                this._showPopupBlockedGuidance({
+                    purpose: 'invoice',
+                    triggerEl: btn,
+                    onRetry: () => {
+                        void this.bulkPrintSelectedOrders();
+                    },
+                });
+                return;
+            }
+
+            let msg = `Opened print dialog for ${htmlDocs.length} order receipt${htmlDocs.length === 1 ? '' : 's'}.`;
+            if (failed.length) {
+                msg += ` ${failed.length} could not be loaded.`;
+            }
+            this._setOrdersBulkStatus(this.escapeHtml(msg), Boolean(failed.length));
+            this.showToast(msg, failed.length ? 'error' : 'success');
+        } catch (err) {
+            HMReceiptPrint.closeQuietly(printWindow);
+            this._setOrdersBulkStatus(this.escapeHtml(err.message || 'Bulk print failed'), true);
+            this.showToast(err.message || 'Bulk print failed', 'error');
+        } finally {
+            if (btn) btn.disabled = prevDisabled;
+        }
     }
 
     async loadEDSABookings() {

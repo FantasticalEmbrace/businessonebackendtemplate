@@ -988,6 +988,66 @@
             vertical-align: middle;
         }
 
+        /* Orders — multi-select checkbox column + bulk print bar */
+        .admin-orders-table-wrap .table th.col-select,
+        .admin-orders-table-wrap .table td.col-select {
+            width: 2.75rem;
+            text-align: center;
+            padding-left: 0.35rem;
+            padding-right: 0.35rem;
+            white-space: nowrap;
+        }
+
+        .admin-orders-table-wrap .col-select input[type="checkbox"] {
+            width: 1.05rem;
+            height: 1.05rem;
+            margin: 0;
+            cursor: pointer;
+            accent-color: var(--brand-primary, var(--primary-green, #ff9b1f));
+            vertical-align: middle;
+        }
+
+        .admin-orders-table-wrap tr.admin-row-selected {
+            background: var(--brand-surface-subtle, rgba(255, 155, 31, 0.06));
+        }
+
+        .admin-orders-select-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            flex-wrap: wrap;
+            margin: 0 0 1rem;
+            padding: 0.75rem 1rem;
+            background: var(--light-green, #fff7ed);
+            border: 2px solid var(--brand-primary, var(--primary-green, #ff9b1f));
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 2px 8px rgba(var(--brand-primary-rgb, 255, 155, 31), 0.12);
+        }
+
+        .admin-orders-select-bar[hidden] {
+            display: none !important;
+        }
+
+        .admin-orders-select-count {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--brand-primary-dark, var(--primary-green-dark, #e8890f));
+            white-space: nowrap;
+        }
+
+        .admin-orders-select-hint {
+            font-size: 0.8rem;
+            color: var(--gray-600);
+            margin-left: auto;
+        }
+
+        @media (max-width: 640px) {
+            .admin-orders-select-hint {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+
         .admin-product-select-label {
             display: inline-flex;
             align-items: center;
@@ -4166,7 +4226,20 @@
                     <div class="card-content">
                         <p class="form-help" style="margin:0 0 1rem;color:var(--gray-600);">
                             Webstore and online checkout orders. POS register sales appear under POS when enabled.
+                            Use the checkboxes to select orders on this page, then <strong>Print selected orders</strong> for customer receipts.
                         </p>
+                        <div id="ordersBulkSelectBar" class="admin-orders-select-bar" hidden role="region" aria-label="Selected order actions">
+                            <span id="ordersBulkSelectCount" class="admin-orders-select-count">No orders selected</span>
+                            <button type="button" id="ordersBulkPrintReceiptsBtn" class="btn btn-primary btn-sm" disabled>
+                                <i class="fas fa-file-invoice" aria-hidden="true"></i>
+                                Print selected orders
+                            </button>
+                            <button type="button" id="ordersBulkClearSelectionBtn" class="btn btn-secondary btn-sm" disabled>
+                                Clear selection
+                            </button>
+                            <span class="admin-orders-select-hint">Select all = this page only · Prints order receipts</span>
+                        </div>
+                        <div id="ordersBulkStatus" class="form-help" style="display:none;margin:0 0 1rem;" aria-live="polite"></div>
                         <div id="ordersTable" class="loading">
                             <div class="spinner"></div>
                             Loading orders...
@@ -7572,7 +7645,7 @@
     <script src="js/password-toggle.js?v=4"></script>
     <script src="js/admin-table-sort.js?v=sortable-inp-20260914a"></script>
     <script src="js/admin-shop-workflows.js?v=1"></script>
-    <script src="admin-app.js?v=dropship-label-20260914a"></script>
+    <script src="admin-app.js?v=orders-multi-print-20260914a"></script>
     <script src="js/shop-calendar-widget.js?v=1"></script>
     <script src="admin-edsa-calendar.js"></script>
     <script src="admin-shop-calendar.js?v=1"></script>
