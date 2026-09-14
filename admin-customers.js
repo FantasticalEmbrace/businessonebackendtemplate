@@ -517,6 +517,17 @@
                     }
                     const ch = String(o.sales_channel || 'online').toLowerCase();
                     if (ch === 'in_store') return '<span style="color:var(--gray-400);">—</span>';
+                    // Paid + dropshipped/manual tracking → no Shippo label needed (not "Needs label")
+                    const tracking = String(o.tracking_number || '').trim();
+                    const isPlaceholder = window.HMTrackingLink?.isPlaceholderTracking
+                        ? window.HMTrackingLink.isPlaceholderTracking(tracking)
+                        : /^HMTRK/i.test(tracking);
+                    const service = String(o.shipping_service || '').trim().toLowerCase();
+                    const isDropship =
+                        (!!tracking && !isPlaceholder) || /\bdrop\s*-?\s*ship/.test(service);
+                    if (isDropship) {
+                        return '<span class="badge badge-info">Dropshipped</span>';
+                    }
                     if (String(o.payment_status || '').toLowerCase() === 'paid') {
                         return '<span class="badge badge-secondary">Needs label</span>';
                     }

@@ -114,6 +114,28 @@
             return;
         }
 
+        // Dropship / external: tracking already entered without a store Shippo label — no buy-label CTA
+        const trackingNum = String(order.tracking_number || '').trim();
+        const isPlaceholderTracking = window.HMTrackingLink?.isPlaceholderTracking
+            ? window.HMTrackingLink.isPlaceholderTracking(trackingNum)
+            : /^HMTRK/i.test(trackingNum);
+        const serviceLower = String(order.shipping_service || '').trim().toLowerCase();
+        const isDropship =
+            (trackingNum && !isPlaceholderTracking) ||
+            /\bdrop\s*-?\s*ship/.test(serviceLower);
+        if (isDropship) {
+            container.style.display = '';
+            container.innerHTML = `
+                <div class="hm-ship-fulfill-panel">
+                    <h4 style="margin:0 0 0.5rem;color:var(--gray-800);">Shipping — dropshipped</h4>
+                    <p style="font-size:0.85rem;color:var(--gray-600);margin:0;line-height:1.4;">
+                        Vendor / external tracking is already on this order — no Shippo label is needed.
+                        Use <strong>Order progress</strong> above to edit dropship tracking if needed.
+                    </p>
+                </div>`;
+            return;
+        }
+
         const missingHtml = missingWeights.length
             ? `<div id="hm-ship-missing-weights" style="margin-bottom:1rem;padding:0.75rem;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;">
                 <strong>New items — enter product weight (lb or oz):</strong>

@@ -1528,6 +1528,8 @@ class CheckoutManager {
             const decDisabled = qty <= 1 ? 'disabled' : '';
             const incDisabled = maxQ != null && qty >= maxQ ? 'disabled' : '';
             const safeName = this.escapeHtml(item.name);
+            const productHref = this.getCartItemProductHref(item);
+            const safeHref = productHref ? this.escapeHtml(productHref) : '';
             const giftMeta = item.giftCard
                 ? `<div class="order-item-gift-meta">${item.giftCard.recipientEmail ? `To: ${this.escapeHtml(item.giftCard.recipientEmail)}` : 'Physical gift card'}${item.giftCard.cardType === 'digital' ? ' · Digital' : ' · Physical'}${item.giftCard.includePersonalizedEmail ? ' · Personalized email' : ''}</div>`
                 : '';
@@ -1539,12 +1541,18 @@ class CheckoutManager {
                           compact: true
                       })}</div>`
                     : `<img src="${this.escapeHtml(this.safeImageUrl(item.image))}" alt="${safeName}" class="order-item-image" onerror="this.src='${this.createPlaceholderImage()}'">`;
+            const thumbBlock = productHref && !item.giftCard
+                ? `<a href="${safeHref}" class="order-item-image-link" aria-label="View ${safeName}">${giftThumb}</a>`
+                : giftThumb;
+            const nameBlock = productHref
+                ? `<a href="${safeHref}" class="order-item-name">${safeName}</a>`
+                : `<div class="order-item-name">${safeName}</div>`;
             const itemDiv = document.createElement('div');
             itemDiv.className = 'order-item';
             itemDiv.innerHTML = `
-                ${giftThumb}
+                ${thumbBlock}
                 <div class="order-item-details">
-                    <div class="order-item-name">${safeName}</div>
+                    ${nameBlock}
                     ${giftMeta}
                     <div class="checkout-line-qty" role="group" aria-label="Quantity for ${safeName}">
                         <button type="button" class="checkout-qty-btn" data-checkout-qty="dec" data-index="${index}" aria-label="Decrease quantity" ${decDisabled}>−</button>
@@ -2967,6 +2975,21 @@ class CheckoutManager {
                 document.body.removeChild(notification);
             }, 300);
         }, 3000);
+    }
+
+    /** Relative PDP URL for a cart line (null for gift cards / unresolvable). */
+    getCartItemProductHref(item) {
+        if (!item || item.giftCard) return null;
+        if (item.url && typeof item.url === 'string' && item.url.trim()) {
+            return item.url.trim();
+        }
+        if (item.slug) {
+            return `product.html?slug=${encodeURIComponent(item.slug)}`;
+        }
+        if (item.id != null && item.id !== '') {
+            return `product.html?id=${encodeURIComponent(item.id)}`;
+        }
+        return null;
     }
 
     escapeHtml(text) {

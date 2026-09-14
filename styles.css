@@ -5251,6 +5251,72 @@ body.cart-open .cart-sidebar.open {
   line-height: 1.4;
 }
 
+/* Override global `a { text-decoration: underline }` — keep clickable, no underline */
+a.cart-item-name,
+a.cart-item-name:link,
+a.cart-item-name:visited {
+  display: block;
+  text-decoration: none !important;
+  color: var(--gray-900);
+}
+
+a.cart-item-name:hover,
+a.cart-item-name:focus {
+  color: var(--primary-green);
+  text-decoration: none !important;
+}
+
+a.cart-item-image-link {
+  display: block;
+  flex-shrink: 0;
+  line-height: 0;
+  text-decoration: none;
+}
+
+a.cart-item-image-link:hover,
+a.cart-item-image-link:focus {
+  text-decoration: none;
+  opacity: 0.92;
+}
+
+a.cart-item-image-link:focus-visible {
+  outline: 2px solid var(--primary-green);
+  outline-offset: 2px;
+}
+
+/* Checkout order summary product links (same treatment as sidebar cart) */
+a.order-item-name,
+a.order-item-name:link,
+a.order-item-name:visited {
+  display: block;
+  text-decoration: none !important;
+  color: var(--gray-900);
+}
+
+a.order-item-name:hover,
+a.order-item-name:focus {
+  color: var(--primary-green);
+  text-decoration: none !important;
+}
+
+a.order-item-image-link {
+  display: block;
+  flex-shrink: 0;
+  line-height: 0;
+  text-decoration: none;
+}
+
+a.order-item-image-link:hover,
+a.order-item-image-link:focus {
+  text-decoration: none;
+  opacity: 0.92;
+}
+
+a.order-item-image-link:focus-visible {
+  outline: 2px solid var(--primary-green);
+  outline-offset: 2px;
+}
+
 .cart-item-controls {
   display: flex;
   align-items: center;

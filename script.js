@@ -920,13 +920,15 @@ class HMHerbsApp {
         // Add or update cart item
         if (existingItem) {
             existingItem.quantity += quantity;
+            if (!existingItem.slug && product.slug) existingItem.slug = product.slug;
         } else {
             this.cart.push({
                 id: productId,
                 name: product.name,
                 price: product.price,
                 image: product.image,
-                quantity: quantity
+                quantity: quantity,
+                slug: product.slug || ''
             });
         }
 
@@ -993,6 +995,7 @@ class HMHerbsApp {
                 this.showNotification(`Only ${availableQuantity} more available. Added ${availableQuantity} to cart.`, 'warning');
                 if (existingItem) {
                     existingItem.quantity += availableQuantity;
+                    if (!existingItem.slug && productData.slug) existingItem.slug = productData.slug;
                 } else {
                     this.cart.push({
                         id: productId,
@@ -1003,6 +1006,7 @@ class HMHerbsApp {
                         image: productImage,
                         quantity: availableQuantity,
                         inventory_quantity: inventory,
+                        slug: productData.slug || '',
                     });
                 }
                 this.updateCartDisplay();
@@ -1017,6 +1021,7 @@ class HMHerbsApp {
             existingItem.quantity += productQuantity;
             existingItem.price = productPrice;
             if (variantName) existingItem.variant_name = variantName;
+            if (!existingItem.slug && productData.slug) existingItem.slug = productData.slug;
         } else {
             this.cart.push({
                 id: productId,
@@ -1027,6 +1032,7 @@ class HMHerbsApp {
                 image: productImage,
                 quantity: productQuantity,
                 inventory_quantity: inventory,
+                slug: productData.slug || '',
             });
         }
 
@@ -1093,13 +1099,15 @@ class HMHerbsApp {
                 // Add the available quantity instead of 1
                 if (existingItem) {
                     existingItem.quantity += availableQuantity;
+                    if (!existingItem.slug && product.slug) existingItem.slug = product.slug;
                 } else {
                     this.cart.push({
                         id: productId,
                         name: product.name,
                         price: product.price,
                         image: product.image,
-                        quantity: availableQuantity
+                        quantity: availableQuantity,
+                        slug: product.slug || ''
                     });
                 }
                 this.updateCartDisplay();
@@ -1113,13 +1121,15 @@ class HMHerbsApp {
         // Add or update cart item
         if (existingItem) {
             existingItem.quantity += 1;
+            if (!existingItem.slug && product.slug) existingItem.slug = product.slug;
         } else {
             this.cart.push({
                 id: productId,
                 name: product.name,
                 price: product.price,
                 image: product.image,
-                quantity: 1
+                quantity: 1,
+                slug: product.slug || ''
             });
         }
 
@@ -1276,6 +1286,26 @@ class HMHerbsApp {
         this.attachCheckoutButtonListener();
     }
 
+    /** Relative PDP URL for a cart line (null for gift cards / unresolvable). */
+    getCartItemProductHref(item) {
+        if (!item || item.giftCard) return null;
+        if (item.url && typeof item.url === 'string' && item.url.trim()) {
+            return item.url.trim();
+        }
+        let slug = item.slug;
+        if (!slug && Array.isArray(this.products)) {
+            const product = this.products.find((p) => String(p.id) === String(item.id));
+            slug = product && product.slug;
+        }
+        if (slug) {
+            return `product.html?slug=${encodeURIComponent(slug)}`;
+        }
+        if (item.id != null && item.id !== '') {
+            return `product.html?id=${encodeURIComponent(item.id)}`;
+        }
+        return null;
+    }
+
     createCartItem(item) {
         const cartItem = document.createElement('div');
         cartItem.className = 'cart-item';
@@ -1283,6 +1313,8 @@ class HMHerbsApp {
         if (item.variant_id) {
             cartItem.setAttribute('data-variant-id', item.variant_id);
         }
+
+        const productHref = this.getCartItemProductHref(item);
 
         // Create elements safely to prevent XSS
         const img = document.createElement('img');
@@ -1293,9 +1325,12 @@ class HMHerbsApp {
         const details = document.createElement('div');
         details.className = 'cart-item-details';
 
-        const name = document.createElement('div');
+        const name = productHref ? document.createElement('a') : document.createElement('div');
         name.className = 'cart-item-name';
         name.textContent = item.name;
+        if (productHref) {
+            name.href = productHref;
+        }
 
         const price = document.createElement('div');
         price.className = 'cart-item-price';
@@ -1338,7 +1373,16 @@ class HMHerbsApp {
         details.appendChild(price);
         details.appendChild(controls);
 
-        cartItem.appendChild(img);
+        if (productHref) {
+            const imgLink = document.createElement('a');
+            imgLink.href = productHref;
+            imgLink.className = 'cart-item-image-link';
+            imgLink.setAttribute('aria-label', `View ${item.name}`);
+            imgLink.appendChild(img);
+            cartItem.appendChild(imgLink);
+        } else {
+            cartItem.appendChild(img);
+        }
         cartItem.appendChild(details);
         cartItem.appendChild(removeBtn);
 

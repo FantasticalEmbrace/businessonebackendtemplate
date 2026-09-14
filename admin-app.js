@@ -8159,9 +8159,9 @@ class AdminApp {
                                         ${this.escapeHtml(this._formatPaymentStatus(order.payment_status))}
                                     </span>
                                 </td>
-                                <td>$${parseFloat(order.total_amount || 0).toFixed(2)}</td>
-                                <td>${order.item_count || 0}</td>
-                                <td>${new Date(order.created_at).toLocaleDateString()}</td>
+                                <td data-sort-value="${parseFloat(order.total_amount || 0)}">$${parseFloat(order.total_amount || 0).toFixed(2)}</td>
+                                <td data-sort-value="${Number(order.item_count) || 0}">${order.item_count || 0}</td>
+                                <td data-sort-value="${this.escapeHtml(order.created_at || '')}">${new Date(order.created_at).toLocaleDateString()}</td>
                                 <td>
                                     <button class="btn btn-sm btn-secondary" onclick="viewOrder(${order.id})">
                                         <i class="fas fa-eye"></i>

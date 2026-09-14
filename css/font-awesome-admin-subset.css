@@ -1,0 +1,118 @@
+/**
+ * Admin Font Awesome 6.4 subset — only icons used by admin UI.
+ * Solid webfont from Cloudflare CDN; CSS is same-origin and small.
+ */
+@font-face {
+  font-family: "Font Awesome 6 Free";
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-solid-900.woff2") format("woff2");
+}
+
+.fa,
+.fas,
+.fa-solid {
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  display: inline-block;
+  font-style: normal;
+  font-variant: normal;
+  text-rendering: auto;
+  line-height: 1;
+}
+
+.fas,
+.fa-solid {
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+}
+
+.fa-spin {
+  animation: fa-spin 2s linear infinite;
+}
+@keyframes fa-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.fa-arrow-left::before { content: "\f060"; }
+.fa-arrow-up::before { content: "\f062"; }
+.fa-arrows-alt-h::before { content: "\f337"; }
+.fa-ban::before { content: "\f05e"; }
+.fa-barcode::before { content: "\f02a"; }
+.fa-bars::before { content: "\f0c9"; }
+.fa-box::before { content: "\f466"; }
+.fa-box-open::before { content: "\f49e"; }
+.fa-boxes::before { content: "\f468"; }
+.fa-bullhorn::before { content: "\f0a1"; }
+.fa-calendar::before { content: "\f133"; }
+.fa-cash-register::before { content: "\f788"; }
+.fa-chart-line::before { content: "\f201"; }
+.fa-check::before { content: "\f00c"; }
+.fa-check-circle::before { content: "\f058"; }
+.fa-chevron-left::before { content: "\f053"; }
+.fa-chevron-right::before { content: "\f054"; }
+.fa-cloud-download-alt::before { content: "\f0ed"; }
+.fa-code::before { content: "\f121"; }
+.fa-cog::before { content: "\f013"; }
+.fa-credit-card::before { content: "\f09d"; }
+.fa-database::before { content: "\f1c0"; }
+.fa-dollar-sign::before { content: "\24"; }
+.fa-download::before { content: "\f019"; }
+.fa-edit::before { content: "\f044"; }
+.fa-envelope::before { content: "\f0e0"; }
+.fa-eraser::before { content: "\f12d"; }
+.fa-exclamation-circle::before { content: "\f06a"; }
+.fa-exclamation-triangle::before { content: "\f071"; }
+.fa-external-link-alt::before { content: "\f35d"; }
+.fa-eye::before { content: "\f06e"; }
+.fa-file-csv::before { content: "\f6dd"; }
+.fa-file-excel::before { content: "\f1c3"; }
+.fa-file-invoice::before { content: "\f570"; }
+.fa-file-invoice-dollar::before { content: "\f571"; }
+.fa-gift::before { content: "\f06b"; }
+.fa-globe::before { content: "\f0ac"; }
+.fa-grip-vertical::before { content: "\f58e"; }
+.fa-home::before { content: "\f015"; }
+.fa-key::before { content: "\f084"; }
+.fa-leaf::before { content: "\f06c"; }
+.fa-life-ring::before { content: "\f1cd"; }
+.fa-link::before { content: "\f0c1"; }
+.fa-minus::before { content: "\f068"; }
+.fa-paint-roller::before { content: "\f5aa"; }
+.fa-pen::before { content: "\f304"; }
+.fa-pen-to-square::before { content: "\f044"; }
+.fa-piggy-bank::before { content: "\f4d3"; }
+.fa-play::before { content: "\f04b"; }
+.fa-plug::before { content: "\f1e6"; }
+.fa-plus::before { content: "\2b"; }
+.fa-print::before { content: "\f02f"; }
+.fa-question-circle::before { content: "\f059"; }
+.fa-rocket::before { content: "\f135"; }
+.fa-save::before { content: "\f0c7"; }
+.fa-search::before { content: "\f002"; }
+.fa-search-dollar::before { content: "\f688"; }
+.fa-server::before { content: "\f233"; }
+.fa-shield-alt::before { content: "\f3ed"; }
+.fa-shipping-fast::before { content: "\f48b"; }
+.fa-shopping-cart::before { content: "\f07a"; }
+.fa-sign-in-alt::before { content: "\f2f6"; }
+.fa-sign-out-alt::before { content: "\f2f5"; }
+.fa-spinner::before { content: "\f110"; }
+.fa-star::before { content: "\f005"; }
+.fa-stethoscope::before { content: "\f0f1"; }
+.fa-store::before { content: "\f54e"; }
+.fa-sync-alt::before { content: "\f2f1"; }
+.fa-tags::before { content: "\f02c"; }
+.fa-th::before { content: "\f00a"; }
+.fa-times::before { content: "\f00d"; }
+.fa-trademark::before { content: "\f25c"; }
+.fa-trash::before { content: "\f1f8"; }
+.fa-truck::before { content: "\f0d1"; }
+.fa-truck-loading::before { content: "\f4de"; }
+.fa-upload::before { content: "\f093"; }
+.fa-user::before { content: "\f007"; }
+.fa-user-friends::before { content: "\f500"; }
+.fa-user-plus::before { content: "\f234"; }
+.fa-users::before { content: "\f0c0"; }

@@ -40,7 +40,7 @@
 
         link.rel = 'stylesheet';
 
-        link.href = 'css/address-autocomplete.css';
+        link.href = 'css/address-autocomplete.css?v=suggest-visible-20260914a';
 
         link.setAttribute('data-hm-address-ac-css', '1');
 
@@ -144,6 +144,10 @@
 
         let fetchToken = 0;
 
+        // While applying a picked suggestion, ignore synthetic input/change on line1
+        // so filling the field does not re-open the dropdown.
+        let suppressSuggest = false;
+
 
 
         function showList() {
@@ -205,21 +209,33 @@
 
 
         function fillFields(item) {
+            // Lock suggest before writing values / dispatching events.
+            suppressSuggest = true;
+            clearTimeout(debounceTimer);
+            debounceTimer = null;
+            fetchToken += 1; // invalidate any in-flight suggest responses
+            lastQuery = '';
 
             if (item.line1) line1.value = item.line1;
-
             if (line2 && item.line2) line2.value = item.line2;
-
             if (city && item.city) city.value = item.city;
-
             if (state && item.state) state.value = String(item.state).toUpperCase().slice(0, 2);
-
             if (zip && item.postalCode) zip.value = item.postalCode;
 
             hideList();
 
-            line1.dispatchEvent(new Event('change', { bubbles: true }));
+            // Checkout listens for input/change on ZIP/state to reload carrier rates.
+            // Setting .value alone does not fire those events.
+            [line1, line2, city, state, zip].forEach((el) => {
+                if (!el) return;
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+            });
 
+            // Keep suppress briefly so any late listeners / blur timers stay quiet.
+            setTimeout(() => {
+                suppressSuggest = false;
+            }, 400);
         }
 
 
@@ -267,85 +283,57 @@
 
 
         async function fetchSuggestions(query) {
+            if (suppressSuggest) return;
 
             lastQuery = query;
-
             const token = ++fetchToken;
-
             showStatusMessage('Searching addresses…', 'hm-address-suggest-status is-loading');
 
-
-
             const stateHint = state && state.value ? state.value.trim() : '';
-
             const params = new URLSearchParams({ q: query });
-
             if (stateHint) params.set('state', stateHint);
 
-
-
             try {
-
                 const res = await fetch(`${apiBase}/address-suggest?${params.toString()}`, {
-
                     headers: { Accept: 'application/json' },
-
                 });
-
-                if (token !== fetchToken || lastQuery !== query) return;
-
-
+                if (suppressSuggest || token !== fetchToken || lastQuery !== query) return;
 
                 if (!res.ok) {
-
                     showStatusMessage('Address lookup unavailable right now — you can still enter your address manually.');
-
                     return;
-
                 }
 
-
-
                 const data = await res.json();
-
-                if (token !== fetchToken || lastQuery !== query) return;
-
-
+                if (suppressSuggest || token !== fetchToken || lastQuery !== query) return;
 
                 suggestions = Array.isArray(data.suggestions) ? data.suggestions : [];
-
                 activeIndex = suggestions.length ? 0 : -1;
-
                 renderList();
-
             } catch (_) {
-
-                if (token !== fetchToken || lastQuery !== query) return;
-
+                if (suppressSuggest || token !== fetchToken || lastQuery !== query) return;
                 showStatusMessage('Could not reach the address service — enter your address manually.');
-
             }
-
         }
 
 
 
         line1.addEventListener('input', () => {
+            if (suppressSuggest) return;
 
             const q = line1.value.trim();
 
             clearTimeout(debounceTimer);
 
             if (q.length < 3) {
-
                 hideList();
-
                 return;
-
             }
 
-            debounceTimer = setTimeout(() => fetchSuggestions(q), 280);
-
+            debounceTimer = setTimeout(() => {
+                if (suppressSuggest) return;
+                fetchSuggestions(q);
+            }, 280);
         });
 
 

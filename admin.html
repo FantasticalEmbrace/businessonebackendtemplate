@@ -19,12 +19,12 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
         rel="stylesheet">
 
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Font Awesome (local admin subset — replaces render-blocking CDN all.min.css) -->
+    <link rel="stylesheet" href="css/font-awesome-admin-subset.css?v=admin-fa-20260914a">
 
     <!-- Browser Compatibility -->
     <link rel="stylesheet" href="css/browser-compatibility.css">
-    <link rel="stylesheet" href="css/brand-tokens.css?v=admin-sync-5">
+    <link rel="stylesheet" href="css/brand-tokens.css?v=sidebar-sticky-20260914a">
     <link rel="stylesheet" href="css/shop-calendar-widget.css?v=1">
     <link rel="stylesheet" href="css/password-toggle.css?v=4">
     <link rel="stylesheet" href="css/hm-choice-toggles.css?v=20260629b">
@@ -113,24 +113,34 @@
         }
 
         /* Sidebar */
+        /* Flex column: header stays pinned; only .sidebar-nav scrolls.
+           Prevents the fixed close/toggle (X) from overlapping section links. */
         .sidebar {
             width: 280px;
             background: linear-gradient(135deg, var(--admin-sidebar-from) 0%, var(--admin-sidebar-to) 100%);
             color: white;
-            padding: 2rem 0;
+            padding: 0;
             box-shadow: var(--shadow-lg);
             position: fixed;
             height: 100vh;
-            overflow-y: auto;
+            max-height: 100vh;
+            overflow: hidden;
             z-index: 1000;
+            display: flex;
+            flex-direction: column;
         }
 
         .sidebar-header {
-            position: relative;
-            padding: 1.25rem 1.5rem 2rem 4.25rem; /* extra left pad for toggle button */
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            flex-shrink: 0;
+            padding: 2rem 1.5rem 1.5rem 4.25rem; /* extra left pad for toggle button */
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 2rem;
+            margin-bottom: 0;
             min-height: 4.5rem;
+            /* Opaque match so scrolled nav never shows through under the X/brand */
+            background: linear-gradient(135deg, var(--admin-sidebar-from) 0%, var(--admin-sidebar-to) 100%);
         }
 
         .sidebar-logo {
@@ -170,7 +180,12 @@
         }
 
         .sidebar-nav {
-            padding: 0 1rem;
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+            padding: 1.25rem 1rem 2rem;
         }
 
         .nav-section {
@@ -7521,19 +7536,32 @@
                             </div>
                         </div>
 
-    <!-- jsPDF for PDF generation -->
+    <!-- jsPDF: lazy-load only when export needs it (never render-blocking) -->
+    <script>
+    window.loadJsPdf = function loadJsPdf() {
+        if (window.jspdf || window.jsPDF) return Promise.resolve(window.jspdf || window.jsPDF);
+        if (window.__hmJsPdfPromise) return window.__hmJsPdfPromise;
+        window.__hmJsPdfPromise = new Promise(function (resolve, reject) {
+            var s = document.createElement('script');
+            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+            s.async = true;
+            s.onload = function () { resolve(window.jspdf || window.jsPDF); };
+            s.onerror = function () { window.__hmJsPdfPromise = null; reject(new Error('jsPDF failed to load')); };
+            document.head.appendChild(s);
+        });
+        return window.__hmJsPdfPromise;
+    };
+    </script>
     <script src="js/hm-search-input.js?v=search-fix-2"></script>
     <script src="js/hm-choice-toggles.js?v=loyalty-toggles-1"></script>
-    <script src="js/admin-table-sort.js?v=1"></script>
     <script src="js/phone-us-format.js"></script>
     <link rel="stylesheet" href="css/products.css">
     <link rel="stylesheet" href="css/admin-vendors.css">
     <script src="js/description-html.js?v=disclaimer-2"></script>
     <script src="js/admin-product-sku.js?v=brand-lookup-1"></script>
     <script src="js/admin-product-variants.js?v=variant-dropdown-1"></script>
-    <script src="js/tracking-link.js"></script>
-    <script src="js/admin-shipping.js?v=label-print-3"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="js/tracking-link.js?v=dropship-label-20260914a"></script>
+    <script src="js/admin-shipping.js?v=dropship-label-20260914a"></script>
     <script src="admin-personnel-pos.js"></script>
     <script src="js/admin-vendors.js"></script>
     <script src="admin-pos-hub.js"></script>
@@ -7542,8 +7570,9 @@
     <script src="admin-pos-billing.js"></script>
     <script src="admin-pos-troubleshoot.js"></script>
     <script src="js/password-toggle.js?v=4"></script>
+    <script src="js/admin-table-sort.js?v=sortable-inp-20260914a"></script>
     <script src="js/admin-shop-workflows.js?v=1"></script>
-    <script src="admin-app.js?v=local-api-3011-2"></script>
+    <script src="admin-app.js?v=dropship-label-20260914a"></script>
     <script src="js/shop-calendar-widget.js?v=1"></script>
     <script src="admin-edsa-calendar.js"></script>
     <script src="admin-shop-calendar.js?v=1"></script>
