@@ -41,7 +41,7 @@ class StructuredDataManager {
         if (path === '/' || path === '/index.html') return 'homepage';
         if (path.includes('products')) return 'products';
         if (path.includes('product/')) return 'product';
-        if (path.includes('edsa') || path.includes('service')) return 'service';
+        if (path.includes('scheduling') || path.includes('service')) return 'service';
         return 'other';
     }
 
@@ -85,7 +85,7 @@ class StructuredDataManager {
                 "Vitamins",
                 "Natural Health",
                 "Wellness",
-                "EDSA Testing",
+                "Scheduling Testing",
                 "Holistic Health"
             ]
         };
@@ -250,7 +250,7 @@ class StructuredDataManager {
             "@context": "https://schema.org",
             "@type": "WebPage",
             "name": "Business One - One Source. Comprehensive Solutions.",
-            "description": "Premium herbs, vitamins, and natural health supplements organized by health conditions. EDSA wellness testing available in-store.",
+            "description": "Premium herbs, vitamins, and natural health supplements organized by health conditions. Scheduling wellness testing available in-store.",
             "url": this.baseUrl,
             "mainEntity": {
                 "@type": "ItemList",
@@ -282,7 +282,7 @@ class StructuredDataManager {
             "mentions": [
                 {
                     "@type": "Service",
-                    "name": "EDSA Testing",
+                    "name": "Scheduling Testing",
                     "description": "Electro Dermal Stress Analysis for personalized health assessment"
                 }
             ]
@@ -365,9 +365,9 @@ class StructuredDataManager {
         const serviceSchema = {
             "@context": "https://schema.org",
             "@type": "Service",
-            "name": "EDSA Biofeedback Testing",
+            "name": "Scheduling Biofeedback Testing",
             "description": "Electro Dermal Stress Analysis wellness session offered in-store by appointment.",
-            "url": `${this.baseUrl}/#edsa-service`,
+            "url": `${this.baseUrl}/#scheduling-service`,
             "provider": {
                 "@type": "Organization",
                 "name": "Business One"
@@ -383,13 +383,13 @@ class StructuredDataManager {
             },
             "hasOfferCatalog": {
                 "@type": "OfferCatalog",
-                "name": "EDSA Services",
+                "name": "Scheduling Services",
                 "itemListElement": [
                     {
                         "@type": "Offer",
                         "itemOffered": {
                             "@type": "Service",
-                            "name": "Comprehensive EDSA Analysis",
+                            "name": "Comprehensive Scheduling Analysis",
                             "description": "Full body stress analysis and health assessment"
                         },
                         "price": "75",

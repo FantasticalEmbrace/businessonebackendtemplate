@@ -33,6 +33,28 @@ async function recalcUserOrderAggregates(connection, userId) {
 }
 
 /**
+ * Resolve loyalty/account user for an order: prefer orders.user_id, else match users.email.
+ * Guest checkout with a known account email still earns store credit / points.
+ */
+async function resolveOrderCustomerUserId(connectionOrPool, orderRow) {
+    const direct = Number(orderRow?.user_id);
+    if (Number.isFinite(direct) && direct > 0) return direct;
+
+    const email = String(orderRow?.email || '').trim().toLowerCase();
+    if (!email || !email.includes('@')) return null;
+
+    const [[user]] = await connectionOrPool.execute(
+        `SELECT id FROM users
+          WHERE LOWER(email) = ?
+            AND COALESCE(customer_status, '') != 'deleted'
+          LIMIT 1`,
+        [email]
+    );
+    const uid = Number(user?.id);
+    return Number.isFinite(uid) && uid > 0 ? uid : null;
+}
+
+/**
  * Completes a pending order: set paid, deduct inventory, update user aggregates.
  * @param {import('mysql2/promise').Pool} pool
  * @param {{ orderId: number, paymentId: string, paymentStatus: string, skipConfirmationEmail?: boolean }} opts
@@ -66,6 +88,15 @@ async function finalizePaidOrder(
     }
 
     const orderRow = orders[0];
+    const orderHadUserId = Boolean(Number(orderRow.user_id) > 0);
+    // Email match is best-effort — never block payment finalize / cart checkout.
+    let loyaltyUserId = null;
+    try {
+        loyaltyUserId = await resolveOrderCustomerUserId(pool, orderRow);
+    } catch (resolveErr) {
+        logger.error(`Order ${oid} loyalty user resolve error:`, resolveErr);
+        loyaltyUserId = Number(orderRow.user_id) > 0 ? Number(orderRow.user_id) : null;
+    }
 
     const [orderItems] = await pool.execute(
         `
@@ -115,6 +146,15 @@ async function finalizePaidOrder(
             throw err;
         }
 
+        if (loyaltyUserId && !orderRow.user_id) {
+            await connection.execute(
+                `UPDATE orders SET user_id = ? WHERE id = ? AND user_id IS NULL`,
+                [loyaltyUserId, oid]
+            );
+            orderRow.user_id = loyaltyUserId;
+            logger.info(`Order ${oid} linked to user ${loyaltyUserId} by checkout email`);
+        }
+
         const inventoryService = new InventoryService(pool);
         const inventoryItems = orderItems.map((item) => ({
             productId: item.product_id,
@@ -129,39 +169,68 @@ async function finalizePaidOrder(
             { allowOversell }
         );
 
-        if (orderRow.user_id) {
-            await recalcUserOrderAggregates(connection, orderRow.user_id);
+        if (loyaltyUserId) {
+            await recalcUserOrderAggregates(connection, loyaltyUserId);
         }
 
         await connection.commit();
         logger.info(`Order ${oid} finalized (payment ${paymentId})`);
 
-        if (orderRow.user_id) {
-            const loyaltySettings = await loadLoyaltyProgramSettings(pool);
-            if (loyaltySettings.enabled) {
-                const channel = String(orderRow.sales_channel || '').toLowerCase();
-                const source = channel === 'in_store' ? 'pos' : 'web';
-                const nonEarn = await getNonEarnTenderTotal(pool, oid);
-                const eligibleSubtotal = Math.max(
-                    0,
-                    Math.round((Number(orderRow.subtotal) - nonEarn) * 100) / 100
-                );
-                void earnLoyaltyForOrder(
-                    pool,
-                    orderRow.user_id,
-                    oid,
-                    eligibleSubtotal,
-                    loyaltySettings,
-                    source
-                ).catch((loyaltyErr) => {
-                    logger.error(`Order ${oid} loyalty earn error:`, loyaltyErr);
-                });
+        if (loyaltyUserId) {
+            try {
+                const loyaltySettings = await loadLoyaltyProgramSettings(pool);
+                if (loyaltySettings.enabled) {
+                    const [[alreadyEarned]] = await pool.execute(
+                        `SELECT id FROM loyalty_transactions
+                          WHERE order_id = ? AND transaction_type = 'earn'
+                          LIMIT 1`,
+                        [oid]
+                    );
+                    if (!alreadyEarned) {
+                        const channel = String(orderRow.sales_channel || '').toLowerCase();
+                        const source = channel === 'in_store' ? 'pos' : 'web';
+                        const nonEarn = await getNonEarnTenderTotal(pool, oid);
+                        const eligibleSubtotal = Math.max(
+                            0,
+                            Math.round((Number(orderRow.subtotal) - nonEarn) * 100) / 100
+                        );
+                        const earnResult = await earnLoyaltyForOrder(
+                            pool,
+                            loyaltyUserId,
+                            oid,
+                            eligibleSubtotal,
+                            loyaltySettings,
+                            source
+                        );
+                        logger.info(`Order ${oid} loyalty earn applied`, {
+                            userId: loyaltyUserId,
+                            matchedByEmail: !orderHadUserId,
+                            eligibleSubtotal,
+                            cashEarned: earnResult?.cashEarned || 0,
+                            pointsEarned: earnResult?.pointsEarned || 0,
+                            source
+                        });
+                    }
+                }
+            } catch (loyaltyErr) {
+                logger.error(`Order ${oid} loyalty earn error:`, loyaltyErr);
             }
         }
 
         void fulfillGiftCardsForOrder(pool, oid).catch((giftErr) => {
             logger.error(`Order ${oid} gift card fulfillment error:`, giftErr);
         });
+
+        if (orderRow.email) {
+            try {
+                const { markSnapshotsConvertedForEmail } = require('./abandonedCartEngine');
+                void markSnapshotsConvertedForEmail(pool, orderRow.email).catch((err) => {
+                    logger.warn(`Order ${oid} abandoned-cart convert mark failed:`, err.message);
+                });
+            } catch (acRequireErr) {
+                // Abandoned cart module optional if not deployed yet
+            }
+        }
 
         if (!skipConfirmationEmail) {
             void sendOrderConfirmationEmail(pool, oid).catch((emailErr) => {
@@ -172,6 +241,7 @@ async function finalizePaidOrder(
         return {
             orderId: oid,
             orderNumber: orderRow.order_number,
+            userId: loyaltyUserId || null,
         };
     } catch (e) {
         await connection.rollback();
@@ -181,4 +251,8 @@ async function finalizePaidOrder(
     }
 }
 
-module.exports = { finalizePaidOrder, recalcUserOrderAggregates };
+module.exports = {
+    finalizePaidOrder,
+    recalcUserOrderAggregates,
+    resolveOrderCustomerUserId,
+};

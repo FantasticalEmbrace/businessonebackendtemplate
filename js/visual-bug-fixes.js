@@ -372,8 +372,8 @@ class VisualBugFixer {
             /* Modals: .btn rules above break fixed panels + overflow; keep modal trees transform-clean. */
             .wishlist-modal .btn,
             .acct-modal-floating .btn,
-            .edsa-modal .btn,
-            #edsa-booking-modal .btn {
+            .scheduling-modal .btn,
+            #scheduling-booking-modal .btn {
                 transform: none !important;
                 -webkit-transform: none !important;
                 backface-visibility: visible !important;
@@ -507,11 +507,11 @@ class VisualBugFixer {
             return;
         }
 
-        // Skip EDSA images, product detail images, and other static images that should not be processed
-        if (img.closest('.edsa-image') ||
+        // Skip Scheduling images, product detail images, and other static images that should not be processed
+        if (img.closest('.scheduling-image') ||
             img.closest('.product-main-image') ||
             img.classList.contains('product-image-main') ||
-            img.src.includes('edsa-icon') ||
+            img.src.includes('scheduling-icon') ||
             img.hasAttribute('data-skip-error-handling')) {
             // Just mark as loaded if it's already complete, but don't apply error handling
             if (img.complete && img.naturalWidth > 0) {
@@ -605,13 +605,13 @@ class VisualBugFixer {
 
         // Fix ALL images on the page - be more aggressive
         document.querySelectorAll('img').forEach(img => {
-            // Skip EDSA images and other static images
-            if (img.closest('.edsa-image') ||
+            // Skip Scheduling images and other static images
+            if (img.closest('.scheduling-image') ||
                 img.closest('.product-main-image') ||
                 img.classList.contains('product-image-main') ||
-                img.src.includes('edsa-icon') ||
+                img.src.includes('scheduling-icon') ||
                 img.hasAttribute('data-skip-error-handling')) {
-                // Just ensure EDSA images are marked as loaded if they're complete
+                // Just ensure Scheduling images are marked as loaded if they're complete
                 if (img.complete && img.naturalWidth > 0) {
                     img.classList.add('loaded');
                 }
@@ -803,7 +803,7 @@ class VisualBugFixer {
         
         img.loaded, 
         img.error,
-        .edsa-image img,
+        .scheduling-image img,
         img[data-skip-error-handling],
         img[src*="data:"] {
             opacity: 1 !important;

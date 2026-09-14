@@ -5,7 +5,7 @@
     'use strict';
 
     function isPlaceholderTracking(trackingNumber) {
-        return /^HMTRK/i.test(String(trackingNumber || '').trim());
+        return /^(BOTRK|HMTRK)/i.test(String(trackingNumber || '').trim());
     }
 
     function inferCarrierFromTracking(trackingNumber) {

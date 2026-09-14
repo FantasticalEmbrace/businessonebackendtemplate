@@ -1,6 +1,6 @@
 /**
  * Accent link hover: site green fill + white text (nav, breadcrumbs, etc.)
- * .edsa-manage-link and .contact-item links: no hover styling (see bottom)
+ * .scheduling-manage-link and .contact-item links: no hover styling (see bottom)
  */
 
 :is(
@@ -9,7 +9,7 @@
   .navbar #nav-menu a,
   .navbar #navbar-menu a,
   .hm-accent-link,
-  .edsa-nav-link,
+  .scheduling-nav-link,
   .breadcrumb-item a,
   .contact-info-box a
 ):hover {
@@ -49,7 +49,7 @@
     .navbar #nav-menu a,
     .navbar #navbar-menu a,
     .hm-accent-link,
-    .edsa-nav-link
+    .scheduling-nav-link
   ):hover {
     background-color: var(--primary-green) !important;
     background: var(--primary-green) !important;
@@ -59,11 +59,11 @@
 }
 
 /* No hover change — keeps green text visible on white backgrounds */
-.edsa-manage-link a:hover,
-.edsa-manage-link a:focus,
-main .edsa-manage-link a:hover,
-#edsa-service .edsa-manage-link a:hover,
-a[href*="edsa-manage-appointment"]:hover,
+.scheduling-manage-link a:hover,
+.scheduling-manage-link a:focus,
+main .scheduling-manage-link a:hover,
+#scheduling-service .scheduling-manage-link a:hover,
+a[href*="scheduling-manage-appointment"]:hover,
 .contact-item a:hover,
 .contact-item a:focus,
 .contact .contact-item a:hover,

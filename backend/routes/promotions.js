@@ -6,6 +6,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const logger = require('../utils/logger');
 const promoEngine = require('../services/webPromotionEngine');
+const { applyWebDestinationTax } = require('../services/webDestinationTax');
 
 async function authUserLite(pool, req) {
     const authHeader = req.headers.authorization;
@@ -25,10 +26,17 @@ async function authUserLite(pool, req) {
     }
 }
 
-/** POST body: cartItems[{ id|product_id, variant_id?, price, quantity }], promoCode?, email? */
+/** POST body: cartItems[{ id|product_id, variant_id?, price, quantity }], promoCode?, email?, shippingAddress? */
 router.post('/preview', async (req, res) => {
     try {
-        const { cartItems, promoCode, email: bodyEmail, shippingMethod, shippingAmount } = req.body || {};
+        const {
+            cartItems,
+            promoCode,
+            email: bodyEmail,
+            shippingMethod,
+            shippingAmount,
+            shippingAddress
+        } = req.body || {};
         const authUser = await authUserLite(req.pool, req);
 
         const hasTaxExemptProof = Boolean(
@@ -51,6 +59,35 @@ router.post('/preview', async (req, res) => {
             shippingAmount: shippingAmount != null ? Number(shippingAmount) : undefined,
         });
 
+        // Match order finalize / process-payment: replace flat store tax with destination tax
+        // (including $0 for tax-exempt destination states). Checkout already sends shippingAddress.
+        const ship = shippingAddress && typeof shippingAddress === 'object' ? shippingAddress : {};
+        const shipTo = {
+            street1: String(ship.street1 || ship.line1 || '').trim(),
+            city: String(ship.city || '').trim(),
+            state: String(ship.state || '').trim(),
+            postalCode: String(ship.postalCode || ship.zip || '').trim(),
+            name: String(ship.name || '').trim()
+        };
+        let totals = result.totals;
+        let baselineTotals = result.baselineTotals;
+        let taxSource = applyTaxExemption ? 'exempt' : 'flat';
+        if (shipTo.state || shipTo.postalCode) {
+            const taxed = await applyWebDestinationTax(req.pool, totals, shipTo, {
+                applyTaxExemption,
+                tenant: 'business_one'
+            });
+            totals = taxed.totals;
+            taxSource = taxed.taxSource;
+            if (baselineTotals) {
+                const baseTaxed = await applyWebDestinationTax(req.pool, baselineTotals, shipTo, {
+                    applyTaxExemption,
+                    tenant: 'business_one'
+                });
+                baselineTotals = baseTaxed.totals;
+            }
+        }
+
         res.json({
             ok: true,
             promoApplied: !!result.promotion,
@@ -65,8 +102,9 @@ router.post('/preview', async (req, res) => {
             groupAutoPromotionCode: result.groupAutoPromotionCode || null,
             customerGroups: result.customerGroups || [],
             availableGroupPromotions: result.availableGroupPromotions || [],
-            totals: result.totals,
-            baselineTotals: result.baselineTotals,
+            totals,
+            baselineTotals,
+            taxSource,
             serverLineItems: result.enrichment.map((r) => ({
                 product_id: r.product_id,
                 variant_id: r.variant_id,
@@ -76,7 +114,7 @@ router.post('/preview', async (req, res) => {
                 name: r.name,
                 sku: r.sku
             })),
-            taxExemptApplied: applyTaxExemption
+            taxExemptApplied: applyTaxExemption || taxSource === 'exempt'
         });
     } catch (e) {
         const code = e.code || '';

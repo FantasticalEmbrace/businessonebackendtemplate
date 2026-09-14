@@ -74,13 +74,13 @@
       ]
     },
     {
-      "name": "EDSA Service",
-      "short_name": "EDSA",
+      "name": "Scheduling Service",
+      "short_name": "Scheduling",
       "description": "Book an Electro Dermal Stress Analysis appointment",
-      "url": "/services/edsa",
+      "url": "/services/scheduling",
       "icons": [
         {
-          "src": "/images/edsa-icon-96x96.png",
+          "src": "/images/scheduling-icon-96x96.png",
           "sizes": "96x96"
         }
       ]

@@ -72,9 +72,9 @@ INSERT INTO settings (key_name, value, description, type) VALUES
 ('free_shipping_threshold', '25.00', 'Minimum order amount for free shipping', 'number'),
 ('tax_rate', '0.08', 'Default tax rate', 'number'),
 ('currency', 'USD', 'Default currency', 'string'),
-('edsa_service_enabled', 'true', 'Enable EDSA service bookings', 'boolean'),
-('edsa_service_price', '75.00', 'Price for EDSA service', 'number'),
-('edsa_service_description', 'Electro Dermal Stress Analysis - A non-invasive health assessment technique', 'EDSA service description', 'string');
+('scheduling_service_enabled', 'true', 'Enable Scheduling service bookings', 'boolean'),
+('scheduling_service_price', '75.00', 'Price for Scheduling service', 'number'),
+('scheduling_service_description', 'Electro Dermal Stress Analysis - A non-invasive health assessment technique', 'Scheduling service description', 'string');
 
 -- Insert default admin user (password should be changed immediately)
 INSERT INTO admin_users (email, password_hash, first_name, last_name, role) VALUES
@@ -87,9 +87,9 @@ INSERT INTO email_templates (name, subject, html_content, text_content, variable
 'Thank you for your order! Your order {{order_number}} has been received and is being processed.', 
 '["order_number", "customer_name", "order_total"]'),
 
-('edsa_booking_confirmation', 'EDSA Appointment Confirmation', 
-'<h1>Your EDSA appointment has been confirmed</h1><p>Date: {{appointment_date}}<br>Time: {{appointment_time}}</p>', 
-'Your EDSA appointment has been confirmed. Date: {{appointment_date}} Time: {{appointment_time}}', 
+('scheduling_booking_confirmation', 'Scheduling Appointment Confirmation', 
+'<h1>Your Scheduling appointment has been confirmed</h1><p>Date: {{appointment_date}}<br>Time: {{appointment_time}}</p>', 
+'Your Scheduling appointment has been confirmed. Date: {{appointment_date}} Time: {{appointment_time}}', 
 '["customer_name", "appointment_date", "appointment_time"]'),
 
 ('welcome_email', 'Welcome to Business One!', 

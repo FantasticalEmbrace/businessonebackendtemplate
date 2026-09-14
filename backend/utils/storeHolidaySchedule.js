@@ -1,6 +1,6 @@
 'use strict';
 
-const { addBlockedDate, listBlockedDates } = require('../services/edsaBlockedDates');
+const { addBlockedDate, listBlockedDates } = require('../services/schedulingBlockedDates');
 const { normalizeDateYmd } = require('./storeTimezone');
 
 const HOLIDAY_SETTING_KEY = 'store_holiday_schedule';
@@ -153,7 +153,7 @@ async function loadHolidaySchedule(pool) {
     return parseHolidaySchedule(rows[0]?.value || '[]');
 }
 
-async function syncClosedHolidaysToEdsa(pool, schedule, { adminId = null } = {}) {
+async function syncClosedHolidaysToScheduling(pool, schedule, { adminId = null } = {}) {
     const entries = parseHolidaySchedule(schedule).filter(isHolidayClosed);
     if (!entries.length) {
         return { added: 0, skipped: 0, existing: 0 };
@@ -198,5 +198,5 @@ module.exports = {
     formatHolidayPublicLine,
     upcomingHolidayLines,
     loadHolidaySchedule,
-    syncClosedHolidaysToEdsa,
+    syncClosedHolidaysToScheduling,
 };

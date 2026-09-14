@@ -105,7 +105,7 @@
     .modal-close,
     .gdpr-modal-close,
     .ccpa-modal-close,
-    .edsa-modal-close,
+    .scheduling-modal-close,
     .newsletter-popup-close,
     .acct-modal-close,
     .notification .notification-close {
@@ -689,7 +689,7 @@
         font-size: 20px !important;
     }
 
-    .btn:not(.edsa-book-btn):not(.hero-search-submit):not(.no-results-clear-btn) {
+    .btn:not(.scheduling-book-btn):not(.hero-search-submit):not(.no-results-clear-btn) {
         width: 100% !important;
         max-width: 100% !important;
     }
@@ -707,7 +707,7 @@
         max-width: none !important;
     }
 
-    .edsa-book-btn {
+    .scheduling-book-btn {
         width: fit-content !important;
         max-width: 100% !important;
         margin-left: auto !important;

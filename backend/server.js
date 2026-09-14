@@ -48,8 +48,8 @@ const { ensureCbdCategory } = require('./utils/ensureCbdCategory');
 const { ensureCustomerGroupSchema } = require('./utils/ensureCustomerGroupSchema');
 const { ensureWebPromotionsSchema } = require('./utils/ensureWebPromotionsSchema');
 const { ensureUserPasswordResetSchema } = require('./utils/ensureUserPasswordResetSchema');
-const { ensureEdsaBookingSchema } = require('./utils/ensureEdsaBookingSchema');
-const { ensureEdsaBlockedDatesTable } = require('./services/edsaBlockedDates');
+const { ensureSchedulingBookingSchema } = require('./utils/ensureSchedulingBookingSchema');
+const { ensureSchedulingBlockedDatesTable } = require('./services/schedulingBlockedDates');
 const {
     findCustomerByEmailAnyStatus,
     reactivateCustomerForLocalSignup,
@@ -66,7 +66,10 @@ const { ensurePlatformBillingSchema } = require('./utils/ensurePlatformBillingSc
 const { startTaxAccountantScheduler } = require('./services/taxAccountantScheduler');
 const { startPosDailySalesScheduler } = require('./services/posDailySalesScheduler');
 const { startPosPayrollScheduler } = require('./services/posPayrollScheduler');
+const { startShippingTrackingScheduler } = require('./services/shippingTrackingScheduler');
 const { ensureSocialOAuthSchema } = require('./utils/ensureSocialOAuthSchema');
+const { startStoreSubscriptionScheduler } = require('./services/storeSubscriptionScheduler');
+const { ensureStoreSubscriptionSchema } = require('./utils/ensureStoreSubscriptionSchema');
 const { createCustomerGoogleRoutes, createAdminGoogleRoutes } = require('./routes/socialAuth');
 const secureLogger = require('./utils/secure-logger');
 const {
@@ -1225,7 +1228,14 @@ app.get('/api/user/loyalty', authenticateToken, async (req, res) => {
               LIMIT 25`,
             [userId]
         );
-        res.json({ loyalty, settings: loyaltySettings, transactions });
+        let benefits = null;
+        try {
+            const { getLoyaltyBenefitsForUser } = require('./services/loyaltyCheckout');
+            benefits = await getLoyaltyBenefitsForUser(pool, userId, 0);
+        } catch (benErr) {
+            logger.warn('loyaltyCheckout benefits unavailable', { err: benErr.message });
+        }
+        res.json({ loyalty, settings: loyaltySettings, transactions, benefits });
     } catch (error) {
         logger.error('Get user loyalty error:', error);
         res.status(500).json({ error: 'Internal server error' });
@@ -1441,28 +1451,6 @@ app.get('/api/products', async (req, res) => {
             queryParams.push(merchantId);
         }
 
-        // Exclude scheduled events/non-product items from product listing
-        const excludedSkus = ['51302']; // Association of Natural Health EDSA Biofeedback Testing
-        const excludedSlugs = ['association-of-natural-health-edsa-biofeedback-testing'];
-        const excludedNamePatterns = ['association of natural health edsa'];
-
-        if (excludedSkus.length) {
-            const placeholders = excludedSkus.map(() => '?').join(', ');
-            whereConditions.push(`COALESCE(TRIM(p.sku), '') NOT IN (${placeholders})`);
-            queryParams.push(...excludedSkus);
-        }
-
-        if (excludedSlugs.length) {
-            const placeholders = excludedSlugs.map(() => '?').join(', ');
-            whereConditions.push(`COALESCE(TRIM(p.slug), '') NOT IN (${placeholders})`);
-            queryParams.push(...excludedSlugs);
-        }
-
-        excludedNamePatterns.forEach(pattern => {
-            whereConditions.push('LOWER(p.name) NOT LIKE ?');
-            queryParams.push(`%${pattern}%`);
-        });
-
         // Gift card products appear on gift-cards.html / category=gift-cards only
         if (!cat && !hc) {
             whereConditions.push('(p.gift_card_type IS NULL)');
@@ -1504,6 +1492,9 @@ app.get('/api/products', async (req, res) => {
                 p.is_cannabis,
                 p.coa_url,
                 p.coa_updated_at,
+                p.subscription_eligible,
+                p.subscription_interval_days,
+                p.subscription_discount_percent,
                 b.name as brand_name,
                 b.slug as brand_slug,
                 pc.name as category_name,
@@ -1812,7 +1803,7 @@ app.get('/api/categories', async (req, res) => {
 
 // Import route modules
 const cartRoutes = require('./routes/cart');
-const edsaRoutes = require('./routes/edsa');
+const schedulingRoutes = require('./routes/scheduling');
 const adminRoutes = require('./routes/admin');
 const paymentCardsRoutes = require('./routes/payment-cards');
 const publicRoutes = require('./routes/public');
@@ -1865,6 +1856,14 @@ app.use(
     authenticateAdmin,
     requireAdminPermissionLevel('manager'),
     require('./routes/loyalty-admin')
+);
+
+app.use('/api/abandoned-cart', require('./routes/abandoned-cart'));
+app.use(
+    '/api/admin/abandoned-cart',
+    authenticateAdmin,
+    requireAdminPermissionLevel('manager'),
+    require('./routes/abandoned-cart-admin')
 );
 
 app.get('/api/admin/marketing-settings', authenticateAdmin, requireAdminPermissionLevel('manager'), requireEcommerceStoreAccess, (req, res) => {
@@ -1949,12 +1948,13 @@ app.use('/api/auth', createCustomerGoogleRoutes(pool, logger, authenticateToken)
 app.use('/api/admin/auth', createAdminGoogleRoutes(pool, logger));
 app.use('/api/cart', cartRoutes);
 app.use('/api/promotions', require('./routes/promotions'));
+app.use('/api/store', require('./routes/store'));
 app.use('/api/payments', require('./routes/nmi-payments'));
 app.use('/api/payments', require('./routes/mxmerchant-payments'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/shipping', require('./routes/shipping'));
 app.use('/api/payment-gateway', require('./routes/payment-gateway'));
-app.use('/api/edsa', edsaRoutes);
+app.use('/api/scheduling', schedulingRoutes);
 app.use('/api/menu', require('./routes/menu'));
 app.use('/api/business-one', require('./routes/business-one-contact'));
 app.use('/api/business-one/pos', require('./routes/business-one-pos'));
@@ -2094,15 +2094,28 @@ app.use('/api/*', (req, res) => {
     }
 
     try {
-        await ensureEdsaBookingSchema(pool);
+        await ensureSchedulingBookingSchema(pool);
     } catch (e) {
-        logger.error(`ensureEdsaBookingSchema failed: ${logger.formatMysqlError(e)}`);
+        logger.error(`ensureSchedulingBookingSchema failed: ${logger.formatMysqlError(e)}`);
     }
 
     try {
-        await ensureEdsaBlockedDatesTable(pool);
+        await ensureSchedulingBlockedDatesTable(pool);
     } catch (e) {
-        logger.error(`ensureEdsaBlockedDatesTable failed: ${logger.formatMysqlError(e)}`);
+        logger.error(`ensureSchedulingBlockedDatesTable failed: ${logger.formatMysqlError(e)}`);
+    }
+
+    try {
+        const { ensureAbandonedCartSchema } = require('./utils/ensureAbandonedCartSchema');
+        await ensureAbandonedCartSchema(pool);
+    } catch (e) {
+        logger.error(`ensureAbandonedCartSchema failed: ${logger.formatMysqlError(e)}`);
+    }
+
+    try {
+        await ensureStoreSubscriptionSchema(pool);
+    } catch (e) {
+        logger.error(`ensureStoreSubscriptionSchema failed: ${logger.formatMysqlError(e)}`);
     }
 
     try {
@@ -2127,8 +2140,22 @@ app.use('/api/*', (req, res) => {
     const stopTaxAccountantScheduler = startTaxAccountantScheduler(pool);
     const stopPosDailySalesScheduler = startPosDailySalesScheduler(pool);
     const stopPosPayrollScheduler = startPosPayrollScheduler(pool);
+    const stopShippingTrackingScheduler = startShippingTrackingScheduler(pool);
     const stopPosBillingScheduler = startPosBillingScheduler(pool);
     const stopPlatformBillingScheduler = startPlatformBillingScheduler(pool);
+    let stopAbandonedCartScheduler = () => {};
+    try {
+        const { startAbandonedCartScheduler } = require('./services/abandonedCartScheduler');
+        stopAbandonedCartScheduler = startAbandonedCartScheduler(pool) || (() => {});
+    } catch (e) {
+        logger.error(`startAbandonedCartScheduler failed: ${logger.formatMysqlError(e)}`);
+    }
+    let stopStoreSubscriptionScheduler = () => {};
+    try {
+        stopStoreSubscriptionScheduler = startStoreSubscriptionScheduler(pool) || (() => {});
+    } catch (e) {
+        logger.error(`startStoreSubscriptionScheduler failed: ${logger.formatMysqlError(e)}`);
+    }
 
     const server = app.listen(PORT, () => {
         const { isSmtpConfigured } = require('./utils/smtpConfig');
@@ -2141,10 +2168,10 @@ app.use('/api/*', (req, res) => {
         console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
         console.log(`Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:8000'}`);
         if (isSmtpConfigured()) {
-            console.log('EDSA/customer email: SMTP configured (branded appointment emails enabled)');
+            console.log('Scheduling/customer email: SMTP configured (branded appointment emails enabled)');
         } else {
             console.warn(
-                'EDSA/customer email: SMTP not configured — set SMTP_HOST, SMTP_USER, SMTP_PASSWORD in backend/.env. ' +
+                'Scheduling/customer email: SMTP not configured — set SMTP_HOST, SMTP_USER, SMTP_PASSWORD in backend/.env. ' +
                     'Until then, new bookings rely on Google Calendar guest invites when calendar is connected.'
             );
         }
@@ -2177,6 +2204,10 @@ app.use('/api/*', (req, res) => {
             process.on('SIGTERM', () => stopPosPayrollScheduler());
             process.on('SIGINT', () => stopPosPayrollScheduler());
         }
+        if (typeof stopShippingTrackingScheduler === 'function') {
+            process.on('SIGTERM', () => stopShippingTrackingScheduler());
+            process.on('SIGINT', () => stopShippingTrackingScheduler());
+        }
         if (typeof stopPosBillingScheduler === 'function') {
             process.on('SIGTERM', () => stopPosBillingScheduler());
             process.on('SIGINT', () => stopPosBillingScheduler());
@@ -2184,6 +2215,14 @@ app.use('/api/*', (req, res) => {
         if (typeof stopPlatformBillingScheduler === 'function') {
             process.on('SIGTERM', () => stopPlatformBillingScheduler());
             process.on('SIGINT', () => stopPlatformBillingScheduler());
+        }
+        if (typeof stopAbandonedCartScheduler === 'function') {
+            process.on('SIGTERM', () => stopAbandonedCartScheduler());
+            process.on('SIGINT', () => stopAbandonedCartScheduler());
+        }
+        if (typeof stopStoreSubscriptionScheduler === 'function') {
+            process.on('SIGTERM', () => stopStoreSubscriptionScheduler());
+            process.on('SIGINT', () => stopStoreSubscriptionScheduler());
         }
     }).on('error', (error) => {
         logger.error('Server startup error:', error);

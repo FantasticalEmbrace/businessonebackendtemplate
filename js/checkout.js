@@ -98,20 +98,29 @@ class CheckoutManager {
         return this.createPlaceholderImage();
     }
 
+    isCardPaymentMethod(pm) {
+        const v = String(pm || '').trim().toLowerCase();
+        return v === 'credit_card' || v === 'debit_card' || v === 'card';
+    }
+
+    normalizeCheckoutPaymentMethod(pm) {
+        const v = String(pm || '').trim().toLowerCase();
+        if (v === 'debit_card' || v === 'card') return 'credit_card';
+        return v;
+    }
+
     applyPaymentProcessorLabels(cfg = {}) {
         const processor = String(cfg.processor || 'epi').toLowerCase();
         const label = String(cfg.processorLabel || (processor === 'nmi' ? 'NMI' : processor === 'mxmerchant' ? 'MX' : 'EPI'));
         this.activePaymentProcessor = processor;
         this.activePaymentProcessorLabel = label;
-        const suffix = ` (via ${label})`;
-        const labels = {
-            credit_card: `Credit Card${suffix}`,
-            debit_card: `Debit Card${suffix}`
-        };
         const select = document.getElementById('payment-method');
         if (!select) return;
+        for (const opt of [...select.options]) {
+            if (opt.value === 'debit_card') opt.remove();
+        }
         for (const opt of select.options) {
-            if (labels[opt.value]) opt.textContent = labels[opt.value];
+            if (opt.value === 'credit_card') opt.textContent = 'Credit Card';
         }
     }
 
@@ -126,8 +135,29 @@ class CheckoutManager {
         window.location.href = `order-confirmation.html?${params.toString()}`;
     }
 
+    getCheckoutShippingAddressPayload() {
+        const first = document.getElementById('first-name')?.value?.trim() || '';
+        const last = document.getElementById('last-name')?.value?.trim() || '';
+        return {
+            line1: document.getElementById('shipping-address-1')?.value?.trim() || '',
+            city: document.getElementById('shipping-city')?.value?.trim() || '',
+            state: document.getElementById('shipping-state')?.value?.trim() || '',
+            postalCode: document.getElementById('shipping-zip')?.value?.trim() || '',
+            name: [first, last].filter(Boolean).join(' ')
+        };
+    }
+
     init() {
         this.loadCart();
+        if (window.HmCartSubscription?.loadCapabilities) {
+            void window.HmCartSubscription.loadCapabilities().then(() => {
+                if (window.HmCartSubscription?.normalizeCartItemSubscription && Array.isArray(this.cart)) {
+                    this.cart.forEach((item) => window.HmCartSubscription.normalizeCartItemSubscription(item));
+                    this.renderOrderSummary();
+                    this.calculateTotals();
+                }
+            });
+        }
         this.setupEventListeners();
         this.setupFormValidation();
         this.loadTaxExemptStatus();
@@ -137,6 +167,99 @@ class CheckoutManager {
         this.schedulePrefillLoggedInCustomer();
         this.bindCheckoutRewardsUi();
         void this.loadCheckoutRewards();
+        this.setupLoyaltyBanner();
+    }
+
+    /**
+     * Guest-only "sign in / create account to earn loyalty rewards" banner.
+     * Visibility mirrors the exact same signed-in/guest state that already
+     * toggles the header's #customer-auth-guest / #customer-auth-user panels
+     * (window.customerAuth.isAuthenticated(), falling back to the same
+     * hmherbs_customer_token check used elsewhere in this file), and the
+     * Sign In / Create Account buttons reuse customerAuth's existing
+     * openLoginModal()/openRegisterModal() — no new modal logic.
+     */
+    setupLoyaltyBanner() {
+        const banner = document.getElementById('checkout-loyalty-banner');
+        if (!banner) return;
+        const dismissBtn = document.getElementById('checkout-loyalty-banner-dismiss');
+        const signInBtn = document.getElementById('checkout-loyalty-signin-btn');
+        const registerBtn = document.getElementById('checkout-loyalty-register-btn');
+        const DISMISS_KEY = 'hmherbs_checkout_loyalty_banner_dismissed';
+
+        const isDismissed = () => {
+            try {
+                return sessionStorage.getItem(DISMISS_KEY) === '1';
+            } catch (_) {
+                return false;
+            }
+        };
+
+        const isGuest = () => {
+            try {
+                if (window.customerAuth && typeof window.customerAuth.isAuthenticated === 'function') {
+                    return !window.customerAuth.isAuthenticated();
+                }
+            } catch (_) {
+                /* ignore */
+            }
+            return !this._getCustomerToken();
+        };
+
+        const refresh = () => {
+            banner.hidden = isDismissed() || !isGuest();
+        };
+
+        refresh();
+        // customer-auth.js hydrates asynchronously right after construction;
+        // re-check shortly after in case token/user finish loading late.
+        setTimeout(refresh, 400);
+
+        if (dismissBtn) {
+            dismissBtn.addEventListener('click', () => {
+                try {
+                    sessionStorage.setItem(DISMISS_KEY, '1');
+                } catch (_) {
+                    /* ignore */
+                }
+                banner.hidden = true;
+            });
+        }
+        if (signInBtn) {
+            signInBtn.addEventListener('click', () => {
+                if (window.customerAuth && typeof window.customerAuth.openLoginModal === 'function') {
+                    window.customerAuth.openLoginModal();
+                }
+            });
+        }
+        if (registerBtn) {
+            registerBtn.addEventListener('click', () => {
+                if (window.customerAuth && typeof window.customerAuth.openRegisterModal === 'function') {
+                    window.customerAuth.openRegisterModal();
+                }
+            });
+        }
+
+        // Same auth-change signals already used elsewhere in this file to
+        // refresh other auth-dependent checkout UI (gift cards, rewards).
+        window.addEventListener('hmherbs:customer-profile-updated', refresh);
+        window.addEventListener('hmherbs:customer-signed-in', refresh);
+        window.addEventListener('hmherbs:customer-signed-out', refresh);
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'hmherbs_customer_token' || e.key === 'hmherbs_customer_user') refresh();
+        });
+
+        // Observe the exact same guest/user header panels this page already
+        // toggles, so a same-tab logout (no dedicated event today) still
+        // hides/shows the banner immediately.
+        const guestPanel = document.getElementById('customer-auth-guest');
+        const userPanel = document.getElementById('customer-auth-user');
+        if (typeof MutationObserver !== 'undefined' && (guestPanel || userPanel)) {
+            const observer = new MutationObserver(refresh);
+            [guestPanel, userPanel].forEach((el) => {
+                if (el) observer.observe(el, { attributes: true, attributeFilter: ['hidden'] });
+            });
+        }
     }
 
     /** Wait for customer-auth.js, then prefill once profile hydrates (debounced). */
@@ -940,6 +1063,35 @@ class CheckoutManager {
         });
     }
 
+    /**
+     * Live Collect.js validity per field, read from the DOM classes Collect.js itself
+     * applies to each host div. Guards against Collect.js handing back a "token" for a
+     * field that was never actually filled in / re-validated (e.g. right after a
+     * remount) — NMI then rejects that token as "empty / invalid / contains incomplete
+     * data", which reads like a card decline in logs but is really a tokenization
+     * defect, not the customer's card being turned down.
+     */
+    getNmiFieldValidityState() {
+        const invalidFields = [];
+        for (const id of ['ccnumber', 'ccexp', 'cvv']) {
+            const host = document.getElementById(id);
+            const valid = !!host && !!host.querySelector('.CollectJSValid') && !host.querySelector('.CollectJSInvalid');
+            if (!valid) invalidFields.push(id);
+        }
+        return { allValid: invalidFields.length === 0, invalidFields };
+    }
+
+    focusFirstInvalidNmiField(invalidFields) {
+        const order = { ccnumber: 0, ccexp: 1, cvv: 2 };
+        const first = [...invalidFields].sort((a, b) => (order[a] ?? 9) - (order[b] ?? 9))[0];
+        if (!first) return;
+        try {
+            document.getElementById(first)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } catch (_) {
+            /* ignore */
+        }
+    }
+
     onNmiScriptReady() {
         if (this._nmiCollectOnloadHandled) return;
         this._nmiCollectOnloadHandled = true;
@@ -998,6 +1150,18 @@ class CheckoutManager {
                 (response && (response.error || response.message)) ||
                 'Could not tokenize card. Check the details and try again.';
             this.showNotification(typeof msg === 'string' ? msg : 'Card tokenization failed', 'error');
+            return;
+        }
+        // Defense in depth: Collect.js can hand back a token for a field it hasn't
+        // actually validated yet (remount race). Re-check right before we ever call NMI —
+        // sending that token is what produces "token is empty/incomplete" declines.
+        const lateFieldState = this.getNmiFieldValidityState();
+        if (!lateFieldState.allValid) {
+            this.focusFirstInvalidNmiField(lateFieldState.invalidFields);
+            this.showNotification(
+                'Finish entering your card number, expiration date, and CVV in the secure fields, then click Place Order again.',
+                'error'
+            );
             return;
         }
         this.setCheckoutBusy(true);
@@ -1060,7 +1224,18 @@ class CheckoutManager {
             });
         } catch (err) {
             console.error('NMI checkout error:', err);
-            this.showNotification(err.message || 'Payment failed', 'error');
+            // NMI's own "token is empty / invalid / incomplete data" errors are a
+            // tokenization defect, not a card decline — never show that raw gateway
+            // text (it reads like the customer's fault and just invites another
+            // identical failed retry). Tell them what will actually fix it.
+            const raw = String(err?.message || '');
+            const isTokenDefect = /payment token|token is empty|token contains incomplete|invalid payment token/i.test(raw);
+            this.showNotification(
+                isTokenDefect
+                    ? 'Your card details did not reach us securely. Please reload this page and re-enter your card, then try again.'
+                    : raw || 'Payment failed',
+                'error'
+            );
         } finally {
             this.setCheckoutBusy(false);
         }
@@ -1090,6 +1265,7 @@ class CheckoutManager {
                     email,
                     shippingMethod: this.selectedShippingMethod,
                     shippingAmount: this.selectedShippingAmount,
+                    shippingAddress: this.getCheckoutShippingAddressPayload()
                 })
             });
             const data = await response.json().catch(() => ({}));
@@ -1379,7 +1555,9 @@ class CheckoutManager {
             variant_id: it.variant_id ?? it.variantId ?? null,
             quantity: it.quantity ?? 1,
             price: it.price ?? 0,
-            giftCard: it.giftCard || null
+            giftCard: it.giftCard || null,
+            subscribe: Boolean(it.subscribe),
+            subscriptionIntervalDays: Number(it.subscriptionIntervalDays) || 30
         }));
 
         const emailEl = document.getElementById('email');
@@ -1401,6 +1579,7 @@ class CheckoutManager {
                     email,
                     shippingMethod: this.selectedShippingMethod,
                     shippingAmount: this.selectedShippingAmount,
+                    shippingAddress: this.getCheckoutShippingAddressPayload()
                 })
             });
             let data = {};
@@ -1766,7 +1945,7 @@ class CheckoutManager {
                     if (field) field.removeAttribute('required');
                 });
                 
-                if (selectedMethod === 'credit_card' || selectedMethod === 'debit_card') {
+                if (this.isCardPaymentMethod(selectedMethod)) {
                     // Show EPI / NMI Collect.js or MX keyed fields
                     if (epiPaymentFields) {
                         epiPaymentFields.style.display = 'block';
@@ -2123,6 +2302,31 @@ class CheckoutManager {
 
     async handleSubmit() {
         if (this._checkoutInFlight) return;
+
+        // Email is required to complete checkout (order confirmation, receipts,
+        // loyalty crediting). Check it explicitly, before generic form
+        // validation, so a missing/invalid email always gets a clear, specific
+        // message instead of the generic "fix the errors" text — and the flow
+        // stops here, never reaching the order-creation API.
+        const emailFieldEarly = document.getElementById('email');
+        const emailValueEarly = emailFieldEarly ? emailFieldEarly.value.trim() : '';
+        const emailValidEarly = emailFieldEarly && typeof emailFieldEarly.checkValidity === 'function'
+            ? emailFieldEarly.checkValidity()
+            : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValueEarly);
+        if (!emailValueEarly || !emailValidEarly) {
+            if (emailFieldEarly) {
+                this.validateField(emailFieldEarly);
+                try {
+                    emailFieldEarly.focus({ preventScroll: false });
+                    emailFieldEarly.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } catch (_) {
+                    /* ignore */
+                }
+            }
+            this.showNotification('A valid email address is required to complete checkout.', 'error');
+            return;
+        }
+
         // Validate form
         if (!this.validateForm()) {
             this.showNotification('Please fix the errors in the form', 'error');
@@ -2143,7 +2347,7 @@ class CheckoutManager {
         }
 
         const paymentMethod = document.getElementById('payment-method')?.value || '';
-        if (paymentMethod === 'credit_card' || paymentMethod === 'debit_card') {
+        if (this.isCardPaymentMethod(paymentMethod)) {
             const savedId = document.getElementById('saved-card-select')?.value;
             if (savedId) {
                 this.selectedSavedCardId = Number(savedId);
@@ -2228,16 +2432,28 @@ class CheckoutManager {
         const amountDue = this.getCheckoutAmountDue();
         if (storeTenders.length && amountDue > 0.005) {
             const pm = document.getElementById('payment-method')?.value || '';
-            if (pm !== 'credit_card' && pm !== 'debit_card') {
+            if (!this.isCardPaymentMethod(pm)) {
                 this.showNotification('Select credit or debit card to pay the remaining balance.', 'error');
                 return;
             }
         }
         if (storeTenders.length && amountDue <= 0.005) {
             // Pay fully with store credit / points / gift cards — skip NMI
-        } else if (paymentMethod === 'credit_card' || paymentMethod === 'debit_card') {
+        } else if (this.isCardPaymentMethod(paymentMethod)) {
             if (this.activePaymentProcessor === 'mxmerchant') {
                 void this.submitMxCardPayment();
+                return;
+            }
+            // Never hand NMI a token for fields Collect.js itself hasn't marked valid —
+            // that combination reliably comes back "token is empty / incomplete data",
+            // which reads like a card decline but is really an unfinished card field.
+            const fieldState = this.getNmiFieldValidityState();
+            if (!fieldState.allValid) {
+                this.focusFirstInvalidNmiField(fieldState.invalidFields);
+                this.showNotification(
+                    'Finish entering your card number, expiration date, and CVV in the secure fields, then click Place Order again.',
+                    'error'
+                );
                 return;
             }
             try {
@@ -2862,14 +3078,16 @@ class CheckoutManager {
             name: item.name,
             price: item.price,
             quantity: item.quantity,
-            giftCard: item.giftCard || null
+            giftCard: item.giftCard || null,
+            subscribe: Boolean(item.subscribe),
+            subscriptionIntervalDays: Number(item.subscriptionIntervalDays) || 30
         }));
 
         const paymentMethod = document.getElementById('payment-method')?.value || '';
         
         // Collect EPI payment data if credit/debit card is selected
         let paymentData = null;
-        if (paymentMethod === 'credit_card' || paymentMethod === 'debit_card') {
+        if (this.isCardPaymentMethod(paymentMethod)) {
             const processor = this.activePaymentProcessor || 'epi';
             if (this.nmiEnabled) {
                 paymentData = { processor };
@@ -2910,11 +3128,16 @@ class CheckoutManager {
         }
 
         const needsCard = amountDue > 0.005;
-        const effectiveMethod = storeTenders.length && needsCard
-            ? (paymentMethod === 'debit_card' ? 'debit_card' : 'credit_card')
-            : (storeTenders.length && !needsCard ? 'gift_card' : paymentMethod);
+        let effectiveMethod;
+        if (storeTenders.length && needsCard) {
+            effectiveMethod = 'credit_card';
+        } else if (storeTenders.length && !needsCard) {
+            effectiveMethod = 'gift_card';
+        } else {
+            effectiveMethod = this.normalizeCheckoutPaymentMethod(paymentMethod);
+        }
 
-        if ((effectiveMethod === 'credit_card' || effectiveMethod === 'debit_card') && !paymentData && this.nmiEnabled) {
+        if (this.isCardPaymentMethod(effectiveMethod) && !paymentData && this.nmiEnabled) {
             paymentData = { processor: this.activePaymentProcessor || 'epi' };
         }
 
@@ -2935,7 +3158,7 @@ class CheckoutManager {
             tax: this.tax,
             shipping: this.shipping,
             total: this.total,
-            awaitingNmiPayment: needsCard && (effectiveMethod === 'credit_card' || effectiveMethod === 'debit_card')
+            awaitingNmiPayment: needsCard && this.isCardPaymentMethod(effectiveMethod)
         };
     }
 

@@ -12,7 +12,10 @@ const PRODUCT_BULK_ALLOWED_FIELDS = Object.freeze([
     'is_active',
     'is_featured',
     'show_on_web',
-    'is_cannabis'
+    'is_cannabis',
+    'subscription_eligible',
+    'subscription_interval_days',
+    'subscription_discount_percent'
 ]);
 
 const PRODUCT_SINGLE_ALLOWED_FIELDS = Object.freeze([
@@ -33,7 +36,10 @@ const PRODUCT_SINGLE_ALLOWED_FIELDS = Object.freeze([
     'show_on_web',
     'is_cannabis',
     'coa_url',
-    'coa_updated_at'
+    'coa_updated_at',
+    'subscription_eligible',
+    'subscription_interval_days',
+    'subscription_discount_percent'
 ]);
 
 const NUMERIC_FIELDS = new Set([
@@ -42,12 +48,25 @@ const NUMERIC_FIELDS = new Set([
     'cost_price',
     'weight',
     'inventory_quantity',
-    'low_stock_threshold'
+    'low_stock_threshold',
+    'subscription_discount_percent'
 ]);
 
-const INTEGER_FIELDS = new Set(['brand_id', 'category_id', 'inventory_quantity', 'low_stock_threshold']);
+const INTEGER_FIELDS = new Set([
+    'brand_id',
+    'category_id',
+    'inventory_quantity',
+    'low_stock_threshold',
+    'subscription_interval_days'
+]);
 
-const BOOLEAN_FIELDS = new Set(['is_active', 'is_featured', 'show_on_web', 'is_cannabis']);
+const BOOLEAN_FIELDS = new Set([
+    'is_active',
+    'is_featured',
+    'show_on_web',
+    'is_cannabis',
+    'subscription_eligible'
+]);
 
 function normalizeProductFieldValue(field, rawValue) {
     if (rawValue === undefined) return undefined;
@@ -63,7 +82,11 @@ function normalizeProductFieldValue(field, rawValue) {
     if (INTEGER_FIELDS.has(field)) {
         if (value === '' || value === null) return null;
         const intValue = parseInt(value, 10);
-        return Number.isNaN(intValue) ? null : intValue;
+        if (Number.isNaN(intValue)) return null;
+        if (field === 'subscription_interval_days') {
+            return [30, 60, 90].includes(intValue) ? intValue : 30;
+        }
+        return intValue;
     }
 
     if (BOOLEAN_FIELDS.has(field)) {

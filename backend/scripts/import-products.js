@@ -1,7 +1,6 @@
 'use strict';
 
 const fs = require('fs').promises;
-const fsSync = require('fs');
 const { Readable } = require('stream');
 const csv = require('csv-parser');
 const path = require('path');
@@ -9,11 +8,60 @@ const { loadBackendEnv, createPool } = require('../utils/dbConfig');
 
 loadBackendEnv();
 
+function normalizeHeaderKey(k) {
+    return String(k || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+}
+
+/**
+ * Single source of truth for "what header names mean what field", shared by
+ * pickField's exact/normalized matching AND by the AI-assisted column-mapper
+ * (productImportColumnMap.js) so both layers agree on the same target fields.
+ */
+const FIELD_ALIASES = Object.freeze({
+    name: ['name', 'Name', 'Product Name', 'product_name', 'title', 'Item Name', 'item_name'],
+    sku: ['sku', 'SKU', 'Product Code', 'product_code', 'Item Number', 'item_number'],
+    barcode: ['barcode', 'Barcode', 'UPC', 'upc', 'EAN', 'ean'],
+    description: ['description', 'Description', 'Long Description', 'long_description', 'details'],
+    short_description: ['short_description', 'Short Description', 'short_desc', 'summary'],
+    brand: ['brand', 'Brand', 'manufacturer', 'Manufacturer', 'vendor', 'Vendor'],
+    category: ['category', 'Category', 'department', 'Department'],
+    price: ['price', 'Price', 'retail_price', 'Retail Price', 'sell_price', 'Sell Price'],
+    cost_price: ['cost', 'Cost', 'cost_price', 'wholesale', 'Wholesale'],
+    compare_price: ['compare_price', 'Compare Price', 'msrp', 'MSRP'],
+    quantity: ['quantity', 'qty', 'Qty', 'inventory', 'Inventory', 'stock', 'Stock', 'on_hand', 'On Hand', 'quantity_on_hand'],
+    image_url: ['image_url', 'images', 'Images', 'Image URL', 'image', 'Image', 'photo', 'Photo']
+});
+
+/**
+ * A header only counts as "recognized" if it normalized-matches one of the
+ * known aliases above for some field.
+ */
+function findFieldForHeader(header) {
+    const normalized = normalizeHeaderKey(header);
+    if (!normalized) return null;
+    for (const [field, aliases] of Object.entries(FIELD_ALIASES)) {
+        if (aliases.some((alias) => normalizeHeaderKey(alias) === normalized)) return field;
+    }
+    return null;
+}
+
 function pickField(row, keys) {
     for (const key of keys) {
         const value = row[key];
         if (value != null && String(value).trim() !== '') {
             return String(value).trim();
+        }
+    }
+    // POS/catalog systems don't agree on header casing, spacing, or
+    // punctuation (e.g. "Item Name" vs "ITEM_NAME" vs "itemname"). Fall back
+    // to a normalized match instead of silently dropping a whole column.
+    const wanted = new Set(keys.map(normalizeHeaderKey));
+    for (const rowKey of Object.keys(row)) {
+        if (wanted.has(normalizeHeaderKey(rowKey))) {
+            const value = row[rowKey];
+            if (value != null && String(value).trim() !== '') {
+                return String(value).trim();
+            }
         }
     }
     return '';
@@ -38,6 +86,34 @@ function parseBool(value, defaultValue = true) {
     if (['true', 'yes', 'y', '1'].includes(normalized)) return true;
     if (['false', 'no', 'n', '0'].includes(normalized)) return false;
     return defaultValue;
+}
+
+/**
+ * Not every POS/catalog system exports CSV the same way. Excel's "CSV UTF-8"
+ * save adds a BOM; European/Excel-locale exports often use semicolons
+ * instead of commas; some tools use tabs. Strip the BOM and sniff the
+ * delimiter from the header line instead of assuming comma.
+ */
+function stripBom(buffer) {
+    if (Buffer.isBuffer(buffer) && buffer.length >= 3 && buffer[0] === 0xef && buffer[1] === 0xbb && buffer[2] === 0xbf) {
+        return buffer.slice(3);
+    }
+    if (typeof buffer === 'string' && buffer.charCodeAt(0) === 0xfeff) {
+        return buffer.slice(1);
+    }
+    return buffer;
+}
+
+function sniffDelimiter(buffer) {
+    const text = (Buffer.isBuffer(buffer) ? buffer.toString('utf8', 0, 4096) : String(buffer).slice(0, 4096));
+    const headerLine = text.split(/\r\n|\n/, 1)[0] || '';
+    const counts = {
+        ',': (headerLine.match(/,/g) || []).length,
+        ';': (headerLine.match(/;/g) || []).length,
+        '\t': (headerLine.match(/\t/g) || []).length
+    };
+    const best = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+    return best && best[1] > 0 ? best[0] : ',';
 }
 
 class ProductImporter {
@@ -165,13 +241,26 @@ class ProductImporter {
         }
     }
 
-    async parseCSVFile(filePath) {
+    async parseCSVFile(filePath, columnMapping = null) {
+        const raw = await fs.readFile(filePath);
+        return this.parseCSVBuffer(raw, columnMapping);
+    }
+
+    /**
+     * @param {Buffer} buffer
+     * @param {Object.<string,string>} [columnMapping] - optional { csvHeader: canonicalField }
+     *   override, e.g. from the AI/merchant-confirmed column-mapping step. Takes
+     *   precedence over the built-in alias guessing in mapCSVToProduct.
+     */
+    async parseCSVBuffer(buffer, columnMapping = null) {
+        const clean = stripBom(buffer);
+        const separator = sniffDelimiter(clean);
         return new Promise((resolve, reject) => {
             const products = [];
-            fsSync.createReadStream(filePath)
-                .pipe(csv())
+            Readable.from(clean)
+                .pipe(csv({ separator }))
                 .on('data', (row) => {
-                    const product = this.mapCSVToProduct(row);
+                    const product = this.mapCSVToProduct(row, columnMapping);
                     if (product) products.push(product);
                 })
                 .on('end', () => resolve(products))
@@ -179,38 +268,61 @@ class ProductImporter {
         });
     }
 
-    async parseCSVBuffer(buffer) {
+    /**
+     * Lightweight preview: just the headers and the first few raw rows
+     * (keyed by their original column names, no field mapping applied).
+     * Used by the AI-assisted column-mapping step, which needs to see the
+     * real headers/values before deciding what they mean — it must not run
+     * the full row-by-row product mapping first.
+     */
+    async parsePreviewRows(buffer, limit = 6) {
+        const clean = stripBom(buffer);
+        const separator = sniffDelimiter(clean);
         return new Promise((resolve, reject) => {
-            const products = [];
-            Readable.from(buffer)
-                .pipe(csv())
+            const rows = [];
+            let headers = [];
+            Readable.from(clean)
+                .pipe(csv({ separator }))
+                .on('headers', (h) => { headers = h; })
                 .on('data', (row) => {
-                    const product = this.mapCSVToProduct(row);
-                    if (product) products.push(product);
+                    if (rows.length < limit) rows.push(row);
                 })
-                .on('end', () => resolve(products))
+                .on('end', () => resolve({ headers, rows }))
                 .on('error', reject);
         });
     }
 
-    mapCSVToProduct(row) {
+    /**
+     * @param {Object} row - raw CSV row keyed by original header
+     * @param {Object.<string,string>} [columnMapping] - optional { csvHeader: canonicalField }
+     *   confirmed by the merchant (or auto-detected) in the column-mapping step.
+     *   Explicit mapping always wins over alias guessing below.
+     */
+    mapCSVToProduct(row, columnMapping = null) {
         try {
-            const name = pickField(row, [
-                'name', 'Name', 'Product Name', 'product_name', 'title', 'Item Name', 'item_name'
-            ]);
+            let workingRow = row;
+            if (columnMapping && typeof columnMapping === 'object') {
+                workingRow = { ...row };
+                for (const [header, field] of Object.entries(columnMapping)) {
+                    if (!field || field === 'ignore') continue;
+                    const value = row[header];
+                    if (value != null && String(value).trim() !== '') {
+                        workingRow[field] = value;
+                    }
+                }
+            }
+            row = workingRow;
+
+            const name = pickField(row, FIELD_ALIASES.name);
             if (!name) return null;
 
             const sku =
-                pickField(row, ['sku', 'SKU', 'Product Code', 'product_code', 'Item Number', 'item_number']) ||
-                pickField(row, ['barcode', 'Barcode', 'UPC', 'upc', 'EAN', 'ean']) ||
+                pickField(row, FIELD_ALIASES.sku) ||
+                pickField(row, FIELD_ALIASES.barcode) ||
                 this.generateSKU();
 
-            const shortDesc = pickField(row, [
-                'short_description', 'Short Description', 'short_desc', 'summary'
-            ]);
-            const longDesc = pickField(row, [
-                'description', 'Description', 'Long Description', 'long_description', 'details'
-            ]);
+            const shortDesc = pickField(row, FIELD_ALIASES.short_description);
+            const longDesc = pickField(row, FIELD_ALIASES.description);
 
             return {
                 sku,
@@ -218,28 +330,22 @@ class ProductImporter {
                 slug: this.generateSlug(name),
                 short_description: shortDesc,
                 long_description: longDesc || shortDesc,
-                brand: pickField(row, ['brand', 'Brand', 'manufacturer', 'Manufacturer', 'vendor', 'Vendor']) || 'Unknown',
-                category: pickField(row, ['category', 'Category', 'department', 'Department']) || 'General',
-                price: parseMoney(pickField(row, ['price', 'Price', 'retail_price', 'Retail Price', 'sell_price', 'Sell Price']), 0),
+                brand: pickField(row, FIELD_ALIASES.brand) || 'Unknown',
+                category: pickField(row, FIELD_ALIASES.category) || 'General',
+                price: parseMoney(pickField(row, FIELD_ALIASES.price), 0),
                 cost_price: (() => {
-                    const raw = pickField(row, ['cost', 'Cost', 'cost_price', 'wholesale', 'Wholesale']);
+                    const raw = pickField(row, FIELD_ALIASES.cost_price);
                     return raw ? parseMoney(raw, null) : null;
                 })(),
                 compare_price: (() => {
-                    const raw = pickField(row, ['compare_price', 'Compare Price', 'msrp', 'MSRP']);
+                    const raw = pickField(row, FIELD_ALIASES.compare_price);
                     return raw ? parseMoney(raw, null) : null;
                 })(),
                 weight: (() => {
                     const raw = pickField(row, ['weight', 'Weight']);
                     return raw ? parseMoney(raw, null) : null;
                 })(),
-                inventory_quantity: parseIntQty(
-                    pickField(row, [
-                        'quantity', 'qty', 'Qty', 'inventory', 'Inventory', 'stock', 'Stock',
-                        'on_hand', 'On Hand', 'quantity_on_hand'
-                    ]),
-                    0
-                ),
+                inventory_quantity: parseIntQty(pickField(row, FIELD_ALIASES.quantity), 0),
                 track_inventory: parseBool(pickField(row, ['track_inventory', 'Track Inventory', 'track_stock']), true),
                 is_taxable: parseBool(pickField(row, ['is_taxable', 'taxable', 'Taxable']), true),
                 low_stock_threshold: parseIntQty(
@@ -260,7 +366,7 @@ class ProductImporter {
                     pickField(row, ['health_categories', 'Health Categories'])
                 ),
                 images: this.parseImages(
-                    pickField(row, ['image_url', 'images', 'Images', 'Image URL', 'image', 'Image', 'photo', 'Photo'])
+                    pickField(row, FIELD_ALIASES.image_url)
                 ),
                 variants: this.parseVariants(pickField(row, ['variants', 'Variants']))
             };
@@ -564,5 +670,13 @@ if (require.main === module) {
             importer.close().finally(() => process.exit(1));
         });
 }
+
+// Attached as static properties (not a separate export) so existing
+// `const ProductImporter = require('../scripts/import-products')` call sites
+// keep working unchanged, while the column-mapping service can still reach
+// the same alias data ProductImporter itself uses.
+ProductImporter.FIELD_ALIASES = FIELD_ALIASES;
+ProductImporter.normalizeHeaderKey = normalizeHeaderKey;
+ProductImporter.findFieldForHeader = findFieldForHeader;
 
 module.exports = ProductImporter;

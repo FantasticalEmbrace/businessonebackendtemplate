@@ -85,9 +85,9 @@ class DatabaseOptimizer {
                 'CREATE INDEX idx_users_email_active ON users(email) WHERE is_active = true;',
                 'CREATE INDEX idx_users_created ON users(created_at);'
             ],
-            edsa_bookings: [
-                'CREATE INDEX idx_edsa_date_status ON edsa_bookings(appointment_date, status);',
-                'CREATE INDEX idx_edsa_user ON edsa_bookings(user_id, created_at);'
+            scheduling_bookings: [
+                'CREATE INDEX idx_scheduling_date_status ON scheduling_bookings(appointment_date, status);',
+                'CREATE INDEX idx_scheduling_user ON scheduling_bookings(user_id, created_at);'
             ]
         };
     }

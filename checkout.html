@@ -117,6 +117,80 @@
             margin-left: var(--space-1);
         }
 
+        /* Guest-only loyalty sign-in/create-account callout on checkout */
+        .checkout-loyalty-banner {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: var(--space-3);
+            margin-bottom: var(--space-6);
+            padding: var(--space-4);
+            background: var(--brand-surface-subtle, #f7f7f7);
+            border: 1px solid var(--primary-green, #ff9b1f);
+            border-radius: var(--radius-lg);
+            position: relative;
+        }
+
+        .checkout-loyalty-banner p {
+            flex: 1 1 auto;
+            min-width: 200px;
+            margin: 0;
+            color: var(--gray-800, #1f2937);
+            font-size: var(--text-sm);
+            font-weight: 500;
+            padding-right: var(--space-6);
+        }
+
+        .checkout-loyalty-banner-actions {
+            display: flex;
+            gap: var(--space-2);
+            flex-wrap: wrap;
+        }
+
+        .checkout-loyalty-banner-actions button {
+            border: 2px solid var(--primary-green, #ff9b1f);
+            background: var(--white, #fff);
+            color: var(--primary-green, #ff9b1f);
+            font-weight: 600;
+            font-size: var(--text-sm);
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .checkout-loyalty-banner-actions button:hover {
+            background: var(--primary-green, #ff9b1f);
+            color: var(--white, #fff);
+        }
+
+        .checkout-loyalty-banner-actions .checkout-loyalty-signin {
+            background: var(--primary-green, #ff9b1f);
+            color: var(--white, #fff);
+        }
+
+        .checkout-loyalty-banner-actions .checkout-loyalty-signin:hover {
+            background: var(--primary-green-dark, #cc7a00);
+        }
+
+        .checkout-loyalty-banner-dismiss {
+            position: absolute;
+            top: var(--space-2);
+            right: var(--space-2);
+            background: transparent;
+            border: none;
+            color: var(--gray-500, #6b7280);
+            font-size: var(--text-lg);
+            line-height: 1;
+            cursor: pointer;
+            padding: var(--space-1);
+            border-radius: var(--radius-sm, 4px);
+        }
+
+        .checkout-loyalty-banner-dismiss:hover {
+            color: var(--gray-800, #1f2937);
+        }
+
         .form-input,
         .form-select {
             width: 100%;
@@ -620,7 +694,7 @@
                     <ul class="nav-menu" id="nav-menu" role="menubar">
                         <li role="none"><a href="index.html" class="nav-link" role="menuitem">Home</a></li>
                         <li role="none"><a href="products.html" class="nav-link" role="menuitem">Products</a></li>
-                        <li role="none"><a href="index.html#edsa-service" class="nav-link edsa-nav-link" role="menuitem">EDSA Service</a></li>
+                        <li role="none"><a href="index.html#scheduling-service" class="nav-link scheduling-nav-link" role="menuitem">Scheduling Service</a></li>
                         <li role="none"><a href="index.html#about" class="nav-link" role="menuitem">About</a></li>
                         <li role="none"><a href="index.html#contact" class="nav-link" role="menuitem">Contact</a></li>
                     </ul>
@@ -670,6 +744,15 @@
                 <!-- Checkout Form -->
                 <div class="checkout-form-section">
                     <form id="checkout-form">
+                        <!-- Guest-only loyalty sign-in/create-account banner -->
+                        <div id="checkout-loyalty-banner" class="checkout-loyalty-banner" hidden>
+                            <button type="button" class="checkout-loyalty-banner-dismiss" id="checkout-loyalty-banner-dismiss" aria-label="Dismiss">&times;</button>
+                            <p><i class="fas fa-star" aria-hidden="true" style="margin-right:0.35rem;color:var(--primary-green,#658d0b);"></i>Sign in or create an account to earn loyalty rewards on this order!</p>
+                            <div class="checkout-loyalty-banner-actions">
+                                <button type="button" class="checkout-loyalty-signin" id="checkout-loyalty-signin-btn">Sign In</button>
+                                <button type="button" class="checkout-loyalty-register" id="checkout-loyalty-register-btn">Create Account</button>
+                            </div>
+                        </div>
                         <!-- Customer Information -->
                         <h2>Customer Information</h2>
                         <div class="form-row">
@@ -855,8 +938,7 @@
                             <label for="payment-method">Payment Method <span class="required">*</span></label>
                             <select id="payment-method" name="payment_method" class="form-select" required>
                                 <option value="">Select payment method</option>
-                                <option value="credit_card">Credit Card (via EPI)</option>
-                                <option value="debit_card">Debit Card (via EPI)</option>
+                                <option value="credit_card">Credit Card</option>
                                 <option value="gift_card">Gift card only</option>
                             </select>
                             <span class="error-message">Please select a payment method</span>
@@ -1420,7 +1502,8 @@
     <script src="js/nmi-public-token.js" defer></script>
     <script src="js/hm-gift-card.js"></script>
     <script src="js/mxmerchant-checkout.js?v=20260708" defer></script>
-    <script src="js/checkout.js?v=20260708" defer></script>
+    <script src="js/cart-subscription-ui.js?v=subscribe-save-5" defer></script>
+    <script src="js/checkout.js?v=no-debit-cardfix-20260914a" defer></script>
     <script src="script.js" defer></script>
     <script src="js/hm-choice-toggles.js"></script>
     <script src="js/accessibility.js?v=a11y-1" defer></script>

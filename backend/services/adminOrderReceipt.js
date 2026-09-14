@@ -53,6 +53,17 @@ function resolveCustomerName(order) {
     return '';
 }
 
+/** Storefront PDP href for a receipt line (null when no product reference). */
+function getReceiptLineProductHref(line) {
+    if (!line) return null;
+    const slug = String(line.productSlug || '').trim();
+    if (slug) return `/product.html?slug=${encodeURIComponent(slug)}`;
+    if (line.productId != null && line.productId !== '') {
+        return `/product.html?id=${encodeURIComponent(line.productId)}`;
+    }
+    return null;
+}
+
 function formatAddressBlock(order, prefix) {
     const lines = [
         [order[`${prefix}_first_name`], order[`${prefix}_last_name`]].filter(Boolean).join(' '),
@@ -97,10 +108,12 @@ async function loadAdminOrderReceiptContext(pool, orderId) {
     const order = orders[0];
 
     const [items] = await pool.execute(
-        `SELECT oi.product_name, oi.product_sku, oi.variant_name, oi.quantity, oi.price, oi.total,
-                COALESCE(NULLIF(TRIM(pv.sku), ''), oi.product_sku) AS resolved_sku
+        `SELECT oi.product_id, oi.product_name, oi.product_sku, oi.variant_name, oi.quantity, oi.price, oi.total,
+                COALESCE(NULLIF(TRIM(pv.sku), ''), oi.product_sku) AS resolved_sku,
+                p.slug AS product_slug
            FROM order_items oi
            LEFT JOIN product_variants pv ON pv.id = oi.variant_id
+           LEFT JOIN products p ON p.id = oi.product_id
           WHERE oi.order_id = ?
           ORDER BY oi.id ASC`,
         [oid]
@@ -111,7 +124,9 @@ async function loadAdminOrderReceiptContext(pool, orderId) {
         sku: resolveOrderLineSku(row.product_sku, row.resolved_sku),
         quantity: Number(row.quantity) || 0,
         price: Number(row.price) || 0,
-        total: Number(row.total) || 0
+        total: Number(row.total) || 0,
+        productId: row.product_id != null ? row.product_id : null,
+        productSlug: row.product_slug || null
     }));
 
     const branding = await resolveStoreBranding(pool);
@@ -130,12 +145,14 @@ async function loadAdminOrderReceiptContext(pool, orderId) {
     if (!paymentTenders.length) {
         try {
             const [tenderRows] = await pool.execute(
-                `SELECT tender_type, amount, loyalty_points, gift_card_id,
-                        cash_tendered, cash_change, check_number,
-                        terminal_last_four, terminal_auth_code, payment_reference
-                   FROM order_payment_tenders
-                  WHERE order_id = ?
-                  ORDER BY id ASC`,
+                `SELECT opt.tender_type, opt.amount, opt.loyalty_points, opt.gift_card_id,
+                        opt.cash_tendered, opt.cash_change, opt.check_number,
+                        opt.terminal_last_four, opt.terminal_auth_code, opt.payment_reference,
+                        gc.code AS gift_card_code
+                   FROM order_payment_tenders opt
+                   LEFT JOIN gift_cards gc ON gc.id = opt.gift_card_id
+                  WHERE opt.order_id = ?
+                  ORDER BY opt.id ASC`,
                 [oid]
             );
             paymentTenders = tenderRows || [];
@@ -185,9 +202,13 @@ function buildOrderReceiptHtml(context, { autoPrint = false } = {}) {
                 receiptSettings.showSku && line.sku
                     ? `<div style="font-size:11px;color:#6b7280;">SKU ${escapeHtml(line.sku)}</div>`
                     : '';
+            const href = getReceiptLineProductHref(line);
+            const nameHtml = href
+                ? `<a class="receipt-item-name" href="${escapeHtml(href)}">${escapeHtml(line.name)}</a>`
+                : `<div>${escapeHtml(line.name)}</div>`;
             return `<tr>
                 <td style="padding:8px 0;border-bottom:1px solid #e5e7eb;vertical-align:top;">
-                    <div>${escapeHtml(line.name)}</div>${skuLine}
+                    ${nameHtml}${skuLine}
                 </td>
                 <td style="padding:8px 8px;border-bottom:1px solid #e5e7eb;text-align:center;vertical-align:top;">${line.quantity}</td>
                 <td style="padding:8px 0;border-bottom:1px solid #e5e7eb;text-align:right;vertical-align:top;">${formatMoney(line.total)}</td>
@@ -274,10 +295,13 @@ function buildOrderReceiptHtml(context, { autoPrint = false } = {}) {
 <style>
   body { font-family: Inter, system-ui, sans-serif; color: #111827; margin: 0; padding: 24px; background: #f3f4f6; }
   .receipt { max-width: 520px; margin: 0 auto; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 24px; }
+  a.receipt-item-name { color: inherit; text-decoration: none; }
+  a.receipt-item-name:hover, a.receipt-item-name:focus { color: ${primary}; text-decoration: none; }
   @media print {
     body { background: #fff; padding: 0; }
     .receipt { border: none; border-radius: 0; max-width: none; padding: 0; }
     .no-print { display: none !important; }
+    a.receipt-item-name { color: inherit !important; text-decoration: none !important; }
   }
 </style>
 </head>

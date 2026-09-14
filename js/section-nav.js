@@ -1,22 +1,22 @@
 /**
- * Section navigation — EDSA, Contact, About, etc.
- * Bottom-aligned sections (EDSA, Contact) scroll so CTAs sit above the viewport bottom.
+ * Section navigation — Scheduling, Contact, About, etc.
+ * Bottom-aligned sections (Scheduling, Contact) scroll so CTAs sit above the viewport bottom.
  * Cross-page index.html#section links defer scroll until the homepage layout is ready.
  */
 (function () {
     'use strict';
 
     const INDEX_FILES = new Set(['', 'index.html']);
-    const EDSA_PENDING_FLAG = 'hmPendingEdsaNav';
+    const Scheduling_PENDING_FLAG = 'hmPendingSchedulingNav';
     const PENDING_SECTION_KEY = 'hmPendingSectionNav';
-    const EDSA_HASH = '#edsa-service';
+    const Scheduling_HASH = '#scheduling-service';
     const CONTACT_HASH = '#contact';
-    const EDSA_FOCUS_ID = 'edsa-nav-target';
+    const Scheduling_FOCUS_ID = 'scheduling-nav-target';
     /** Extra space below the contact section when bottom-aligning (px). */
     const CONTACT_BOTTOM_PADDING = 56;
 
     /** Sections whose bottom edge should align near the viewport bottom. */
-    const BOTTOM_ALIGNED = new Set([EDSA_HASH, CONTACT_HASH]);
+    const BOTTOM_ALIGNED = new Set([Scheduling_HASH, CONTACT_HASH]);
 
     function currentPageFile() {
         const name = window.location.pathname.split('/').pop() || '';
@@ -44,20 +44,20 @@
         return INDEX_FILES.has(parsed.file);
     }
 
-    function isEdsaHash(hash) {
-        return hash === EDSA_HASH;
+    function isSchedulingHash(hash) {
+        return hash === Scheduling_HASH;
     }
 
     /** Homepage sections below the spotlight grid — wait for layout before scrolling. */
     function sectionNeedsSpotlightReady(hash) {
-        return hash === EDSA_HASH || hash === CONTACT_HASH;
+        return hash === Scheduling_HASH || hash === CONTACT_HASH;
     }
 
     function getPendingSectionHash() {
         try {
             const stored = sessionStorage.getItem(PENDING_SECTION_KEY);
             if (stored && stored.startsWith('#')) return stored;
-            if (sessionStorage.getItem(EDSA_PENDING_FLAG) === '1') return EDSA_HASH;
+            if (sessionStorage.getItem(Scheduling_PENDING_FLAG) === '1') return Scheduling_HASH;
         } catch (_) {
             /* ignore */
         }
@@ -77,15 +77,15 @@
     }
 
     /** @deprecated Use hmIsSectionCrossPagePending */
-    function isEdsaCrossPagePending() {
+    function isSchedulingCrossPagePending() {
         return isSectionCrossPagePending();
     }
 
     function markPendingSection(hash) {
         try {
             sessionStorage.setItem(PENDING_SECTION_KEY, hash);
-            if (hash === EDSA_HASH) {
-                sessionStorage.setItem(EDSA_PENDING_FLAG, '1');
+            if (hash === Scheduling_HASH) {
+                sessionStorage.setItem(Scheduling_PENDING_FLAG, '1');
             }
         } catch (_) {
             /* ignore */
@@ -95,7 +95,7 @@
     function clearPendingSection() {
         try {
             sessionStorage.removeItem(PENDING_SECTION_KEY);
-            sessionStorage.removeItem(EDSA_PENDING_FLAG);
+            sessionStorage.removeItem(Scheduling_PENDING_FLAG);
         } catch (_) {
             /* ignore */
         }
@@ -183,16 +183,16 @@
         }
         document.documentElement.classList.remove(
             'hm-age-gate-open',
-            'hm-await-edsa-scroll',
+            'hm-await-scheduling-scroll',
             'hm-section-scroll-ready',
-            'hm-edsa-scroll-ready',
-            'edsa-ui-scroll-locked'
+            'hm-scheduling-scroll-ready',
+            'scheduling-ui-scroll-locked'
         );
         document.body.classList.remove(
             'hm-age-gate-open',
             'auth-modal-open',
-            'edsa-modal-open',
-            'edsa-ui-scroll-locked',
+            'scheduling-modal-open',
+            'scheduling-ui-scroll-locked',
             'modal-open',
             'no-scroll',
             'cart-open',
@@ -211,19 +211,19 @@
         return header ? header.offsetHeight : 76;
     }
 
-    function resolveEdsaScrollTarget() {
+    function resolveSchedulingScrollTarget() {
         return (
-            document.getElementById(EDSA_FOCUS_ID) ||
-            document.getElementById('edsa-book-btn') ||
-            document.querySelector('#edsa-service .edsa-text') ||
-            document.getElementById('edsa-service')
+            document.getElementById(Scheduling_FOCUS_ID) ||
+            document.getElementById('scheduling-book-btn') ||
+            document.querySelector('#scheduling-service .scheduling-text') ||
+            document.getElementById('scheduling-service')
         );
     }
 
     function resolveSectionTarget(hash) {
         switch (hash) {
-            case EDSA_HASH:
-                return resolveEdsaScrollTarget();
+            case Scheduling_HASH:
+                return resolveSchedulingScrollTarget();
             case CONTACT_HASH:
                 return (
                     document.getElementById('contact') ||
@@ -271,8 +271,8 @@
     }
 
     /** @deprecated Use hmScrollToSection */
-    function scrollToEdsaSection() {
-        return scrollToSection(EDSA_HASH);
+    function scrollToSchedulingSection() {
+        return scrollToSection(Scheduling_HASH);
     }
 
     function syncSectionHash(hash) {
@@ -302,7 +302,7 @@
         e.preventDefault();
         markPendingSection(parsed.hash);
         releaseScrollLocks();
-        document.documentElement.classList.add('hm-await-edsa-scroll');
+        document.documentElement.classList.add('hm-await-scheduling-scroll');
         window.location.assign(parsed.file + parsed.hash);
     }
 
@@ -347,7 +347,7 @@
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
                     scrollToSection(hash);
-                    document.documentElement.classList.remove('hm-await-edsa-scroll');
+                    document.documentElement.classList.remove('hm-await-scheduling-scroll');
                     document.documentElement.classList.add('hm-section-scroll-ready');
                 });
             });
@@ -384,7 +384,7 @@
     }
 
     /** @deprecated Use hmCompleteCrossPageSectionNav */
-    function completeEdsaCrossPageNav() {
+    function completeSchedulingCrossPageNav() {
         completeCrossPageSectionNav();
     }
 
@@ -395,7 +395,7 @@
         const hash = getTargetSectionHash();
         if (!hash) return;
 
-        document.documentElement.classList.add('hm-await-edsa-scroll');
+        document.documentElement.classList.add('hm-await-scheduling-scroll');
         scheduleSectionScroll(hash);
     }
 
@@ -407,7 +407,7 @@
         if (!hash || hash.length <= 1) return;
         if (!resolveSectionTarget(hash)) return;
 
-        document.documentElement.classList.add('hm-await-edsa-scroll');
+        document.documentElement.classList.add('hm-await-scheduling-scroll');
         scheduleSectionScroll(hash);
     }
 
@@ -419,9 +419,9 @@
         if (isPageReloadNavigation() && isIndexPage()) {
             clearPendingSection();
             document.documentElement.classList.remove(
-                'hm-await-edsa-scroll',
+                'hm-await-scheduling-scroll',
                 'hm-section-scroll-ready',
-                'hm-edsa-scroll-ready'
+                'hm-scheduling-scroll-ready'
             );
             try {
                 if (window.location.hash) {
@@ -438,11 +438,11 @@
 
         window.hmReleaseScrollLocks = releaseScrollLocks;
         window.hmScrollToSection = scrollToSection;
-        window.hmScrollToEdsaSection = scrollToEdsaSection;
+        window.hmScrollToSchedulingSection = scrollToSchedulingSection;
         window.hmIsSectionCrossPagePending = isSectionCrossPagePending;
-        window.hmIsEdsaCrossPagePending = isEdsaCrossPagePending;
+        window.hmIsSchedulingCrossPagePending = isSchedulingCrossPagePending;
         window.hmCompleteCrossPageSectionNav = completeCrossPageSectionNav;
-        window.hmCompleteEdsaCrossPageNav = completeEdsaCrossPageNav;
+        window.hmCompleteSchedulingCrossPageNav = completeSchedulingCrossPageNav;
         window.hmIsPageReloadNavigation = isPageReloadNavigation;
 
         initClickDelegation();

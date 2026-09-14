@@ -23,12 +23,20 @@ function normalizeIncomingCartItems(cartItems = []) {
             const quantity = Number(item.quantity);
             const price = Number(item.price);
             const giftCard = item.giftCard || item.gift_card || null;
+            const subscribe = Boolean(
+                item.subscribe === true || item.subscribe === 1 || item.subscribe === '1'
+            );
+            const intervalRaw = Number(
+                item.subscriptionIntervalDays ?? item.subscription_interval_days
+            );
             return {
                 product_id: Number(item.product_id ?? item.productId ?? item.id ?? 0),
                 variant_id: item.variant_id ?? item.variantId ?? null,
                 quantity: Number.isFinite(quantity) ? quantity : 0,
                 price: Number.isFinite(price) ? price : 0,
-                giftCard: giftCard && typeof giftCard === 'object' ? giftCard : null
+                giftCard: giftCard && typeof giftCard === 'object' ? giftCard : null,
+                subscribe,
+                subscriptionIntervalDays: Number.isFinite(intervalRaw) ? intervalRaw : 30,
             };
         })
         .filter((item) => item.product_id > 0 && item.quantity > 0 && item.price >= 0);
@@ -467,19 +475,31 @@ async function enrichCartLines(pool, normalizedItems) {
     let rows;
     try {
         [rows] = await pool.execute(
-            `SELECT id, name, sku, category_id, price, gift_card_type FROM products
+            `SELECT id, name, sku, category_id, price, gift_card_type,
+                    subscription_discount_percent
+               FROM products
               WHERE id IN (${ids.map(() => '?').join(',')})
                 AND is_active = 1 AND COALESCE(show_on_web, 1) = 1`,
             ids
         );
     } catch (e) {
         if (e.errno !== 1054 && e.code !== 'ER_BAD_FIELD_ERROR') throw e;
-        [rows] = await pool.execute(
-            `SELECT id, name, sku, category_id, price FROM products
-              WHERE id IN (${ids.map(() => '?').join(',')})
-                AND is_active = 1`,
-            ids
-        );
+        try {
+            [rows] = await pool.execute(
+                `SELECT id, name, sku, category_id, price, gift_card_type FROM products
+                  WHERE id IN (${ids.map(() => '?').join(',')})
+                    AND is_active = 1 AND COALESCE(show_on_web, 1) = 1`,
+                ids
+            );
+        } catch (e2) {
+            if (e2.errno !== 1054 && e2.code !== 'ER_BAD_FIELD_ERROR') throw e2;
+            [rows] = await pool.execute(
+                `SELECT id, name, sku, category_id, price FROM products
+                  WHERE id IN (${ids.map(() => '?').join(',')})
+                    AND is_active = 1`,
+                ids
+            );
+        }
     }
     const map = new Map(rows.map((r) => [r.id, r]));
 
@@ -517,6 +537,13 @@ async function enrichCartLines(pool, normalizedItems) {
             unitPrice = vp;
         }
 
+        if (item.subscribe) {
+            const discountPct = Number(p.subscription_discount_percent);
+            if (Number.isFinite(discountPct) && discountPct > 0) {
+                unitPrice = roundMoney(unitPrice * (1 - Math.min(100, discountPct) / 100));
+            }
+        }
+
         enriched.push({
             product_id: item.product_id,
             variant_id: item.variant_id != null ? Number(item.variant_id) || null : null,
@@ -526,7 +553,9 @@ async function enrichCartLines(pool, normalizedItems) {
             sku: p.sku,
             category_id: p.category_id,
             gift_card_type: p.gift_card_type || null,
-            giftCard: item.giftCard || null
+            giftCard: item.giftCard || null,
+            subscribe: Boolean(item.subscribe),
+            subscriptionIntervalDays: item.subscriptionIntervalDays || 30,
         });
     }
     return enriched;

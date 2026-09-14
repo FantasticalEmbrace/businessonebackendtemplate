@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Seed store hours + U.S. holiday schedule and sync closed holidays to EDSA blocked dates.
+ * Seed store hours + U.S. holiday schedule and sync closed holidays to Scheduling blocked dates.
  *
  *   cd backend && node scripts/seed-store-hours-holidays.js
  *   cd backend && node scripts/seed-store-hours-holidays.js --years=2026,2027
@@ -10,7 +10,7 @@
 const { loadBackendEnv } = require('../utils/dbConfig');
 const {
     buildUsHolidaySchedule,
-    syncClosedHolidaysToEdsa,
+    syncClosedHolidaysToScheduling,
 } = require('../utils/storeHolidaySchedule');
 
 loadBackendEnv();
@@ -69,11 +69,11 @@ async function main() {
             'json'
         );
 
-        const edsaSync = await syncClosedHolidaysToEdsa(pool, holidays);
+        const schedulingSync = await syncClosedHolidaysToScheduling(pool, holidays);
         console.log('Store hours saved.');
         console.log(`Holiday schedule saved (${holidays.length} entries).`);
         console.log(
-            `EDSA blocked dates: ${edsaSync.added} added, ${edsaSync.skipped} skipped (${edsaSync.existing} already in DB before sync).`
+            `Scheduling blocked dates: ${schedulingSync.added} added, ${schedulingSync.skipped} skipped (${schedulingSync.existing} already in DB before sync).`
         );
     } finally {
         await pool.end();

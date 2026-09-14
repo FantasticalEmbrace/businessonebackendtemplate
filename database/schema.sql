@@ -290,8 +290,8 @@ CREATE TABLE order_items (
     INDEX idx_product_id (product_id)
 );
 
--- EDSA (Electro Dermal Stress Analysis) service bookings
-CREATE TABLE edsa_bookings (
+-- Scheduling (Electro Dermal Stress Analysis) service bookings
+CREATE TABLE scheduling_bookings (
     id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NULL,
     first_name VARCHAR(100) NOT NULL,

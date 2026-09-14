@@ -187,9 +187,9 @@ class ErrorHandler {
                 const optionalEndpoints = [
                     '/sitemap.xml',
                     '/robots.txt',
-                    '/api/edsa/hours',
+                    '/api/scheduling/hours',
                     '/hours',
-                    'api/edsa/hours',
+                    'api/scheduling/hours',
                     '/categories/',
                     '/services/',
                     '/about.html',
@@ -242,9 +242,9 @@ class ErrorHandler {
                 const isOptional = [
                     '/sitemap.xml',
                     '/robots.txt',
-                    '/api/edsa/hours',
+                    '/api/scheduling/hours',
                     '/hours',
-                    'api/edsa/hours',
+                    'api/scheduling/hours',
                     '/categories/',
                     '/services/',
                     '/about.html',
@@ -429,7 +429,7 @@ class ErrorHandler {
         const optionalEndpoints = [
             '/sitemap.xml',
             '/robots.txt',
-            '/api/edsa/hours',
+            '/api/scheduling/hours',
             '/categories/',
             '/services/',
             '/about.html',
@@ -519,7 +519,7 @@ class ErrorHandler {
         const optionalEndpoints = [
             '/sitemap.xml',
             '/robots.txt',
-            '/api/edsa/hours',
+            '/api/scheduling/hours',
             '/categories/',
             '/services/',
             '/about.html',
@@ -568,7 +568,7 @@ class ErrorHandler {
         // Double-check one more time before logging
         const finalCheckUrl = urlLower || errorString || '';
         const isDefinitelyAnalytics = finalCheckUrl.includes('analytics') || finalCheckUrl.includes('/api/analytics');
-        const isDefinitelyOptional = ['sitemap', 'robots', 'edsa/hours', 'admin/auth/login', 'admin.html', 'api/admin'].some(term => finalCheckUrl.includes(term));
+        const isDefinitelyOptional = ['sitemap', 'robots', 'scheduling/hours', 'admin/auth/login', 'admin.html', 'api/admin'].some(term => finalCheckUrl.includes(term));
         const isDefinitelyProducts503 = finalCheckUrl.includes('/api/products') &&
             (finalCheckUrl.includes('503') ||
                 finalCheckUrl.includes('service unavailable') ||
@@ -636,7 +636,7 @@ class ErrorHandler {
             form.id === 'customer-login-form' ||
             form.id === 'customer-register-form' ||
             form.id === 'customer-forgot-password-form' ||
-            form.id === 'edsa-booking-form'
+            form.id === 'scheduling-booking-form'
         ) {
             return;
         }

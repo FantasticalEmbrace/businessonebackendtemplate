@@ -36,8 +36,8 @@ body > :is(
   .cart-overlay,
   .cookie-popup,
   .auth-modal,
-  .edsa-modal,
-  #edsa-booking-modal,
+  .scheduling-modal,
+  #scheduling-booking-modal,
   .newsletter-popup,
   #newsletter-popup,
   #hero-search-suggestions,
@@ -70,7 +70,7 @@ body > :is(
   position: fixed !important;
 }
 
-body > :is(#live-region, .sr-only, #edsa-nmi-wallet-stub) {
+body > :is(#live-region, .sr-only, #scheduling-nmi-wallet-stub) {
   position: absolute !important;
   width: 1px !important;
   height: 1px !important;

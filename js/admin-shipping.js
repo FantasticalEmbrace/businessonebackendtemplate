@@ -118,7 +118,7 @@
         const trackingNum = String(order.tracking_number || '').trim();
         const isPlaceholderTracking = window.HMTrackingLink?.isPlaceholderTracking
             ? window.HMTrackingLink.isPlaceholderTracking(trackingNum)
-            : /^HMTRK/i.test(trackingNum);
+            : /^(BOTRK|HMTRK)/i.test(trackingNum);
         const serviceLower = String(order.shipping_service || '').trim().toLowerCase();
         const isDropship =
             (trackingNum && !isPlaceholderTracking) ||

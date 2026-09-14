@@ -97,9 +97,9 @@ async function purgeCustomer(conn, email) {
             summary.deleted.orders = rOrders.affectedRows;
         }
 
-        if (await tableExists(conn, 'edsa_bookings')) {
-            const [r] = await conn.query(`DELETE FROM edsa_bookings WHERE user_id = ?`, [userId]);
-            summary.deleted.edsa_bookings = r.affectedRows;
+        if (await tableExists(conn, 'scheduling_bookings')) {
+            const [r] = await conn.query(`DELETE FROM scheduling_bookings WHERE user_id = ?`, [userId]);
+            summary.deleted.scheduling_bookings = r.affectedRows;
         }
 
         if (await tableExists(conn, 'product_reviews')) {

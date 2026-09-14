@@ -1,0 +1,369 @@
+/**
+ * Business One shop calendar — same grid patterns as ecommerce admin Scheduling calendar.
+ * Used on POS Calendar tab (view-only) and merchant-admin shop Schedule.
+ */
+
+.b1-shop-cal.scheduling-cal,
+.shop-cal.scheduling-cal {
+  --shop-cal-accent: #166534;
+  --shop-cal-accent-soft: #dcfce7;
+  --shop-cal-border: #e2e8f0;
+  --shop-cal-muted: #64748b;
+  --shop-cal-bg: #fff;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  background: var(--shop-cal-bg);
+  border: 1px solid var(--shop-cal-border);
+  border-radius: 12px;
+  padding: 0.85rem 1rem 1rem;
+  min-height: 0;
+}
+
+.b1-shop-cal .scheduling-cal-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.65rem;
+}
+
+.b1-shop-cal .scheduling-cal-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.b1-shop-cal .scheduling-cal-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--shop-cal-accent);
+  margin: 0 0 0 0.35rem;
+}
+
+.b1-shop-cal .scheduling-cal-views {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.b1-shop-cal .scheduling-cal-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--shop-cal-muted);
+  margin-bottom: 0.65rem;
+}
+
+.b1-shop-cal .scheduling-legend-dot {
+  display: inline-block;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  margin-right: 0.25rem;
+  vertical-align: middle;
+}
+
+.b1-shop-cal .scheduling-legend-dot.scheduling-ev-confirmed,
+.b1-shop-cal .scheduling-cal-event.scheduling-ev-confirmed {
+  background: #166534;
+}
+.b1-shop-cal .scheduling-legend-dot.scheduling-ev-pending {
+  background: #d97706;
+}
+.b1-shop-cal .scheduling-legend-dot.scheduling-ev-cancelled {
+  background: #94a3b8;
+}
+.b1-shop-cal .scheduling-legend-dot.scheduling-ev-completed {
+  background: #0ea5e9;
+}
+
+.b1-shop-cal .scheduling-cal-event.scheduling-ev-pending {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #fcd34d;
+}
+.b1-shop-cal .scheduling-cal-event.scheduling-ev-cancelled {
+  background: #f1f5f9;
+  color: #64748b;
+  text-decoration: line-through;
+}
+.b1-shop-cal .scheduling-cal-event.scheduling-ev-completed {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.b1-shop-cal .scheduling-cal-event {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.25;
+  padding: 0.2rem 0.35rem;
+  margin: 0.1rem 0;
+  border-radius: 4px;
+  border: 1px solid #bbf7d0;
+  background: var(--shop-cal-accent-soft);
+  color: #14532d;
+  cursor: default;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.b1-shop-cal[data-shop-cal-view-only='0'] .scheduling-cal-event {
+  cursor: pointer;
+}
+
+.b1-shop-cal .scheduling-cal-event.is-readonly {
+  pointer-events: none;
+}
+
+.b1-shop-cal .btn {
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.3rem 0.55rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #0f172a;
+  cursor: pointer;
+}
+
+.b1-shop-cal .btn-primary {
+  background: var(--shop-cal-accent);
+  border-color: var(--shop-cal-accent);
+  color: #fff;
+}
+
+.b1-shop-cal .btn-secondary:hover {
+  background: #f8fafc;
+}
+
+.b1-shop-cal .scheduling-month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--shop-cal-border);
+  border: 1px solid var(--shop-cal-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.b1-shop-cal .scheduling-month-dow {
+  background: #f8fafc;
+  padding: 0.35rem;
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--shop-cal-muted);
+  text-transform: uppercase;
+}
+
+.b1-shop-cal .scheduling-month-cell {
+  background: #fff;
+  min-height: 4.5rem;
+  padding: 0.25rem;
+  cursor: pointer;
+}
+
+.b1-shop-cal .scheduling-month-cell:hover {
+  background: #f0fdf4;
+}
+
+.b1-shop-cal .scheduling-month-other {
+  background: #f8fafc;
+  opacity: 0.7;
+}
+
+.b1-shop-cal .scheduling-month-today .scheduling-month-num {
+  background: var(--shop-cal-accent);
+  color: #fff;
+  border-radius: 999px;
+  width: 1.4rem;
+  height: 1.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.b1-shop-cal .scheduling-month-num {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 0.15rem;
+}
+
+.b1-shop-cal .scheduling-month-events {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+}
+
+.b1-shop-cal .scheduling-month-more {
+  font-size: 0.65rem;
+  color: var(--shop-cal-muted);
+  font-weight: 600;
+}
+
+.b1-shop-cal .scheduling-week-wrap {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+}
+
+.b1-shop-cal .scheduling-week-cols {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(6.5rem, 1fr));
+  gap: 1px;
+  background: var(--shop-cal-border);
+  flex: 1;
+  border: 1px solid var(--shop-cal-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.b1-shop-cal .scheduling-week-col {
+  background: #fff;
+  min-width: 0;
+}
+
+.b1-shop-cal .scheduling-week-today {
+  background: #f0fdf4;
+}
+
+.b1-shop-cal .scheduling-week-head {
+  padding: 0.4rem;
+  text-align: center;
+  border-bottom: 1px solid var(--shop-cal-border);
+  background: #f8fafc;
+}
+
+.b1-shop-cal .scheduling-week-dow {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--shop-cal-muted);
+  text-transform: uppercase;
+}
+
+.b1-shop-cal .scheduling-week-date {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.b1-shop-cal .scheduling-week-slot {
+  padding: 0.25rem;
+  border-bottom: 1px solid #f1f5f9;
+  min-height: 2.4rem;
+}
+
+.b1-shop-cal .scheduling-week-slot-time {
+  display: block;
+  font-size: 0.6rem;
+  color: var(--shop-cal-muted);
+  margin-bottom: 0.1rem;
+}
+
+.b1-shop-cal .scheduling-day-view {
+  border: 1px solid var(--shop-cal-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.b1-shop-cal .scheduling-day-row {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr;
+  border-bottom: 1px solid #f1f5f9;
+  min-height: 2.75rem;
+}
+
+.b1-shop-cal .scheduling-day-time {
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--shop-cal-muted);
+  background: #f8fafc;
+  border-right: 1px solid var(--shop-cal-border);
+}
+
+.b1-shop-cal .scheduling-day-events {
+  padding: 0.35rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.b1-shop-cal .scheduling-day-free {
+  color: #cbd5e1;
+}
+
+.b1-shop-cal .scheduling-day-empty {
+  margin: 0;
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--shop-cal-muted);
+}
+
+/* POS Calendar tab two-column layout */
+.shop-calendar-layout {
+  display: grid;
+  grid-template-columns: minmax(16rem, 22rem) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: stretch;
+  min-height: 0;
+  flex: 1;
+}
+
+@media (max-width: 900px) {
+  .shop-calendar-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.shop-calendar-layout .shop-calendar-day-panel {
+  margin: 0;
+  max-width: none;
+  min-height: 0;
+  overflow: auto;
+}
+
+.shop-calendar-layout .shop-calendar-grid-panel {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+}
+
+.shop-workspace-calendar {
+  max-width: none !important;
+}
+
+.shop-workspace-calendar .shop-calendar-panel {
+  max-width: none;
+}
+
+.demo-fp-appt-bay {
+  color: #166534;
+  font-weight: 600;
+}
+
+.demo-fp-appt-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.demo-fp-appt-list li {
+  padding: 0.55rem 0.65rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  font-size: 0.875rem;
+  line-height: 1.35;
+}

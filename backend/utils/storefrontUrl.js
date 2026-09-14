@@ -28,7 +28,7 @@ function getStorefrontPublicBaseUrl() {
     return base;
 }
 
-/** Admin panel URL for staff links in emails (OAuth callbacks, EDSA notifications). */
+/** Admin panel URL for staff links in emails (OAuth callbacks, Scheduling notifications). */
 function getAdminAppUrl() {
     const explicit = String(process.env.ADMIN_APP_URL || '').trim().replace(/\/+$/, '');
     if (explicit) return explicit;

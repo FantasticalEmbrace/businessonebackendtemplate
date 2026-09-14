@@ -69,7 +69,7 @@ function renderConfirmation(root, data) {
     const trackingRow = tracking && trackingUrl
         ? `<dt>Tracking</dt>
            <dd class="tracking-highlight"><a href="${escapeHtml(trackingUrl)}" target="_blank" rel="noopener">${escapeHtml(tracking)}</a></dd>`
-        : tracking && !/^HMTRK/i.test(tracking)
+        : tracking && !/^(BOTRK|HMTRK)/i.test(tracking)
           ? `<dt>Tracking number</dt><dd class="tracking-highlight">${escapeHtml(tracking)}</dd>`
           : null;
     const trackingSection = trackingRow != null

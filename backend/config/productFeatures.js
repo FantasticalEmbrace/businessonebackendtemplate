@@ -16,7 +16,7 @@ function getProductFeatures() {
         phonesEnabled: envBool('FEATURE_PHONES', true),
         loyaltyEnabled: envBool('FEATURE_LOYALTY', true),
         giftCardsEnabled: envBool('FEATURE_GIFT_CARDS', true),
-        edsaEnabled: envBool('FEATURE_EDSA', false),
+        schedulingEnabled: envBool('FEATURE_Scheduling', false),
         brand: {
             platformName: process.env.BRAND_PLATFORM_NAME || 'Business One',
             storeName: process.env.BRAND_STORE_NAME || 'Business One Merchant',
@@ -34,7 +34,7 @@ function getProductFeatures() {
 }
 
 /** Nav sections that require a website build */
-const WEBSITE_LOCKED_SECTIONS = ['marketing', 'edsa'];
+const WEBSITE_LOCKED_SECTIONS = ['marketing', 'scheduling'];
 
 module.exports = {
     getProductFeatures,

@@ -2,7 +2,7 @@
 
 require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
 
-const { sendBookingReceivedEmail } = require('../services/edsaAppointmentEmail');
+const { sendBookingReceivedEmail } = require('../services/schedulingAppointmentEmail');
 
 const to = String(process.argv[2] || process.env.SMTP_USER || '').trim();
 if (!to) {

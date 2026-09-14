@@ -1,6 +1,6 @@
 /**
  * Business One — unified popup / modal / overlay branding
- * Load after component popup CSS (age-gate, customer-auth, edsa-booking, styles.css modals).
+ * Load after component popup CSS (age-gate, customer-auth, scheduling-booking, styles.css modals).
  */
 
 :root {
@@ -105,8 +105,8 @@
 .acct-modal,
 .acct-modal-backdrop .acct-modal,
 .wishlist-modal.acct-modal,
-.edsa-modal-content,
-#edsa-booking-modal .edsa-modal-content {
+.scheduling-modal-content,
+#scheduling-booking-modal .scheduling-modal-content {
   border-radius: var(--hm-popup-card-radius);
   box-shadow: var(--hm-popup-card-shadow);
 }
@@ -117,8 +117,8 @@
 .gdpr-modal-header h3,
 .cookie-popup-title,
 .acct-modal h3,
-.edsa-modal-header h2,
-#edsa-booking-modal .edsa-modal-header h2 {
+.scheduling-modal-header h2,
+#scheduling-booking-modal .scheduling-modal-header h2 {
   font-family: var(--hm-popup-title-font);
   color: var(--hm-popup-title-color);
 }
@@ -132,7 +132,7 @@
 .auth-modal::before,
 .cookie-popup-overlay,
 .newsletter-popup-overlay,
-.edsa-modal-overlay,
+.scheduling-modal-overlay,
 .modal,
 .gdpr-modal-overlay,
 .hm-wl-picker-dim,
@@ -206,7 +206,7 @@
 
 /* Popup primary buttons inside overlays */
 .auth-modal-body .btn-primary,
-.edsa-modal-body .btn-primary,
+.scheduling-modal-body .btn-primary,
 .acct-modal-actions .btn-primary:not(.btn-danger),
 .cookie-popup-actions .btn-primary {
   border-radius: var(--hm-popup-btn-radius);
@@ -265,8 +265,8 @@
     max-width: calc(100vw - 1.5rem);
   }
 
-  .edsa-modal-content,
-  #edsa-booking-modal .edsa-modal-content {
+  .scheduling-modal-content,
+  #scheduling-booking-modal .scheduling-modal-content {
     width: calc(100vw - 1.5rem) !important;
     max-height: calc(100dvh - 1.5rem) !important;
   }
@@ -291,16 +291,16 @@
   .auth-modal-header,
   .modal-header,
   .gdpr-modal-header,
-  .edsa-modal-header,
-  #edsa-booking-modal .edsa-modal-header {
+  .scheduling-modal-header,
+  #scheduling-booking-modal .scheduling-modal-header {
     padding: var(--space-4) var(--space-5);
   }
 
   .auth-modal-body,
   .modal-body,
   .gdpr-modal-body,
-  .edsa-modal-body,
-  #edsa-booking-modal .edsa-modal-body {
+  .scheduling-modal-body,
+  #scheduling-booking-modal .scheduling-modal-body {
     padding: var(--space-4) var(--space-5) var(--space-5);
   }
 
@@ -337,8 +337,8 @@
     max-width: 520px;
   }
 
-  .edsa-modal-content,
-  #edsa-booking-modal .edsa-modal-content {
+  .scheduling-modal-content,
+  #scheduling-booking-modal .scheduling-modal-content {
     max-width: min(920px, calc(100vw - 4rem)) !important;
   }
 }
@@ -380,7 +380,7 @@
   .newsletter-popup-content,
   .modal-content,
   .auth-modal-content,
-  .edsa-modal-content {
+  .scheduling-modal-content {
     transition: none;
   }
 }

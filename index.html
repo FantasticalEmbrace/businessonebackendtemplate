@@ -139,24 +139,24 @@
     <link rel="stylesheet" href="css/hm-accent-links.css">
     <link rel="stylesheet" href="css/hm-close-controls.css">
     <link rel="stylesheet" href="css/site-promo-banner.css?v=brand-sync-5">
-    <link rel="stylesheet" href="css/edsa-booking.css?v=16">
+    <link rel="stylesheet" href="css/scheduling-booking.css?v=16">
     <link rel="stylesheet" href="css/hm-popups-brand.css?v=brand-sync-5">
     <link rel="stylesheet" href="css/notification-permission.css?v=1">
     <link rel="stylesheet" href="css/hero-image-fix.css?v=1">
-    <style id="edsa-booking-viewport-fix">
-        #edsa-booking-modal.edsa-modal:not(.show) {
+    <style id="scheduling-booking-viewport-fix">
+        #scheduling-booking-modal.scheduling-modal:not(.show) {
             opacity: 0 !important;
             visibility: hidden !important;
             pointer-events: none !important;
         }
 
-        #edsa-booking-modal.edsa-modal.show {
+        #scheduling-booking-modal.scheduling-modal.show {
             opacity: 1 !important;
             visibility: visible !important;
             pointer-events: auto !important;
         }
 
-        #edsa-booking-modal.edsa-modal {
+        #scheduling-booking-modal.scheduling-modal {
             position: fixed !important;
             inset: 0 !important;
             display: flex !important;
@@ -167,7 +167,7 @@
             transform: none !important;
         }
 
-        #edsa-booking-modal .edsa-modal-content {
+        #scheduling-booking-modal .scheduling-modal-content {
             margin: 0 !important;
             max-height: min(90vh, 90dvh) !important;
             overflow-y: auto !important;
@@ -247,7 +247,7 @@
                     <ul class="nav-menu" id="nav-menu" role="menubar">
                         <li role="none"><a href="#home" role="menuitem">Home</a></li>
                         <li role="none"><a href="products.html" role="menuitem">Products</a></li>
-                        <li role="none"><a href="#edsa-service" role="menuitem" class="edsa-nav-link">EDSA Service</a>
+                        <li role="none"><a href="#scheduling-service" role="menuitem" class="scheduling-nav-link">Scheduling Service</a>
                         </li>
                         <li role="none"><a href="about.html" role="menuitem">About</a></li>
                         <li role="none"><a href="#contact" role="menuitem">Contact</a></li>
@@ -342,7 +342,7 @@
                                 <a href="products.html" class="btn btn-accent">All Products</a>
                                 <a href="brands.html" class="btn btn-accent">Shop by Brand</a>
                                 <a href="categories.html" class="btn btn-accent">Shop by Condition</a>
-                                <a href="#edsa-service" class="btn btn-accent">EDSA Service</a>
+                                <a href="#scheduling-service" class="btn btn-accent">Scheduling Service</a>
                             </div>
                         </div>
                     </div>
@@ -376,45 +376,45 @@
             </div>
         </section>
 
-        <!-- EDSA Service Section -->
-        <section class="edsa-service" id="edsa-service" aria-labelledby="edsa-heading">
+        <!-- Scheduling Service Section -->
+        <section class="scheduling-service" id="scheduling-service" aria-labelledby="scheduling-heading">
             <div class="container">
-                <div class="edsa-content">
-                    <div class="edsa-text">
-                        <h2 id="edsa-heading">EDSA - Electro Dermal Stress Analysis</h2>
-                        <p class="edsa-description">
-                            Experience our professional EDSA service - a non-invasive health assessment technique
+                <div class="scheduling-content">
+                    <div class="scheduling-text">
+                        <h2 id="scheduling-heading">Scheduling - Electro Dermal Stress Analysis</h2>
+                        <p class="scheduling-description">
+                            Experience our professional Scheduling service - a non-invasive health assessment technique
                             that provides valuable insights into your body's stress levels and overall wellness.
                         </p>
-                        <div class="edsa-features">
-                            <div class="edsa-feature">
+                        <div class="scheduling-features">
+                            <div class="scheduling-feature">
                                 <i class="fas fa-stethoscope" aria-hidden="true"></i>
                                 <span>Non-invasive assessment</span>
                             </div>
-                            <div class="edsa-feature">
+                            <div class="scheduling-feature">
                                 <i class="fas fa-chart-line" aria-hidden="true"></i>
                                 <span>Detailed stress analysis</span>
                             </div>
-                            <div class="edsa-feature">
+                            <div class="scheduling-feature">
                                 <i class="fas fa-user-md" aria-hidden="true"></i>
                                 <span>Professional consultation</span>
                             </div>
                         </div>
-                        <div class="edsa-pricing">
-                            <span class="edsa-price">$75.00</span>
-                            <span class="edsa-price-note">per session</span>
+                        <div class="scheduling-pricing">
+                            <span class="scheduling-price">$75.00</span>
+                            <span class="scheduling-price-note">per session</span>
                         </div>
-                        <button type="button" class="btn btn-primary edsa-book-btn" id="edsa-book-btn">
+                        <button type="button" class="btn btn-primary scheduling-book-btn" id="scheduling-book-btn">
                             <i class="fas fa-calendar-plus" aria-hidden="true"></i>
-                            Book EDSA Session
+                            Book Scheduling Session
                         </button>
-                        <p class="edsa-manage-link" id="edsa-nav-target">
-                            <a href="edsa-manage-appointment.html">Change or cancel an existing appointment</a>
+                        <p class="scheduling-manage-link" id="scheduling-nav-target">
+                            <a href="scheduling-manage-appointment.html">Change or cancel an existing appointment</a>
                         </p>
                     </div>
-                    <div class="edsa-image">
-                        <img src="images/edsa.jpg" alt="EDSA health assessment service" loading="eager"
-                            data-skip-error-handling="true" id="edsa-main-image">
+                    <div class="scheduling-image">
+                        <img src="images/scheduling.jpg" alt="Scheduling health assessment service" loading="eager"
+                            data-skip-error-handling="true" id="scheduling-main-image">
                     </div>
                 </div>
             </div>
@@ -892,23 +892,24 @@
     <script src="js/product-search-utils.js?v=3" defer></script>
     <script src="js/hm-search-input.js?v=1" defer></script>
     <script src="js/hero-product-search.js?v=8" defer></script>
+    <script src="js/cart-subscription-ui.js?v=subscribe-save-5" defer></script>
     <script src="script.js?v=hero-search-3" defer></script>
     <script src="js/phone-us-format.js" defer></script>
     <script src="js/address-autocomplete.js" defer></script>
-    <script src="js/edsa-ui.js" defer></script>
+    <script src="js/scheduling-ui.js" defer></script>
     <script>
         (function () {
-            var modal = document.getElementById('edsa-booking-modal');
+            var modal = document.getElementById('scheduling-booking-modal');
             if (
                 modal &&
-                (modal.getAttribute('data-edsa-modal-version') !== '5' ||
-                    !modal.querySelector('#edsa-step-schedule'))
+                (modal.getAttribute('data-scheduling-modal-version') !== '5' ||
+                    !modal.querySelector('#scheduling-step-schedule'))
             ) {
                 modal.remove();
             }
         })();
     </script>
-    <script src="js/edsa-booking.js?v=23" defer></script>
+    <script src="js/scheduling-booking.js?v=23" defer></script>
     <script src="js/newsletter-popup.js" defer></script>
     <script src="js/google-reviews-data.js?v=appeal-truth-1" defer></script>
     <script src="js/testimonials-carousel.js" defer></script>
@@ -919,8 +920,8 @@
     <script src="gdpr-compliance.js?v=20260617a" defer></script>
     <script src="ccpa-compliance.js" defer></script>
 
-    <!-- Ensure EDSA image loads correctly -->
-    <script src="js/edsa-image-handler.js?v=2"></script>
+    <!-- Ensure Scheduling image loads correctly -->
+    <script src="js/scheduling-image-handler.js?v=2"></script>
 </body>
 
 </html>

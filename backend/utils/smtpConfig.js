@@ -1,6 +1,6 @@
 'use strict';
 
-/** True when SMTP env vars are set enough to send mail (EDSA, orders, password reset). */
+/** True when SMTP env vars are set enough to send mail (Scheduling, orders, password reset). */
 function isSmtpConfigured() {
     const smtpHost = String(process.env.SMTP_HOST || process.env.EMAIL_HOST || '').trim();
     const smtpUser = String(process.env.SMTP_USER || process.env.EMAIL_USER || '').trim();

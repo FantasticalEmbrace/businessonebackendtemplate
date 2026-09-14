@@ -1,5 +1,5 @@
 // Admin panel routes
-// Complete admin interface for managing products, orders, customers, and EDSA bookings
+// Complete admin interface for managing products, orders, customers, and Scheduling bookings
 
 const express = require('express');
 const router = express.Router();
@@ -13,6 +13,7 @@ const logger = require('../utils/logger');
 const { saveProductVariants } = require('../utils/saveProductVariants');
 const { sanitizeLegacyProductImageUrl } = require('../utils/catalogOverrides');
 const { normalizeScannedSku, generateUniqueProductSku, skuExists } = require('../utils/generateProductSku');
+const { deleteOrArchiveProduct } = require('../utils/deleteOrArchiveProduct');
 
 function parseJsonField(value, fallback = null) {
     if (value == null || value === '') return fallback;
@@ -27,7 +28,7 @@ const {
     sendAdminResolutionEmail,
     sendStaffCancelledCustomerEmail,
     sendStaffRescheduledCustomerEmail
-} = require('../services/edsaAppointmentEmail');
+} = require('../services/schedulingAppointmentEmail');
 const {
     loadBookingRowById,
     deleteBookingCalendarEvent,
@@ -35,12 +36,12 @@ const {
     bookingEmailPayload,
     appointmentSnapshot,
     normalizeDateYmd
-} = require('../utils/edsaBookingOps');
+} = require('../utils/schedulingBookingOps');
 const {
     listBlockedDates,
     addBlockedDate,
     removeBlockedDate
-} = require('../services/edsaBlockedDates');
+} = require('../services/schedulingBlockedDates');
 
 // Configure multer for brand logo uploads
 const brandLogoStorage = multer.diskStorage({
@@ -699,7 +700,7 @@ router.get('/dashboard/stats', ...adminAuth, async (req, res) => {
                 total_users: 0,
                 new_users_30_days: 0
             },
-            edsa: {
+            scheduling: {
                 total_bookings: 0,
                 pending_bookings: 0,
                 confirmed_bookings: 0,
@@ -721,6 +722,7 @@ router.get('/dashboard/stats', ...adminAuth, async (req, res) => {
                 COUNT(CASE WHEN is_featured = 1 THEN 1 END) as featured_products,
                 COUNT(CASE WHEN track_inventory = 1 AND is_active = 1 AND inventory_quantity <= low_stock_threshold THEN 1 END) as low_stock_products
             FROM products
+            WHERE deleted_at IS NULL
         `);
             if (productStats && productStats[0]) {
                 stats.products = productStats[0];
@@ -763,21 +765,21 @@ router.get('/dashboard/stats', ...adminAuth, async (req, res) => {
             logger.warn('Users table error in dashboard stats (may not exist):', userError.message);
         }
 
-        // Get EDSA statistics - handle gracefully if table doesn't exist
+        // Get Scheduling statistics - handle gracefully if table doesn't exist
         try {
-            const [edsaStats] = await req.pool.execute(`
+            const [schedulingStats] = await req.pool.execute(`
             SELECT 
                 COUNT(*) as total_bookings,
                 COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending_bookings,
                 COUNT(CASE WHEN status = 'confirmed' THEN 1 END) as confirmed_bookings,
                 COUNT(CASE WHEN created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) THEN 1 END) as new_bookings_30_days
-            FROM edsa_bookings
+            FROM scheduling_bookings
         `);
-            if (edsaStats && edsaStats[0]) {
-                stats.edsa = edsaStats[0];
+            if (schedulingStats && schedulingStats[0]) {
+                stats.scheduling = schedulingStats[0];
             }
-        } catch (edsaError) {
-            logger.warn('EDSA bookings table error in dashboard stats (may not exist):', edsaError.message);
+        } catch (schedulingError) {
+            logger.warn('Scheduling bookings table error in dashboard stats (may not exist):', schedulingError.message);
         }
 
         // Get recent activity - handle gracefully if tables don't exist
@@ -823,7 +825,7 @@ router.get('/dashboard/stats', ...adminAuth, async (req, res) => {
                     appointment_date,
                     status,
                     created_at
-                FROM edsa_bookings
+                FROM scheduling_bookings
                 ORDER BY created_at DESC
                 LIMIT 5
             `);
@@ -875,6 +877,10 @@ router.get('/products', ...adminAuth, async (req, res) => {
 
         let whereConditions = [];
         let queryParams = [];
+
+        // Soft-deleted (admin Delete with history) stay out of the catalog list;
+        // order_items still retain product snapshots for Orders.
+        whereConditions.push('p.deleted_at IS NULL');
 
         if (search) {
             const searchTerm = `%${search}%`;
@@ -1081,13 +1087,31 @@ router.post('/products/bulk', ...adminAuth, requirePermission('manager'), async 
                 if (!hasMinAdminRole(req.admin?.role, 'admin')) {
                     return res.status(403).json({ error: 'Admin permission required to delete products.' });
                 }
-                const [result] = await req.pool.execute(
-                    `DELETE FROM products WHERE id IN (${placeholders})`,
-                    productIds
-                );
+                let deleted = 0;
+                let archived = 0;
+                const connection = await req.pool.getConnection();
+                try {
+                    await connection.beginTransaction();
+                    for (const productId of productIds) {
+                        const result = await deleteOrArchiveProduct(connection, productId);
+                        if (result.mode === 'deleted') deleted += 1;
+                        else archived += 1;
+                    }
+                    await connection.commit();
+                } catch (bulkErr) {
+                    await connection.rollback();
+                    throw bulkErr;
+                } finally {
+                    connection.release();
+                }
+                const parts = [];
+                if (deleted) parts.push(`deleted ${deleted}`);
+                if (archived) parts.push(`archived ${archived} (had order/inventory history)`);
                 return res.json({
-                    message: `Deleted ${result.affectedRows} product(s).`,
-                    affected: result.affectedRows
+                    message: `Updated ${deleted + archived} product(s) — ${parts.join(', ') || 'no changes'}.`,
+                    affected: deleted + archived,
+                    deleted,
+                    archived,
                 });
             }
 
@@ -1158,6 +1182,7 @@ router.post('/products', ...adminAuth, requirePermission('manager'), productVali
             sku, name, short_description, long_description, brand_id, category_id,
             price, compare_price, cost_price, weight, inventory_quantity, low_stock_threshold,
             is_active, is_featured, show_on_web, is_cannabis, coa_url, coa_updated_at,
+            subscription_eligible, subscription_interval_days, subscription_discount_percent,
             health_categories, images, variants, variant_option_groups
         } = req.body;
 
@@ -1217,12 +1242,23 @@ router.post('/products', ...adminAuth, requirePermission('manager'), productVali
 
             // Insert product
             const { merchantIdFromReq } = require('../utils/merchantScope');
+            const { normalizeProductFieldValue } = require('../utils/productFieldNormalizer');
+            const subEligible = normalizeProductFieldValue('subscription_eligible', subscription_eligible);
+            const subIntervalDays = normalizeProductFieldValue(
+                'subscription_interval_days',
+                subscription_interval_days
+            );
+            const subDiscountPct = normalizeProductFieldValue(
+                'subscription_discount_percent',
+                subscription_discount_percent
+            );
             const merchantId = merchantIdFromReq(req);
             const productCols = `sku, name, slug, short_description, long_description,
                     brand_id, category_id, price, compare_price, cost_price, weight,
                     inventory_quantity, low_stock_threshold, is_active, is_featured, show_on_web,
-                    is_cannabis, coa_url, coa_updated_at`;
-            const productVals = `?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?`;
+                    is_cannabis, coa_url, coa_updated_at,
+                    subscription_eligible, subscription_interval_days, subscription_discount_percent`;
+            const productVals = `?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?`;
             const productParams = [
                 finalSku,
                 name,
@@ -1242,7 +1278,10 @@ router.post('/products', ...adminAuth, requirePermission('manager'), productVali
                 showOnWeb,
                 isCannabis,
                 coaUrlValue,
-                coaDateValue
+                coaDateValue,
+                subEligible === undefined ? false : subEligible,
+                subIntervalDays === undefined || subIntervalDays === null ? 30 : subIntervalDays,
+                subDiscountPct === undefined ? null : subDiscountPct
             ];
             const insertCols = merchantId ? `${productCols}, merchant_id` : productCols;
             const insertVals = merchantId ? `${productVals}, ?` : productVals;
@@ -1625,6 +1664,7 @@ router.get('/products/:id', ...adminAuth, async (req, res) => {
                 p.price, p.compare_price, p.cost_price, p.cost_synced_at,
                 p.weight, p.inventory_quantity, p.low_stock_threshold,
                 p.is_active, p.is_featured, p.show_on_web, p.is_cannabis, p.coa_url, p.coa_updated_at,
+                p.subscription_eligible, p.subscription_interval_days, p.subscription_discount_percent,
                 p.gift_card_type,
                 p.variant_option_groups,
                 p.created_at, p.updated_at,
@@ -1668,7 +1708,7 @@ router.get('/products/:id', ...adminAuth, async (req, res) => {
             const [variants] = await req.pool.execute(`
                 SELECT id, sku, name, price, compare_price, cost_price, image_url, inventory_quantity, weight, is_active, sort_order, attributes
                 FROM product_variants
-                WHERE product_id = ?
+                WHERE product_id = ? AND is_active = 1
                 ORDER BY sort_order ASC
             `, [id]);
             product.variants = (variants || []).map((row) => ({
@@ -1848,24 +1888,30 @@ router.put('/products/:id', ...adminAuth, requirePermission('manager'), async (r
     }
 });
 
-// Delete Product
+// Delete Product (hard-delete when safe; otherwise archive so FK history never 500s)
 router.delete('/products/:id', ...adminAuth, requirePermission('admin'), async (req, res) => {
+    const connection = await req.pool.getConnection();
     try {
         const { id } = req.params;
-
-        const [result] = await req.pool.execute(
-            'DELETE FROM products WHERE id = ?',
-            [id]
-        );
-
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'Product not found' });
-        }
-
-        res.json({ message: 'Product deleted successfully' });
+        await connection.beginTransaction();
+        const result = await deleteOrArchiveProduct(connection, id);
+        await connection.commit();
+        res.json({
+            message: result.message,
+            mode: result.mode,
+            affected: result.affected,
+        });
     } catch (error) {
+        try {
+            await connection.rollback();
+        } catch (_) { /* ignore */ }
+        if (error.code === 'NOT_FOUND' || error.code === 'INVALID_PRODUCT_ID') {
+            return res.status(404).json({ error: error.message || 'Product not found' });
+        }
         logger.error('Product deletion error:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: 'Failed to delete product. Please try again.' });
+    } finally {
+        connection.release();
     }
 });
 
@@ -2443,17 +2489,38 @@ router.get('/orders/:id', ...adminAuth, async (req, res) => {
         let payment_tenders = [];
         try {
             const [tenderRows] = await req.pool.execute(
-                `SELECT tender_type, amount, loyalty_points, gift_card_id,
-                        cash_tendered, cash_change, check_number,
-                        terminal_last_four, terminal_auth_code, payment_reference, metadata
-                   FROM order_payment_tenders
-                  WHERE order_id = ?
-                  ORDER BY id ASC`,
+                `SELECT opt.tender_type, opt.amount, opt.status, opt.loyalty_points, opt.gift_card_id,
+                        opt.cash_tendered, opt.cash_change, opt.check_number,
+                        opt.terminal_last_four, opt.terminal_auth_code, opt.payment_reference, opt.metadata,
+                        gc.code AS gift_card_code
+                   FROM order_payment_tenders opt
+                   LEFT JOIN gift_cards gc ON gc.id = opt.gift_card_id
+                  WHERE opt.order_id = ?
+                  ORDER BY opt.id ASC`,
                 [orderId]
             );
             payment_tenders = tenderRows || [];
         } catch (e) {
-            if (e.code !== 'ER_NO_SUCH_TABLE') throw e;
+            if (e.code === 'ER_NO_SUCH_TABLE') {
+                payment_tenders = [];
+            } else if (e.code === 'ER_BAD_FIELD_ERROR') {
+                try {
+                    const [fallbackRows] = await req.pool.execute(
+                        `SELECT tender_type, amount, loyalty_points, gift_card_id,
+                                cash_tendered, cash_change, check_number,
+                                terminal_last_four, terminal_auth_code, payment_reference, metadata
+                           FROM order_payment_tenders
+                          WHERE order_id = ?
+                          ORDER BY id ASC`,
+                        [orderId]
+                    );
+                    payment_tenders = fallbackRows || [];
+                } catch (e2) {
+                    if (e2.code !== 'ER_NO_SUCH_TABLE') throw e2;
+                }
+            } else {
+                throw e;
+            }
         }
 
         const { enrichOrderTracking } = require('../utils/trackingUrl');
@@ -2787,8 +2854,8 @@ router.post('/orders/:id/refund', ...adminAuth, requirePermission('manager'), as
     }
 });
 
-// EDSA Booking Management
-router.get('/edsa/bookings', ...adminAuth, async (req, res) => {
+// Scheduling Booking Management
+router.get('/scheduling/bookings', ...adminAuth, async (req, res) => {
     try {
         const { page = 1, limit = 20, status, date, from, to } = req.query;
         const pageInt = parseInt(page, 10) || 1;
@@ -2836,7 +2903,7 @@ router.get('/edsa/bookings', ...adminAuth, async (req, res) => {
                 confirmed_date, confirmed_time, status, notes, admin_notes, created_at,
                 customer_request_type, customer_request_notes,
                 requested_date, requested_time, customer_request_at
-            FROM edsa_bookings
+            FROM scheduling_bookings
             ${whereClause}
             ORDER BY preferred_date ASC, preferred_time ASC
             LIMIT ${limitParam} OFFSET ${offsetParam}
@@ -2847,13 +2914,13 @@ router.get('/edsa/bookings', ...adminAuth, async (req, res) => {
 
         res.json({ bookings });
     } catch (error) {
-        logger.error('Admin EDSA bookings fetch error:', error);
+        logger.error('Admin Scheduling bookings fetch error:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
 
-// Update EDSA booking (staff) — syncs calendar and emails customer when changed
-router.put('/edsa/bookings/:id', ...adminAuth, async (req, res) => {
+// Update Scheduling booking (staff) — syncs calendar and emails customer when changed
+router.put('/scheduling/bookings/:id', ...adminAuth, async (req, res) => {
     try {
         const bookingId = Number(req.params.id);
         if (!Number.isFinite(bookingId) || bookingId < 1) {
@@ -2894,7 +2961,7 @@ router.put('/edsa/bookings/:id', ...adminAuth, async (req, res) => {
         const clearCalendarOnCancel = nowCancelled && !wasCancelled;
 
         await req.pool.execute(
-            `UPDATE edsa_bookings
+            `UPDATE scheduling_bookings
                 SET status = ?,
                     preferred_date = ?,
                     preferred_time = ?,
@@ -2968,25 +3035,25 @@ router.put('/edsa/bookings/:id', ...adminAuth, async (req, res) => {
             customerNotified: Boolean(notifyCustomer)
         });
     } catch (error) {
-        logger.error('EDSA booking update error:', error);
+        logger.error('Scheduling booking update error:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
 
-// EDSA blocked dates (staff closes calendar days to online booking)
-router.get('/edsa/blocked-dates', ...adminAuth, async (req, res) => {
+// Scheduling blocked dates (staff closes calendar days to online booking)
+router.get('/scheduling/blocked-dates', ...adminAuth, async (req, res) => {
     try {
         const from = req.query.from || null;
         const to = req.query.to || null;
         const blockedDates = await listBlockedDates(req.pool, from, to);
         res.json({ blockedDates });
     } catch (error) {
-        logger.error('Admin EDSA blocked dates fetch error:', error);
+        logger.error('Admin Scheduling blocked dates fetch error:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
 
-router.post('/edsa/blocked-dates', ...adminAuth, async (req, res) => {
+router.post('/scheduling/blocked-dates', ...adminAuth, async (req, res) => {
     try {
         const { date, reason } = req.body || {};
         const created = await addBlockedDate(req.pool, date, reason, req.admin?.id || null);
@@ -2998,12 +3065,12 @@ router.post('/edsa/blocked-dates', ...adminAuth, async (req, res) => {
         if (error.status === 400) {
             return res.status(400).json({ error: error.message });
         }
-        logger.error('Admin EDSA block date error:', error);
+        logger.error('Admin Scheduling block date error:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
 
-router.delete('/edsa/blocked-dates/:date', ...adminAuth, async (req, res) => {
+router.delete('/scheduling/blocked-dates/:date', ...adminAuth, async (req, res) => {
     try {
         const removed = await removeBlockedDate(req.pool, req.params.date);
         res.json({ message: 'Date unblocked', ...removed });
@@ -3014,7 +3081,7 @@ router.delete('/edsa/blocked-dates/:date', ...adminAuth, async (req, res) => {
         if (error.status === 400) {
             return res.status(400).json({ error: error.message });
         }
-        logger.error('Admin EDSA unblock date error:', error);
+        logger.error('Admin Scheduling unblock date error:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -3693,6 +3760,126 @@ router.post('/import-products', ...adminAuth, requirePermission('manager'), (req
         });
     } catch (error) {
         logger.error('Import error:', error);
+        res.status(500).json({ error: 'Failed to import products: ' + error.message });
+    }
+});
+
+/**
+ * AI-assisted column mapping — figures out what each COLUMN in an uploaded
+ * CSV means (name, sku/barcode, price, cost, quantity, etc.) before any row
+ * is turned into a product. Not every POS exports the same column names, or
+ * even the same set of columns, so this runs a free deterministic alias
+ * match first and only calls AI for headers that don't match anything we
+ * already know. Only reads the header row + a few sample rows — no import,
+ * no database writes.
+ */
+router.post('/import-products/map-columns', ...adminAuth, requirePermission('manager'), (req, res, next) => {
+    uploadProductCsv.single('csvFile')(req, res, (err) => {
+        if (err) {
+            return res.status(400).json({ error: err.message || 'Invalid CSV upload' });
+        }
+        next();
+    });
+}, async (req, res) => {
+    try {
+        if (!req.file?.buffer?.length) {
+            return res.status(400).json({ error: 'CSV file is required' });
+        }
+        const importer = new ProductImporter(req.pool);
+        const preview = await importer.parsePreviewRows(req.file.buffer, 6);
+        if (importer.ownsPool) await importer.close();
+
+        const { proposeColumnMapping, CANONICAL_FIELDS } = require('../services/productImportColumnMap');
+        const useAi = req.query.ai !== '0' && req.body?.ai !== '0';
+        const result = await proposeColumnMapping(preview.headers, preview.rows, { useAi });
+
+        res.json({
+            headers: preview.headers,
+            sampleRows: preview.rows.slice(0, 3),
+            canonicalFields: CANONICAL_FIELDS,
+            ...result
+        });
+    } catch (error) {
+        logger.error('Column mapping error:', error);
+        res.status(500).json({ error: 'Failed to read CSV columns: ' + error.message });
+    }
+});
+
+/**
+ * Review a CSV before writing anything — flags rows with a real problem
+ * (bad barcode checksum, barcode already used by a different product,
+ * missing image on a web-visible item, missing price, duplicate row).
+ * Clean rows are returned separately so the UI can import them without
+ * making the merchant look at a big list. No database writes happen here.
+ */
+router.post('/import-products/review', ...adminAuth, requirePermission('manager'), (req, res, next) => {
+    uploadProductCsv.single('csvFile')(req, res, (err) => {
+        if (err) {
+            return res.status(400).json({ error: err.message || 'Invalid CSV upload' });
+        }
+        next();
+    });
+}, async (req, res) => {
+    try {
+        if (!req.file?.buffer?.length) {
+            return res.status(400).json({ error: 'CSV file is required' });
+        }
+
+        let columnMapping = null;
+        if (req.body?.columnMapping) {
+            try {
+                const parsed = JSON.parse(req.body.columnMapping);
+                if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) columnMapping = parsed;
+            } catch {
+                /* ignore malformed mapping — falls back to alias auto-detection */
+            }
+        }
+
+        const importer = new ProductImporter(req.pool);
+        const rows = await importer.parseCSVBuffer(req.file.buffer, columnMapping);
+        if (importer.ownsPool) await importer.close();
+
+        const { reviewImportRows } = require('../services/productImportReview');
+        const enrich = req.query.enrich !== '0' && req.body?.enrich !== '0';
+        const result = await reviewImportRows(req.pool, rows, { enrich });
+
+        res.json(result);
+    } catch (error) {
+        logger.error('Import review error:', error);
+        res.status(500).json({ error: 'Failed to review CSV: ' + error.message });
+    }
+});
+
+/**
+ * Commit a previously-reviewed set of rows (auto-passed rows plus any
+ * flagged rows the merchant chose to keep, with their edits applied).
+ * Reuses the same write path as the direct CSV import.
+ */
+router.post('/import-products/commit', ...adminAuth, requirePermission('manager'), async (req, res) => {
+    try {
+        const rows = Array.isArray(req.body?.rows) ? req.body.rows : null;
+        if (!rows || !rows.length) {
+            return res.status(400).json({ error: 'No rows to import' });
+        }
+        if (rows.length > 20000) {
+            return res.status(400).json({ error: 'Too many rows in one commit' });
+        }
+
+        const importer = new ProductImporter(req.pool);
+        const stats = await importer.importProductList(rows);
+
+        res.json({
+            message: 'Product import completed',
+            imported: stats.success,
+            created: stats.created,
+            updated: stats.updated,
+            total: stats.total,
+            errors: stats.errors,
+            skipped: stats.skipped,
+            errorDetails: stats.errorDetails
+        });
+    } catch (error) {
+        logger.error('Import commit error:', error);
         res.status(500).json({ error: 'Failed to import products: ' + error.message });
     }
 });

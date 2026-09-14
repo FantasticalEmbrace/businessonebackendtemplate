@@ -9,6 +9,37 @@ class InventoryService {
     }
 
     /**
+     * Verify tracked products have enough stock before checkout / card capture.
+     * @param {Array<{ productId: number, variantId?: number|null, quantity: number }>} orderItems
+     * @param {{ connection?: import('mysql2/promise').PoolConnection, forUpdate?: boolean, allowOversell?: boolean }} [options]
+     */
+    async validateOrderInventoryAvailability(orderItems, options = {}) {
+        const connection = options.connection || (await this.pool.getConnection());
+        const ownsConnection = !options.connection;
+
+        try {
+            if (ownsConnection) await connection.beginTransaction();
+
+            for (const item of orderItems) {
+                await this._assertSufficientInventory(
+                    connection,
+                    item.productId,
+                    item.variantId,
+                    item.quantity,
+                    options
+                );
+            }
+
+            if (ownsConnection) await connection.commit();
+        } catch (error) {
+            if (ownsConnection) await connection.rollback();
+            throw error;
+        } finally {
+            if (ownsConnection) connection.release();
+        }
+    }
+
+    /**
      * Deduct inventory for an order
      * @param {Array} orderItems - Array of {productId, variantId, quantity}
      * @param {number} orderId - Order ID for audit trail
@@ -149,6 +180,69 @@ class InventoryService {
         }
     }
 
+    async _assertSufficientInventory(
+        connection,
+        productId,
+        variantId,
+        quantity,
+        options = {}
+    ) {
+        const qty = Number(quantity);
+        if (!Number.isFinite(qty) || qty <= 0) return;
+
+        const lockSql = options.forUpdate ? ' FOR UPDATE' : '';
+        const [parentProducts] = await connection.execute(
+            `SELECT id, name, track_inventory, allow_backorder, inventory_quantity FROM products WHERE id = ?${lockSql}`,
+            [productId]
+        );
+        const parentProduct = parentProducts[0];
+        if (!parentProduct) {
+            const err = new Error(`Product ${productId} not found`);
+            err.code = 'PRODUCT_NOT_FOUND';
+            err.productId = productId;
+            throw err;
+        }
+        if (!parentProduct.track_inventory) return;
+
+        let currentInventory;
+        if (variantId) {
+            const [variants] = await connection.execute(
+                `SELECT inventory_quantity FROM product_variants WHERE id = ? AND product_id = ?${lockSql}`,
+                [variantId, productId]
+            );
+            if (variants.length === 0) {
+                const err = new Error(`Product variant ${variantId} not found`);
+                err.code = 'INVALID_CART_VARIANT';
+                err.productId = productId;
+                err.variantId = variantId;
+                throw err;
+            }
+            currentInventory = Number(variants[0].inventory_quantity) || 0;
+        } else {
+            currentInventory = Number(parentProduct.inventory_quantity) || 0;
+        }
+
+        const inventorySettings = await loadInventorySettings(connection);
+        const allowOversell =
+            Boolean(options.allowOversell) ||
+            Boolean(parentProduct.allow_backorder) ||
+            Boolean(inventorySettings.allowOversell);
+
+        if (!allowOversell && currentInventory < qty) {
+            const label = String(parentProduct.name || `product ${productId}`).trim();
+            const err = new Error(
+                `"${label}" only has ${currentInventory} in stock (you requested ${qty}). Update your cart and try again.`
+            );
+            err.code = 'INSUFFICIENT_INVENTORY';
+            err.productId = productId;
+            err.variantId = variantId || null;
+            err.available = currentInventory;
+            err.requested = qty;
+            err.productName = label;
+            throw err;
+        }
+    }
+
     /**
      * Internal method to deduct inventory with audit trail
      */
@@ -211,25 +305,9 @@ class InventoryService {
                 console.log(`⚠️ Product ${productId} doesn't track inventory, skipping deduction`);
                 return { productId, variantId, skipped: true, reason: 'Inventory tracking disabled' };
             }
-            
-            const inventorySettings = await loadInventorySettings(connection);
-            const allowOversell =
-                Boolean(options.allowOversell) ||
-                Boolean(product.allow_backorder) ||
-                Boolean(inventorySettings.allowOversell);
-
-            // Check if we have enough inventory (unless oversell allowed)
-            if (!allowOversell && currentInventory < quantity) {
-                const err = new Error(
-                    `Insufficient inventory for product ${productId}. Available: ${currentInventory}, Requested: ${quantity}`
-                );
-                err.code = 'INSUFFICIENT_INVENTORY';
-                err.productId = productId;
-                err.available = currentInventory;
-                err.requested = quantity;
-                throw err;
-            }
         }
+
+        await this._assertSufficientInventory(connection, productId, variantId, quantity, options);
         
         const newInventory = currentInventory - quantity;
         

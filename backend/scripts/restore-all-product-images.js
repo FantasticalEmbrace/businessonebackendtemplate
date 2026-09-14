@@ -55,7 +55,7 @@ function stripTrailingContentHash(stem) {
 function shouldIgnoreRootFile(name) {
     const n = name.toLowerCase();
     if (!IMAGE_EXT.test(name)) return true;
-    if (/^(icon-|edsa|health-icon|search-icon|account-icon)/.test(n)) return true;
+    if (/^(icon-|scheduling|health-icon|search-icon|account-icon)/.test(n)) return true;
     if (/^(og-image|twitter-card|screenshot-|storefront|manifest)/.test(n)) return true;
     if (n === 'logo.png' || n === 'hm herbs logo.png') return true;
     if (/^product-image-\d+/i.test(name.replace(/\.\w+$/, ''))) return true;

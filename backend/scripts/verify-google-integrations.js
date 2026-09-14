@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Verify Google Calendar (EDSA) and Google Business (hours/holidays) integrations.
+ * Verify Google Calendar (Scheduling) and Google Business (hours/holidays) integrations.
  *
  *   cd backend && node scripts/verify-google-integrations.js
  */
@@ -41,7 +41,7 @@ async function main() {
 
     try {
         // --- Calendar ---
-        console.log('Google Calendar (EDSA)');
+        console.log('Google Calendar (Scheduling)');
         const gcalStatus = await GoogleCalendarOAuthService.getConnectionStatus(pool);
         if (!gcalStatus.clientConfigured) {
             fail('OAuth client', 'Set GCAL_CLIENT_ID / GCAL_CLIENT_SECRET (or GBP_*) in backend/.env');
@@ -55,7 +55,7 @@ async function main() {
             ok('Calendar ID', gcalStatus.calendarId || 'primary');
         }
 
-        if (gcalStatus.readyForEdsa) {
+        if (gcalStatus.readyForScheduling) {
             await googleCalendarService.ensureInitialized(pool);
             if (googleCalendarService.isAvailable()) {
                 ok('Calendar API', `mode=${googleCalendarService.authMode}`);

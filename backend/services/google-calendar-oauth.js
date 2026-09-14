@@ -145,7 +145,7 @@ class GoogleCalendarOAuthService {
             connectedEmail: creds.connectedEmail || null,
             connectedAt: creds.connectedAt || null,
             calendarId: creds.calendarId || null,
-            readyForEdsa: Boolean(this.hasClientCredentials() && creds.refreshToken),
+            readyForScheduling: Boolean(this.hasClientCredentials() && creds.refreshToken),
         };
     }
 
@@ -222,7 +222,7 @@ class GoogleCalendarOAuthService {
                 pool,
                 SETTINGS_KEYS.connectedEmail,
                 connectedEmail,
-                'Google account used for EDSA calendar sync',
+                'Google account used for Scheduling calendar sync',
                 'string'
             );
         }
@@ -240,7 +240,7 @@ class GoogleCalendarOAuthService {
                 pool,
                 SETTINGS_KEYS.calendarId,
                 'primary',
-                'Google Calendar ID for EDSA appointments',
+                'Google Calendar ID for Scheduling appointments',
                 'string'
             );
         }
@@ -261,7 +261,7 @@ class GoogleCalendarOAuthService {
             pool,
             SETTINGS_KEYS.calendarId,
             normalized,
-            'Google Calendar ID for EDSA appointments',
+            'Google Calendar ID for Scheduling appointments',
             'string'
         );
         return normalized;

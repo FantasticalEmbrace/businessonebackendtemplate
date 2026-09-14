@@ -69,6 +69,11 @@ class HMHerbsApp {
             // Ensure cart starts closed
             this.ensureCartClosed();
 
+            // Load Subscribe & Save capabilities before cart render
+            if (window.HmCartSubscription?.loadCapabilities) {
+                await window.HmCartSubscription.loadCapabilities();
+            }
+
             // Load products data
             await this.loadProducts();
 
@@ -80,6 +85,9 @@ class HMHerbsApp {
 
             // Load cart from localStorage
             this.loadCartFromStorage();
+            if (window.HmCartSubscription?.normalizeCartItemSubscription) {
+                this.cart.forEach((item) => window.HmCartSubscription.normalizeCartItemSubscription(item));
+            }
 
             // Cart loaded silently - no debug logging needed
 
@@ -249,6 +257,12 @@ class HMHerbsApp {
                             inStock: (product.inventory_quantity || 0) > 0 || product.inventory_quantity === null,
                             // Add URL for product link if slug exists
                             url: product.slug ? `product.html?slug=${encodeURIComponent(product.slug)}` : null,
+                            subscriptionEligible: product.subscription_eligible,
+                            subscription_eligible: product.subscription_eligible,
+                            subscriptionIntervalDays: product.subscription_interval_days,
+                            subscription_interval_days: product.subscription_interval_days,
+                            subscriptionDiscountPercent: product.subscription_discount_percent,
+                            subscription_discount_percent: product.subscription_discount_percent,
                             // Keep original fields for reference
                             _original: product
                         };
@@ -921,15 +935,24 @@ class HMHerbsApp {
         if (existingItem) {
             existingItem.quantity += quantity;
             if (!existingItem.slug && product.slug) existingItem.slug = product.slug;
+            const subPatch = window.HmCartSubscription?.enrichCartPayload?.(product);
+            if (subPatch) Object.assign(existingItem, subPatch);
+            if (!Number.isFinite(Number(existingItem.basePrice))) existingItem.basePrice = Number(product.price) || 0;
+            window.HmCartSubscription?.normalizeCartItemSubscription?.(existingItem);
         } else {
-            this.cart.push({
+            const line = {
                 id: productId,
                 name: product.name,
                 price: product.price,
+                basePrice: product.price,
                 image: product.image,
                 quantity: quantity,
                 slug: product.slug || ''
-            });
+            };
+            const subPatch = window.HmCartSubscription?.enrichCartPayload?.(product);
+            if (subPatch) Object.assign(line, subPatch);
+            window.HmCartSubscription?.normalizeCartItemSubscription?.(line);
+            this.cart.push(line);
         }
 
         this.updateCartDisplay();
@@ -996,18 +1019,28 @@ class HMHerbsApp {
                 if (existingItem) {
                     existingItem.quantity += availableQuantity;
                     if (!existingItem.slug && productData.slug) existingItem.slug = productData.slug;
+                    const subPatch = window.HmCartSubscription?.enrichCartPayload?.(productData);
+                    if (subPatch) Object.assign(existingItem, subPatch);
+                    if (productData.basePrice != null) existingItem.basePrice = productData.basePrice;
+                    else if (!Number.isFinite(Number(existingItem.basePrice))) existingItem.basePrice = productPrice;
+                    window.HmCartSubscription?.normalizeCartItemSubscription?.(existingItem);
                 } else {
-                    this.cart.push({
+                    const line = {
                         id: productId,
                         variant_id: variantId,
                         variant_name: variantName || null,
                         name: productName,
+                        basePrice: productData.basePrice != null ? productData.basePrice : productPrice,
                         price: productPrice,
                         image: productImage,
                         quantity: availableQuantity,
                         inventory_quantity: inventory,
                         slug: productData.slug || '',
-                    });
+                    };
+                    const subPatch = window.HmCartSubscription?.enrichCartPayload?.(productData);
+                    if (subPatch) Object.assign(line, subPatch);
+                    window.HmCartSubscription?.normalizeCartItemSubscription?.(line);
+                    this.cart.push(line);
                 }
                 this.updateCartDisplay();
                 this.saveCartToStorage();
@@ -1022,18 +1055,28 @@ class HMHerbsApp {
             existingItem.price = productPrice;
             if (variantName) existingItem.variant_name = variantName;
             if (!existingItem.slug && productData.slug) existingItem.slug = productData.slug;
+            const subPatch = window.HmCartSubscription?.enrichCartPayload?.(productData);
+            if (subPatch) Object.assign(existingItem, subPatch);
+            if (productData.basePrice != null) existingItem.basePrice = productData.basePrice;
+            else if (!Number.isFinite(Number(existingItem.basePrice))) existingItem.basePrice = productPrice;
+            window.HmCartSubscription?.normalizeCartItemSubscription?.(existingItem);
         } else {
-            this.cart.push({
+            const line = {
                 id: productId,
                 variant_id: variantId,
                 variant_name: variantName || null,
                 name: productName,
+                basePrice: productData.basePrice != null ? productData.basePrice : productPrice,
                 price: productPrice,
                 image: productImage,
                 quantity: productQuantity,
                 inventory_quantity: inventory,
                 slug: productData.slug || '',
-            });
+            };
+            const subPatch = window.HmCartSubscription?.enrichCartPayload?.(productData);
+            if (subPatch) Object.assign(line, subPatch);
+            window.HmCartSubscription?.normalizeCartItemSubscription?.(line);
+            this.cart.push(line);
         }
 
         this.updateCartDisplay();
@@ -1269,6 +1312,9 @@ class HMHerbsApp {
         }
 
         // Update cart total
+        if (window.HmCartSubscription?.normalizeCartItemSubscription) {
+            this.cart.forEach((item) => window.HmCartSubscription.normalizeCartItemSubscription(item));
+        }
         const total = this.cart.reduce((sum, item) => {
             let priceValue = typeof item.price === 'string' ? parseFloat(item.price) : (item.price || 0);
             // Ensure priceValue is a valid number
@@ -1372,6 +1418,15 @@ class HMHerbsApp {
         details.appendChild(name);
         details.appendChild(price);
         details.appendChild(controls);
+
+        if (window.HmCartSubscription?.renderCartLineControls) {
+            window.HmCartSubscription.renderCartLineControls(item, details, {
+                onUpdate: () => {
+                    this.updateCartDisplay();
+                    this.saveCartToStorage();
+                }
+            });
+        }
 
         if (productHref) {
             const imgLink = document.createElement('a');
@@ -2000,7 +2055,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Note: Mobile menu toggle is handled by inline script in index.html head
 // This ensures it works immediately without waiting for script.js to load
 
-// EDSA booking: `openEDSABooking` is defined in js/edsa-booking.js (loads after this script).
+// Scheduling booking: `openSchedulingBooking` is defined in js/scheduling-booking.js (loads after this script).
 
 // Export for potential module usage
 if (typeof module !== 'undefined' && module.exports) {

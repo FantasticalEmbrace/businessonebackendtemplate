@@ -4,8 +4,16 @@ const logger = require('../utils/logger');
 const shippo = require('./shippoClient');
 const { registerTrack, syncOrderTracking } = require('./shippoTracking');
 const { validateOriginForExpressCarriers } = require('./shippoCarrierAudit');
-const { buildCarrierTrackingUrl, enrichOrderTracking, inferCarrierFromTracking } = require('../utils/trackingUrl');
-const { sendLabelCreatedNotificationEmail } = require('./shippedNotificationEmail');
+const {
+    buildCarrierTrackingUrl,
+    enrichOrderTracking,
+    inferCarrierFromTracking,
+    isPlaceholderTracking,
+} = require('../utils/trackingUrl');
+const {
+    sendLabelCreatedNotificationEmail,
+    sendShippedNotificationEmail,
+} = require('./shippedNotificationEmail');
 const {
     FREE_SHIPPING_THRESHOLD,
     FIRST_CLASS_SHIPPING,
@@ -449,6 +457,18 @@ async function purchaseLabel(pool, orderId, { rateId, boxId, packageWeightOz, it
         throw err;
     }
     const order = orders[0];
+    if (isOrderBlockedFromShipping(order)) {
+        const err = new Error('ORDER_VOIDED_OR_REFUNDED');
+        err.code = 'ORDER_VOIDED_OR_REFUNDED';
+        err.message = 'Cannot create a shipping label for a voided, refunded, or cancelled order';
+        throw err;
+    }
+    if (String(order.payment_status || '').toLowerCase() !== 'paid') {
+        const err = new Error('ORDER_NOT_PAID');
+        err.code = 'ORDER_NOT_PAID';
+        err.message = 'Only paid orders can get a shipping label';
+        throw err;
+    }
     if (order.label_url) {
         const err = new Error('LABEL_ALREADY_EXISTS');
         err.code = 'LABEL_ALREADY_EXISTS';
@@ -570,6 +590,325 @@ async function listBoxes(pool) {
     return rows;
 }
 
+function isOrderBlockedFromShipping(order) {
+    const status = String(order?.status || '').trim().toLowerCase();
+    const payment = String(order?.payment_status || '').trim().toLowerCase();
+    if (['cancelled', 'canceled', 'refunded', 'voided', 'void'].includes(status)) return true;
+    if (['refunded', 'voided', 'void', 'cancelled', 'canceled'].includes(payment)) return true;
+    return false;
+}
+
+/** Dropship / external fulfillment — vendor tracking without a Shippo label. */
+async function setManualTracking(
+    pool,
+    orderId,
+    {
+        trackingNumber,
+        shippingCarrier = null,
+        shippingService = null,
+        trackingUrl = null,
+        markShipped = true,
+    } = {}
+) {
+    const num = String(trackingNumber || '').trim();
+    if (!num) {
+        const err = new Error('Tracking number is required');
+        err.code = 'TRACKING_REQUIRED';
+        throw err;
+    }
+    if (isPlaceholderTracking(num)) {
+        const err = new Error('Enter the real carrier tracking number from the vendor');
+        err.code = 'TRACKING_INVALID';
+        throw err;
+    }
+
+    const oid = Number(orderId);
+    if (!Number.isFinite(oid) || oid < 1) {
+        const err = new Error('ORDER_NOT_FOUND');
+        err.code = 'ORDER_NOT_FOUND';
+        throw err;
+    }
+
+    const [orders] = await pool.execute('SELECT * FROM orders WHERE id = ? LIMIT 1', [oid]);
+    if (!orders.length) {
+        const err = new Error('ORDER_NOT_FOUND');
+        err.code = 'ORDER_NOT_FOUND';
+        throw err;
+    }
+    const order = orders[0];
+
+    if (isOrderBlockedFromShipping(order)) {
+        const err = new Error('Cannot update tracking on a voided, refunded, or cancelled order');
+        err.code = 'ORDER_VOIDED_OR_REFUNDED';
+        throw err;
+    }
+    if (String(order.payment_status || '').toLowerCase() !== 'paid') {
+        const err = new Error('Only paid orders can receive tracking');
+        err.code = 'ORDER_NOT_PAID';
+        throw err;
+    }
+    if (order.label_url || order.shippo_transaction_id) {
+        const err = new Error(
+            'This order already has a Shippo label — tracking is managed by the carrier. Use manual tracking only for dropships without a store label.'
+        );
+        err.code = 'SHIPPO_LABEL_EXISTS';
+        throw err;
+    }
+
+    let carrier = String(shippingCarrier || '').trim() || inferCarrierFromTracking(num);
+    carrier = String(carrier || '').trim();
+    if (!carrier) {
+        const err = new Error('Select a carrier (USPS, UPS, FedEx, etc.)');
+        err.code = 'CARRIER_REQUIRED';
+        throw err;
+    }
+
+    const url = String(trackingUrl || '').trim() || buildCarrierTrackingUrl(carrier, num) || null;
+    const service = String(shippingService || '').trim() || null;
+    const shouldMarkShipped = markShipped !== false;
+    const st = String(order.status || '').toLowerCase();
+    const alreadyShipped = ['shipped', 'in_transit', 'delivered'].includes(st);
+
+    const updates = [
+        'tracking_number = ?',
+        'tracking_url = ?',
+        'shipping_carrier = ?',
+        'tracking_status_detail = ?',
+        'tracking_status_updated_at = NOW()',
+    ];
+    const params = [
+        num.slice(0, 128),
+        url ? String(url).slice(0, 500) : null,
+        carrier.slice(0, 32),
+        'Manual / dropship tracking',
+    ];
+
+    if (service) {
+        updates.push('shipping_service = ?');
+        params.push(service.slice(0, 128));
+    }
+
+    if (shouldMarkShipped) {
+        if (!alreadyShipped) updates.push("status = 'shipped'");
+        updates.push('shipped_at = COALESCE(shipped_at, NOW())');
+        updates.push("fulfillment_status = 'fulfilled'");
+    }
+
+    params.push(oid);
+    await pool.execute(`UPDATE orders SET ${updates.join(', ')} WHERE id = ?`, params);
+
+    void registerTrack(carrier, num)
+        .then(() => syncOrderTracking(pool, oid))
+        .catch((err) => {
+            logger.warn(`Manual tracking register failed for order ${oid}: ${err.message}`);
+        });
+
+    if (shouldMarkShipped) {
+        void sendShippedNotificationEmail(pool, oid).catch((err) => {
+            logger.error(`Shipped email failed after manual tracking for order ${oid}:`, err);
+        });
+    }
+
+    const [fresh] = await pool.execute('SELECT * FROM orders WHERE id = ? LIMIT 1', [oid]);
+    return { order: enrichOrderTracking(fresh[0] || order) };
+}
+
+const BULK_LABEL_LIMIT = 25;
+const BULK_PRINT_LIMIT = 50;
+
+const SHIPPING_ELIGIBLE_SQL = `
+    LOWER(COALESCE(o.status, '')) NOT IN ('cancelled', 'canceled', 'refunded', 'voided', 'void')
+    AND LOWER(COALESCE(o.payment_status, '')) NOT IN ('refunded', 'voided', 'void', 'cancelled', 'canceled')
+`;
+
+function merchantScopeSql(merchantId, alias = 'o') {
+    const mid = merchantId || null;
+    if (!mid) return { sql: '', params: [] };
+    return { sql: ` AND ${alias}.merchant_id = ?`, params: [mid] };
+}
+
+/** Paid webstore orders that still need a shipping label. */
+async function listOrdersNeedingLabels(pool, { limit = BULK_LABEL_LIMIT, merchantId = null } = {}) {
+    const lim = Math.min(BULK_LABEL_LIMIT, Math.max(1, Number(limit) || BULK_LABEL_LIMIT));
+    const mid = merchantScopeSql(merchantId);
+    const [rows] = await pool.query(
+        `SELECT o.id, o.order_number, o.email, o.status, o.payment_status, o.fulfillment_status,
+                o.shipping_first_name, o.shipping_last_name, o.created_at,
+                o.shipping_address_line_1, o.shipping_city, o.shipping_state, o.shipping_postal_code
+           FROM orders o
+          WHERE o.payment_status = 'paid'
+            AND COALESCE(o.sales_channel, 'online') = 'online'
+            AND (o.label_url IS NULL OR o.label_url = '')
+            AND (o.tracking_number IS NULL OR TRIM(o.tracking_number) = ''
+                 OR o.tracking_number LIKE 'BOTRK%' OR o.tracking_number LIKE 'HMTRK%')
+            AND ${SHIPPING_ELIGIBLE_SQL}
+            AND LOWER(COALESCE(o.status, '')) NOT IN ('delivered')
+            AND NULLIF(TRIM(o.shipping_address_line_1), '') IS NOT NULL
+            AND NULLIF(TRIM(o.shipping_postal_code), '') IS NOT NULL
+            ${mid.sql}
+          ORDER BY o.created_at ASC
+          LIMIT ${lim}`,
+        mid.params
+    );
+    return rows;
+}
+
+/** Labels created but not yet marked printed (excludes voided/refunded/cancelled). */
+async function listUnprintedLabels(pool, { limit = BULK_PRINT_LIMIT, merchantId = null } = {}) {
+    const lim = Math.min(BULK_PRINT_LIMIT, Math.max(1, Number(limit) || BULK_PRINT_LIMIT));
+    const mid = merchantScopeSql(merchantId);
+    const [rows] = await pool.query(
+        `SELECT o.id, o.order_number, o.email, o.status, o.payment_status, o.label_url, o.label_created_at,
+                o.label_printed_at, o.shipping_carrier, o.tracking_number,
+                o.shipping_first_name, o.shipping_last_name, o.created_at
+           FROM orders o
+          WHERE o.label_url IS NOT NULL AND o.label_url <> ''
+            AND o.label_printed_at IS NULL
+            AND ${SHIPPING_ELIGIBLE_SQL}
+            ${mid.sql}
+          ORDER BY o.label_created_at ASC, o.created_at ASC
+          LIMIT ${lim}`,
+        mid.params
+    );
+    return rows;
+}
+
+async function markLabelsPrinted(pool, orderIds = [], { merchantId = null } = {}) {
+    const ids = [...new Set((orderIds || []).map((id) => Number(id)).filter((id) => Number.isInteger(id) && id > 0))];
+    if (!ids.length) return { updated: 0, ids: [] };
+    const placeholders = ids.map(() => '?').join(', ');
+    const mid = merchantScopeSql(merchantId);
+    const [result] = await pool.execute(
+        `UPDATE orders o
+            SET o.label_printed_at = COALESCE(o.label_printed_at, NOW())
+          WHERE o.id IN (${placeholders})
+            AND o.label_url IS NOT NULL AND o.label_url <> ''
+            AND ${SHIPPING_ELIGIBLE_SQL}
+            ${mid.sql}`,
+        [...ids, ...mid.params]
+    );
+    return { updated: Number(result?.affectedRows) || 0, ids };
+}
+
+/**
+ * Create shipping labels for many ready orders (cheapest/first Shippo rate).
+ * Skips orders that still need product weights or already have labels.
+ */
+async function bulkPurchaseLabels(pool, { orderIds = null, limit = BULK_LABEL_LIMIT, merchantId = null } = {}) {
+    let targets;
+    if (Array.isArray(orderIds) && orderIds.length) {
+        const ids = [...new Set(orderIds.map((id) => Number(id)).filter((id) => Number.isInteger(id) && id > 0))];
+        if (!ids.length) return { created: [], skipped: [], failed: [] };
+        const placeholders = ids.map(() => '?').join(', ');
+        const mid = merchantScopeSql(merchantId);
+        const [rows] = await pool.execute(
+            `SELECT id, order_number, status, payment_status FROM orders o
+              WHERE o.id IN (${placeholders})
+                AND o.payment_status = 'paid'
+                AND (o.label_url IS NULL OR o.label_url = '')
+                AND ${SHIPPING_ELIGIBLE_SQL}
+                ${mid.sql}
+              ORDER BY FIELD(o.id, ${placeholders})`,
+            [...ids, ...mid.params, ...ids]
+        );
+        targets = rows;
+    } else {
+        targets = await listOrdersNeedingLabels(pool, { limit, merchantId });
+    }
+
+    const created = [];
+    const skipped = [];
+    const failed = [];
+
+    for (const row of targets) {
+        try {
+            const ctx = await getOrderFulfillmentContext(pool, row.id);
+            if (ctx.hasLabel) {
+                skipped.push({
+                    orderId: row.id,
+                    orderNumber: row.order_number,
+                    reason: 'already_has_label',
+                });
+                continue;
+            }
+            const tn = String(ctx.order?.tracking_number || '').trim();
+            if (tn && !isPlaceholderTracking(tn)) {
+                skipped.push({
+                    orderId: row.id,
+                    orderNumber: row.order_number,
+                    reason: 'dropship_manual_tracking',
+                });
+                continue;
+            }
+            if (ctx.missingWeights?.length) {
+                skipped.push({
+                    orderId: row.id,
+                    orderNumber: row.order_number,
+                    reason: 'missing_weights',
+                    missing: ctx.missingWeights.map((m) => m.product_name || m.product_sku || m.product_id),
+                });
+                continue;
+            }
+            if (!ctx.shippoConfigured || !ctx.originConfigured) {
+                failed.push({
+                    orderId: row.id,
+                    orderNumber: row.order_number,
+                    reason: !ctx.shippoConfigured ? 'shippo_not_configured' : 'origin_not_configured',
+                });
+                continue;
+            }
+
+            const result = await purchaseLabel(pool, row.id, {});
+            created.push({
+                orderId: row.id,
+                orderNumber: row.order_number,
+                labelUrl: result.label_url,
+                trackingNumber: result.tracking_number,
+                carrier: result.carrier,
+                service: result.service,
+            });
+        } catch (e) {
+            const code = e.code || 'ERROR';
+            if (code === 'LABEL_ALREADY_EXISTS') {
+                skipped.push({ orderId: row.id, orderNumber: row.order_number, reason: 'already_has_label' });
+            } else if (code === 'ORDER_VOIDED_OR_REFUNDED') {
+                skipped.push({
+                    orderId: row.id,
+                    orderNumber: row.order_number,
+                    reason: 'voided_or_refunded',
+                });
+            } else if (code === 'MISSING_PRODUCT_WEIGHTS') {
+                skipped.push({
+                    orderId: row.id,
+                    orderNumber: row.order_number,
+                    reason: 'missing_weights',
+                    missing: (e.missing || []).map((m) => m.product_name || m.product_sku || m.product_id),
+                });
+            } else {
+                failed.push({
+                    orderId: row.id,
+                    orderNumber: row.order_number,
+                    reason: code,
+                    message: e.message || 'Unable to create label',
+                });
+                logger.warn(`[bulk-label] Failed order ${row.id}: ${e.message}`);
+            }
+        }
+    }
+
+    return {
+        created,
+        skipped,
+        failed,
+        summary: {
+            created: created.length,
+            skipped: skipped.length,
+            failed: failed.length,
+            total: targets.length,
+        },
+    };
+}
+
 module.exports = {
     roundMoney,
     weightToOz,
@@ -581,7 +920,15 @@ module.exports = {
     saveLearnedWeights,
     getRatesForOrder,
     purchaseLabel,
+    setManualTracking,
     listBoxes,
+    listOrdersNeedingLabels,
+    listUnprintedLabels,
+    markLabelsPrinted,
+    bulkPurchaseLabels,
+    isOrderBlockedFromShipping,
+    BULK_LABEL_LIMIT,
+    BULK_PRINT_LIMIT,
     FREE_SHIPPING_THRESHOLD,
     FIRST_CLASS_SHIPPING,
 };

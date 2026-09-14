@@ -38,16 +38,16 @@
         }
         document.documentElement.classList.remove(
             'hm-age-gate-open',
-            'hm-await-edsa-scroll',
+            'hm-await-scheduling-scroll',
             'hm-section-scroll-ready',
-            'hm-edsa-scroll-ready',
-            'edsa-ui-scroll-locked'
+            'hm-scheduling-scroll-ready',
+            'scheduling-ui-scroll-locked'
         );
         document.body.classList.remove(
             'hm-age-gate-open',
             'auth-modal-open',
-            'edsa-modal-open',
-            'edsa-ui-scroll-locked',
+            'scheduling-modal-open',
+            'scheduling-ui-scroll-locked',
             'modal-open',
             'no-scroll',
             'cart-open',
@@ -60,13 +60,13 @@
         if (typeof window.hmIsSectionCrossPagePending === 'function') {
             return window.hmIsSectionCrossPagePending();
         }
-        if (typeof window.hmIsEdsaCrossPagePending === 'function') {
-            return window.hmIsEdsaCrossPagePending();
+        if (typeof window.hmIsSchedulingCrossPagePending === 'function') {
+            return window.hmIsSchedulingCrossPagePending();
         }
         try {
             const stored = sessionStorage.getItem('hmPendingSectionNav');
             if (stored && stored.startsWith('#')) return true;
-            return sessionStorage.getItem('hmPendingEdsaNav') === '1';
+            return sessionStorage.getItem('hmPendingSchedulingNav') === '1';
         } catch (_) {
             return false;
         }

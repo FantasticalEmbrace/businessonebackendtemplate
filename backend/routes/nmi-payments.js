@@ -4,11 +4,14 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const logger = require('../utils/logger');
 const promoEngine = require('../services/webPromotionEngine');
+const { applyWebDestinationTax } = require('../services/webDestinationTax');
 const { nmiSale, nmiVoid } = require('../services/nmiGateway');
 const nmiVaultCards = require('../services/nmiVaultCards');
 const { finalizePaidOrder } = require('../services/finalizePaidOrder');
+const { createSubscriptionsFromPaidOrder } = require('../services/storeSubscriptionService');
 const { getCardAmountDueForOrder, persistOrderTenders, applyPendingStoreTendersAtCapture, loadLoyaltyProgramSettings } = require('../services/webCheckoutPayments');
 const { cartLookupBinds, hasCartIdentity } = require('../utils/cartSession');
+const InventoryService = require('../services/inventory');
 const {
     getNmiCollectJsUrl,
     isNmiSandboxHint,
@@ -27,6 +30,12 @@ const {
     markUnpaidPaymentOutcome,
     nmiUnpaidOutcomeFromSale
 } = require('../services/unpaidPaymentStatus');
+const {
+    beginPaymentAttempt,
+    completePaymentAttempt,
+    failPaymentAttempt
+} = require('../services/paymentIdempotency');
+const { formatNmiDeclineMessage } = require('../services/nmiDeclineMessages');
 
 const router = express.Router();
 
@@ -36,6 +45,31 @@ function getOrderPaymentMethod(orderRow) {
     const notes = String(orderRow?.notes || '');
     const match = notes.match(/Payment method:\s*([a-z_]+)/i);
     return match ? match[1].toLowerCase() : '';
+}
+
+function mapInventoryHttpError(err) {
+    if (!err || err.code !== 'INSUFFICIENT_INVENTORY') return null;
+    return {
+        status: 409,
+        message:
+            err.message ||
+            'An item in your order is no longer in stock. Update your cart and try again.',
+        code: 'INSUFFICIENT_INVENTORY',
+        productId: err.productId,
+        productName: err.productName,
+        available: err.available,
+        requested: err.requested
+    };
+}
+
+async function assertOrderInventoryBeforeCharge(pool, orderItems) {
+    const inventoryService = new InventoryService(pool);
+    const inventoryItems = orderItems.map((oi) => ({
+        productId: Number(oi.product_id),
+        variantId: oi.variant_id ?? null,
+        quantity: Number(oi.quantity)
+    }));
+    await inventoryService.validateOrderInventoryAvailability(inventoryItems, { forUpdate: true });
 }
 
 async function getAuthenticatedUserFromRequest(req) {
@@ -209,6 +243,9 @@ router.delete('/saved-cards/:id', async (req, res) => {
  * Re-prices from order lines, charges NMI, finalizes order, clears server cart when session matches.
  */
 router.post('/process-payment', async (req, res) => {
+    let attemptToken = null;
+    let attemptOrderId = null;
+    let attemptIdempotencyKey = '';
     try {
         const processor = await loadStorePaymentProcessor(req.pool);
         if (processor === 'mxmerchant') {
@@ -220,7 +257,7 @@ router.post('/process-payment', async (req, res) => {
             return res.status(503).json({ error: 'Payment processing is not configured.' });
         }
 
-        const { orderId, payment_token: paymentTokenRaw, savedCardId, saveCard, customerEmail } = req.body || {};
+        const { orderId, payment_token: paymentTokenRaw, savedCardId, saveCard, customerEmail, idempotencyKey } = req.body || {};
         const oid = Number(orderId);
         const payment_token = String(paymentTokenRaw || '').trim();
         const vaultCardId = savedCardId != null ? Number(savedCardId) : null;
@@ -228,14 +265,29 @@ router.post('/process-payment', async (req, res) => {
             return res.status(400).json({ error: 'orderId and payment_token or savedCardId are required' });
         }
 
+        const idem = beginPaymentAttempt(oid, idempotencyKey);
+        if (idem.duplicate) {
+            if (idem.cached) {
+                return res.json(idem.cached);
+            }
+            return res.status(409).json({
+                error: 'Payment is already in progress for this order. Please wait…',
+                code: 'PAYMENT_IN_PROGRESS'
+            });
+        }
+        attemptToken = idem.token;
+        attemptOrderId = oid;
+        attemptIdempotencyKey = idempotencyKey;
+
         const connection = await req.pool.getConnection();
-        const payLockName = `hmherbs_order_pay_${oid}`;
+        const payLockName = `bo_order_pay_${oid}`;
         let orderRow;
         let payLockHeld = false;
         try {
             const [[lockRow]] = await connection.execute('SELECT GET_LOCK(?, 0) AS got', [payLockName]);
             if (!Number(lockRow?.got)) {
                 connection.release();
+                failPaymentAttempt(oid, idempotencyKey, attemptToken);
                 return res.status(409).json({ error: 'Payment is already in progress for this order.' });
             }
             payLockHeld = true;
@@ -247,6 +299,7 @@ router.post('/process-payment', async (req, res) => {
             );
             if (!orders.length) {
                 await connection.rollback();
+                failPaymentAttempt(oid, idempotencyKey, attemptToken);
                 return res.status(404).json({ error: 'Order not found or already paid' });
             }
             orderRow = orders[0];
@@ -254,26 +307,73 @@ router.post('/process-payment', async (req, res) => {
             if (orderRow.status !== 'pending') {
                 await connection.commit();
                 if (orderRow.payment_reference) {
-                    return res.json({
+                    const paidPayload = {
                         success: true,
                         transactionId: String(orderRow.payment_reference),
                         orderId: oid,
                         orderNumber: orderRow.order_number,
                         idempotent: true
-                    });
+                    };
+                    completePaymentAttempt(oid, idempotencyKey, attemptToken, paidPayload);
+                    return res.json(paidPayload);
                 }
+                failPaymentAttempt(oid, idempotencyKey, attemptToken);
                 return res.status(404).json({ error: 'Order not found or already paid' });
             }
 
             if (orderRow.payment_reference) {
+                // The NMI charge already succeeded and stamped payment_reference, but
+                // status is still 'pending' — finalizePaidOrder() never completed (e.g.
+                // a process crash/restart between the gateway response and finalize).
+                // Self-heal by finishing finalization now instead of returning a bare
+                // "success" for an order that would otherwise sit as an ambiguous
+                // pending/"Awaiting payment" row forever despite being paid.
                 await connection.commit();
-                return res.json({
-                    success: true,
-                    transactionId: String(orderRow.payment_reference),
-                    orderId: oid,
-                    orderNumber: orderRow.order_number,
-                    idempotent: true
-                });
+                const stampedRef = String(orderRow.payment_reference);
+                try {
+                    const healResult = await finalizePaidOrder(req.pool, {
+                        orderId: oid,
+                        paymentId: stampedRef,
+                        paymentStatus: 'paid',
+                        paymentProcessor: orderRow.payment_processor || processor || undefined,
+                        // Charge already captured — never fail-closed on stock for recovery.
+                        allowOversell: true
+                    });
+                    logger.warn('Self-healed order stuck pending after payment_reference was stamped', {
+                        orderId: oid,
+                        paymentReference: stampedRef
+                    });
+                    const healPayload = {
+                        success: true,
+                        transactionId: stampedRef,
+                        orderId: oid,
+                        orderNumber: healResult?.orderNumber || orderRow.order_number,
+                        trackingNumber: healResult?.trackingNumber || null,
+                        idempotent: true
+                    };
+                    completePaymentAttempt(oid, idempotencyKey, attemptToken, healPayload);
+                    return res.json(healPayload);
+                } catch (healErr) {
+                    if (healErr.code !== 'ORDER_NOT_PENDING') {
+                        logger.error('Self-heal finalize failed for order stuck pending with payment_reference set', {
+                            orderId: oid,
+                            paymentReference: stampedRef,
+                            err: healErr.message
+                        });
+                    }
+                    // Either another request just finished finalizing it (ORDER_NOT_PENDING,
+                    // fine) or the heal attempt itself failed — either way the charge already
+                    // happened, so still report success rather than a false decline/error.
+                    const healPayload = {
+                        success: true,
+                        transactionId: stampedRef,
+                        orderId: oid,
+                        orderNumber: orderRow.order_number,
+                        idempotent: true
+                    };
+                    completePaymentAttempt(oid, idempotencyKey, attemptToken, healPayload);
+                    return res.json(healPayload);
+                }
             }
 
             await connection.commit();
@@ -344,6 +444,7 @@ router.post('/process-payment', async (req, res) => {
                 email: orderRow.email,
                 applyTaxExemption,
                 customerType,
+                userId: orderRow.user_id || undefined,
                 shippingMethod: String(orderRow.shipping_method || '').trim() || undefined,
                 shippingAmount:
                     orderRow.shipping_amount != null ? Number(orderRow.shipping_amount) : undefined
@@ -353,9 +454,66 @@ router.post('/process-payment', async (req, res) => {
             return res.status(400).json({ error: 'Unable to verify order pricing.' });
         }
 
-        const expected = promoEngine.roundMoney(recheck.totals.totalAmount);
         const stored = promoEngine.roundMoney(Number(orderRow.total_amount));
+        const storedSubtotal = promoEngine.roundMoney(Number(orderRow.subtotal));
+        const storedShipping = promoEngine.roundMoney(Number(orderRow.shipping_amount) || 0);
+        const storedDiscount = promoEngine.roundMoney(Number(orderRow.discount_amount) || 0);
+        const recheckSubtotal = promoEngine.roundMoney(Number(recheck.totals.merchandiseSubtotal) || 0);
+        const recheckShipping = promoEngine.roundMoney(Number(recheck.totals.shippingAfter) || 0);
+        const recheckDiscount = promoEngine.roundMoney(Number(recheck.totals.totalDiscountAmount) || 0);
+        const orderAgeMs = Math.max(0, Date.now() - new Date(orderRow.created_at).getTime());
+        const merchandiseStillMatches =
+            Math.abs(recheckSubtotal - storedSubtotal) <= 0.02 &&
+            Math.abs(recheckShipping - storedShipping) <= 0.02 &&
+            Math.abs(recheckDiscount - storedDiscount) <= 0.02;
+
+        // Fresh unpaid drafts already ran ZipTax at order create — skip a second round-trip
+        // so a flaky tax API cannot block / falsely fail a valid card charge.
+        let expected = promoEngine.roundMoney(recheck.totals.totalAmount);
+        if (merchandiseStillMatches && orderAgeMs <= 20 * 60 * 1000) {
+            expected = stored;
+        } else {
+            try {
+                const taxed = await applyWebDestinationTax(
+                    req.pool,
+                    recheck.totals,
+                    {
+                        street1: orderRow.shipping_address_line_1 || '',
+                        city: orderRow.shipping_city || '',
+                        state: orderRow.shipping_state || '',
+                        postalCode: orderRow.shipping_postal_code || '',
+                        name: [orderRow.shipping_first_name, orderRow.shipping_last_name]
+                            .filter(Boolean)
+                            .join(' ')
+                    },
+                    { applyTaxExemption, tenant: 'business_one' }
+                );
+                expected = promoEngine.roundMoney(taxed.totals.totalAmount);
+            } catch (taxErr) {
+                logger.warn('NMI price recheck destination tax failed', {
+                    orderId: oid,
+                    code: taxErr.code,
+                    message: taxErr.message
+                });
+                // Merchandise still matches the draft: keep the create-time total instead of
+                // turning a ZipTax outage into a failed checkout.
+                if (merchandiseStillMatches) {
+                    expected = stored;
+                } else {
+                    return res.status(400).json({
+                        error: 'Unable to verify sales tax for this order. Please start checkout again.'
+                    });
+                }
+            }
+        }
+
         if (Math.abs(expected - stored) > 0.02) {
+            logger.warn('NMI price recheck mismatch', {
+                orderId: oid,
+                expected,
+                stored,
+                delta: promoEngine.roundMoney(expected - stored)
+            });
             return res.status(400).json({
                 error: 'Order total no longer matches current prices or promotions. Please start checkout again.'
             });
@@ -363,13 +521,33 @@ router.post('/process-payment', async (req, res) => {
 
         const chargeTotal = promoEngine.roundMoney(cardAmountDue);
         if (chargeTotal > stored + 0.02) {
+            failPaymentAttempt(oid, idempotencyKey, attemptToken);
             return res.status(400).json({ error: 'Card charge exceeds order total.' });
+        }
+
+        try {
+            await assertOrderInventoryBeforeCharge(req.pool, items);
+        } catch (invErr) {
+            failPaymentAttempt(oid, idempotencyKey, attemptToken);
+            const mapped = mapInventoryHttpError(invErr);
+            if (mapped) {
+                return res.status(mapped.status).json({
+                    error: mapped.message,
+                    code: mapped.code,
+                    productId: mapped.productId,
+                    productName: mapped.productName,
+                    available: mapped.available,
+                    requested: mapped.requested
+                });
+            }
+            throw invErr;
         }
 
         const amountStr = chargeTotal.toFixed(2);
         const authUser = await getAuthenticatedUserFromRequest(req);
 
         let sale;
+        let savedCardIdForSubscription = vaultCardId || null;
         if (vaultCardId) {
             if (!authUser) return res.status(401).json({ error: 'Sign in to use a saved card' });
             sale = await nmiVaultCards.chargeVaultCard(req.pool, authUser.id, vaultCardId, amountStr);
@@ -387,16 +565,20 @@ router.post('/process-payment', async (req, res) => {
                 paymentToken: payment_token
             });
             if (sale.ok && saveCard && authUser) {
-                void nmiVaultCards
-                    .saveVaultCard(req.pool, authUser.id, {
+                try {
+                    const saved = await nmiVaultCards.saveVaultCard(req.pool, authUser.id, {
                         paymentToken: payment_token,
                         setAsDefault: Boolean(req.body?.setAsDefault)
-                    })
-                    .catch((vaultErr) => logger.warn('Save card after checkout failed', { err: vaultErr.message }));
+                    });
+                    savedCardIdForSubscription = saved.id;
+                } catch (vaultErr) {
+                    logger.warn('Save card after checkout failed', { err: vaultErr.message });
+                }
             }
         }
 
         if (!sale.ok) {
+            failPaymentAttempt(oid, idempotencyKey, attemptToken);
             const unpaidOutcome = nmiUnpaidOutcomeFromSale(sale);
             try {
                 await markUnpaidPaymentOutcome(req.pool, oid, unpaidOutcome);
@@ -409,7 +591,9 @@ router.post('/process-payment', async (req, res) => {
             }
             return res.status(402).json({
                 success: false,
-                error: sale.responseText,
+                error: unpaidOutcome === 'declined'
+                    ? formatNmiDeclineMessage(sale)
+                    : 'We could not complete this payment. Your card was not charged — please try again.',
                 declineCode: unpaidOutcome === 'declined' ? 'CARD_DECLINED' : 'PAYMENT_FAILED',
                 nmiResponse: sale.responseCode,
                 nmi: sale.fields
@@ -498,6 +682,7 @@ router.post('/process-payment', async (req, res) => {
                     });
                 }
             }
+            failPaymentAttempt(oid, idempotencyKey, attemptToken);
             throw preFinalizeErr;
         } finally {
             payConnection.release();
@@ -522,6 +707,7 @@ router.post('/process-payment', async (req, res) => {
                         });
                     }
                 }
+                failPaymentAttempt(oid, idempotencyKey, attemptToken);
                 return res.status(409).json({ error: 'Order was already processed.' });
             }
             if (sale.transactionId) {
@@ -531,7 +717,44 @@ router.post('/process-payment', async (req, res) => {
                     logger.error('NMI void after finalize failure', { orderId: oid, err: voidErr.message });
                 }
             }
+            const mappedInv = mapInventoryHttpError(e);
+            if (mappedInv) {
+                failPaymentAttempt(oid, idempotencyKey, attemptToken);
+                try {
+                    await markUnpaidPaymentOutcome(req.pool, oid, 'failed');
+                } catch (markErr) {
+                    logger.warn('Could not mark payment failed after inventory error', {
+                        orderId: oid,
+                        err: markErr.message
+                    });
+                }
+                return res.status(mappedInv.status).json({
+                    error: mappedInv.message,
+                    code: mappedInv.code,
+                    productId: mappedInv.productId,
+                    productName: mappedInv.productName,
+                    available: mappedInv.available,
+                    requested: mappedInv.requested
+                });
+            }
+            failPaymentAttempt(oid, idempotencyKey, attemptToken);
             throw e;
+        }
+
+        const subscriptionUserId = authUser?.id || orderRow.user_id;
+        if (subscriptionUserId && savedCardIdForSubscription) {
+            try {
+                await createSubscriptionsFromPaidOrder(req.pool, {
+                    orderId: oid,
+                    userId: subscriptionUserId,
+                    paymentCardId: savedCardIdForSubscription,
+                });
+            } catch (subErr) {
+                logger.error('Subscription signup after payment failed', {
+                    orderId: oid,
+                    message: subErr.message,
+                });
+            }
         }
 
         const cartUserId = authUser?.id ?? null;
@@ -554,16 +777,21 @@ router.post('/process-payment', async (req, res) => {
             }
         }
 
-        res.json({
+        const successPayload = {
             success: true,
             transactionId: String(payId),
             orderId: oid,
             orderNumber: finalizeResult?.orderNumber || orderRow.order_number,
             trackingNumber: finalizeResult?.trackingNumber || null,
             nmi: sale.fields
-        });
+        };
+        completePaymentAttempt(oid, idempotencyKey, attemptToken, successPayload);
+        res.json(successPayload);
     } catch (err) {
         logger.error('NMI process-payment error:', err);
+        if (attemptToken && attemptOrderId) {
+            failPaymentAttempt(attemptOrderId, attemptIdempotencyKey, attemptToken);
+        }
         res.status(500).json({ error: err.message || 'Payment failed' });
     }
 });

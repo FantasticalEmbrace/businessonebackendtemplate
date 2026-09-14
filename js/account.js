@@ -117,7 +117,7 @@ class AccountManager {
 
     handleHashNavigation() {
         const hash = window.location.hash.replace('#', '');
-        if (hash && ['profile', 'orders', 'addresses', 'loyalty', 'gift-cards', 'wishlists'].includes(hash)) {
+        if (hash && ['profile', 'orders', 'addresses', 'loyalty', 'gift-cards', 'wishlists', 'subscriptions'].includes(hash)) {
             this.showSection(hash);
         }
     }
@@ -152,6 +152,8 @@ class AccountManager {
             this.loadAddresses();
         } else if (sectionId === 'loyalty') {
             this.loadLoyalty();
+        } else if (sectionId === 'subscriptions') {
+            this.loadSubscriptions();
         } else if (sectionId === 'gift-cards') {
             this.loadGiftCards();
             this.bindGiftCardLookup();
@@ -1348,6 +1350,65 @@ class AccountManager {
             console.error('Error loading loyalty:', error);
             if (container) container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Could not load rewards</p></div>';
         }
+    }
+
+    // -----------------------------------------------------------------
+    // Product subscriptions (Subscribe & Save)
+    // -----------------------------------------------------------------
+    async loadSubscriptions() {
+        const container = document.getElementById('subscriptions-list');
+        if (!container) return;
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading subscriptions...</p></div>';
+        try {
+            const data = await this.apiRequest('/store/subscriptions');
+            const rows = Array.isArray(data.subscriptions) ? data.subscriptions : [];
+            if (!rows.length) {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-sync-alt"></i><p>No active subscriptions yet. Choose Subscribe &amp; Save in your cart on eligible products.</p></div>';
+                return;
+            }
+            container.innerHTML = rows.map((sub) => this.renderSubscription(sub)).join('');
+            container.querySelectorAll('[data-cancel-sub]').forEach((btn) => {
+                btn.addEventListener('click', async () => {
+                    const id = btn.getAttribute('data-cancel-sub');
+                    if (!id || !confirm('Cancel this subscription? Future auto-ship orders will stop.')) return;
+                    try {
+                        await this.apiRequest(`/store/subscriptions/${id}/cancel`, { method: 'POST' });
+                        this.showNotification('Subscription cancelled', 'success');
+                        this.loadSubscriptions();
+                    } catch (err) {
+                        this.showNotification(err.message || 'Could not cancel subscription', 'error');
+                    }
+                });
+            });
+        } catch (error) {
+            console.error('Error loading subscriptions:', error);
+            container.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>${this._esc(error.message || 'Could not load subscriptions')}</p></div>`;
+        }
+    }
+
+    renderSubscription(sub) {
+        const name = this._esc(sub.product_name || 'Product');
+        const variant = sub.variant_name ? ` — ${this._esc(sub.variant_name)}` : '';
+        const status = this._esc(String(sub.status || '').replace(/_/g, ' '));
+        const interval = Number(sub.interval_days) || 30;
+        const qty = Number(sub.quantity) || 1;
+        const price = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(sub.unit_price) || 0);
+        const next = sub.next_charge_at ? new Date(sub.next_charge_at).toLocaleDateString() : '—';
+        const canCancel = ['active', 'paused', 'past_due'].includes(String(sub.status || ''));
+        return `
+            <div class="address-card" style="margin-bottom: var(--space-3);">
+                <div style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+                    <div>
+                        <strong>${name}${variant}</strong>
+                        <div style="color:var(--gray-600);font-size:var(--text-sm);margin-top:0.25rem;">
+                            ${qty} × ${price} · every ${interval} days · next: ${this._esc(next)}
+                        </div>
+                        <div style="margin-top:0.35rem;text-transform:capitalize;">Status: ${status}</div>
+                    </div>
+                    ${canCancel ? `<button type="button" class="btn btn-secondary" data-cancel-sub="${Number(sub.id)}">Cancel</button>` : ''}
+                </div>
+            </div>
+        `;
     }
 
     // -----------------------------------------------------------------

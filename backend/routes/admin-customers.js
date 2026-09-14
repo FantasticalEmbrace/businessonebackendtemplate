@@ -91,6 +91,20 @@ const {
     setLoyaltyEnrollment,
     loadLoyaltyProgramSettings
 } = require('../services/customerLoyalty');
+
+/** Merchant list column: 'cash' (Credit) or 'points' (Points). */
+async function resolveLoyaltyListDisplayMode(pool) {
+    const settings = await loadLoyaltyProgramSettings(pool);
+    if (settings.pointsEnabled && !settings.cashEnabled) return 'points';
+    if (settings.cashEnabled && !settings.pointsEnabled) return 'cash';
+    try {
+        const { getProgramSettings } = require('../services/loyaltyTierProgram');
+        const tier = await getProgramSettings(pool);
+        if (String(tier.programMode || '').toLowerCase() === 'points') return 'points';
+    } catch (_) { /* optional */ }
+    return 'cash';
+}
+
 // ---------------------------------------------------------------------------
 // LIST customers (paginated, with search & filters)
 // ---------------------------------------------------------------------------
@@ -101,6 +115,7 @@ router.get('/', async (req, res) => {
         const offset = (page - 1) * limit;
 
         const { search, status, type, has_loyalty, marketing_opt_in, sort } = req.query;
+        const loyaltyMode = await resolveLoyaltyListDisplayMode(req.pool);
 
         const where = ['u.is_active <> 0'];
         const params = [];
@@ -119,6 +134,9 @@ router.get('/', async (req, res) => {
             where.push('(cl.points_balance IS NULL OR cl.points_balance = 0) AND (cl.cash_balance IS NULL OR cl.cash_balance = 0)');
         }
 
+        const loyaltySortCol = loyaltyMode === 'points'
+            ? 'COALESCE(cl.points_balance, 0)'
+            : 'COALESCE(cl.cash_balance, 0)';
         const sortOptions = {
             recent:        'u.created_at DESC',
             oldest:        'u.created_at ASC',
@@ -128,8 +146,8 @@ router.get('/', async (req, res) => {
             last_order:    'u.last_order_at DESC',
             name_asc:      'u.last_name ASC, u.first_name ASC',
             name_desc:     'u.last_name DESC, u.first_name DESC',
-            loyalty_desc:  'COALESCE(cl.points_balance, 0) DESC, u.last_name ASC',
-            loyalty_asc:   'COALESCE(cl.points_balance, 0) ASC, u.last_name ASC',
+            loyalty_desc:  `${loyaltySortCol} DESC, u.last_name ASC`,
+            loyalty_asc:   `${loyaltySortCol} ASC, u.last_name ASC`,
         };
         const orderBy = sortOptions[sort] || 'u.created_at DESC';
 
@@ -147,7 +165,7 @@ router.get('/', async (req, res) => {
                 u.lifetime_value, u.total_orders, u.last_order_at, u.avg_order_value,
                 u.marketing_email_opt_in, u.marketing_sms_opt_in,
                 u.created_at, u.last_login,
-                cl.points_balance, cl.tier, cl.last_synced_at AS loyalty_synced_at,
+                cl.points_balance, cl.cash_balance, cl.tier, cl.last_synced_at AS loyalty_synced_at,
                 (SELECT COUNT(*) FROM gift_cards gc
                   WHERE gc.customer_id = u.id AND gc.status IN ('active','inactive')) AS gift_card_count,
                 (SELECT COALESCE(SUM(gc.current_balance),0) FROM gift_cards gc
@@ -173,6 +191,7 @@ router.get('/', async (req, res) => {
         res.json(
             jsonSafeDeep({
                 customers: rows,
+                loyalty_display_mode: loyaltyMode,
                 pagination: {
                     page,
                     limit,
@@ -215,6 +234,7 @@ router.get('/', async (req, res) => {
                     0 AS marketing_email_opt_in,
                     0 AS marketing_sms_opt_in,
                     0 AS points_balance,
+                    0 AS cash_balance,
                     NULL AS tier,
                     NULL AS loyalty_synced_at,
                     0 AS gift_card_count,
@@ -235,6 +255,7 @@ router.get('/', async (req, res) => {
             return res.json(
                 jsonSafeDeep({
                     customers: rows,
+                    loyalty_display_mode: 'cash',
                     pagination: {
                         page,
                         limit,
@@ -287,7 +308,8 @@ router.get('/stats', async (req, res) => {
               FROM gift_cards`
         );
 
-        res.json({ ...totals, ...loyalty, ...gc });
+        const loyaltyMode = await resolveLoyaltyListDisplayMode(req.pool);
+        res.json({ ...totals, ...loyalty, ...gc, loyalty_display_mode: loyaltyMode });
     } catch (err) {
         logger.error('Customer stats error', { error: err.message, code: err.code });
 

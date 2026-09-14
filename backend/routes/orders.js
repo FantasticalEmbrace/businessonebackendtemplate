@@ -4,9 +4,11 @@ const router = express.Router();
 const logger = require('../utils/logger');
 const InventoryService = require('../services/inventory');
 const promoEngine = require('../services/webPromotionEngine');
+const { applyWebDestinationTax } = require('../services/webDestinationTax');
 const { finalizePaidOrder, recalcUserOrderAggregates } = require('../services/finalizePaidOrder');
 const { cartLookupBinds, hasCartIdentity } = require('../utils/cartSession');
 const { validateGiftCardCartItems } = require('../services/giftCardFulfillment');
+const { validateSubscriptionCart } = require('../services/storeSubscriptionService');
 const { isUsPhoneDisplay } = require('../utils/usPhoneDisplay');
 const {
     normalizeWebStoreTenders,
@@ -116,7 +118,7 @@ function generateOrderNumber() {
     const m = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
     const seq = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
-    return `HM${y}${m}${day}-${seq}`;
+    return `BO${y}${m}${day}-${seq}`;
 }
 
 function buildOrderNotes(orderNotes) {
@@ -140,12 +142,16 @@ function normalizeCartItems(cartItems = []) {
             const quantity = Number(item.quantity);
             const price = Number(item.price);
             const giftCard = item.giftCard || item.gift_card || null;
+            const subscribe = Boolean(item.subscribe === true || item.subscribe === 1 || item.subscribe === '1');
+            const intervalRaw = Number(item.subscriptionIntervalDays ?? item.subscription_interval_days);
             return {
                 product_id: Number(item.product_id ?? item.productId ?? item.id ?? 0),
                 variant_id: item.variant_id ?? item.variantId ?? null,
                 quantity: Number.isFinite(quantity) ? quantity : 0,
                 price: Number.isFinite(price) ? price : 0,
-                giftCard: giftCard && typeof giftCard === 'object' ? giftCard : null
+                giftCard: giftCard && typeof giftCard === 'object' ? giftCard : null,
+                subscribe,
+                subscriptionIntervalDays: Number.isFinite(intervalRaw) ? intervalRaw : 30
             };
         })
         .filter((item) => item.product_id > 0 && item.quantity > 0 && item.price >= 0);
@@ -178,9 +184,18 @@ router.post('/', async (req, res) => {
         const normalizedCustomer = normalizeCustomerInfo(customerInfo);
         const normalizedItems = normalizeCartItems(cartItems);
 
-        // Validate required fields
-        if (!normalizedCustomer.email || normalizedItems.length === 0) {
-            return res.status(400).json({ error: 'Missing required order information' });
+        // Validate required fields — distinct, explicit messages so the
+        // storefront never surfaces an obscure/generic checkout failure.
+        const emailTrimmed = String(normalizedCustomer.email || '').trim();
+        if (!emailTrimmed) {
+            return res.status(400).json({ error: 'A valid email address is required to complete checkout.' });
+        }
+        const EMAIL_FORMAT_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!EMAIL_FORMAT_REGEX.test(emailTrimmed)) {
+            return res.status(400).json({ error: 'Please enter a valid email address.' });
+        }
+        if (normalizedItems.length === 0) {
+            return res.status(400).json({ error: 'Your cart is empty.' });
         }
 
         try {
@@ -191,6 +206,16 @@ router.post('/', async (req, res) => {
                 return res.status(mapped.status).json({ error: mapped.message, code: giftErr.code });
             }
             throw giftErr;
+        }
+
+        try {
+            await validateSubscriptionCart(req.pool, normalizedItems, { userId });
+        } catch (subErr) {
+            const status = Number(subErr.status) || 400;
+            return res.status(status).json({
+                error: subErr.message || 'Subscription cart validation failed.',
+                code: subErr.code || 'SUBSCRIPTION_INVALID'
+            });
         }
 
         const phoneTrim = String(normalizedCustomer.phone || '').trim();
@@ -250,9 +275,43 @@ router.post('/', async (req, res) => {
         const t = checkout.totals;
         const merchandiseSubtotal = Number(t.merchandiseSubtotal) || 0;
         const discountAmount = Number(t.totalDiscountAmount) || 0;
-        const computedTax = Number(t.taxAmount) || 0;
+        let computedTax = Number(t.taxAmount) || 0;
         const computedShipping = Number(t.shippingAfter) || 0;
-        const computedTotal = Number(t.totalAmount) || 0;
+        let computedTotal = Number(t.totalAmount) || 0;
+
+        // Destination tax for online shipping (Ziptax). Store flat rate is estimate-only.
+        // Tax-exempt destination states return $0 (sales/shipping still allowed). Tax-exempt customers stay at $0.
+        try {
+            const taxed = await applyWebDestinationTax(
+                req.pool,
+                t,
+                {
+                    street1: ship.line1,
+                    city: ship.city,
+                    state: ship.state,
+                    postalCode: ship.postalCode,
+                    name: `${normalizedCustomer.firstName || ''} ${normalizedCustomer.lastName || ''}`.trim()
+                },
+                { applyTaxExemption, tenant: 'business_one' }
+            );
+            computedTax = Number(taxed.totals.taxAmount) || 0;
+            computedTotal = Number(taxed.totals.totalAmount) || 0;
+        } catch (taxErr) {
+            logger.warn('[orders] Destination tax failed', {
+                code: taxErr.code,
+                message: taxErr.message
+            });
+            const status =
+                taxErr.code === 'TAX_PROVIDER_NOT_CONFIGURED' ||
+                taxErr.code === 'TAX_PROVIDER_UNAVAILABLE'
+                    ? 503
+                    : 400;
+            return res.status(status).json({
+                error: taxErr.message || 'Unable to calculate sales tax for this shipping address.',
+                code: taxErr.code || 'TAX_CALCULATION_FAILED'
+            });
+        }
+
         const orderNumber = generateOrderNumber();
         const baseOrderNotes = buildOrderNotes(rawOrderNotes);
 
@@ -397,7 +456,21 @@ router.post('/', async (req, res) => {
             // Add order items (server catalog price)
             for (const line of checkout.enrichment) {
                 const lineTotal = promoEngine.roundMoney(line.unitPrice * line.quantity);
-                const lineMeta = line.giftCard ? JSON.stringify({ giftCard: line.giftCard }) : null;
+                const meta = {};
+                if (line.giftCard) meta.giftCard = line.giftCard;
+                const cartLine = normalizedItems.find(
+                    (i) =>
+                        Number(i.product_id) === Number(line.product_id) &&
+                        (i.variant_id == null
+                            ? line.variant_id == null
+                            : Number(i.variant_id) === Number(line.variant_id))
+                );
+                if (cartLine?.subscribe) {
+                    meta.subscription = {
+                        intervalDays: Number(cartLine.subscriptionIntervalDays) || 30
+                    };
+                }
+                const lineMeta = Object.keys(meta).length ? JSON.stringify(meta) : null;
                 await connection.execute(
                     `
                     INSERT INTO order_items (

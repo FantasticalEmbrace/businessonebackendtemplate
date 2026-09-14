@@ -16,7 +16,7 @@
 .modal-close,
 .gdpr-modal-close,
 .ccpa-modal-close,
-.edsa-modal-close,
+.scheduling-modal-close,
 .newsletter-popup-close,
 .acct-modal-close,
 .notification .notification-close {
@@ -52,8 +52,8 @@
 .gdpr-modal-close::after,
 .ccpa-modal-close::before,
 .ccpa-modal-close::after,
-.edsa-modal-close::before,
-.edsa-modal-close::after,
+.scheduling-modal-close::before,
+.scheduling-modal-close::after,
 .newsletter-popup-close::before,
 .newsletter-popup-close::after,
 .acct-modal-close::before,
@@ -74,7 +74,7 @@
 .modal-close::before,
 .gdpr-modal-close::before,
 .ccpa-modal-close::before,
-.edsa-modal-close::before,
+.scheduling-modal-close::before,
 .newsletter-popup-close::before,
 .acct-modal-close::before,
 .notification .notification-close::before {
@@ -87,7 +87,7 @@
 .modal-close::after,
 .gdpr-modal-close::after,
 .ccpa-modal-close::after,
-.edsa-modal-close::after,
+.scheduling-modal-close::after,
 .newsletter-popup-close::after,
 .acct-modal-close::after,
 .notification .notification-close::after {
@@ -100,7 +100,7 @@
 .modal-close:hover,
 .gdpr-modal-close:hover,
 .ccpa-modal-close:hover,
-.edsa-modal-close:hover,
+.scheduling-modal-close:hover,
 .newsletter-popup-close:hover,
 .acct-modal-close:hover,
 .notification .notification-close:hover {
@@ -114,7 +114,7 @@
 .modal-close:focus-visible,
 .gdpr-modal-close:focus-visible,
 .ccpa-modal-close:focus-visible,
-.edsa-modal-close:focus-visible,
+.scheduling-modal-close:focus-visible,
 .newsletter-popup-close:focus-visible,
 .acct-modal-close:focus-visible,
 .notification .notification-close:focus-visible {
@@ -145,7 +145,7 @@
 .modal-close .cart-close-svg,
 .gdpr-modal-close .cart-close-svg,
 .ccpa-modal-close .cart-close-svg,
-.edsa-modal-close .cart-close-svg,
+.scheduling-modal-close .cart-close-svg,
 .newsletter-popup-close .cart-close-svg,
 .acct-modal-close .cart-close-svg,
 .notification .notification-close .cart-close-svg,
@@ -154,7 +154,7 @@
 .modal-close i,
 .gdpr-modal-close i,
 .ccpa-modal-close i,
-.edsa-modal-close i,
+.scheduling-modal-close i,
 .newsletter-popup-close i,
 .acct-modal-close i,
 .notification .notification-close i {

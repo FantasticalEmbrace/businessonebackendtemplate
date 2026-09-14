@@ -140,7 +140,7 @@
 
     function hasTrackingReady(order) {
         const num = String(order?.tracking_number || '').trim();
-        return num && !/^HMTRK/i.test(num);
+        return num && !/^(BOTRK|HMTRK)/i.test(num);
     }
 
     global.HMOrderProgress = {

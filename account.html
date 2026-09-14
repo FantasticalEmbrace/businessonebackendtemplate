@@ -412,7 +412,7 @@
                     <ul class="nav-menu" id="nav-menu" role="menubar">
                         <li role="none"><a href="index.html" role="menuitem">Home</a></li>
                         <li role="none"><a href="products.html" role="menuitem">Products</a></li>
-                        <li role="none"><a href="index.html#edsa-service" role="menuitem" class="edsa-nav-link">EDSA Service</a></li>
+                        <li role="none"><a href="index.html#scheduling-service" role="menuitem" class="scheduling-nav-link">Scheduling Service</a></li>
                         <li role="none"><a href="about.html" role="menuitem">About</a></li>
                         <li role="none"><a href="index.html#contact" role="menuitem">Contact</a></li>
                     </ul>
@@ -495,6 +495,12 @@
                             <a href="#loyalty" class="account-nav-link" data-section="loyalty">
                                 <i class="fas fa-star" aria-hidden="true"></i>
                                 Rewards
+                            </a>
+                        </li>
+                        <li class="account-nav-item">
+                            <a href="#subscriptions" class="account-nav-link" data-section="subscriptions">
+                                <i class="fas fa-sync-alt" aria-hidden="true"></i>
+                                Subscriptions
                             </a>
                         </li>
                         <li class="account-nav-item">
@@ -619,6 +625,12 @@
                         <div id="loyalty-history-container" class="orders-list"></div>
                     </section>
 
+                    <section id="subscriptions" class="account-section">
+                        <h2 class="section-title">Subscriptions</h2>
+                        <p style="color: var(--gray-600); margin-bottom: var(--space-4);">Manage Subscribe &amp; Save auto-ship orders. Cancel anytime.</p>
+                        <div id="subscriptions-list" class="orders-list"></div>
+                    </section>
+
                     <!-- Addresses Section -->
                     <section id="addresses" class="account-section">
                         <h2 class="section-title">Saved Addresses</h2>
@@ -686,6 +698,7 @@
     <script src="js/tracking-link.js" defer></script>
     <script src="js/order-progress.js" defer></script>
     <script src="js/hm-gift-card.js"></script>
+    <script src="js/cart-subscription-ui.js?v=subscribe-save-1" defer></script>
     <script src="js/account.js" defer></script>
     <script src="js/hm-notify.js"></script>
     <script src="script.js" defer></script>

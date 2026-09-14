@@ -160,15 +160,15 @@ self.addEventListener('fetch', event => {
     url.pathname === '/css/gift-cards.css' ||
     url.pathname === '/gift-cards.html' ||
     url.pathname === '/gdpr-compliance.js' ||
-    url.pathname === '/js/edsa-ui.js' ||
-    url.pathname === '/js/edsa-booking.js' ||
-    url.pathname === '/css/edsa-booking.css' ||
+    url.pathname === '/js/scheduling-ui.js' ||
+    url.pathname === '/js/scheduling-booking.js' ||
+    url.pathname === '/css/scheduling-booking.css' ||
     url.pathname === '/js/products.js' ||
     url.pathname === '/products.html' ||
-    url.pathname === '/js/edsa-confirmation.js' ||
-    url.pathname === '/js/edsa-manage-appointment.js' ||
-    url.pathname === '/edsa-confirmation.html' ||
-    url.pathname === '/edsa-manage-appointment.html' ||
+    url.pathname === '/js/scheduling-confirmation.js' ||
+    url.pathname === '/js/scheduling-manage-appointment.js' ||
+    url.pathname === '/scheduling-confirmation.html' ||
+    url.pathname === '/scheduling-manage-appointment.html' ||
     url.pathname === '/order-confirmation.html'
   ) {
     return;

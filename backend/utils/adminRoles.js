@@ -141,7 +141,7 @@ const SECTION_ACCESS = Object.freeze({
 
         'customer-groups',
 
-        'edsa',
+        'scheduling',
 
         'low-stock',
 
@@ -175,7 +175,7 @@ const SECTION_ACCESS = Object.freeze({
 
         'gift-cards',
 
-        'edsa',
+        'scheduling',
 
         'marketing',
 
@@ -197,7 +197,7 @@ const SECTION_ACCESS = Object.freeze({
 
 const DEVELOPER_ONLY_SECTIONS = Object.freeze(['developer-tools']);
 
-/** Reserved for principal-store-only admin sections (schedule/EDSA is available to all merchants). */
+/** Reserved for principal-store-only admin sections (schedule/Scheduling is available to all merchants). */
 const PRINCIPAL_ONLY_SECTIONS = Object.freeze([]);
 
 function filterAllowedSectionsForStore(sections, { isPrincipalStore = false } = {}) {

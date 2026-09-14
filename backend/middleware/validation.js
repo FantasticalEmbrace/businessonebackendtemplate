@@ -244,8 +244,8 @@ const orderValidation = [
   handleValidationErrors
 ];
 
-// EDSA booking validation (JSON body matches js/edsa-booking.js: camelCase)
-const edsaBookingValidation = [
+// Scheduling booking validation (JSON body matches js/scheduling-booking.js: camelCase)
+const schedulingBookingValidation = [
   body('firstName')
     .trim()
     .isLength({ min: 1, max: 50 })
@@ -317,7 +317,7 @@ const edsaBookingValidation = [
   handleValidationErrors
 ];
 
-const edsaCustomerEmailValidation = [
+const schedulingCustomerEmailValidation = [
   body('email')
     .isEmail()
     .normalizeEmail()
@@ -325,7 +325,7 @@ const edsaCustomerEmailValidation = [
   handleValidationErrors
 ];
 
-const edsaCustomerRescheduleValidation = [
+const schedulingCustomerRescheduleValidation = [
   body('email')
     .isEmail()
     .normalizeEmail()
@@ -360,7 +360,7 @@ const edsaCustomerRescheduleValidation = [
   handleValidationErrors
 ];
 
-const edsaRequestChangeValidation = [
+const schedulingRequestChangeValidation = [
   body('email')
     .isEmail()
     .normalizeEmail()
@@ -611,10 +611,10 @@ module.exports = {
   adminLoginValidation,
   productValidation,
   orderValidation,
-  edsaBookingValidation,
-  edsaRequestChangeValidation,
-  edsaCustomerEmailValidation,
-  edsaCustomerRescheduleValidation,
+  schedulingBookingValidation,
+  schedulingRequestChangeValidation,
+  schedulingCustomerEmailValidation,
+  schedulingCustomerRescheduleValidation,
   emailCampaignValidation,
   idParamValidation,
   paginationValidation,

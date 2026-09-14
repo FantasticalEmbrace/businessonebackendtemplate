@@ -198,6 +198,9 @@
 
             container.classList.remove('loading');
             this._lastCustomersPage = data.customers;
+            const loyaltyMode = data.loyalty_display_mode === 'points' ? 'points' : 'cash';
+            this._customersLoyaltyMode = loyaltyMode;
+            const loyaltyHeader = loyaltyMode === 'points' ? 'Points' : 'Credit';
 
             const sortToHeader = {
                 recent: { key: 'joined', dir: 'desc' },
@@ -225,17 +228,25 @@
                             <tr>
                                 <th data-sort="name" data-sort-type="text" data-sort-default="asc">Name</th>
                                 <th data-sort="spent" data-sort-type="number" data-sort-default="desc">Spent</th>
-                                <th data-sort="loyalty" data-sort-type="number" data-sort-default="desc">Loyalty</th>
+                                <th data-sort="loyalty" data-sort-type="number" data-sort-default="desc">${loyaltyHeader}</th>
                                 <th data-sort="joined" data-sort-type="date" data-sort-default="desc">Joined</th>
                                 <th class="col-actions">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${data.customers.map(c => `
+                            ${data.customers.map(c => {
+                                const tierHtml = c.tier ? ` <small style="color:var(--gray-500);">(${esc(c.tier)})</small>` : '';
+                                const sortVal = loyaltyMode === 'points'
+                                    ? (Number(c.points_balance) || 0)
+                                    : (Number(c.cash_balance) || 0);
+                                const cell = loyaltyMode === 'points'
+                                    ? `${fmtNumber(c.points_balance || 0)} pts${tierHtml}`
+                                    : `${fmtMoney(c.cash_balance || 0)}${tierHtml}`;
+                                return `
                                 <tr>
                                     <td data-sort-value="${esc((c.last_name || '') + ' ' + (c.first_name || ''))}"><strong>${esc((c.first_name || '') + ' ' + (c.last_name || ''))}</strong></td>
                                     <td data-sort-value="${Number(c.lifetime_value) || 0}">${fmtMoney(c.lifetime_value)}</td>
-                                    <td data-sort-value="${Number(c.points_balance) || 0}">${fmtNumber(c.points_balance || 0)} pts ${c.tier ? `<small style="color:var(--gray-500);">(${esc(c.tier)})</small>` : ''}</td>
+                                    <td data-sort-value="${sortVal}">${cell}</td>
                                     <td data-sort-value="${esc(c.created_at || '')}">${fmtDate(c.created_at)}</td>
                                     <td class="col-actions">
                                         <div class="admin-row-actions">
@@ -245,8 +256,8 @@
                                             ${this.isFullAdmin ? `<button type="button" class="btn btn-sm btn-danger" onclick="adminApp.deleteCustomerAccount(${c.id})" title="Delete account"><i class="fas fa-trash" aria-hidden="true"></i></button>` : ''}
                                         </div>
                                     </td>
-                                </tr>
-                            `).join('')}
+                                </tr>`;
+                            }).join('')}
                         </tbody>
                     </table>
                 </div>`;
@@ -306,7 +317,18 @@
             $('statTotalCustomers').textContent = fmtNumber(stats.total_customers);
             $('statNewCustomers').textContent = fmtNumber(stats.new_30_days);
             $('statLoyaltyMembers').textContent = fmtNumber(stats.loyalty_members);
-            $('statLoyaltyPoints').textContent = fmtNumber(stats.total_points_outstanding);
+            const loyaltyMode = stats.loyalty_display_mode === 'points' ? 'points' : 'cash';
+            const outstandingEl = $('statLoyaltyPoints');
+            const unitEl = $('statLoyaltyOutstandingUnit');
+            if (outstandingEl) {
+                if (loyaltyMode === 'points') {
+                    outstandingEl.textContent = fmtNumber(stats.total_points_outstanding);
+                    if (unitEl) unitEl.textContent = 'pts outstanding';
+                } else {
+                    outstandingEl.textContent = fmtMoney(stats.total_cash_outstanding);
+                    if (unitEl) unitEl.textContent = 'credit outstanding';
+                }
+            }
             $('statAvgLTV').textContent = fmtMoney(stats.avg_lifetime_value);
         } catch (err) {
             console.warn('Failed to load customer stats', err);
@@ -521,7 +543,7 @@
                     const tracking = String(o.tracking_number || '').trim();
                     const isPlaceholder = window.HMTrackingLink?.isPlaceholderTracking
                         ? window.HMTrackingLink.isPlaceholderTracking(tracking)
-                        : /^HMTRK/i.test(tracking);
+                        : /^(BOTRK|HMTRK)/i.test(tracking);
                     const service = String(o.shipping_service || '').trim().toLowerCase();
                     const isDropship =
                         (!!tracking && !isPlaceholder) || /\bdrop\s*-?\s*ship/.test(service);

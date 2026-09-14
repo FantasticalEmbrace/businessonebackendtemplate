@@ -15,7 +15,7 @@ const HMReceiptPrint = (() => {
   .spinner { width: 2.25rem; height: 2.25rem; border: 3px solid #d1d5db; border-top-color: #059669; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 1rem; }
   @keyframes spin { to { transform: rotate(360deg); } }
 </style></head><body>
-<div class="wrap"><div class="spinner" aria-hidden="true"></div><p>Loading receipt…</p></div>
+<div class="wrap"><div class="spinner" aria-hidden="true"></div><p>Loading receipt?</p></div>
 </body></html>`;
 
     function openLoading() {
@@ -110,13 +110,13 @@ class AdminApp {
         };
         this.categoriesViewTab = 'shop';
         this._categoriesTabsReady = false;
-        this._edsaBookingsById = new Map();
+        this._schedulingBookingsById = new Map();
 
         this.init();
     }
 
     getApiBaseUrl() {
-        // file:// has no origin — point at the local merchant API port.
+        // file:// has no origin ? point at the local merchant API port.
         if (window.location.protocol === 'file:') {
             console.warn('Admin panel opened via file:// protocol. Please use a web server.');
             console.warn('Start the backend server: cd backend && npm start');
@@ -304,10 +304,85 @@ class AdminApp {
             gift_card: 'Gift card',
             card: 'Credit card',
             credit_card: 'Credit card',
+            debit_card: 'Debit card',
             bank_account: 'Bank account',
             nmi: 'Credit card',
+            cash: 'Cash',
+            check: 'Check',
+            card_terminal: 'Card (terminal)',
+            loyalty: 'Loyalty / store credit',
+            loyalty_cash: 'Store credit',
+            loyalty_points: 'Loyalty points',
+            split: 'Split payment'
         };
         return labels[method] || (method ? method.replace(/_/g, ' ') : '-');
+    }
+
+    _formatPaymentTenderLabel(t) {
+        const type = String(t?.tender_type || t?.type || '').toLowerCase();
+        const labels = {
+            loyalty_cash: 'Store credit',
+            loyalty_points: 'Loyalty points',
+            gift_card: 'Gift card',
+            cash: 'Cash',
+            check: 'Check',
+            card_terminal: 'Card',
+            credit_card: 'Card',
+            debit_card: 'Card',
+            card: 'Card',
+            nmi: 'Card',
+            mxmerchant: 'Card',
+            promo: 'Promo',
+            discount: 'Discount',
+            split: 'Split payment'
+        };
+        let label = labels[type] || (type ? type.replace(/_/g, ' ') : 'Payment');
+        if (type === 'loyalty_points') {
+            const pts = Number(t.loyalty_points);
+            if (Number.isFinite(pts) && pts > 0) label += ` (${pts} pts)`;
+        }
+        if (type === 'gift_card') {
+            const code = String(t.gift_card_code || t.gift_card_last4 || '').trim();
+            if (code) label += ` (${code})`;
+        }
+        if (type === 'check' && t.check_number) {
+            label += ` #${String(t.check_number).trim()}`;
+        }
+        if (type === 'cash' && t.cash_tendered != null && t.cash_tendered !== '') {
+            label += ` (tendered ${this.formatAdminMoney(t.cash_tendered)}`;
+            if (Number(t.cash_change) > 0) label += `, change ${this.formatAdminMoney(t.cash_change)}`;
+            label += ')';
+        }
+        const lastFour = String(t.terminal_last_four || '').replace(/\D/g, '');
+        if (
+            (type === 'card_terminal' || type === 'credit_card' || type === 'debit_card' || type === 'card' || type === 'nmi') &&
+            lastFour.length === 4
+        ) {
+            label += ` (???? ${lastFour})`;
+        }
+        return label;
+    }
+
+    _formatPaymentTendersHtml(tenders, order) {
+        const list = (Array.isArray(tenders) ? tenders : []).filter((t) => {
+            const status = String(t.status || 'captured').toLowerCase();
+            return !['failed', 'declined', 'voided', 'cancelled'].includes(status);
+        });
+        if (!list.length) {
+            const method = this._formatPaymentMethod(order);
+            return `<div style="font-size:0.95rem;">${this.escapeHtml(order.payment_status || '-')}${method && method !== '-' ? ` ? ${this.escapeHtml(method)}` : ''}</div>`;
+        }
+        const rows = list
+            .map((t) => {
+                const label = this._formatPaymentTenderLabel(t);
+                return `<div style="display:flex;justify-content:space-between;gap:0.75rem;flex-wrap:wrap;"><span style="min-width:0;overflow-wrap:anywhere;">${this.escapeHtml(label)}</span><span style="font-variant-numeric:tabular-nums;white-space:nowrap;">${this.formatAdminMoney(t.amount)}</span></div>`;
+            })
+            .join('');
+        const heading =
+            list.length > 1
+                ? '<div style="font-weight:600;margin-bottom:0.35rem;">Payment breakdown</div>'
+                : '<div style="font-weight:600;margin-bottom:0.35rem;">Payment</div>';
+        return `<div style="font-size:0.95rem;line-height:1.55;">${heading}${rows}<div style="margin-top:0.35rem;color:var(--gray-500);">${this.escapeHtml(order.payment_status || '')}</div></div>`;
     }
 
     _formatSalesChannel(order) {
@@ -329,21 +404,22 @@ class AdminApp {
 
     _renderOrderProgress(order) {
         const hasLabel = !!(order.label_url || order.label_created_at);
+        const hasManualTracking = !!(order.tracking_number && !hasLabel);
         const trackingLink = window.HMTrackingLink
             ? window.HMTrackingLink.renderTrackingLink(order, (s) => this.escapeHtml(s), {
                 empty: '<span style="color:var(--gray-500);">-</span>',
             })
             : (order.tracking_url && order.tracking_number
-                ? `<a href="${this.escapeHtml(order.tracking_url)}" target="_blank" rel="noopener" style="color:var(--primary-green);font-weight:600;">${this.escapeHtml(order.tracking_number)}</a>`
+                ? `<a href="${this.escapeHtml(order.tracking_url)}" target="_blank" rel="noopener" style="color:var(--primary-green);font-weight:600;overflow-wrap:anywhere;word-break:break-all;">${this.escapeHtml(order.tracking_number)}</a>`
                 : '<span style="color:var(--gray-500);">-</span>');
 
         const gridCells = [
             `<div><div style="font-size:0.75rem;color:var(--gray-500);text-transform:uppercase;">Status</div><div style="font-weight:600;">${this.escapeHtml(this._formatOrderStatus(order.status))}</div></div>`,
         ];
-        if (hasLabel) {
+        if (hasLabel || order.shipping_carrier) {
             gridCells.push(
                 `<div><div style="font-size:0.75rem;color:var(--gray-500);text-transform:uppercase;">Carrier</div><div>${this.escapeHtml(order.shipping_carrier || '-')}</div></div>`,
-                `<div><div style="font-size:0.75rem;color:var(--gray-500);text-transform:uppercase;">Service</div><div>${this.escapeHtml(order.shipping_service || '-')}</div></div>`
+                `<div><div style="font-size:0.75rem;color:var(--gray-500);text-transform:uppercase;">Service</div><div>${this.escapeHtml(order.shipping_service || (hasManualTracking ? 'Dropship' : '-'))}</div></div>`
             );
         } else {
             gridCells.push(
@@ -352,12 +428,19 @@ class AdminApp {
         }
         gridCells.push(
             `<div><div style="font-size:0.75rem;color:var(--gray-500);text-transform:uppercase;">Payment</div><div>${this.escapeHtml(order.payment_status || '-')}${order.payment_method || (order.notes && /Payment method:/i.test(order.notes)) ? ` \u00B7 ${this.escapeHtml(this._formatPaymentMethod(order))}` : ''}</div></div>`,
-            `<div><div style="font-size:0.75rem;color:var(--gray-500);text-transform:uppercase;">Tracking</div><div>${trackingLink}</div></div>`
+            `<div style="min-width:0;"><div style="font-size:0.75rem;color:var(--gray-500);text-transform:uppercase;">Tracking</div><div style="overflow-wrap:anywhere;word-break:break-all;max-width:100%;">${trackingLink}</div></div>`
         );
 
         const steps = [
             { key: 'placed', label: 'Order placed', done: true, at: order.created_at },
-            { key: 'label', label: 'Shipping label created', done: !!order.label_created_at || !!order.label_url, at: order.label_created_at },
+            {
+                key: 'label',
+                label: hasManualTracking ? 'Tracking entered (dropship)' : 'Shipping label created',
+                done: !!order.label_created_at || !!order.label_url || hasManualTracking,
+                at: hasManualTracking
+                    ? (order.shipped_at || order.tracking_status_updated_at || null)
+                    : order.label_created_at,
+            },
             { key: 'shipped', label: 'Shipped', done: ['shipped', 'in_transit', 'delivered'].includes(String(order.status || '').toLowerCase()), at: order.shipped_at },
             { key: 'delivered', label: 'Delivered', done: String(order.status || '').toLowerCase() === 'delivered', at: order.delivered_at },
         ];
@@ -365,7 +448,7 @@ class AdminApp {
         const detailForStep = (step) => {
             const detail = String(order.tracking_status_detail || '').trim();
             if (!detail || !step.done) return '';
-            if (step.key === 'label' && st === 'label_created') return detail;
+            if (step.key === 'label' && (st === 'label_created' || hasManualTracking)) return detail;
             if (step.key === 'shipped' && (st === 'shipped' || st === 'in_transit')) return detail;
             if (step.key === 'delivered' && st === 'delivered') return detail;
             return '';
@@ -383,8 +466,96 @@ class AdminApp {
             </div>`;
         }).join('');
 
+        // Print Invoice always available (customer receipt). Print label only when Shippo PDF exists.
+        // Use data-* + JS bind ? never nested-quotes onclick (broke print before).
+        const safeLabelUrl = hasLabel && order.label_url
+            ? String(order.label_url)
+                .replace(/&/g, '&amp;')
+                .replace(/"/g, '&quot;')
+                .replace(/</g, '&lt;')
+                .replace(/'/g, '&#39;')
+            : '';
+        const printInvoiceProgress =
+            `<button type="button" class="btn btn-secondary btn-sm" id="hm-order-progress-print-invoice-btn"
+                data-order-id="${Number(order.id)}"
+                data-sales-channel="${this.escapeHtml(String(order.sales_channel || ''))}"
+                title="Print customer invoice / receipt">
+                <i class="fas fa-file-invoice"></i> Print Invoice
+            </button>`;
         const printLabel = hasLabel && order.label_url
-            ? `<div style="margin-top:0.75rem;"><a class="btn btn-primary btn-sm" href="${this.escapeHtml(order.label_url)}" target="_blank" rel="noopener"><i class="fas fa-print"></i> Print label</a></div>`
+            ? `<button type="button" class="btn btn-primary btn-sm" id="hm-order-progress-print-label-btn"
+                    data-order-id="${Number(order.id)}"
+                    data-label-url="${safeLabelUrl}">
+                    <i class="fas fa-print"></i> Print label
+                </button>
+                ${order.label_printed_at
+                    ? `<span style="font-size:0.8rem;color:var(--gray-500);">Printed ${this.formatAdminDateTime(order.label_printed_at)}</span>`
+                    : '<span style="font-size:0.8rem;color:#b45309;">Not printed yet ? opens 4?6 Shippo PDF</span>'}`
+            : '';
+        const printActions = `
+            <div style="margin-top:0.75rem;display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
+                ${printInvoiceProgress}
+                ${printLabel}
+            </div>`;
+
+        const carrierVal = String(order.shipping_carrier || '').trim().toLowerCase();
+        const carrierOptions = [
+            { v: 'usps', l: 'USPS' },
+            { v: 'ups', l: 'UPS' },
+            { v: 'fedex', l: 'FedEx' },
+            { v: 'dhl', l: 'DHL' },
+            { v: 'ontrac', l: 'OnTrac' },
+            { v: 'other', l: 'Other' },
+        ];
+        const known = carrierOptions.some((c) => carrierVal.includes(c.v));
+        const selectedCarrier = known
+            ? (carrierOptions.find((c) => carrierVal.includes(c.v))?.v || 'usps')
+            : (carrierVal ? 'other' : 'usps');
+
+        // Manual tracking always available when there is no store Shippo label (dropship / external).
+        const manualTrackingForm = !hasLabel
+            ? `<div style="margin-top:1rem;padding-top:0.85rem;border-top:1px solid var(--gray-200);" id="hm-manual-tracking-section">
+                <h5 style="margin:0 0 0.35rem;color:var(--gray-800);font-size:0.95rem;">
+                    ${hasManualTracking ? 'Edit dropship tracking' : 'Enter tracking (dropship / external)'}
+                </h5>
+                <p style="font-size:0.8rem;color:var(--gray-500);margin:0 0 0.75rem;line-height:1.35;">
+                    Use when the vendor ships for you ? no Shippo label from this store. Saves tracking, marks the order shipped, and emails the customer.
+                </p>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0.75rem;align-items:end;">
+                    <div class="form-group" style="margin:0;">
+                        <label for="hm-manual-tracking-number" style="font-size:0.8rem;">Tracking number</label>
+                        <input type="text" class="form-input" id="hm-manual-tracking-number" autocomplete="off"
+                            value="${this.escapeHtml(order.tracking_number || '')}"
+                            placeholder="Vendor tracking #" aria-label="Dropship tracking number">
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <label for="hm-manual-tracking-carrier" style="font-size:0.8rem;">Carrier</label>
+                        <select class="form-input" id="hm-manual-tracking-carrier" aria-label="Shipping carrier">
+                            ${carrierOptions.map((c) =>
+                                `<option value="${c.v}" ${selectedCarrier === c.v ? 'selected' : ''}>${c.l}</option>`
+                            ).join('')}
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin:0;" id="hm-manual-carrier-other-wrap" ${selectedCarrier === 'other' ? '' : 'hidden'}>
+                        <label for="hm-manual-tracking-carrier-other" style="font-size:0.8rem;">Carrier name</label>
+                        <input type="text" class="form-input" id="hm-manual-tracking-carrier-other" autocomplete="off"
+                            value="${selectedCarrier === 'other' ? this.escapeHtml(order.shipping_carrier || '') : ''}"
+                            placeholder="e.g. Amazon Logistics" aria-label="Other carrier name">
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <label for="hm-manual-tracking-service" style="font-size:0.8rem;">Service <span style="font-weight:400;color:var(--gray-500);">(optional)</span></label>
+                        <input type="text" class="form-input" id="hm-manual-tracking-service" autocomplete="off"
+                            value="${this.escapeHtml(hasManualTracking ? (order.shipping_service || '') : '')}"
+                            placeholder="e.g. Ground" aria-label="Shipping service optional">
+                    </div>
+                    <div style="display:flex;align-items:end;">
+                        <button type="button" class="btn btn-primary btn-sm" id="hm-manual-tracking-save"
+                            data-order-id="${Number(order.id)}">
+                            <i class="fas fa-truck"></i> ${hasManualTracking ? 'Update tracking' : 'Save tracking &amp; mark shipped'}
+                        </button>
+                    </div>
+                </div>
+               </div>`
             : '';
 
         return `
@@ -393,20 +564,157 @@ class AdminApp {
                     ${gridCells.join('')}
                 </div>
                 <div style="border-top:1px solid var(--gray-200);padding-top:0.75rem;">${timeline}</div>
-                ${printLabel}
-                <p style="font-size:0.8rem;color:var(--gray-500);margin:0.75rem 0 0;">Status and tracking update automatically from Shippo when labels are created and carriers scan packages.</p>
+                ${printActions}
+                ${manualTrackingForm}
+                <p style="font-size:0.8rem;color:var(--gray-500);margin:0.75rem 0 0;">Shippo labels update tracking automatically. For dropships, enter the vendor tracking number above.</p>
             </div>`;
+    }
+
+    _bindManualTrackingForm(root, modal) {
+        if (!root) return;
+
+        const printInvoiceBtn = root.querySelector('#hm-order-progress-print-invoice-btn');
+        if (printInvoiceBtn && printInvoiceBtn.dataset.bound !== '1') {
+            printInvoiceBtn.dataset.bound = '1';
+            printInvoiceBtn.addEventListener('click', () => {
+                if (this._receiptPrintInFlight) return;
+                const oid = Number(printInvoiceBtn.getAttribute('data-order-id') || 0);
+                const salesChannel = String(printInvoiceBtn.getAttribute('data-sales-channel') || '');
+                const printWindow = HMReceiptPrint.openLoading();
+                void this.printOrderReceipt(oid, salesChannel, {
+                    printWindow,
+                    triggerEl: printInvoiceBtn,
+                });
+            });
+        }
+
+        const printBtn = root.querySelector('#hm-order-progress-print-label-btn');
+        if (printBtn && printBtn.dataset.bound !== '1') {
+            printBtn.dataset.bound = '1';
+            printBtn.addEventListener('click', () => {
+                const oid = Number(printBtn.getAttribute('data-order-id') || 0);
+                const url = String(printBtn.getAttribute('data-label-url') || '').trim();
+                if (typeof this.printOrderLabel === 'function') {
+                    void this.printOrderLabel(oid, url);
+                } else if (window.HMShippingLabelPrint?.open) {
+                    window.HMShippingLabelPrint.open(url);
+                } else if (url) {
+                    window.open(url, '_blank');
+                }
+            });
+        }
+
+        const carrierSelect = root.querySelector('#hm-manual-tracking-carrier');
+        const otherWrap = root.querySelector('#hm-manual-carrier-other-wrap');
+        const syncOther = () => {
+            if (!otherWrap) return;
+            otherWrap.hidden = String(carrierSelect?.value || '') !== 'other';
+        };
+        if (carrierSelect && carrierSelect.dataset.bound !== '1') {
+            carrierSelect.dataset.bound = '1';
+            carrierSelect.addEventListener('change', syncOther);
+            syncOther();
+        }
+
+        const saveBtn = root.querySelector('#hm-manual-tracking-save');
+        if (!saveBtn || saveBtn.dataset.bound === '1') return;
+        saveBtn.dataset.bound = '1';
+        saveBtn.addEventListener('click', async () => {
+            const orderId = Number(saveBtn.getAttribute('data-order-id'));
+            const trackingNumber = String(
+                root.querySelector('#hm-manual-tracking-number')?.value || ''
+            ).trim();
+            let shippingCarrier = String(carrierSelect?.value || '').trim();
+            if (shippingCarrier === 'other') {
+                shippingCarrier = String(
+                    root.querySelector('#hm-manual-tracking-carrier-other')?.value || ''
+                ).trim();
+            }
+            const shippingService = String(
+                root.querySelector('#hm-manual-tracking-service')?.value || ''
+            ).trim();
+
+            if (!trackingNumber) {
+                this.showNotification('Enter the vendor tracking number', 'error');
+                return;
+            }
+            if (!shippingCarrier) {
+                this.showNotification('Select or enter a carrier', 'error');
+                return;
+            }
+
+            const prevHtml = saveBtn.innerHTML;
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving?';
+            try {
+                await this.apiRequest(`/shipping/orders/${orderId}/manual-tracking`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        trackingNumber,
+                        shippingCarrier,
+                        shippingService: shippingService || undefined,
+                        markShipped: true,
+                    }),
+                });
+                this.showNotification('Tracking saved ? order marked shipped', 'success');
+                await this.refreshOrderProgressPanel(orderId, modal);
+                if (typeof this.loadOrders === 'function') await this.loadOrders();
+            } catch (e) {
+                this.showNotification(e.message || 'Failed to save tracking', 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = prevHtml;
+            }
+        });
+    }
+
+    /**
+     * Dropship / external fulfillment: vendor tracking entered without a store Shippo label.
+     * Matches order-detail hasManualTracking (tracking present, no label_url).
+     */
+    _isDropshipFulfillment(order) {
+        if (!order || order.label_url || order.label_created_at) return false;
+        const tracking = String(order.tracking_number || '').trim();
+        if (tracking) {
+            const isPlaceholder = window.HMTrackingLink?.isPlaceholderTracking
+                ? window.HMTrackingLink.isPlaceholderTracking(tracking)
+                : /^(BOTRK|HMTRK)/i.test(tracking);
+            if (!isPlaceholder) return true;
+        }
+        const service = String(order.shipping_service || '').trim().toLowerCase();
+        return /\bdrop\s*-?\s*ship/.test(service);
+    }
+
+    _formatOrderLabelCell(order) {
+        if (order.label_url) {
+            if (order.label_printed_at) {
+                return '<span class="badge badge-success">Printed</span>';
+            }
+            return '<span class="badge badge-warning">Ready to print</span>';
+        }
+        const channel = String(order.sales_channel || 'online').toLowerCase();
+        if (channel === 'in_store') {
+            return '<span style="color:var(--gray-400);">?</span>';
+        }
+        // Paid + dropshipped/manual tracking ? no Shippo label needed (not "Needs label")
+        if (this._isDropshipFulfillment(order)) {
+            return '<span class="badge badge-info">Dropshipped</span>';
+        }
+        if (String(order.payment_status || '').toLowerCase() === 'paid') {
+            return '<span class="badge badge-secondary">Needs label</span>';
+        }
+        return '<span style="color:var(--gray-400);">?</span>';
     }
 
     _mountAdminModal(html) {
         const root = document.getElementById('adminModalRoot');
         if (!root) return null;
         const modal = document.createElement('div');
-        modal.className = 'modal';
+        modal.className = 'modal hm-admin-order-modal';
         modal.style.cssText =
-            'display:flex;position:fixed;z-index:10000;inset:0;background:rgba(0,0,0,0.6);align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto;';
+            'display:flex;position:fixed;z-index:10000;inset:0;background:rgba(0,0,0,0.6);align-items:flex-start;justify-content:center;padding:max(0.75rem, env(safe-area-inset-top)) 0.75rem max(0.75rem, env(safe-area-inset-bottom));overflow-y:auto;-webkit-overflow-scrolling:touch;';
         modal.innerHTML = `
-            <div class="modal-content" style="background:#fff;border-radius:var(--radius-lg, 8px);max-width:980px;width:100%;position:relative;max-height:calc(100vh - 4rem);overflow-y:auto;box-shadow:0 25px 50px -12px rgba(0,0,0,0.3);">
+            <div class="modal-content hm-order-detail-sheet" style="background:#fff;border-radius:var(--radius-lg, 8px);max-width:980px;width:100%;position:relative;margin:0 auto 1.5rem;max-height:none;overflow:visible;box-shadow:0 25px 50px -12px rgba(0,0,0,0.3);">
                 ${html}
             </div>`;
 
@@ -458,6 +766,7 @@ class AdminApp {
                 panel.innerHTML = `
                     <h4 style="margin:1rem 0 0.75rem;color:var(--gray-800);">Order progress</h4>
                     ${this._renderOrderProgress(data.order)}`;
+                this._bindManualTrackingForm(panel, modal);
             }
             const badges = modal.querySelector('.modal-content > div:first-child .badge');
             // refresh header badges
@@ -545,6 +854,40 @@ class AdminApp {
         } finally {
             this._receiptPrintInFlight = false;
             if (triggerEl) triggerEl.disabled = prevDisabled;
+        }
+    }
+
+    async printOrderLabel(orderId, labelUrl) {
+        const url = String(labelUrl || '').trim();
+        if (!url) {
+            this.showToast('No label PDF for this order', 'error');
+            return;
+        }
+        // Prefer native PDF_4x6 open; avoid window.open(..., 'noopener') which returns null even on success.
+        const openFn = window.HMShippingLabelPrint && typeof window.HMShippingLabelPrint.open === 'function'
+            ? window.HMShippingLabelPrint.open
+            : null;
+        const win = openFn ? openFn(url) : window.open(url, '_blank');
+        if (!win) {
+            this.showToast('Allow pop-ups to open the shipping label PDF', 'error');
+            return;
+        }
+        this.showToast('Label PDF opened ? choose your 4?6 label printer in the print dialog', 'success');
+        try {
+            const marked = await this.apiRequest('/shipping/labels/mark-printed', {
+                method: 'POST',
+                body: JSON.stringify({ orderIds: [Number(orderId)] }),
+            });
+            if (!marked?.updated) {
+                this.showToast(
+                    'Label opened, but this order is voided/refunded/cancelled so it was not marked printed',
+                    'error'
+                );
+            } else {
+                this.loadOrders();
+            }
+        } catch (err) {
+            console.warn('Could not mark label printed', err);
         }
     }
 
@@ -645,12 +988,12 @@ class AdminApp {
             ],
             firefox: [
                 'Click the shield or lock icon in the address bar.',
-                'Open Connection secure → More information → Permissions.',
+                'Open Connection secure ? More information ? Permissions.',
                 'Uncheck Block pop-up windows, or click the blocked-pop-up icon in the address bar and choose Allow pop-ups for this site.',
                 `Return here and click Try again to print ${noun}.`,
             ],
             safari: [
-                'In the menu bar, open Safari → Settings (or Preferences) → Websites.',
+                'In the menu bar, open Safari ? Settings (or Preferences) ? Websites.',
                 'Select Pop-up Windows in the sidebar.',
                 `Set ${host} to Allow.`,
                 `Return here and click Try again to print ${noun}.`,
@@ -689,7 +1032,7 @@ class AdminApp {
 
             const itemsHeading = shop ? `Parts & labor (${items.length})` : `Items (${items.length})`;
             const itemsHtml = items.length
-                ? `<div class="table-container"><table class="table">
+                ? `<div class="table-container" style="overflow-x:auto;-webkit-overflow-scrolling:touch;"><table class="table">
                     <thead><tr><th>Product</th><th>SKU</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
                     <tbody>
                     ${items.map((item) => `
@@ -718,22 +1061,22 @@ class AdminApp {
                 ? `<div>
                         <h4 style="margin:0 0 0.75rem;color:var(--gray-800);">Job totals</h4>
                         <div style="font-size:0.95rem;line-height:1.6;">
-                            <div style="display:flex;justify-content:space-between;"><span>Parts & labor</span><span>${this.formatAdminMoney(order.subtotal)}</span></div>
-                            ${Number(order.discount_amount) > 0 ? `<div style="display:flex;justify-content:space-between;"><span>Discount</span><span>-${this.formatAdminMoney(order.discount_amount)}</span></div>` : ''}
-                            <div style="display:flex;justify-content:space-between;"><span>Tax</span><span>${this.formatAdminMoney(order.tax_amount)}</span></div>
-                            <div style="display:flex;justify-content:space-between;font-weight:700;margin-top:0.35rem;padding-top:0.35rem;border-top:1px solid var(--gray-200);"><span>Total</span><span>${this.formatAdminMoney(order.total_amount)}</span></div>
+                            <div style="display:flex;justify-content:space-between;gap:0.75rem;"><span>Parts & labor</span><span>${this.formatAdminMoney(order.subtotal)}</span></div>
+                            ${Number(order.discount_amount) > 0 ? `<div style="display:flex;justify-content:space-between;gap:0.75rem;"><span>Discount</span><span>-${this.formatAdminMoney(order.discount_amount)}</span></div>` : ''}
+                            <div style="display:flex;justify-content:space-between;gap:0.75rem;"><span>Tax</span><span>${this.formatAdminMoney(order.tax_amount)}</span></div>
+                            <div style="display:flex;justify-content:space-between;gap:0.75rem;font-weight:700;margin-top:0.35rem;padding-top:0.35rem;border-top:1px solid var(--gray-200);"><span>Total</span><span>${this.formatAdminMoney(order.total_amount)}</span></div>
                         </div>
                         ${paymentBlock}
                     </div>`
                 : `<div>
                         <h4 style="margin:0 0 0.75rem;color:var(--gray-800);">Order totals</h4>
                         <div style="font-size:0.95rem;line-height:1.6;">
-                            <div style="display:flex;justify-content:space-between;"><span>Subtotal</span><span>${this.formatAdminMoney(order.subtotal)}</span></div>
-                            <div style="display:flex;justify-content:space-between;"><span>Discount</span><span>-${this.formatAdminMoney(order.discount_amount)}</span></div>
-                            <div style="display:flex;justify-content:space-between;"><span>Shipping</span><span>${this.formatAdminMoney(order.shipping_amount)}</span></div>
-                            <div style="display:flex;justify-content:space-between;"><span>Tax</span><span>${this.formatAdminMoney(order.tax_amount)}</span></div>
-                            <div style="display:flex;justify-content:space-between;font-weight:700;margin-top:0.35rem;padding-top:0.35rem;border-top:1px solid var(--gray-200);"><span>Total</span><span>${this.formatAdminMoney(order.total_amount)}</span></div>
-                            ${order.promo_code ? `<div style="margin-top:0.5rem;color:var(--gray-600);">Promo: <code>${this.escapeHtml(order.promo_code)}</code></div>` : ''}
+                            <div style="display:flex;justify-content:space-between;gap:0.75rem;"><span>Subtotal</span><span>${this.formatAdminMoney(order.subtotal)}</span></div>
+                            ${Number(order.discount_amount) > 0 ? `<div style="display:flex;justify-content:space-between;gap:0.75rem;"><span>Discount${order.promo_code ? ` (${this.escapeHtml(order.promo_code)})` : ''}</span><span>-${this.formatAdminMoney(order.discount_amount)}</span></div>` : ''}
+                            <div style="display:flex;justify-content:space-between;gap:0.75rem;"><span>Shipping</span><span>${this.formatAdminMoney(order.shipping_amount)}</span></div>
+                            <div style="display:flex;justify-content:space-between;gap:0.75rem;"><span>Tax</span><span>${this.formatAdminMoney(order.tax_amount)}</span></div>
+                            <div style="display:flex;justify-content:space-between;gap:0.75rem;font-weight:700;margin-top:0.35rem;padding-top:0.35rem;border-top:1px solid var(--gray-200);"><span>Total</span><span>${this.formatAdminMoney(order.total_amount)}</span></div>
+                            ${order.promo_code && !(Number(order.discount_amount) > 0) ? `<div style="margin-top:0.5rem;color:var(--gray-600);">Promo: <code>${this.escapeHtml(order.promo_code)}</code></div>` : ''}
                         </div>
                         ${paymentBlock}
                     </div>`;
@@ -781,7 +1124,7 @@ class AdminApp {
                     ${closeBtn}
                 </div>
 
-                <div style="padding:1.5rem;display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+                <div class="hm-order-detail-grid" style="padding:1.5rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;">
                     <div>
                         <h4 style="margin:0 0 0.75rem;color:var(--gray-800);">Customer</h4>
                         <div style="font-size:0.95rem;line-height:1.5;">
@@ -810,7 +1153,6 @@ class AdminApp {
             if (!modal) return;
 
             if (!shop) {
-                this._bindOrderLabelPrintButtons(modal);
                 this._bindManualTrackingForm(modal, modal);
             }
 
@@ -925,8 +1267,8 @@ class AdminApp {
             const deep = this.parseAdminDeepLink();
             if (deep) {
                 this.showSection(deep.section, { skipHashUpdate: true }).then(() => {
-                    if (deep.bookingId && deep.section === 'edsa') {
-                        this.openEdsaBookingWhenReady(deep.bookingId);
+                    if (deep.bookingId && deep.section === 'scheduling') {
+                        this.openSchedulingBookingWhenReady(deep.bookingId);
                     }
                 });
             }
@@ -950,7 +1292,7 @@ class AdminApp {
         try {
             const url = new URL(window.location.href);
             url.hash = sectionName;
-            if (sectionName !== 'edsa') {
+            if (sectionName !== 'scheduling') {
                 url.searchParams.delete('booking');
             }
             const next = `${url.pathname}${url.search}${url.hash}`;
@@ -962,11 +1304,11 @@ class AdminApp {
         }
     }
 
-    async openEdsaBookingWhenReady(bookingId, attemptsLeft = 20) {
+    async openSchedulingBookingWhenReady(bookingId, attemptsLeft = 20) {
         const id = Number(bookingId);
         if (!Number.isFinite(id) || id < 1) return;
-        if (this._edsaBookingsById.has(id)) {
-            this.openEdsaBookingModal(id);
+        if (this._schedulingBookingsById.has(id)) {
+            this.openSchedulingBookingModal(id);
             return;
         }
         if (attemptsLeft <= 0) {
@@ -977,7 +1319,7 @@ class AdminApp {
             return;
         }
         await new Promise((r) => setTimeout(r, 150));
-        return this.openEdsaBookingWhenReady(id, attemptsLeft - 1);
+        return this.openSchedulingBookingWhenReady(id, attemptsLeft - 1);
     }
 
     async applyAdminDeepLink() {
@@ -993,8 +1335,8 @@ class AdminApp {
         if (!deep) return;
 
         await this.showSection(deep.section, { skipHashUpdate: true });
-        if (deep.bookingId && deep.section === 'edsa') {
-            await this.openEdsaBookingWhenReady(deep.bookingId);
+        if (deep.bookingId && deep.section === 'scheduling') {
+            await this.openSchedulingBookingWhenReady(deep.bookingId);
         }
     }
 
@@ -1493,9 +1835,9 @@ class AdminApp {
                 if (totalOrders) totalOrders.textContent = response.orders.total_orders || 0;
             }
 
-            if (response.edsa) {
+            if (response.scheduling) {
                 const totalBookings = document.getElementById('totalBookings');
-                if (totalBookings) totalBookings.textContent = response.edsa.pending_bookings || 0;
+                if (totalBookings) totalBookings.textContent = response.scheduling.pending_bookings || 0;
             }
 
             // Render recent activity
@@ -1584,7 +1926,7 @@ class AdminApp {
                 activities.push({
                     type: 'booking',
                     icon: 'fa-calendar',
-                    title: 'EDSA Booking',
+                    title: 'Scheduling Booking',
                     description: `${booking.customer_name || 'Customer'} - ${booking.appointment_date ? new Date(booking.appointment_date).toLocaleDateString() : 'Pending'}`,
                     status: booking.status,
                     time: this.formatTimeAgo(booking.created_at)
@@ -1835,8 +2177,8 @@ class AdminApp {
             case 'low-stock':
                 await this.loadLowStock();
                 break;
-            case 'edsa':
-                await this.loadEDSABookings();
+            case 'scheduling':
+                await this.loadSchedulingBookings();
                 break;
             case 'customers':
                 if (typeof this.loadCustomers === 'function') {
@@ -2060,7 +2402,7 @@ class AdminApp {
         if (!statusEl) return;
         if (this.currentUser?.role !== 'developer') return;
 
-        statusEl.textContent = 'Loading credentialsâ€¦';
+        statusEl.textContent = 'Loading credentials?';
         if (msg) msg.textContent = '';
 
         try {
@@ -2230,7 +2572,7 @@ class AdminApp {
 
         if (btn) btn.disabled = true;
         if (msg) {
-            msg.textContent = 'Savingâ€¦';
+            msg.textContent = 'Saving?';
             msg.style.color = 'var(--gray-600)';
         }
 
@@ -2266,7 +2608,7 @@ class AdminApp {
         const btn = document.getElementById('dev-integrations-test-btn');
         if (btn) btn.disabled = true;
         if (msg) {
-            msg.textContent = 'Testing connectionsâ€¦';
+            msg.textContent = 'Testing connections?';
             msg.style.color = 'var(--gray-600)';
         }
 
@@ -2277,7 +2619,7 @@ class AdminApp {
             });
             const lines = Object.entries(res.results || {}).map(([k, v]) => {
                 const label = k.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase());
-                let line = `${label}: ${v.ok ? 'OK' : 'Failed'} â€” ${v.message}`;
+                let line = `${label}: ${v.ok ? 'OK' : 'Failed'} ? ${v.message}`;
                 if (k === 'shippo' && Array.isArray(v.carrierSummary) && v.carrierSummary.length) {
                     line += `<br><span style="font-size:0.9em;margin-left:1rem;">${v.carrierSummary.map((c) => this._escapeHtml(c)).join('<br><span style="margin-left:1rem;"></span>')}</span>`;
                 }
@@ -2321,7 +2663,7 @@ class AdminApp {
         }
 
         const url = `${this.apiBaseUrl}/admin/dev-tools/backup`;
-        this.showNotification('Building database backupâ€¦', 'info');
+        this.showNotification('Building database backup?', 'info');
         try {
             const response = await fetch(url, {
                 method: 'GET',
@@ -3972,8 +4314,8 @@ class AdminApp {
                           ? `<div><strong>Failover data:</strong> ${Number(license.failoverGbUsed).toFixed(1)} GB (within included 2 GB)</div>`
                           : '';
                 summary.innerHTML = `
-                    <div><strong>Business:</strong> ${this.escapeHtml(license.businessName || 'â€”')}</div>
-                    <div><strong>Billing email:</strong> ${this.escapeHtml(license.billingEmail || 'â€”')}</div>
+                    <div><strong>Business:</strong> ${this.escapeHtml(license.businessName || '?')}</div>
+                    <div><strong>Billing email:</strong> ${this.escapeHtml(license.billingEmail || '?')}</div>
                     <div><strong>Status:</strong> ${this.escapeHtml(license.status || 'trial')}</div>
                     <div><strong>Active registers:</strong> ${activeDevices} of ${license.licensedStationCount || 1} licensed</div>
                     <div><strong>Monthly:</strong> ${this.escapeHtml(license.monthlyFormatted || '-')}</div>
@@ -4013,7 +4355,7 @@ class AdminApp {
                 const over = Number(license.failoverOverageAmount) || 0;
                 failoverEl.textContent =
                     over > 0
-                        ? `${gb.toFixed(1)} GB used Â· $${over.toFixed(2)} overage due`
+                        ? `${gb.toFixed(1)} GB used ? $${over.toFixed(2)} overage due`
                         : gb > 0
                           ? `${gb.toFixed(1)} GB used (within included 2 GB)`
                           : '0 GB used this period';
@@ -4199,7 +4541,7 @@ class AdminApp {
             if (msg) {
                 msg.textContent = value
                     ? 'Store address saved.'
-                    : 'Cleared â€” env FRONTEND_URL / POS_PLATFORM_STORE_URL will be used if set.';
+                    : 'Cleared ? env FRONTEND_URL / POS_PLATFORM_STORE_URL will be used if set.';
                 msg.style.color = 'var(--success)';
             }
             this.showToast('Store website address saved', 'success');
@@ -4218,7 +4560,7 @@ class AdminApp {
         const value = String(input?.value || '').trim();
         if (!value) {
             if (msg) {
-                msg.textContent = 'Nothing to copy â€” enter a store address first.';
+                msg.textContent = 'Nothing to copy ? enter a store address first.';
                 msg.style.color = 'var(--error)';
             }
             return;
@@ -4226,7 +4568,7 @@ class AdminApp {
         try {
             await navigator.clipboard.writeText(value);
             if (msg) {
-                msg.textContent = 'Copied â€” paste into Web POS setup.';
+                msg.textContent = 'Copied ? paste into Web POS setup.';
                 msg.style.color = 'var(--success)';
             }
         } catch {
@@ -4238,7 +4580,7 @@ class AdminApp {
         }
     }
 
-    /** Remote support connect lives on Business One ops admin â€” not merchant admin. */
+    /** Remote support connect lives on Business One ops admin ? not merchant admin. */
     async loadPosSupport() {
         const list = document.getElementById('pos-support-agents-list');
         const configMsg = document.getElementById('pos-support-config-msg');
@@ -4525,7 +4867,7 @@ class AdminApp {
                     <code style="user-select:all">${this.escapeHtml(apiKey)}</code>
                     <button type="button" class="btn btn-secondary btn-sm" data-copy-pos-device-key>Copy</button>
                 </span>
-                <br><span style="font-size:0.9rem;">Paste this key on the tablet (${openPos}). The key already includes this storeâ€™s address.</span>`;
+                <br><span style="font-size:0.9rem;">Paste this key on the tablet (${openPos}). The key already includes this store?s address.</span>`;
             msg.style.color = 'var(--gray-800)';
             const copyBtn = msg.querySelector('[data-copy-pos-device-key]');
             if (copyBtn) {
@@ -4669,7 +5011,7 @@ class AdminApp {
 
             if (!displays.length) {
                 list.innerHTML =
-                    '<p style="margin:0;color:var(--gray-500);font-size:0.9rem;">No front-facing displays yet. Add a <strong>Customer display</strong> under Point of Sale Ã¢â€ â€™ Equipment and assign it to a register.</p>';
+                    '<p style="margin:0;color:var(--gray-500);font-size:0.9rem;">No front-facing displays yet. Add a <strong>Customer display</strong> under Point of Sale ??? Equipment and assign it to a register.</p>';
                 return;
             }
 
@@ -5131,7 +5473,7 @@ class AdminApp {
         if (/access_denied/i.test(text)) {
             return (
                 'Google denied access. If the app is in Testing mode, add your Google test users under ' +
-                'Google Cloud Ã¢â€ â€™ OAuth consent screen Ã¢â€ â€™ Test users. Also confirm the redirect URI ' +
+                'Google Cloud ??? OAuth consent screen ??? Test users. Also confirm the redirect URI ' +
                 'http://localhost:3001/api/admin/settings/google-calendar/callback is listed on your OAuth client.'
             );
         }
@@ -5398,12 +5740,12 @@ class AdminApp {
             const email = status.connectedEmail ? ` Signed in as ${status.connectedEmail}.` : '';
             const cal =
                 status.calendarId && status.calendarId !== 'primary'
-                    ? ' EDSA bookings will use the calendar you selected below.'
+                    ? ' Scheduling bookings will use the calendar you selected below.'
                     : status.calendarId === 'primary'
-                      ? ' EDSA bookings will go to your main Google calendar.'
-                      : ' Choose which calendar should receive EDSA bookings below.';
+                      ? ' Scheduling bookings will go to your main Google calendar.'
+                      : ' Choose which calendar should receive Scheduling bookings below.';
             if (statusText) {
-                statusText.textContent = `Connected - EDSA appointments will sync to your calendar.${email}${cal}`;
+                statusText.textContent = `Connected - Scheduling appointments will sync to your calendar.${email}${cal}`;
             }
             if (calendarWrap) calendarWrap.style.display = 'block';
             if (saveBtn) saveBtn.style.display = 'inline-flex';
@@ -5441,11 +5783,11 @@ class AdminApp {
             const res = await this.apiRequest('/admin/settings/google-calendar/calendars');
             const calendars = Array.isArray(res?.calendars) ? res.calendars : [];
             if (!calendars.length) {
-                select.innerHTML = '<option value="">No calendars found â€” enter your calendar below</option>';
+                select.innerHTML = '<option value="">No calendars found ? enter your calendar below</option>';
                 return;
             }
             select.innerHTML =
-                '<option value="">Select calendarâ€¦</option>' +
+                '<option value="">Select calendar?</option>' +
                 calendars
                     .map((cal) => {
                         const label = `${cal.summary || cal.id}${cal.primary ? ' (main calendar)' : ''}`;
@@ -5480,7 +5822,7 @@ class AdminApp {
     async disconnectGoogleCalendar() {
         const ok = await this.showAdminConfirm({
             title: 'Disconnect Google Calendar?',
-            message: 'New EDSA bookings will no longer be added to Google Calendar until you connect again.',
+            message: 'New Scheduling bookings will no longer be added to Google Calendar until you connect again.',
             confirmLabel: 'Disconnect',
             cancelLabel: 'Cancel',
             danger: true,
@@ -5509,8 +5851,8 @@ class AdminApp {
                 method: 'PUT',
                 body: JSON.stringify({ calendarId }),
             });
-            this.showToast('EDSA calendar saved', 'success');
-            this._setGcalActionMsg('Calendar saved for EDSA bookings.');
+            this.showToast('Scheduling calendar saved', 'success');
+            this._setGcalActionMsg('Calendar saved for Scheduling bookings.');
             await this.loadGoogleCalendarStatus();
         } catch (err) {
             this.showToast('Save calendar failed: ' + (err.message || 'error'), 'error');
@@ -5523,8 +5865,8 @@ class AdminApp {
         if (!gcal) return;
         const msg = params.get('msg');
         if (gcal === 'connected') {
-            this.showToast('Google Calendar connected for EDSA', 'success');
-            this._setGcalActionMsg('You are signed in. Choose which calendar should receive EDSA bookings, then click Save Calendar.');
+            this.showToast('Google Calendar connected for Scheduling', 'success');
+            this._setGcalActionMsg('You are signed in. Choose which calendar should receive Scheduling bookings, then click Save Calendar.');
             this.loadGoogleCalendarStatus();
         } else if (gcal === 'error') {
             this.showToast('Google Calendar connection failed: ' + (msg || 'unknown error'), 'error');
@@ -5596,8 +5938,450 @@ class AdminApp {
         }
     }
 
+    _initMarketingTabs() {
+        if (this._marketingTabsReady) return;
+        const bar = document.querySelector('#marketing .marketing-tab-bar');
+        if (!bar) return;
+        bar.querySelectorAll('[data-marketing-tab]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const tab = btn.getAttribute('data-marketing-tab');
+                if (tab) this.switchMarketingTab(tab);
+            });
+        });
+        this._marketingTabsReady = true;
+    }
+
+    switchMarketingTab(tab) {
+        const allowed = ['newsletter', 'promotions', 'displays', 'loyalty', 'abandoned-cart'];
+        const active = allowed.includes(tab) ? tab : 'newsletter';
+        this.marketingTab = active;
+
+        document.querySelectorAll('#marketing [data-marketing-tab]').forEach((btn) => {
+            const isActive = btn.getAttribute('data-marketing-tab') === active;
+            btn.classList.toggle('active', isActive);
+            btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        });
+
+        document.querySelectorAll('#marketing [data-marketing-panel]').forEach((panel) => {
+            const show = panel.getAttribute('data-marketing-panel') === active;
+            panel.style.display = show ? '' : 'none';
+        });
+
+        if (active === 'loyalty') {
+            void this.loadLoyaltyTiers();
+        }
+        if (active === 'abandoned-cart') {
+            void this.loadAbandonedCartSettings();
+        }
+
+        if (typeof this._refreshMainContentScroll === 'function') {
+            this._refreshMainContentScroll();
+        }
+    }
+
+    async loadLoyaltyTiers() {
+        const card = document.getElementById('loyalty-tiers-card');
+        const tiersBody = document.getElementById('loyalty-tiers-body');
+        const customersBody = document.getElementById('loyalty-customers-body');
+        if (!card || !tiersBody) return;
+
+        tiersBody.innerHTML =
+            '<tr><td colspan="9" style="padding:1rem;color:var(--gray-500);">Loading?</td></tr>';
+        if (customersBody) {
+            customersBody.innerHTML =
+                '<tr><td colspan="5" style="padding:1rem;color:var(--gray-500);">Loading?</td></tr>';
+        }
+
+        try {
+            const res = await this.apiRequest('/admin/loyalty/settings');
+            const note = document.getElementById('loyalty-tiers-starter-note');
+            if (note) note.textContent = res.starterNote || '';
+
+            const s = res.settings || {};
+            const enabledEl = document.getElementById('loyalty-tiers-enabled');
+            const modeEl = document.getElementById('loyalty-tiers-mode');
+            if (enabledEl) enabledEl.checked = Boolean(s.enabled);
+            if (modeEl) {
+                const mode = s.programMode === 'points' || s.mode === 'points' ? 'points' : 'spend';
+                modeEl.value = mode;
+            }
+            const ppd = document.getElementById('loyalty-tiers-points-per-dollar');
+            if (ppd) ppd.value = s.pointsPerDollar ?? 1;
+            const near = document.getElementById('loyalty-tiers-near-threshold');
+            if (near) near.value = s.nearThresholdPercent ?? s.nearTierThresholdPercent ?? 80;
+            const win = document.getElementById('loyalty-tiers-winback-days');
+            if (win) win.value = s.winbackDays ?? s.winbackDaysInactive ?? 90;
+            const emailNear = document.getElementById('loyalty-tiers-email-near');
+            const emailPromo = document.getElementById('loyalty-tiers-email-promotion');
+            const emailWin = document.getElementById('loyalty-tiers-email-winback');
+            const combined = document.getElementById('loyalty-tiers-combined-bonus');
+            if (emailNear) emailNear.checked = s.emailNearEnabled !== false;
+            if (emailPromo) emailPromo.checked = s.emailPromotionEnabled !== false;
+            if (emailWin) emailWin.checked = s.emailWinbackEnabled !== false;
+            if (combined) combined.checked = s.combinedSpendFrequencyBonus !== false;
+
+            const tiers = Array.isArray(res.tiers) ? res.tiers : [];
+            this._loyaltyTiersCache = tiers;
+            tiersBody.innerHTML = tiers
+                .map((t) => {
+                    const key = this._escapeHtml(t.tierKey);
+                    const name = this._escapeHtml(t.displayName || t.tierKey);
+                    const minSpend = Number(t.minLifetimeSpend ?? t.minSpend ?? 0).toFixed(2);
+                    const minOrders = t.minOrderCount ?? t.minOrders ?? 0;
+                    return `<tr>
+                        <td style="padding:0.5rem;text-transform:capitalize;">${name}</td>
+                        <td style="padding:0.5rem;">${minSpend}</td>
+                        <td style="padding:0.5rem;">${minOrders}</td>
+                        <td style="padding:0.5rem;">${t.minPoints ?? 0}</td>
+                        <td style="padding:0.5rem;">${t.discountPercent ?? t.cashbackPercent ?? 0}%</td>
+                        <td style="padding:0.5rem;">${t.freeShipping ? 'Yes' : 'No'}</td>
+                        <td style="padding:0.5rem;">${t.frequencyBonusPercent ?? 0}%</td>
+                        <td style="padding:0.5rem;">${t.isActive !== false ? 'Yes' : 'No'}</td>
+                        <td style="padding:0.5rem;"><button type="button" class="btn btn-secondary btn-sm" data-loyalty-tier-edit="${key}">Edit</button></td>
+                    </tr>`;
+                })
+                .join('');
+
+            const custRes = await this.apiRequest('/admin/loyalty/customers?limit=25');
+            const customers = Array.isArray(custRes.customers) ? custRes.customers : [];
+            if (customersBody) {
+                customersBody.innerHTML = customers.length
+                    ? customers
+                          .map((c) => {
+                              const name = this._escapeHtml(
+                                  [c.firstName, c.lastName].filter(Boolean).join(' ') ||
+                                      c.name ||
+                                      c.email ||
+                                      'Customer'
+                              );
+                              const tier = this._escapeHtml(c.currentTierKey || c.tier || 'bronze');
+                              const pct = c.progress?.progressPercent ?? c.tierProgress ?? 0;
+                              return `<tr>
+                                <td style="padding:0.5rem;">${name}</td>
+                                <td style="padding:0.5rem;text-transform:capitalize;">${tier}</td>
+                                <td style="padding:0.5rem;">${Number(c.lifetimeSpend || 0).toFixed(2)}</td>
+                                <td style="padding:0.5rem;">${c.orderCount ?? c.totalOrders ?? 0}</td>
+                                <td style="padding:0.5rem;">${pct}%</td>
+                            </tr>`;
+                          })
+                          .join('')
+                    : '<tr><td colspan="5" style="padding:1rem;color:var(--gray-500);">No loyalty accounts yet.</td></tr>';
+            }
+        } catch (err) {
+            tiersBody.innerHTML =
+                '<tr><td colspan="9" style="padding:1rem;color:var(--error);">Failed to load loyalty settings.</td></tr>';
+            console.error('loadLoyaltyTiers', err);
+        }
+    }
+
+    async saveLoyaltyTiersSettings() {
+        const msg = document.getElementById('loyalty-tiers-msg');
+        const modeRaw = document.getElementById('loyalty-tiers-mode')?.value;
+        const body = {
+            enabled: document.getElementById('loyalty-tiers-enabled')?.checked,
+            mode: modeRaw,
+            programMode: modeRaw === 'points' ? 'points' : 'cashback',
+            pointsPerDollar: Number(document.getElementById('loyalty-tiers-points-per-dollar')?.value) || 1,
+            nearTierThresholdPercent:
+                Number(document.getElementById('loyalty-tiers-near-threshold')?.value) || 80,
+            nearThresholdPercent:
+                Number(document.getElementById('loyalty-tiers-near-threshold')?.value) || 80,
+            winbackDaysInactive: Number(document.getElementById('loyalty-tiers-winback-days')?.value) || 90,
+            winbackDays: Number(document.getElementById('loyalty-tiers-winback-days')?.value) || 90,
+            emailNearEnabled: document.getElementById('loyalty-tiers-email-near')?.checked,
+            emailPromotionEnabled: document.getElementById('loyalty-tiers-email-promotion')?.checked,
+            emailWinbackEnabled: document.getElementById('loyalty-tiers-email-winback')?.checked,
+            combinedSpendFrequencyBonus: document.getElementById('loyalty-tiers-combined-bonus')?.checked,
+        };
+        try {
+            await this.apiRequest('/admin/loyalty/settings', { method: 'PUT', body: JSON.stringify(body) });
+            if (msg) msg.textContent = 'Program settings saved.';
+            this.showToast('Loyalty settings saved', 'success');
+            await this.loadLoyaltyTiers();
+        } catch (err) {
+            if (msg) msg.textContent = err.message || 'Save failed';
+            this.showToast('Save failed: ' + (err.message || 'error'), 'error');
+        }
+    }
+
+    async editLoyaltyTier(tierKey) {
+        const tier = (this._loyaltyTiersCache || []).find((t) => t.tierKey === tierKey);
+        if (!tier) return;
+        const displayName = window.prompt('Display name', tier.displayName || tier.tierKey);
+        if (displayName == null) return;
+        const minSpend = window.prompt(
+            'Minimum lifetime spend ($)',
+            String(tier.minLifetimeSpend ?? tier.minSpend ?? 0)
+        );
+        if (minSpend == null) return;
+        const minOrders = window.prompt(
+            'Minimum paid orders (lifetime)',
+            String(tier.minOrderCount ?? tier.minOrders ?? 0)
+        );
+        if (minOrders == null) return;
+        const minPoints = window.prompt('Minimum points balance (points mode)', String(tier.minPoints ?? 0));
+        if (minPoints == null) return;
+        const discountPercent = window.prompt(
+            'Cash back / discount percent',
+            String(tier.discountPercent ?? tier.cashbackPercent ?? 0)
+        );
+        if (discountPercent == null) return;
+        const freeShipping = window.confirm('Free shipping for this tier?');
+        const frequencyBonusPercent = window.prompt(
+            'Frequency bonus % (when spend+orders both met)',
+            String(tier.frequencyBonusPercent ?? 0)
+        );
+        if (frequencyBonusPercent == null) return;
+        const isActive = window.confirm('Tier active?');
+
+        try {
+            await this.apiRequest(`/admin/loyalty/tiers/${tierKey}`, {
+                method: 'PUT',
+                body: JSON.stringify({
+                    displayName: displayName.trim(),
+                    minSpend: Number(minSpend),
+                    minLifetimeSpend: Number(minSpend),
+                    minOrders: Number(minOrders),
+                    minOrderCount: Number(minOrders),
+                    minPoints: Number(minPoints),
+                    discountPercent: Number(discountPercent),
+                    cashbackPercent: Number(discountPercent),
+                    freeShipping,
+                    frequencyBonusPercent: Number(frequencyBonusPercent),
+                    isActive,
+                }),
+            });
+            this.showToast(`${tierKey} tier updated`, 'success');
+            await this.loadLoyaltyTiers();
+        } catch (err) {
+            this.showToast('Update failed: ' + (err.message || 'error'), 'error');
+        }
+    }
+
+    async runLoyaltyEmailCheck() {
+        const msg = document.getElementById('loyalty-tiers-msg');
+        if (msg) msg.textContent = 'Running loyalty email check?';
+        try {
+            const res = await this.apiRequest('/admin/loyalty/run-now', { method: 'POST', body: '{}' });
+            const sent = res.result?.sent ?? 0;
+            if (msg) msg.textContent = `Email check complete ? ${sent} sent.`;
+            this.showToast(`Loyalty emails: ${sent} sent`, sent ? 'success' : 'info');
+        } catch (err) {
+            if (msg) msg.textContent = err.message || 'Run failed';
+            this.showToast('Run failed: ' + (err.message || 'error'), 'error');
+        }
+    }
+
+    async previewLoyaltyIntroEmail(mode) {
+        const programMode = mode === 'points' ? 'points' : 'cashback';
+        const url = `${this.apiBaseUrl}/admin/loyalty/email-preview/program-intro?mode=${encodeURIComponent(programMode)}&format=html`;
+        try {
+            const response = await fetch(url, {
+                headers: { Authorization: `Bearer ${this.authToken}` },
+            });
+            if (!response.ok) {
+                let errMsg = 'Preview failed';
+                try {
+                    const data = await response.json();
+                    errMsg = data.error || errMsg;
+                } catch (_) {
+                    /* ignore */
+                }
+                throw new Error(errMsg);
+            }
+            const html = await response.text();
+            const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+            const href = URL.createObjectURL(blob);
+            window.open(href, '_blank', 'noopener');
+            setTimeout(() => URL.revokeObjectURL(href), 60000);
+        } catch (err) {
+            this.showToast('Preview failed: ' + (err.message || 'error'), 'error');
+        }
+    }
+
+    async recalculateAllLoyaltyTiers() {
+        const msg = document.getElementById('loyalty-tiers-msg');
+        if (msg) msg.textContent = 'Recalculating all tiers…';
+        try {
+            const res = await this.apiRequest('/admin/loyalty/recalculate-all-tiers', {
+                method: 'POST',
+                body: JSON.stringify({ sendPromotionEmail: false }),
+            });
+            const r = res.result || {};
+            const text = `Recalculated ${r.processed || 0} customers (${r.changed || 0} changed).`;
+            if (msg) msg.textContent = text;
+            this.showToast(text, 'success');
+            await this.loadLoyaltyTiers();
+        } catch (err) {
+            if (msg) msg.textContent = err.message || 'Recalc failed';
+            this.showToast('Recalc failed: ' + (err.message || 'error'), 'error');
+        }
+    }
+
+    async backfillLoyaltyEarns() {
+        const msg = document.getElementById('loyalty-tiers-msg');
+        if (msg) msg.textContent = 'Backfilling loyalty earns…';
+        try {
+            const res = await this.apiRequest('/admin/loyalty/backfill-earns', {
+                method: 'POST',
+                body: JSON.stringify({ dryRun: false }),
+            });
+            const r = res.result || {};
+            const text = `Backfill done — earned ${r.earned ?? r.processed ?? 0}, skipped ${r.skipped ?? 0}.`;
+            if (msg) msg.textContent = text;
+            this.showToast(text, 'success');
+            await this.loadLoyaltyTiers();
+        } catch (err) {
+            if (msg) msg.textContent = err.message || 'Backfill failed';
+            this.showToast('Backfill failed: ' + (err.message || 'error'), 'error');
+        }
+    }
+
+    async sendPendingLoyaltyPromotionEmails() {
+        const msg = document.getElementById('loyalty-tiers-msg');
+        if (msg) msg.textContent = 'Sending pending promotion emails…';
+        try {
+            const res = await this.apiRequest('/admin/loyalty/send-pending-promotion-emails', {
+                method: 'POST',
+                body: JSON.stringify({ dryRun: false }),
+            });
+            const r = res.result || {};
+            const text = `Promotion emails — sent ${r.sent || 0}, skipped ${r.skipped || 0}.`;
+            if (msg) msg.textContent = text;
+            this.showToast(text, 'success');
+        } catch (err) {
+            if (msg) msg.textContent = err.message || 'Send failed';
+            this.showToast('Send failed: ' + (err.message || 'error'), 'error');
+        }
+    }
+
+    async resumeLoyaltyIntroEmails() {
+        const msg = document.getElementById('loyalty-tiers-msg');
+        if (msg) msg.textContent = 'Resuming intro emails…';
+        try {
+            const res = await this.apiRequest('/admin/loyalty/resume-intro-emails', {
+                method: 'POST',
+                body: '{}',
+            });
+            if (res.alreadyRunning) {
+                if (msg) msg.textContent = 'Intro email send already running.';
+                this.showToast('Intro emails already running', 'info');
+                return;
+            }
+            const text = res.scheduled
+                ? `Intro emails scheduled (${res.pending ?? 0} pending, ${res.remainingToday ?? 0} left today).`
+                : `Resume: ${res.reason || 'done'}.`;
+            if (msg) msg.textContent = text;
+            this.showToast(text, res.scheduled ? 'success' : 'info');
+        } catch (err) {
+            if (msg) msg.textContent = err.message || 'Resume failed';
+            this.showToast('Resume failed: ' + (err.message || 'error'), 'error');
+        }
+    }
+
+    async loadLoyaltyIntroEmailStatus() {
+        const msg = document.getElementById('loyalty-tiers-msg');
+        if (msg) msg.textContent = 'Loading intro email status…';
+        try {
+            const res = await this.apiRequest('/admin/loyalty/intro-email-status');
+            const s = res.stats || {};
+            const text = `Intro emails — sent ${s.sent ?? 0}, pending ${s.pending ?? 0}, today ${s.sentToday ?? 0}/${s.dailyCap ?? '?'}${s.running ? ' (running)' : ''}.`;
+            if (msg) msg.textContent = text;
+            this.showToast(text, 'info');
+        } catch (err) {
+            if (msg) msg.textContent = err.message || 'Status failed';
+            this.showToast('Status failed: ' + (err.message || 'error'), 'error');
+        }
+    }
+
+    async loadAbandonedCartSettings() {
+        const enabledEl = document.getElementById('abandoned-cart-enabled');
+        const programsBody = document.getElementById('abandoned-cart-programs-body');
+        const msg = document.getElementById('abandoned-cart-msg');
+        if (!programsBody) return;
+
+        programsBody.innerHTML =
+            '<tr><td colspan="4" style="padding:1rem;color:var(--gray-500);">Loading?</td></tr>';
+
+        try {
+            const res = await this.apiRequest('/admin/abandoned-cart/settings');
+            if (enabledEl) enabledEl.checked = Boolean(res.enabled);
+
+            const programs = Array.isArray(res.programs) ? res.programs : [];
+            programsBody.innerHTML = programs.length
+                ? programs
+                      .map((p) => {
+                          const name = this._escapeHtml(p.name || 'Program');
+                          const delay = this._escapeHtml(
+                              `${p.delayValue ?? 1} ${p.delayUnit || 'days'}`
+                          );
+                          const active = p.isActive ? 'Yes' : 'No';
+                          const sent = p.stats?.sends ?? 0;
+                          return `<tr>
+                            <td style="padding:0.5rem;">${name}</td>
+                            <td style="padding:0.5rem;">${delay}</td>
+                            <td style="padding:0.5rem;">${active}</td>
+                            <td style="padding:0.5rem;">${sent}</td>
+                        </tr>`;
+                      })
+                      .join('')
+                : '<tr><td colspan="4" style="padding:1rem;color:var(--gray-500);">No programs yet.</td></tr>';
+
+            if (msg) {
+                msg.textContent = res.starterGuideNote || '';
+            }
+        } catch (err) {
+            programsBody.innerHTML =
+                '<tr><td colspan="4" style="padding:1rem;color:var(--error);">Failed to load abandoned cart settings.</td></tr>';
+            if (msg) msg.textContent = err.message || 'Load failed';
+            console.error('loadAbandonedCartSettings', err);
+        }
+    }
+
+    async saveAbandonedCartSettings() {
+        const msg = document.getElementById('abandoned-cart-msg');
+        const enabled = Boolean(document.getElementById('abandoned-cart-enabled')?.checked);
+        try {
+            await this.apiRequest('/admin/abandoned-cart/settings', {
+                method: 'PUT',
+                body: JSON.stringify({ enabled }),
+            });
+            if (msg) msg.textContent = 'Settings saved.';
+            this.showToast('Abandoned cart settings saved', 'success');
+            await this.loadAbandonedCartSettings();
+        } catch (err) {
+            if (msg) msg.textContent = err.message || 'Save failed';
+            this.showToast('Save failed: ' + (err.message || 'error'), 'error');
+        }
+    }
+
+    async runAbandonedCartNow() {
+        const msg = document.getElementById('abandoned-cart-msg');
+        if (msg) msg.textContent = 'Sending due reminders?';
+        try {
+            const res = await this.apiRequest('/admin/abandoned-cart/run-now', {
+                method: 'POST',
+                body: '{}',
+            });
+            const result = res.result || {};
+            const sent = result.sent ?? 0;
+            if (msg) {
+                msg.textContent = result.skipped
+                    ? `Skipped (${result.reason || 'disabled'}).`
+                    : `Run complete ? ${sent} sent.`;
+            }
+            this.showToast(`Abandoned cart: ${sent} sent`, sent ? 'success' : 'info');
+            await this.loadAbandonedCartSettings();
+        } catch (err) {
+            if (msg) msg.textContent = err.message || 'Run failed';
+            this.showToast('Run failed: ' + (err.message || 'error'), 'error');
+        }
+    }
+
     async loadMarketingHub() {
         if (!this.authToken) return;
+        this._initMarketingTabs();
+        this.switchMarketingTab(this.marketingTab || 'newsletter');
         try {
             const res = await this.apiRequest('/admin/marketing-settings');
             const signup = document.getElementById('marketing-signup-url');
@@ -5608,6 +6392,12 @@ class AdminApp {
             await this.loadPromoBannerSettings();
             await Promise.all([this.loadPosFrontDisplays(), this.loadPosDisplayAds()]);
             await this.loadWebPromotionsTable();
+            if ((this.marketingTab || 'newsletter') === 'loyalty') {
+                await this.loadLoyaltyTiers();
+            }
+            if ((this.marketingTab || 'newsletter') === 'abandoned-cart') {
+                await this.loadAbandonedCartSettings();
+            }
             this._refreshMainContentScroll();
         } catch (e) {
             console.error('loadMarketingHub', e);
@@ -5857,15 +6647,15 @@ class AdminApp {
             ? `
                 <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;margin-bottom:0.65rem;">
                     <input type="checkbox" name="canProcessRefunds" value="true"${canProcessRefunds ? ' checked' : ''} style="margin-top:0.2rem;">
-                    <span>Can process refunds <span style="color:var(--gray-600);font-weight:400;">(Admin/Developer only â€” register PIN required)</span></span>
+                    <span>Can process refunds <span style="color:var(--gray-600);font-weight:400;">(Admin/Developer only ? register PIN required)</span></span>
                 </label>
                 <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;margin-bottom:0.65rem;">
                     <input type="checkbox" name="canOpenDrawer" value="true"${canOpenDrawer ? ' checked' : ''} style="margin-top:0.2rem;">
-                    <span>Can open cash drawer manually <span style="color:var(--gray-600);font-weight:400;">(Admin/Developer only â€” Shift screen button)</span></span>
+                    <span>Can open cash drawer manually <span style="color:var(--gray-600);font-weight:400;">(Admin/Developer only ? Shift screen button)</span></span>
                 </label>
                 <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;">
                     <input type="checkbox" name="canViewCost" value="true"${canViewCost ? ' checked' : ''} style="margin-top:0.2rem;">
-                    <span>Can view product cost at register <span style="color:var(--gray-600);font-weight:400;">(Admin/Developer only â€” requires store cost display enabled)</span></span>
+                    <span>Can view product cost at register <span style="color:var(--gray-600);font-weight:400;">(Admin/Developer only ? requires store cost display enabled)</span></span>
                 </label>`
             : '';
         return `
@@ -5873,7 +6663,7 @@ class AdminApp {
                 <h5 style="margin:0 0 0.75rem;font-size:0.95rem;color:var(--gray-700);">Register permissions</h5>
                 <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;margin-bottom:0.65rem;">
                     <input type="checkbox" name="allowManualDiscounts" value="true"${allowManualDiscounts ? ' checked' : ''} style="margin-top:0.2rem;">
-                    <span>Can apply manual line and sale discounts <span style="color:var(--gray-600);font-weight:400;">(off by default â€” automatic promotions still apply)</span></span>
+                    <span>Can apply manual line and sale discounts <span style="color:var(--gray-600);font-weight:400;">(off by default ? automatic promotions still apply)</span></span>
                 </label>
                 <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;margin-bottom:0.65rem;">
                     <input type="checkbox" name="canAuthorize" value="true"${canAuthorize ? ' checked' : ''} style="margin-top:0.2rem;">
@@ -7582,7 +8372,7 @@ class AdminApp {
                         <td><code>${this.escapeHtml(r.code)}</code></td>
                         <td>${this.escapeHtml(channel)}</td>
                         <td>${this.escapeHtml(active)}</td>
-                        <td style="font-size:0.88rem">${this.escapeHtml(r.description || 'â€”')}</td>
+                        <td style="font-size:0.88rem">${this.escapeHtml(r.description || '?')}</td>
                         <td style="white-space:nowrap">
                             <button type="button" class="btn btn-secondary btn-sm" data-promo-edit="${r.id}">Edit</button>
                             <button type="button" class="btn btn-danger btn-sm" data-promo-delete="${r.id}">Delete</button>
@@ -7613,7 +8403,7 @@ class AdminApp {
         if (!rules.effects.length && !usesTriggerSku) {
             if (msg) {
                 msg.textContent =
-                    'Add a TriggerÃ¢â€ â€™Reward SKU setup, cart discount (classic), buy/get, or check Free shipping.';
+                    'Add a Trigger???Reward SKU setup, cart discount (classic), buy/get, or check Free shipping.';
                 msg.style.color = 'var(--error)';
             }
             this.showToast('Add promotion rules first', 'error');
@@ -7625,7 +8415,7 @@ class AdminApp {
 
             const bad = () => {
                 const t =
-                    'Trigger mode: add at least one Trigger SKU, minimum quantity Ã¢â€°Â¥ 1, and one reward SKU group with a valid discount value.';
+                    'Trigger mode: add at least one Trigger SKU, minimum quantity ??? 1, and one reward SKU group with a valid discount value.';
                 if (msg) {
 
                     msg.textContent = t;
@@ -7891,7 +8681,7 @@ class AdminApp {
                 response.accountantEmail ||
                 '';
             const storeEmailDisplay = document.getElementById('taxAccountantEmailDisplay');
-            if (storeEmailDisplay) storeEmailDisplay.textContent = storeEmail || '—';
+            if (storeEmailDisplay) storeEmailDisplay.textContent = storeEmail || '?';
 
             const keyInput = document.getElementById('taxZiptaxApiKey');
             const keyStatus = document.getElementById('taxZiptaxKeyStatus');
@@ -7901,13 +8691,13 @@ class AdminApp {
             if (keyInput && !keyInput.dataset.dirty) {
                 keyInput.value = '';
                 keyInput.placeholder = settings.ziptaxApiKeyConfigured
-                    ? 'Ziptax key saved â€” leave blank to keep current'
+                    ? 'Ziptax key saved ? leave blank to keep current'
                     : 'Paste Ziptax API key';
             }
             if (keyStatus) {
                 keyStatus.textContent = settings.ziptaxApiKeyConfigured
                     ? `Configured: ${settings.ziptaxApiKey || '[configured]'}`
-                    : 'Not configured yet â€” online checkout tax will fail until a key is saved.';
+                    : 'Not configured yet ? online checkout tax will fail until a key is saved.';
             }
             if (storeExempt && !storeExempt.dataset.dirty) {
                 storeExempt.value =
@@ -8165,7 +8955,7 @@ class AdminApp {
                                         ${this.escapeHtml(this._formatPaymentStatus(order.payment_status))}
                                     </span>
                                 </td>
-                                <td data-sort-value="${parseFloat(order.total_amount || 0)}">$${parseFloat(order.total_amount || 0).toFixed(2)}</td>
+                                <td data-sort-value="${parseFloat(order.total_amount || 0)}">${parseFloat(order.total_amount || 0).toFixed(2)}</td>
                                 <td data-sort-value="${Number(order.item_count) || 0}">${order.item_count || 0}</td>
                                 <td data-sort-value="${this.escapeHtml(order.created_at || '')}">${new Date(order.created_at).toLocaleDateString()}</td>
                                 <td>
@@ -8276,8 +9066,8 @@ class AdminApp {
                 count === 0
                     ? 'No orders selected'
                     : count === 1
-                      ? '1 selected · Print order receipts'
-                      : `${count} selected · Print order receipts`;
+                      ? '1 selected ? Print order receipts'
+                      : `${count} selected ? Print order receipts`;
         }
         if (bar) {
             bar.hidden = count === 0;
@@ -8370,7 +9160,7 @@ ${bodies.join('\n')}
         const btn = document.getElementById('ordersBulkPrintReceiptsBtn');
         const prevDisabled = btn ? btn.disabled : false;
         if (btn) btn.disabled = true;
-        this._setOrdersBulkStatus(`Loading ${ids.length} order receipt${ids.length === 1 ? '' : 's'}…`);
+        this._setOrdersBulkStatus(`Loading ${ids.length} order receipt${ids.length === 1 ? '' : 's'}?`);
 
         // Open print window on the click gesture so the browser allows the popup.
         const printWindow = HMReceiptPrint.openLoading();
@@ -8392,7 +9182,7 @@ ${bodies.join('\n')}
             const failed = [];
             for (let i = 0; i < ids.length; i++) {
                 const orderId = ids[i];
-                this._setOrdersBulkStatus(`Loading receipt ${i + 1} of ${ids.length}…`);
+                this._setOrdersBulkStatus(`Loading receipt ${i + 1} of ${ids.length}?`);
                 try {
                     const data = await this.apiRequest(`/admin/orders/${orderId}/receipt`);
                     const html = String(data?.html || '').trim();
@@ -8417,7 +9207,7 @@ ${bodies.join('\n')}
             const combined = this._combineOrderReceiptHtml(htmlDocs);
             if (!HMReceiptPrint.writeReceipt(printWindow, combined)) {
                 HMReceiptPrint.closeQuietly(printWindow);
-                this._setOrdersBulkStatus('Pop-ups blocked — allow pop-ups and try again.', true);
+                this._setOrdersBulkStatus('Pop-ups blocked ? allow pop-ups and try again.', true);
                 this._showPopupBlockedGuidance({
                     purpose: 'invoice',
                     triggerEl: btn,
@@ -8443,61 +9233,228 @@ ${bodies.join('\n')}
         }
     }
 
-    async loadEDSABookings() {
-        // Implementation for loading EDSA bookings
-        const container = document.getElementById('edsaBookingsTable');
+    async bulkPrintUnprintedLabels() {
+        const btn = document.getElementById('orders-bulk-print-labels-btn');
+        if (btn) btn.disabled = true;
+        this._setOrdersBulkStatus('Loading unprinted labels?');
+        try {
+            const res = await this.apiRequest('/shipping/labels/unprinted?limit=50');
+            const orders = (res && res.orders) || [];
+            if (!orders.length) {
+                this._setOrdersBulkStatus('No unprinted labels right now.');
+                this.showToast('No unprinted labels', 'success');
+                return;
+            }
+            const ok = window.confirm(
+                `Open and mark printed for ${orders.length} shipping label${orders.length === 1 ? '' : 's'}?\n\nAllow pop-ups if your browser asks.`
+            );
+            if (!ok) {
+                this._setOrdersBulkStatus('');
+                return;
+            }
+
+            const opened = [];
+            const blocked = [];
+            const openFn = window.HMShippingLabelPrint && typeof window.HMShippingLabelPrint.open === 'function'
+                ? window.HMShippingLabelPrint.open
+                : null;
+            for (let i = 0; i < orders.length; i++) {
+                const order = orders[i];
+                const url = String(order.label_url || '').trim();
+                if (!url) continue;
+                const win = openFn ? openFn(url) : window.open(url, '_blank');
+                if (!win) {
+                    blocked.push(order.order_number || order.id);
+                    break;
+                }
+                opened.push(order.id);
+                this._setOrdersBulkStatus(`Opened ${opened.length} of ${orders.length} label PDFs?`);
+                if (i < orders.length - 1) {
+                    await new Promise((r) => setTimeout(r, 450));
+                }
+            }
+
+            if (opened.length) {
+                await this.apiRequest('/shipping/labels/mark-printed', {
+                    method: 'POST',
+                    body: JSON.stringify({ orderIds: opened }),
+                });
+            }
+
+            let msg = `Opened ${opened.length} label PDF${opened.length === 1 ? '' : 's'} and marked them printed.`;
+            if (blocked.length) {
+                msg += ' Pop-ups were blocked ? allow pop-ups and run Print all Labels again for the rest.';
+            }
+            this._setOrdersBulkStatus(this.escapeHtml(msg), Boolean(blocked.length));
+            this.showToast(msg, blocked.length ? 'error' : 'success');
+            await this.loadOrders();
+        } catch (err) {
+            this._setOrdersBulkStatus(this.escapeHtml(err.message || 'Bulk print failed'), true);
+            this.showToast(err.message || 'Bulk print failed', 'error');
+        } finally {
+            if (btn) btn.disabled = false;
+        }
+    }
+
+    async bulkCreateShippingLabels() {
+        const btn = document.getElementById('orders-bulk-create-labels-btn');
+        if (btn) btn.disabled = true;
+        this._setOrdersBulkStatus('Checking orders that need shipping labels?');
+        try {
+            const preview = await this.apiRequest('/shipping/labels/needs-create?limit=25');
+            const pending = (preview && preview.orders) || [];
+            if (!pending.length) {
+                this._setOrdersBulkStatus('No paid webstore orders need a shipping label right now.');
+                this.showToast('No orders need labels', 'success');
+                return;
+            }
+
+            const sample = pending
+                .slice(0, 8)
+                .map((o) => o.order_number)
+                .join(', ');
+            const more = pending.length > 8 ? ` ?(+${pending.length - 8} more)` : '';
+            const ok = window.confirm(
+                `Create shipping labels for up to ${pending.length} order${pending.length === 1 ? '' : 's'}?\n\n` +
+                    `${sample}${more}\n\n` +
+                    'Uses saved product weights and the first available Shippo rate. Orders missing weights are skipped.'
+            );
+            if (!ok) {
+                this._setOrdersBulkStatus('');
+                return;
+            }
+
+            this._setOrdersBulkStatus(
+                `Creating labels for ${pending.length} order${pending.length === 1 ? '' : 's'}? this can take a minute.`
+            );
+            const result = await this.apiRequest('/shipping/labels/bulk-create', {
+                method: 'POST',
+                body: JSON.stringify({ limit: 25 }),
+            });
+            const summary = result?.summary || {};
+            const created = result?.created || [];
+            const skipped = result?.skipped || [];
+            const failed = result?.failed || [];
+
+            const parts = [
+                `<strong>${summary.created || 0}</strong> created`,
+                `<strong>${summary.skipped || 0}</strong> skipped`,
+                `<strong>${summary.failed || 0}</strong> failed`,
+            ];
+            let detail = '';
+            if (skipped.length) {
+                const reasons = skipped
+                    .slice(0, 5)
+                    .map((s) => `${this.escapeHtml(s.orderNumber || s.orderId)} (${this.escapeHtml(s.reason)})`)
+                    .join('; ');
+                detail += `<div style="margin-top:0.35rem;">Skipped: ${reasons}${skipped.length > 5 ? '?' : ''}</div>`;
+            }
+            if (failed.length) {
+                const reasons = failed
+                    .slice(0, 5)
+                    .map((s) => `${this.escapeHtml(s.orderNumber || s.orderId)} ? ${this.escapeHtml(s.message || s.reason)}`)
+                    .join('; ');
+                detail += `<div style="margin-top:0.35rem;color:var(--error);">Failed: ${reasons}${failed.length > 5 ? '?' : ''}</div>`;
+            }
+
+            this._setOrdersBulkStatus(`Bulk labels: ${parts.join(' ? ')}${detail}`, failed.length > 0);
+            this.showToast(
+                `Labels: ${summary.created || 0} created, ${summary.skipped || 0} skipped, ${summary.failed || 0} failed`,
+                failed.length && !(summary.created > 0) ? 'error' : 'success'
+            );
+
+            if (created.length) {
+                const printNow = window.confirm(
+                    `${created.length} label${created.length === 1 ? '' : 's'} created. Print them now?`
+                );
+                if (printNow) {
+                    const openedIds = [];
+                    for (let i = 0; i < created.length; i++) {
+                        const item = created[i];
+                        if (!item.labelUrl) continue;
+                        const win = window.open(item.labelUrl, '_blank');
+                        if (!win) {
+                            this.showToast('Allow pop-ups to print the new labels', 'error');
+                            break;
+                        }
+                        openedIds.push(item.orderId);
+                        if (i < created.length - 1) {
+                            await new Promise((r) => setTimeout(r, 450));
+                        }
+                    }
+                    if (openedIds.length) {
+                        await this.apiRequest('/shipping/labels/mark-printed', {
+                            method: 'POST',
+                            body: JSON.stringify({ orderIds: openedIds }),
+                        });
+                    }
+                }
+            }
+
+            await this.loadOrders();
+        } catch (err) {
+            this._setOrdersBulkStatus(this.escapeHtml(err.message || 'Bulk label create failed'), true);
+            this.showToast(err.message || 'Bulk label create failed', 'error');
+        } finally {
+            if (btn) btn.disabled = false;
+        }
+    }
+
+    async loadSchedulingBookings() {
+        // Implementation for loading Scheduling bookings
+        const container = document.getElementById('schedulingBookingsTable');
         if (!container) {
-            console.warn('EDSA bookings table container not found');
+            console.warn('Scheduling bookings table container not found');
             return;
         }
 
-        container.innerHTML = '<div class="loading"><div class="spinner"></div>Loading EDSA bookings...</div>';
+        container.innerHTML = '<div class="loading"><div class="spinner"></div>Loading Scheduling bookings...</div>';
 
         // Don't make API call if not authenticated
         if (!this.authToken) {
-            container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--gray-500);"><p>Please log in to view EDSA bookings.</p></div>';
+            container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--gray-500);"><p>Please log in to view Scheduling bookings.</p></div>';
             return;
         }
 
         try {
-            this.initEdsaCalendarState();
-            const range = this.getEdsaCalendarRange();
+            this.initSchedulingCalendarState();
+            const range = this.getSchedulingCalendarRange();
             const response = await this.apiRequest(
-                `/admin/edsa/bookings?limit=500&from=${encodeURIComponent(range.from)}&to=${encodeURIComponent(range.to)}`
+                `/admin/scheduling/bookings?limit=500&from=${encodeURIComponent(range.from)}&to=${encodeURIComponent(range.to)}`
             );
 
             // Handle null response (403 Forbidden)
             if (!response) {
-                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--gray-500);"><p>Please log in to view EDSA bookings.</p></div>';
+                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--gray-500);"><p>Please log in to view Scheduling bookings.</p></div>';
                 return;
             }
 
             if (response.bookings && response.bookings.length > 0) {
-                this._edsaBookingsById = new Map(
+                this._schedulingBookingsById = new Map(
                     response.bookings.map((b) => [Number(b.id), b])
                 );
-                this._edsaBookingsList = response.bookings;
-                container.innerHTML = this.renderEdsaCalendarShell();
-                this.renderEdsaCalendarBody();
-                this.bindEdsaCalendarControls();
+                this._schedulingBookingsList = response.bookings;
+                container.innerHTML = this.renderSchedulingCalendarShell();
+                this.renderSchedulingCalendarBody();
+                this.bindSchedulingCalendarControls();
             } else {
-                this._edsaBookingsById = new Map();
-                this._edsaBookingsList = [];
-                container.innerHTML = this.renderEdsaCalendarShell();
-                this.renderEdsaCalendarBody();
-                this.bindEdsaCalendarControls();
+                this._schedulingBookingsById = new Map();
+                this._schedulingBookingsList = [];
+                container.innerHTML = this.renderSchedulingCalendarShell();
+                this.renderSchedulingCalendarBody();
+                this.bindSchedulingCalendarControls();
             }
         } catch (error) {
             // Don't show error for authentication issues
             if (error.message === 'Authentication required' || error.message.includes('Invalid admin token')) {
-                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--gray-500);"><p>Please log in to view EDSA bookings.</p></div>';
+                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--gray-500);"><p>Please log in to view Scheduling bookings.</p></div>';
             } else {
-                container.innerHTML = `<div style="text-align: center; padding: 2rem; color: var(--error);"><p>Failed to load EDSA bookings: ${this.escapeHtml(error.message)}</p></div>`;
+                container.innerHTML = `<div style="text-align: center; padding: 2rem; color: var(--error);"><p>Failed to load Scheduling bookings: ${this.escapeHtml(error.message)}</p></div>`;
             }
         }
     }
 
-    renderEdsaCustomerRequest(booking) {
+    renderSchedulingCustomerRequest(booking) {
         const type = booking.customer_request_type || 'none';
         if (type === 'none') {
             return '<span class="text-muted">-</span>';
@@ -8507,7 +9464,7 @@ ${bodies.join('\n')}
             const d = new Date(booking.requested_date);
             const dateStr = Number.isNaN(d.getTime()) ? booking.requested_date : d.toLocaleDateString();
             const timeStr = booking.requested_time ? String(booking.requested_time).slice(0, 5) : '';
-            text += ` Ã¢â€ â€™ ${dateStr}${timeStr ? ' ' + timeStr : ''}`;
+            text += ` ??? ${dateStr}${timeStr ? ' ' + timeStr : ''}`;
         }
         if (booking.customer_request_notes) {
             text += ` - ${this.escapeHtml(String(booking.customer_request_notes).slice(0, 80))}`;
@@ -8515,7 +9472,7 @@ ${bodies.join('\n')}
         return `<span class="badge badge-warning">${this.escapeHtml(text)}</span>`;
     }
 
-    renderEDSABookingsTable(bookings) {
+    renderSchedulingBookingsTable(bookings) {
         return `
             <div class="table-container">
                 <table class="table">
@@ -8545,10 +9502,10 @@ ${bodies.join('\n')}
                                         ${this.escapeHtml(String(booking.status || '').toUpperCase())}
                                     </span>
                                 </td>
-                                <td>${this.renderEdsaCustomerRequest(booking)}</td>
+                                <td>${this.renderSchedulingCustomerRequest(booking)}</td>
                                 <td>${new Date(booking.created_at).toLocaleDateString()}</td>
                                 <td>
-                                    <button type="button" class="btn btn-sm btn-secondary" data-edsa-edit-id="${booking.id}" aria-label="Edit booking #${booking.id}">
+                                    <button type="button" class="btn btn-sm btn-secondary" data-scheduling-edit-id="${booking.id}" aria-label="Edit booking #${booking.id}">
                                         <i class="fas fa-edit" aria-hidden="true"></i>
                                     </button>
                                 </td>
@@ -8560,7 +9517,7 @@ ${bodies.join('\n')}
         `;
     }
 
-    formatEdsaDateInput(value) {
+    formatSchedulingDateInput(value) {
         if (!value) return '';
         const raw = String(value);
         if (/^\d{4}-\d{2}-\d{2}/.test(raw)) {
@@ -8574,7 +9531,7 @@ ${bodies.join('\n')}
         return `${y}-${m}-${day}`;
     }
 
-    buildEdsaTimeOptions(selected) {
+    buildSchedulingTimeOptions(selected) {
         const sel = String(selected || '').slice(0, 5);
         let html = '';
         for (let hour = 10; hour < 18; hour++) {
@@ -8584,43 +9541,43 @@ ${bodies.join('\n')}
         return html;
     }
 
-    bindEdsaBookingsTableActions(root) {
+    bindSchedulingBookingsTableActions(root) {
         if (!root) return;
-        root.querySelectorAll('[data-edsa-edit-id]').forEach((btn) => {
-            if (btn.dataset.edsaEditBound === '1') return;
-            btn.dataset.edsaEditBound = '1';
+        root.querySelectorAll('[data-scheduling-edit-id]').forEach((btn) => {
+            if (btn.dataset.schedulingEditBound === '1') return;
+            btn.dataset.schedulingEditBound = '1';
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                const id = Number(btn.getAttribute('data-edsa-edit-id'));
+                const id = Number(btn.getAttribute('data-scheduling-edit-id'));
                 if (Number.isFinite(id)) {
-                    this.openEdsaBookingModal(id);
+                    this.openSchedulingBookingModal(id);
                 }
             });
         });
     }
 
-    openEdsaBookingModal(bookingId) {
-        const booking = this._edsaBookingsById.get(Number(bookingId));
+    openSchedulingBookingModal(bookingId) {
+        const booking = this._schedulingBookingsById.get(Number(bookingId));
         if (!booking) {
             this.showToast('Booking not found. Refresh the list and try again.', 'error');
             return;
         }
 
-        const dateVal = this.formatEdsaDateInput(booking.preferred_date);
+        const dateVal = this.formatSchedulingDateInput(booking.preferred_date);
         const timeVal = String(booking.preferred_time || '10:00').slice(0, 5);
         const name = `${booking.first_name || ''} ${booking.last_name || ''}`.trim();
 
         const modal = this._mountAdminModal(`
             <div class="modal-header" style="display:flex;justify-content:space-between;align-items:center;padding:1.25rem 1.5rem;border-bottom:1px solid var(--gray-200);background:var(--light-green, #f0f7ef);">
-                <h2 id="edsa-edit-title" style="margin:0;color:var(--primary-green);font-size:1.25rem;">EDSA booking #${booking.id}</h2>
-                <button type="button" class="modal-close" id="edsa-edit-close" aria-label="Close">${HM_CLOSE_ICON_SVG}</button>
+                <h2 id="scheduling-edit-title" style="margin:0;color:var(--primary-green);font-size:1.25rem;">Scheduling booking #${booking.id}</h2>
+                <button type="button" class="modal-close" id="scheduling-edit-close" aria-label="Close">${HM_CLOSE_ICON_SVG}</button>
             </div>
             <div class="modal-body" style="padding:1.5rem;">
                 <p style="margin:0 0 1rem;color:var(--gray-600);">${this.escapeHtml(name)} \u00B7 ${this.escapeHtml(booking.email)}</p>
                 <div class="form-group">
-                    <label for="edsa-edit-status">Status</label>
-                    <select id="edsa-edit-status" class="form-control">
+                    <label for="scheduling-edit-status">Status</label>
+                    <select id="scheduling-edit-status" class="form-control">
                         <option value="pending"${booking.status === 'pending' ? ' selected' : ''}>Pending</option>
                         <option value="confirmed"${booking.status === 'confirmed' ? ' selected' : ''}>Confirmed</option>
                         <option value="cancelled"${booking.status === 'cancelled' ? ' selected' : ''}>Cancelled</option>
@@ -8628,19 +9585,19 @@ ${bodies.join('\n')}
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="edsa-edit-date">Appointment date</label>
-                    <input type="date" id="edsa-edit-date" class="form-control" value="${this.escapeHtml(dateVal)}">
+                    <label for="scheduling-edit-date">Appointment date</label>
+                    <input type="date" id="scheduling-edit-date" class="form-control" value="${this.escapeHtml(dateVal)}">
                 </div>
                 <div class="form-group">
-                    <label for="edsa-edit-time">Appointment time</label>
-                    <select id="edsa-edit-time" class="form-control">${this.buildEdsaTimeOptions(timeVal)}</select>
+                    <label for="scheduling-edit-time">Appointment time</label>
+                    <select id="scheduling-edit-time" class="form-control">${this.buildSchedulingTimeOptions(timeVal)}</select>
                 </div>
                 <div class="form-group">
-                    <label for="edsa-edit-notes">Staff notes (internal)</label>
-                    <textarea id="edsa-edit-notes" class="form-control" rows="2">${this.escapeHtml(booking.admin_notes || '')}</textarea>
+                    <label for="scheduling-edit-notes">Staff notes (internal)</label>
+                    <textarea id="scheduling-edit-notes" class="form-control" rows="2">${this.escapeHtml(booking.admin_notes || '')}</textarea>
                 </div>
                 <label style="display:flex;align-items:center;gap:0.5rem;margin:1rem 0;">
-                    <input type="checkbox" id="edsa-edit-notify" checked>
+                    <input type="checkbox" id="scheduling-edit-notify" checked>
                     Email customer about cancel or time change
                 </label>
                 <p style="font-size:0.875rem;color:var(--gray-500);margin:0;">
@@ -8648,8 +9605,8 @@ ${bodies.join('\n')}
                 </p>
             </div>
             <div class="modal-footer" style="display:flex;gap:0.5rem;justify-content:flex-end;padding:1rem 1.5rem;border-top:1px solid var(--gray-200);">
-                <button type="button" class="btn btn-secondary" id="edsa-edit-cancel">Close</button>
-                <button type="button" class="btn btn-primary" id="edsa-edit-save">Save changes</button>
+                <button type="button" class="btn btn-secondary" id="scheduling-edit-cancel">Close</button>
+                <button type="button" class="btn btn-primary" id="scheduling-edit-save">Save changes</button>
             </div>`);
 
         if (!modal) {
@@ -8659,30 +9616,30 @@ ${bodies.join('\n')}
 
         const close = () => modal.remove();
 
-        modal.querySelector('#edsa-edit-close')?.addEventListener('click', close);
-        modal.querySelector('#edsa-edit-cancel')?.addEventListener('click', close);
+        modal.querySelector('#scheduling-edit-close')?.addEventListener('click', close);
+        modal.querySelector('#scheduling-edit-cancel')?.addEventListener('click', close);
         modal.addEventListener('click', (e) => {
             if (e.target === modal) close();
         });
 
-        modal.querySelector('#edsa-edit-save')?.addEventListener('click', async () => {
-            const btn = modal.querySelector('#edsa-edit-save');
+        modal.querySelector('#scheduling-edit-save')?.addEventListener('click', async () => {
+            const btn = modal.querySelector('#scheduling-edit-save');
             btn.disabled = true;
             btn.textContent = 'Saving...';
             try {
-                await this.apiRequest(`/admin/edsa/bookings/${booking.id}`, {
+                await this.apiRequest(`/admin/scheduling/bookings/${booking.id}`, {
                     method: 'PUT',
                     body: JSON.stringify({
-                        status: modal.querySelector('#edsa-edit-status').value,
-                        preferred_date: modal.querySelector('#edsa-edit-date').value,
-                        preferred_time: modal.querySelector('#edsa-edit-time').value,
-                        admin_notes: modal.querySelector('#edsa-edit-notes').value,
-                        notify_customer: modal.querySelector('#edsa-edit-notify').checked
+                        status: modal.querySelector('#scheduling-edit-status').value,
+                        preferred_date: modal.querySelector('#scheduling-edit-date').value,
+                        preferred_time: modal.querySelector('#scheduling-edit-time').value,
+                        admin_notes: modal.querySelector('#scheduling-edit-notes').value,
+                        notify_customer: modal.querySelector('#scheduling-edit-notify').checked
                     })
                 });
-                this.showToast('EDSA booking updated', 'success');
+                this.showToast('Scheduling booking updated', 'success');
                 close();
-                await this.loadEDSABookings();
+                await this.loadSchedulingBookings();
             } catch (err) {
                 this.showToast(err.message || 'Could not save booking', 'error');
             } finally {
@@ -8875,7 +9832,7 @@ ${bodies.join('\n')}
                 // Always replace with fresh products to ensure we have the latest data
                 this.allProducts = response.products || [];
 
-                console.log('Ã¢Å“â€¦ Products stored in allProducts:', {
+                console.log('??? Products stored in allProducts:', {
                     count: this.allProducts.length,
                     useServerPagination: this.productsPagination.useServerPagination,
                     totalProducts: this.productsPagination.totalProducts,
@@ -8886,7 +9843,7 @@ ${bodies.join('\n')}
 
                 // Log sample products to verify they have category_id and is_featured
                 if (this.allProducts.length > 0) {
-                    console.log('Ã°Å¸â€œÂ¦ Sample products after loading:', this.allProducts.slice(0, 5).map(p => ({
+                    console.log('???? Sample products after loading:', this.allProducts.slice(0, 5).map(p => ({
                         id: p.id,
                         name: p.name,
                         category_id: p.category_id,
@@ -8906,7 +9863,7 @@ ${bodies.join('\n')}
                         p.is_featured === '1' ||
                         p.is_featured === 'true'
                     );
-                    console.log('Ã¢Â­Â Featured products found:', {
+                    console.log('? Featured products found:', {
                         count: featuredProducts.length,
                         products: featuredProducts.map(p => ({
                             id: p.id,
@@ -8975,11 +9932,11 @@ ${bodies.join('\n')}
                 requestAnimationFrame(() => {
                     // Double-check products are still loaded before rendering
                     if (this.allProducts.length > 0) {
-                        console.log('Ã°Å¸Å½Â¨ Rendering products via requestAnimationFrame, product count:', this.allProducts.length);
+                        console.log('???? Rendering products via requestAnimationFrame, product count:', this.allProducts.length);
                         this.renderFilteredProductsImmediate();
                     } else {
                         // If products disappeared (shouldn't happen), try loading again
-                        console.warn('Ã¢Å¡Â Ã¯Â¸Â Products were loaded but allProducts is empty, reloading...');
+                        console.warn('???? Products were loaded but allProducts is empty, reloading...');
                         setTimeout(() => this.loadProducts(), 200);
                     }
                 });
@@ -8990,7 +9947,7 @@ ${bodies.join('\n')}
                     // Only render if container is still showing loading or is empty
                     if (container && (container.querySelector('.loading') || container.innerHTML.trim() === '')) {
                         if (this.allProducts.length > 0) {
-                            console.log('Ã°Å¸â€â€ž Fallback render triggered, product count:', this.allProducts.length);
+                            console.log('???? Fallback render triggered, product count:', this.allProducts.length);
                             this.renderFilteredProductsImmediate();
                         }
                     }
@@ -9058,7 +10015,7 @@ ${bodies.join('\n')}
                 }
             }
         } catch (error) {
-            console.error('Ã¢ÂÅ’ Error loading products:', error);
+            console.error('?? Error loading products:', error);
             // Create error message safely
             const errorDiv = document.createElement('div');
             errorDiv.style.textAlign = 'center';
@@ -9104,14 +10061,14 @@ ${bodies.join('\n')}
     async loadCategoriesForFilters() {
         try {
             if (!this.authToken) {
-                console.warn('Ã¢Å¡Â Ã¯Â¸Â Cannot load categories: not authenticated');
+                console.warn('???? Cannot load categories: not authenticated');
                 return;
             }
 
-            console.log('Ã°Å¸â€œÂ¥ Loading categories for filter...');
+            console.log('???? Loading categories for filter...');
             const response = await this.apiRequest('/admin/categories');
 
-            console.log('Ã°Å¸â€œÂ¦ Categories API response:', {
+            console.log('???? Categories API response:', {
                 response: response,
                 isArray: Array.isArray(response),
                 length: response ? response.length : 0
@@ -9119,14 +10076,14 @@ ${bodies.join('\n')}
 
             if (response && Array.isArray(response)) {
                 this.allCategories = response;
-                console.log('Ã¢Å“â€¦ Loaded categories:', this.allCategories.length);
+                console.log('??? Loaded categories:', this.allCategories.length);
                 this.populateCategoryFilter();
             } else {
-                console.warn('Ã¢Å¡Â Ã¯Â¸Â Categories response is not an array:', response);
+                console.warn('???? Categories response is not an array:', response);
                 this.allCategories = [];
             }
         } catch (error) {
-            console.error('Ã¢ÂÅ’ Failed to load categories for filter:', error);
+            console.error('?? Failed to load categories for filter:', error);
             this.allCategories = [];
         }
     }
@@ -9166,11 +10123,11 @@ ${bodies.join('\n')}
     populateCategoryFilter() {
         const categoryFilter = document.getElementById('productsCategoryFilter');
         if (!categoryFilter) {
-            console.warn('Ã¢Å¡Â Ã¯Â¸Â Category filter dropdown not found');
+            console.warn('???? Category filter dropdown not found');
             return;
         }
 
-        console.log('Ã°Å¸â€â€ž Populating category filter:', {
+        console.log('???? Populating category filter:', {
             categoriesCount: this.allCategories.length,
             categories: this.allCategories
         });
@@ -9189,15 +10146,15 @@ ${bodies.join('\n')}
                 option.textContent = category.name || `Category ${category.id}`;
                 categoryFilter.appendChild(option);
             });
-            console.log('Ã¢Å“â€¦ Added', this.allCategories.length, 'categories to filter dropdown');
+            console.log('??? Added', this.allCategories.length, 'categories to filter dropdown');
         } else {
-            console.warn('Ã¢Å¡Â Ã¯Â¸Â No categories to add to filter dropdown');
+            console.warn('???? No categories to add to filter dropdown');
         }
 
         // Restore the selected value if it still exists
         if (currentValue && this.allCategories.some(c => c.id == currentValue)) {
             categoryFilter.value = currentValue;
-            console.log('Ã¢Å“â€¦ Restored selected category:', currentValue);
+            console.log('??? Restored selected category:', currentValue);
         }
     }
 
@@ -9553,7 +10510,7 @@ ${bodies.join('\n')}
         // Ensure searchTerm is a string
         searchTerm = searchTerm || '';
 
-        console.log('Ã°Å¸â€Â filterProducts() called with:', {
+        console.log('???? filterProducts() called with:', {
             searchTerm: searchTerm,
             searchTermType: typeof searchTerm,
             brandId: brandId,
@@ -9569,7 +10526,7 @@ ${bodies.join('\n')}
         if (searchTerm && searchTerm.trim()) {
             const searchTerms = searchTerm.toLowerCase().trim().split(/\s+/).filter(word => word.length > 0);
 
-            console.log('Ã°Å¸â€Â Filtering by search term (FIRST):', {
+            console.log('???? Filtering by search term (FIRST):', {
                 searchTerm: searchTerm,
                 searchTerms: searchTerms,
                 totalProductsBeforeFilter: filtered.length
@@ -9591,7 +10548,7 @@ ${bodies.join('\n')}
                     return matches;
                 });
 
-                console.log('Ã¢Å“â€¦ After search filter (FIRST):', {
+                console.log('??? After search filter (FIRST):', {
                     filteredCount: filtered.length,
                     sampleProducts: filtered.slice(0, 5).map(p => p.name)
                 });
@@ -9602,7 +10559,7 @@ ${bodies.join('\n')}
         if (brandId) {
             const selectedBrandId = parseInt(brandId, 10);
 
-            console.log('Ã°Å¸â€Â Filtering by brand:', {
+            console.log('???? Filtering by brand:', {
                 brandId: brandId,
                 selectedBrandId: selectedBrandId,
                 totalProductsBeforeFilter: filtered.length,
@@ -9644,7 +10601,7 @@ ${bodies.join('\n')}
                 return false;
             });
 
-            console.log('Ã¢Å“â€¦ After brand filter:', {
+            console.log('??? After brand filter:', {
                 filteredCount: filtered.length,
                 sampleProducts: filtered.slice(0, 5).map(p => ({
                     id: p.id,
@@ -9660,7 +10617,7 @@ ${bodies.join('\n')}
             const selectedCategoryId = parseInt(categoryId, 10);
             const selectedCategory = this.allCategories.find(c => c.id == categoryId);
 
-            console.log('Ã°Å¸â€Â Filtering by category:', {
+            console.log('???? Filtering by category:', {
                 categoryId: categoryId,
                 selectedCategoryId: selectedCategoryId,
                 totalProductsBeforeFilter: filtered.length,
@@ -9677,10 +10634,10 @@ ${bodies.join('\n')}
                 category_id_type: typeof p.category_id,
                 category_name: p.category_name
             }));
-            console.log('Ã°Å¸â€œÂ¦ Sample products before category filter:', sampleProducts);
+            console.log('???? Sample products before category filter:', sampleProducts);
 
             // Also log what we're trying to match
-            console.log('Ã°Å¸Å½Â¯ Trying to match category:', {
+            console.log('???? Trying to match category:', {
                 selectedCategoryId: selectedCategoryId,
                 selectedCategoryIdType: typeof selectedCategoryId,
                 selectedCategoryName: selectedCategory ? selectedCategory.name : 'NOT FOUND',
@@ -9690,7 +10647,7 @@ ${bodies.join('\n')}
 
             // Check if any products have the matching category_id
             const productsWithMatchingId = filtered.filter(p => p.category_id == selectedCategoryId);
-            console.log('Ã°Å¸â€Â Products with matching category_id:', {
+            console.log('???? Products with matching category_id:', {
                 count: productsWithMatchingId.length,
                 sample: productsWithMatchingId.slice(0, 5).map(p => ({
                     id: p.id,
@@ -9714,7 +10671,7 @@ ${bodies.join('\n')}
             if (nullCategoryCount > 0) {
                 categoryIdDistribution['null/undefined'] = nullCategoryCount;
             }
-            console.log('Ã°Å¸â€œÅ  Category ID distribution (first 50 products):', categoryIdDistribution);
+            console.log('???? Category ID distribution (first 50 products):', categoryIdDistribution);
 
             // Show what categories these IDs correspond to
             const categoryIdNames = {};
@@ -9722,10 +10679,10 @@ ${bodies.join('\n')}
                 const cat = this.allCategories.find(c => c.id == cid);
                 categoryIdNames[cid] = cat ? cat.name : `Unknown (ID: ${cid})`;
             });
-            console.log('Ã°Å¸â€œâ€¹ Category names for product category_ids:', categoryIdNames);
+            console.log('???? Category names for product category_ids:', categoryIdNames);
 
             // Show all available categories in dropdown
-            console.log('Ã°Å¸â€œâ€¹ All available categories in dropdown:', this.allCategories.map(c => ({
+            console.log('???? All available categories in dropdown:', this.allCategories.map(c => ({
                 id: c.id,
                 name: c.name
             })));
@@ -9789,7 +10746,7 @@ ${bodies.join('\n')}
                 fullCategoryDistribution['null/undefined'] = fullNullCount;
             }
 
-            console.log('Ã¢Å“â€¦ After category filter:', {
+            console.log('??? After category filter:', {
                 filteredCount: filtered.length,
                 matchedByCategoryId: matchedByCategoryId,
                 matchedByCategoryName: matchedByCategoryName,
@@ -9807,7 +10764,7 @@ ${bodies.join('\n')}
 
             // If no matches, show helpful message
             if (filtered.length === 0 && noMatch > 0) {
-                console.warn('Ã¢Å¡Â Ã¯Â¸Â No products match this category filter!', {
+                console.warn('???? No products match this category filter!', {
                     reason: 'Products have different category_id values',
                     selectedCategoryId: selectedCategoryId,
                     selectedCategoryName: selectedCategory ? selectedCategory.name : 'NOT FOUND',
@@ -9823,7 +10780,7 @@ ${bodies.join('\n')}
 
         // Debug: Log if featuredStatus was undefined
         if (featuredStatus === undefined) {
-            console.warn('Ã¢Å¡Â Ã¯Â¸Â filterProducts() called with undefined featuredStatus!', {
+            console.warn('???? filterProducts() called with undefined featuredStatus!', {
                 searchTerm,
                 brandId,
                 categoryId,
@@ -9834,7 +10791,7 @@ ${bodies.join('\n')}
         if (featuredStatusStr !== '') {
             const isFeatured = featuredStatusStr === 'true';
 
-            console.log('Ã°Å¸â€Â Filtering by featured status:', {
+            console.log('???? Filtering by featured status:', {
                 featuredStatus: featuredStatusStr,
                 isFeatured: isFeatured,
                 totalProductsBeforeFilter: filtered.length,
@@ -9857,7 +10814,7 @@ ${bodies.join('\n')}
                 return productIsFeatured === isFeatured;
             });
 
-            console.log('Ã¢Å“â€¦ After featured filter:', {
+            console.log('??? After featured filter:', {
                 filteredCount: filtered.length,
                 sampleFilteredProducts: filtered.slice(0, 5).map(p => ({
                     id: p.id,
@@ -9897,7 +10854,7 @@ ${bodies.join('\n')}
     _renderFilteredProductsImpl() {
         const container = document.getElementById('productsTable');
         if (!container) {
-            console.error('Ã¢ÂÅ’ Products table container not found!');
+            console.error('?? Products table container not found!');
             return;
         }
 
@@ -9910,7 +10867,7 @@ ${bodies.join('\n')}
         const brandId = brandFilter ? brandFilter.value : '';
         const categoryId = categoryFilter ? categoryFilter.value : '';
 
-        console.log('Ã°Å¸Å½Â¨ _renderFilteredProductsImpl - reading filter values:', {
+        console.log('???? _renderFilteredProductsImpl - reading filter values:', {
             searchTerm: searchTerm,
             searchTermLength: searchTerm ? searchTerm.length : 0,
             searchInputExists: !!searchInput,
@@ -9929,7 +10886,7 @@ ${bodies.join('\n')}
         // Ensure featuredStatus is always a string, never undefined
         featuredStatus = featuredStatus || '';
 
-        console.log('Ã°Å¸Å½Â¨ Rendering filtered products:', {
+        console.log('???? Rendering filtered products:', {
             searchTerm: searchTerm,
             brandId: brandId,
             categoryId: categoryId,
@@ -9946,17 +10903,17 @@ ${bodies.join('\n')}
 
         // If no products are loaded and no filters are active, products may still be loading
         if (this.allProducts.length === 0 && !searchTerm && !brandId && !categoryId && !featuredStatus) {
-            console.log('Ã¢ÂÂ³ Products not loaded yet, showing loading state...');
+            console.log('? Products not loaded yet, showing loading state...');
             container.innerHTML = '<div class="loading"><div class="spinner"></div>Loading products...</div>';
             // Try to load products if they haven't been loaded yet
             // Use a longer delay to avoid race conditions
             setTimeout(() => {
                 if (this.allProducts.length === 0) {
-                    console.log('Ã°Å¸â€â€ž Retrying product load...');
+                    console.log('???? Retrying product load...');
                     this.loadProducts();
                 } else {
                     // Products loaded in the meantime, render them
-                    console.log('Ã¢Å“â€¦ Products loaded, rendering...');
+                    console.log('??? Products loaded, rendering...');
                     this._renderFilteredProductsImpl();
                 }
             }, 300);
@@ -9965,7 +10922,7 @@ ${bodies.join('\n')}
 
         // Ensure categories are loaded if category filter is active
         if (categoryId && this.allCategories.length === 0) {
-            console.warn('Ã¢Å¡Â Ã¯Â¸Â Category filter active but categories not loaded yet. Loading...');
+            console.warn('???? Category filter active but categories not loaded yet. Loading...');
             this.loadCategoriesForFilters().then(() => {
                 // Retry filtering after categories are loaded
                 this.renderFilteredProducts();
@@ -10034,7 +10991,7 @@ ${bodies.join('\n')}
             // Ensure we have products to render
             if (filteredProducts.length === 0 && this.allProducts.length > 0) {
                 // This shouldn't happen, but if it does, use allProducts
-                console.warn('Ã¢Å¡Â Ã¯Â¸Â Filtered products empty but allProducts has data, using allProducts');
+                console.warn('???? Filtered products empty but allProducts has data, using allProducts');
                 filteredProducts = this.allProducts.slice(0, this.productsPagination.itemsPerPage);
             }
 
@@ -10046,7 +11003,7 @@ ${bodies.join('\n')}
                     p.is_featured === '1' ||
                     p.is_featured === 'true'
                 );
-                console.log('Ã°Å¸Å½Â¨ About to render products table:', {
+                console.log('???? About to render products table:', {
                     totalProducts: filteredProducts.length,
                     featuredProducts: featuredInFiltered.length,
                     featuredProductIds: featuredInFiltered.map(p => ({ id: p.id, name: p.name, is_featured: p.is_featured }))
@@ -10113,7 +11070,7 @@ ${bodies.join('\n')}
                     <td class="col-sku"><code title="${esc(product.sku)}">${esc(product.sku)}</code></td>
                     <td class="product-name-cell">
                         <span class="product-name-primary" title="${name}">${name}</span>
-                        <span class="product-name-meta" title="${cat}">${cat}${variantBadge ? ` Â· ${variantBadge}` : ''}</span>
+                        <span class="product-name-meta" title="${cat}">${cat}${variantBadge ? ` ? ${variantBadge}` : ''}</span>
                     </td>
                     <td><span class="cell-ellipsis" title="${brand}">${brand}</span></td>
                     <td class="col-money">${money(product.price)}</td>
@@ -10125,8 +11082,8 @@ ${bodies.join('\n')}
                     </td>
                     <td class="col-status">
                         <span class="status-inline">
-                            <span class="badge badge-pos ${product.is_active ? 'badge-success' : 'badge-danger'}" title="POS register â€” ${product.is_active ? 'available at in-store register' : 'hidden from POS register'}">${product.is_active ? 'POS on' : 'POS off'}</span>
-                            <span class="badge badge-web ${showOnWeb ? 'badge-success' : 'badge-secondary'}" title="Website storefront â€” ${showOnWeb ? 'visible on website' : 'hidden from website (in-store only)'}">${showOnWeb ? 'Web on' : 'Web off'}</span>
+                            <span class="badge badge-pos ${product.is_active ? 'badge-success' : 'badge-danger'}" title="POS register ? ${product.is_active ? 'available at in-store register' : 'hidden from POS register'}">${product.is_active ? 'POS on' : 'POS off'}</span>
+                            <span class="badge badge-web ${showOnWeb ? 'badge-success' : 'badge-secondary'}" title="Website storefront ? ${showOnWeb ? 'visible on website' : 'hidden from website (in-store only)'}">${showOnWeb ? 'Web on' : 'Web off'}</span>
                             ${isFeatured ? '<span class="badge badge-info" title="Featured" style="padding:0.2rem 0.4rem;"><i class="fas fa-star" aria-hidden="true"></i></span>' : ''}
                         </span>
                     </td>
@@ -10260,7 +11217,7 @@ ${bodies.join('\n')}
         if (countEl) {
             countEl.textContent =
                 count === 0
-                    ? 'Select products below â€” bulk actions for POS register and website'
+                    ? 'Select products below ? bulk actions for POS register and website'
                     : count === 1
                       ? '1 product selected'
                       : `${count} products selected`;
@@ -10389,8 +11346,8 @@ ${bodies.join('\n')}
                     </div>
                     <div class="bulk-edit-section">
                         <h4>Organization</h4>
-                        ${selectRow('brand_id', 'Brand', `<option value="">â€” Select brand â€”</option>${brandOptions}`)}
-                        ${selectRow('category_id', 'Category', `<option value="">â€” Select category â€”</option>${categoryOptions}`)}
+                        ${selectRow('brand_id', 'Brand', `<option value="">? Select brand ?</option>${brandOptions}`)}
+                        ${selectRow('category_id', 'Category', `<option value="">? Select category ?</option>${categoryOptions}`)}
                     </div>
                     <div class="bulk-edit-section" style="border-bottom:none;margin-bottom:0;padding-bottom:0;">
                         <h4>Pricing &amp; inventory</h4>
@@ -10471,7 +11428,7 @@ ${bodies.join('\n')}
                     return;
                 }
 
-                if (['is_active', 'is_featured', 'show_on_web', 'is_cannabis'].includes(field)) {
+                if (['is_active', 'is_featured', 'show_on_web', 'is_cannabis', 'subscription_eligible'].includes(field)) {
                     val = val === '1';
                 } else if (['brand_id', 'category_id', 'inventory_quantity', 'low_stock_threshold'].includes(field)) {
                     val = parseInt(val, 10);
@@ -11295,7 +12252,7 @@ ${bodies.join('\n')}
             const closeBtn = document.createElement('button');
             closeBtn.type = 'button';
             closeBtn.setAttribute('aria-label', 'Dismiss notification');
-            closeBtn.textContent = 'Ã—';
+            closeBtn.textContent = '?';
             closeBtn.style.cssText = 'background:transparent;border:none;color:white;font-size:1.4rem;line-height:1;cursor:pointer;padding:0 0.15rem;margin-left:0.25rem;opacity:0.9;';
             closeBtn.addEventListener('click', () => dismissNotification(notification));
             container.appendChild(closeBtn);
@@ -11911,17 +12868,378 @@ function renderImportResults(container, data) {
     container.style.display = 'block';
 }
 
+/** Human-readable label for a review issue code (kept short ? shown in a compact list). */
+function importIssueLabel(code) {
+    const labels = {
+        bad_barcode: 'Barcode looks wrong',
+        barcode_missing_leading_zero: 'Barcode may be missing a leading zero',
+        unusual_barcode_length: 'Unusual barcode length',
+        duplicate_in_file: 'Duplicate SKU in file',
+        sku_conflict: 'SKU used by another product',
+        missing_image: 'No image',
+        missing_price: 'No price'
+    };
+    return labels[code] || code;
+}
+
+/**
+ * Renders a compact review panel for flagged rows only. Never shows more
+ * than a short, capped list ? clean rows already imported or are queued
+ * separately so the merchant is never blocked scrolling a giant table.
+ */
+function renderImportReviewPanel(container, review, onCommit) {
+    if (!container) return;
+    const flagged = review.flaggedRows || [];
+    const MAX_SHOWN = 25;
+    const shown = flagged.slice(0, MAX_SHOWN);
+    const hiddenCount = flagged.length - shown.length;
+
+    const rowsHtml = shown
+        .map((item, idx) => {
+            const row = item.row;
+            const issuesHtml = item.issues
+                .map((i) => `<span class="badge badge-warning" style="margin:0 0.3rem 0.3rem 0;">${importIssueLabel(i.code)}</span>`)
+                .join('');
+            const suggestionHtml = item.suggestion
+                ? item.suggestion.type === 'sku'
+                    ? `<div style="margin-top:0.35rem;font-size:0.85rem;color:var(--gray-700);">
+                         ${item.suggestion.source === 'leading-zero-recovery' ? 'Restored barcode (checksum-verified)' : 'Suggested SKU from brand site'}: <code>${item.suggestion.value}</code>
+                         <label style="margin-left:0.5rem;font-weight:400;">
+                           <input type="checkbox" data-accept-suggestion="${idx}" checked> use it
+                         </label>
+                       </div>`
+                    : `<div style="margin-top:0.35rem;font-size:0.85rem;color:var(--gray-700);">
+                         Found an image on the brand site:
+                         <a href="${item.suggestion.value}" target="_blank" rel="noopener noreferrer">preview</a>
+                         <label style="margin-left:0.5rem;font-weight:400;">
+                           <input type="checkbox" data-accept-suggestion="${idx}" checked> use it
+                         </label>
+                       </div>`
+                : '';
+            return `
+                <div class="card" data-review-row="${idx}" style="margin-bottom:0.6rem;padding:0.75rem 0.9rem;">
+                    <div style="display:flex;justify-content:space-between;gap:0.75rem;align-items:flex-start;">
+                        <div style="min-width:0;">
+                            <strong>${row.name || '(unnamed)'}</strong>
+                            <div style="font-size:0.82rem;color:var(--gray-500);">SKU/barcode: ${row.sku || '?'}</div>
+                            <div style="margin-top:0.4rem;">${issuesHtml}</div>
+                            ${suggestionHtml}
+                        </div>
+                        <label style="display:flex;align-items:center;gap:0.35rem;font-size:0.85rem;white-space:nowrap;">
+                            <input type="checkbox" data-keep-row="${idx}" checked> Import this row
+                        </label>
+                    </div>
+                </div>`;
+        })
+        .join('');
+
+    container.innerHTML = `
+        <div style="padding:0.9rem 1rem;border-radius:8px;background:var(--gray-50);border:1px solid var(--gray-200);">
+            <p style="margin:0 0 0.75rem;font-size:0.92rem;">
+                <strong>${review.okCount}</strong> row${review.okCount === 1 ? '' : 's'} look fine and imported automatically.
+                <strong>${review.flaggedCount}</strong> need${review.flaggedCount === 1 ? 's' : ''} a quick look before they're added.
+            </p>
+            ${hiddenCount > 0 ? `<p style="margin:0 0 0.75rem;font-size:0.82rem;color:var(--gray-500);">Showing the first ${MAX_SHOWN} of ${flagged.length} flagged rows. Import the rest as-is or fix the CSV and re-upload.</p>` : ''}
+            <div id="importReviewRows">${rowsHtml}</div>
+            <div style="display:flex;gap:0.6rem;margin-top:0.75rem;flex-wrap:wrap;">
+                <button type="button" class="btn btn-primary btn-sm" id="importReviewCommitBtn">
+                    Import checked rows
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" id="importReviewSkipBtn">
+                    Skip all flagged rows for now
+                </button>
+            </div>
+        </div>`;
+
+    container.style.display = 'block';
+
+    const commitBtn = container.querySelector('#importReviewCommitBtn');
+    const skipBtn = container.querySelector('#importReviewSkipBtn');
+
+    const buildRows = (includeFlagged) => {
+        if (!includeFlagged) return [];
+        const rows = [];
+        shown.forEach((item, idx) => {
+            const keepEl = container.querySelector(`[data-keep-row="${idx}"]`);
+            if (keepEl && !keepEl.checked) return;
+            const row = { ...item.row };
+            const acceptEl = container.querySelector(`[data-accept-suggestion="${idx}"]`);
+            if (item.suggestion && acceptEl && acceptEl.checked) {
+                if (item.suggestion.type === 'sku') row.sku = item.suggestion.value;
+                else if (item.suggestion.type === 'image') row.images = [{ url: item.suggestion.value, alt: '' }];
+            }
+            rows.push(row);
+        });
+        return rows;
+    };
+
+    commitBtn?.addEventListener('click', () => onCommit(buildRows(true)));
+    skipBtn?.addEventListener('click', () => onCommit([]));
+}
+
 async function importProducts(fileInputId = 'csvFile', progressId = 'importProgress', resultsId = 'importResults') {
     const app = window.adminApp;
     const fileInput = document.getElementById(fileInputId);
     const progressDiv = document.getElementById(progressId);
+    const progressText = document.getElementById('importProgressText');
     const resultsDiv = document.getElementById(resultsId);
+    const reviewPanel = document.getElementById('importReviewPanel');
+    const checkFirst = document.getElementById('importCheckFirst');
 
     if (!fileInput?.files?.[0]) {
         app.showNotification('Please select a CSV file first', 'error');
         return;
     }
 
+    if (reviewPanel) {
+        reviewPanel.style.display = 'none';
+        reviewPanel.innerHTML = '';
+    }
+
+    if (checkFirst && !checkFirst.checked) {
+        return importProductsDirect(fileInput, progressDiv, resultsDiv, () => {
+            fileInput.value = '';
+        });
+    }
+
+    const ctx = { fileInput, progressDiv, progressText, resultsDiv, reviewPanel, app };
+
+    try {
+        if (progressDiv) progressDiv.style.display = 'block';
+        if (progressText) progressText.textContent = 'Reading column headers?';
+        if (resultsDiv) resultsDiv.style.display = 'none';
+
+        const mapFormData = new FormData();
+        mapFormData.append('csvFile', fileInput.files[0]);
+        const mapResponse = await fetch(`${app.apiBaseUrl}/admin/import-products/map-columns`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${app.authToken}` },
+            body: mapFormData
+        });
+        const mapResult = await mapResponse.json();
+        if (!mapResponse.ok) throw new Error(mapResult.error || 'Could not read the file columns');
+
+        if (!mapResult.needsReview) {
+            // Headers matched what we already know with confidence ? skip the
+            // extra screen entirely and go straight to the row-level checks.
+            await runImportReview(ctx, mapResult.columnMapping || {});
+            return;
+        }
+
+        // Real ambiguity (an unrecognized column, a guess, or a core field
+        // like name/price still unplaced) ? ask the merchant to confirm once.
+        if (progressDiv) progressDiv.style.display = 'none';
+        renderColumnMappingPanel(reviewPanel, mapResult, async (columnMapping) => {
+            await runImportReview(ctx, columnMapping);
+        });
+    } catch (error) {
+        if (progressDiv) progressDiv.style.display = 'none';
+        app.showNotification(error.message || 'Could not check the file', 'error');
+    }
+}
+
+/** Runs the existing bad-barcode/price/image row review using a confirmed column mapping, then imports. */
+async function runImportReview(ctx, columnMapping) {
+    const { fileInput, progressDiv, progressText, resultsDiv, reviewPanel, app } = ctx;
+
+    try {
+        const formData = new FormData();
+        formData.append('csvFile', fileInput.files[0]);
+        if (columnMapping && Object.keys(columnMapping).length) {
+            formData.append('columnMapping', JSON.stringify(columnMapping));
+        }
+
+        if (progressDiv) progressDiv.style.display = 'block';
+        if (progressText) progressText.textContent = 'Checking rows for barcode, price, and image issues?';
+        if (resultsDiv) resultsDiv.style.display = 'none';
+
+        const response = await fetch(`${app.apiBaseUrl}/admin/import-products/review`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${app.authToken}` },
+            body: formData
+        });
+        const review = await response.json();
+        if (!response.ok) throw new Error(review.error || 'Could not check the file');
+
+        if (!review.flaggedCount) {
+            // Nothing needs a look ? import everything immediately, no extra step.
+            if (progressText) progressText.textContent = 'Importing products?';
+            await commitImportRows((review.okRows || []).map((r) => r.row), progressDiv, resultsDiv, app);
+            fileInput.value = '';
+            return;
+        }
+
+        // Auto-import the clean rows now; hold only the flagged rows for review.
+        const autoResult = await commitImportRows(
+            (review.okRows || []).map((r) => r.row),
+            null,
+            null,
+            app,
+            { silent: true }
+        );
+        if (progressDiv) progressDiv.style.display = 'none';
+
+        renderImportReviewPanel(reviewPanel, review, async (extraRows) => {
+            if (!extraRows.length) {
+                app.showNotification('Skipped the flagged rows ? nothing else to import.', 'success');
+                if (reviewPanel) reviewPanel.style.display = 'none';
+                fileInput.value = '';
+                return;
+            }
+            if (progressDiv) {
+                progressDiv.style.display = 'block';
+                if (progressText) progressText.textContent = 'Importing reviewed rows?';
+            }
+            const followUp = await commitImportRows(extraRows, progressDiv, resultsDiv, app);
+            if (autoResult) {
+                followUp.imported = (followUp.imported || 0) + (autoResult.imported || 0);
+                followUp.created = (followUp.created || 0) + (autoResult.created || 0);
+                followUp.updated = (followUp.updated || 0) + (autoResult.updated || 0);
+                followUp.total = (followUp.total || 0) + (autoResult.total || 0);
+                renderImportResults(resultsDiv, followUp);
+            }
+            if (reviewPanel) reviewPanel.style.display = 'none';
+            fileInput.value = '';
+        });
+
+        if (autoResult && review.okCount) {
+            app.showNotification(
+                `${autoResult.imported || 0} row(s) imported automatically. ${review.flaggedCount} need a quick look below.`,
+                'success'
+            );
+            renderImportResults(resultsDiv, autoResult);
+        } else if (review.flaggedCount) {
+            app.showNotification(`${review.flaggedCount} row(s) need a quick look before they're added.`, 'warning');
+        }
+    } catch (error) {
+        if (progressDiv) progressDiv.style.display = 'none';
+        app.showNotification(error.message || 'Could not check the file', 'error');
+    }
+}
+
+/**
+ * Confirm-once panel shown only when column identification was uncertain
+ * (an AI guess, or a core field like name/price/sku still unplaced). Every
+ * dropdown can be overridden ? nothing is applied until "Continue".
+ */
+function renderColumnMappingPanel(container, mapResult, onContinue) {
+    if (!container) return;
+    const headers = mapResult.headers || [];
+    const sampleRows = mapResult.sampleRows || [];
+    const canonicalFields = mapResult.canonicalFields || [];
+    const mappingByHeader = {};
+    (mapResult.mapping || []).forEach((m) => { mappingByHeader[m.header] = m; });
+
+    const sampleFor = (header) => {
+        for (const row of sampleRows) {
+            const v = row?.[header];
+            if (v != null && String(v).trim() !== '') return String(v).trim();
+        }
+        return '';
+    };
+    const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+    const optionsHtml = (selected) => {
+        const opts = canonicalFields
+            .map((f) => `<option value="${esc(f.key)}" ${f.key === selected ? 'selected' : ''}>${esc(f.label)}</option>`)
+            .join('');
+        return `${opts}<option value="ignore" ${!selected || selected === 'ignore' ? 'selected' : ''}>Ignore this column</option>`;
+    };
+
+    const rowsHtml = headers
+        .map((header, idx) => {
+            const m = mappingByHeader[header] || {};
+            const sample = sampleFor(header);
+            const aiBadge = m.source === 'ai'
+                ? `<span class="badge badge-info" style="margin-left:0.4rem;font-size:0.72rem;white-space:nowrap;" title="${esc(m.reason)}">AI guess</span>`
+                : '';
+            return `
+                <tr>
+                    <td style="padding:0.4rem 0.6rem;font-weight:600;">${esc(header)}</td>
+                    <td style="padding:0.4rem 0.6rem;color:var(--gray-500);font-size:0.85rem;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(sample)}">${esc(sample) || '?'}</td>
+                    <td style="padding:0.4rem 0.6rem;white-space:nowrap;">
+                        <select data-column-map="${idx}" data-header="${esc(header)}" style="min-width:180px;">
+                            ${optionsHtml(m.field)}
+                        </select>
+                        ${aiBadge}
+                    </td>
+                </tr>`;
+        })
+        .join('');
+
+    container.innerHTML = `
+        <div style="padding:0.9rem 1rem;border-radius:8px;background:var(--gray-50);border:1px solid var(--gray-200);">
+            <p style="margin:0 0 0.75rem;font-size:0.92rem;">
+                <strong>Quick check:</strong> confirm what each column in this file means before importing.
+                ${mapResult.aiUsed ? ' A few columns didn\'t match a header we already know, so AI took a guess at those ? double-check anything marked "AI guess".' : ''}
+            </p>
+            <div style="overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;font-size:0.88rem;">
+                    <thead>
+                        <tr style="text-align:left;border-bottom:1px solid var(--gray-200);">
+                            <th style="padding:0.4rem 0.6rem;">Column in your file</th>
+                            <th style="padding:0.4rem 0.6rem;">Example value</th>
+                            <th style="padding:0.4rem 0.6rem;">Import as</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rowsHtml}</tbody>
+                </table>
+            </div>
+            <div style="display:flex;gap:0.6rem;margin-top:0.9rem;flex-wrap:wrap;">
+                <button type="button" class="btn btn-primary btn-sm" id="columnMapContinueBtn">Looks right ? continue</button>
+                <button type="button" class="btn btn-secondary btn-sm" id="columnMapCancelBtn">Cancel</button>
+            </div>
+        </div>`;
+
+    container.style.display = 'block';
+
+    container.querySelector('#columnMapContinueBtn')?.addEventListener('click', () => {
+        const mapping = {};
+        container.querySelectorAll('[data-column-map]').forEach((sel) => {
+            const header = sel.getAttribute('data-header');
+            const field = sel.value;
+            if (field && field !== 'ignore') mapping[header] = field;
+        });
+        container.style.display = 'none';
+        container.innerHTML = '';
+        onContinue(mapping);
+    });
+
+    container.querySelector('#columnMapCancelBtn')?.addEventListener('click', () => {
+        container.style.display = 'none';
+        container.innerHTML = '';
+    });
+}
+
+async function commitImportRows(rows, progressDiv, resultsDiv, app, opts = {}) {
+    if (!rows.length) return { imported: 0, created: 0, updated: 0, total: 0, errors: 0 };
+    const response = await fetch(`${app.apiBaseUrl}/admin/import-products/commit`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${app.authToken}`
+        },
+        body: JSON.stringify({ rows })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Import failed');
+    if (progressDiv) progressDiv.style.display = 'none';
+    if (!opts.silent) {
+        const summary = `${data.imported || 0} imported (${data.created || 0} new, ${data.updated || 0} updated)`;
+        app.showNotification(summary, data.errors ? 'warning' : 'success');
+        if (resultsDiv) renderImportResults(resultsDiv, data);
+        if (app.currentSection === 'products' && typeof app.loadProducts === 'function') {
+            await app.loadProducts();
+        }
+    } else if (app.currentSection === 'products' && typeof app.loadProducts === 'function') {
+        await app.loadProducts();
+    }
+    return data;
+}
+
+/** Original one-shot import path ? used when the merchant unchecks the review option. */
+async function importProductsDirect(fileInput, progressDiv, resultsDiv, onDone) {
+    const app = window.adminApp;
     const formData = new FormData();
     formData.append('csvFile', fileInput.files[0]);
 
@@ -11943,7 +13261,7 @@ async function importProducts(fileInputId = 'csvFile', progressId = 'importProgr
             const summary = `${data.imported || 0} imported (${data.created || 0} new, ${data.updated || 0} updated)`;
             app.showNotification(summary, data.errors ? 'warning' : 'success');
             renderImportResults(resultsDiv, data);
-            fileInput.value = '';
+            onDone?.();
             if (app.currentSection === 'products' && typeof app.loadProducts === 'function') {
                 await app.loadProducts();
             }
@@ -12154,7 +13472,7 @@ function createProductModal(title, formId, isEdit = false) {
 
             if (field.name === 'long_description') {
                 const hint = document.createElement('div');
-                hint.textContent = 'Plain text only â€” headings and paragraphs are formatted automatically on the storefront.';
+                hint.textContent = 'Plain text only ? headings and paragraphs are formatted automatically on the storefront.';
                 hint.style.fontSize = '0.8rem';
                 hint.style.color = 'var(--gray-500)';
                 hint.style.marginTop = '0.35rem';
@@ -12975,9 +14293,75 @@ function createProductModal(title, formId, isEdit = false) {
     webLabel.appendChild(document.createTextNode(' Show on website'));
     webGroup.appendChild(webLabel);
 
+    const subEligibleGroup = document.createElement('div');
+    subEligibleGroup.className = 'form-group';
+    subEligibleGroup.style.marginBottom = '0';
+    const subEligibleLabel = document.createElement('label');
+    subEligibleLabel.style.display = 'flex';
+    subEligibleLabel.style.alignItems = 'center';
+    subEligibleLabel.style.cursor = 'pointer';
+    subEligibleLabel.style.fontWeight = '500';
+    const subEligibleCheckbox = document.createElement('input');
+    subEligibleCheckbox.setAttribute('type', 'checkbox');
+    subEligibleCheckbox.id = `${isEdit ? 'edit' : 'add'}-subscription-eligible`;
+    subEligibleCheckbox.setAttribute('name', 'subscription_eligible');
+    subEligibleCheckbox.style.marginRight = '0.75rem';
+    subEligibleCheckbox.style.width = '1.25rem';
+    subEligibleCheckbox.style.height = '1.25rem';
+    subEligibleLabel.appendChild(subEligibleCheckbox);
+    subEligibleLabel.appendChild(document.createTextNode(' Subscribe & Save eligible'));
+    subEligibleGroup.appendChild(subEligibleLabel);
+
+    const subIntervalGroup = document.createElement('div');
+    subIntervalGroup.className = 'form-group';
+    subIntervalGroup.style.marginBottom = '0';
+    const subIntervalLabel = document.createElement('label');
+    subIntervalLabel.setAttribute('for', `${isEdit ? 'edit' : 'add'}-subscription-interval-days`);
+    subIntervalLabel.textContent = 'Default ship interval';
+    subIntervalLabel.style.display = 'block';
+    subIntervalLabel.style.fontWeight = '500';
+    subIntervalLabel.style.marginBottom = '0.35rem';
+    const subIntervalSelect = document.createElement('select');
+    subIntervalSelect.id = `${isEdit ? 'edit' : 'add'}-subscription-interval-days`;
+    subIntervalSelect.className = 'form-input';
+    subIntervalSelect.setAttribute('name', 'subscription_interval_days');
+    ;[30, 60, 90].forEach((days) => {
+        const opt = document.createElement('option');
+        opt.value = String(days);
+        opt.textContent = `${days} days`;
+        if (days === 30) opt.selected = true;
+        subIntervalSelect.appendChild(opt);
+    });
+    subIntervalGroup.appendChild(subIntervalLabel);
+    subIntervalGroup.appendChild(subIntervalSelect);
+
+    const subDiscountGroup = document.createElement('div');
+    subDiscountGroup.className = 'form-group';
+    subDiscountGroup.style.marginBottom = '0';
+    const subDiscountLabel = document.createElement('label');
+    subDiscountLabel.setAttribute('for', `${isEdit ? 'edit' : 'add'}-subscription-discount-percent`);
+    subDiscountLabel.textContent = 'Subscribe & Save % off';
+    subDiscountLabel.style.display = 'block';
+    subDiscountLabel.style.fontWeight = '500';
+    subDiscountLabel.style.marginBottom = '0.35rem';
+    const subDiscountInput = document.createElement('input');
+    subDiscountInput.type = 'number';
+    subDiscountInput.id = `${isEdit ? 'edit' : 'add'}-subscription-discount-percent`;
+    subDiscountInput.className = 'form-input';
+    subDiscountInput.setAttribute('name', 'subscription_discount_percent');
+    subDiscountInput.min = '0';
+    subDiscountInput.max = '100';
+    subDiscountInput.step = '0.01';
+    subDiscountInput.placeholder = '% off (optional)';
+    subDiscountGroup.appendChild(subDiscountLabel);
+    subDiscountGroup.appendChild(subDiscountInput);
+
     checkboxRow.appendChild(activeGroup);
     checkboxRow.appendChild(featuredGroup);
     checkboxRow.appendChild(webGroup);
+    checkboxRow.appendChild(subEligibleGroup);
+    checkboxRow.appendChild(subIntervalGroup);
+    checkboxRow.appendChild(subDiscountGroup);
     statusSection.appendChild(checkboxRow);
     form.appendChild(statusSection);
 
@@ -13134,7 +14518,7 @@ function editProduct(productId) {
     // Load existing product data
     loadProductForEdit(productId);
 
-    // Handle form submission â€” keep modal open when save fails so data and errors remain visible
+    // Handle form submission ? keep modal open when save fails so data and errors remain visible
     const form = document.getElementById('edit-product-form');
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -13203,6 +14587,26 @@ async function loadProductForEdit(productId) {
                     product.show_on_web === 'true' ||
                     product.show_on_web == null;
                 showOnWebEl.checked = showOnWeb;
+            }
+
+            const subEligibleEl = document.getElementById('edit-subscription-eligible');
+            if (subEligibleEl) {
+                subEligibleEl.checked =
+                    product.subscription_eligible === true ||
+                    product.subscription_eligible === 1 ||
+                    product.subscription_eligible === '1' ||
+                    product.subscription_eligible === 'true';
+            }
+            const subIntervalEl = document.getElementById('edit-subscription-interval-days');
+            if (subIntervalEl) {
+                const days = Number(product.subscription_interval_days) || 30;
+                subIntervalEl.value = String([30, 60, 90].includes(days) ? days : 30);
+            }
+            const subDiscountEl = document.getElementById('edit-subscription-discount-percent');
+            if (subDiscountEl) {
+                const pct = product.subscription_discount_percent;
+                subDiscountEl.value =
+                    pct === null || pct === undefined || pct === '' ? '' : String(pct);
             }
 
             const editCannabis = document.getElementById('edit-is-cannabis');
@@ -13323,7 +14727,7 @@ function showProductFormError(formElement, message) {
     const close = document.createElement('button');
     close.type = 'button';
     close.setAttribute('aria-label', 'Dismiss error');
-    close.textContent = 'Ã—';
+    close.textContent = '?';
     close.style.cssText =
         'background:transparent;border:none;color:#991b1b;font-size:1.35rem;line-height:1;cursor:pointer;padding:0 0.2rem;';
     close.addEventListener('click', () => clearProductFormError(formElement));
@@ -13349,12 +14753,12 @@ async function updateProduct(productId, formData, formElement) {
     if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.dataset.hmOriginalLabel = submitBtn.textContent;
-        submitBtn.textContent = 'Savingâ€¦';
+        submitBtn.textContent = 'Saving?';
     }
     try {
         const productData = {};
         for (let [key, value] of formData.entries()) {
-            if (key === 'is_active' || key === 'is_featured' || key === 'is_cannabis' || key === 'show_on_web') {
+            if (key === 'is_active' || key === 'is_featured' || key === 'is_cannabis' || key === 'show_on_web' || key === 'subscription_eligible') {
                 productData[key] = true; // Checkbox was checked
             } else if (key === 'brand_id' || key === 'category_id') {
                 // Convert brand_id and category_id to integer if it's a valid number
@@ -13369,13 +14773,14 @@ async function updateProduct(productId, formData, formElement) {
         if (!formData.has('is_featured')) productData.is_featured = false;
         if (!formData.has('is_cannabis')) productData.is_cannabis = false;
         if (!formData.has('show_on_web')) productData.show_on_web = false;
+        if (!formData.has('subscription_eligible')) productData.subscription_eligible = false;
 
         if (productData.long_description != null && typeof HMDescriptionHtml !== 'undefined') {
             productData.long_description = HMDescriptionHtml.prepareLongDescriptionForSave(productData.long_description);
         }
 
         // Log featured status for debugging
-        console.log('Ã°Å¸â€œÂ Product update data:', {
+        console.log('???? Product update data:', {
             productId: productId,
             is_featured: productData.is_featured,
             is_featured_type: typeof productData.is_featured,
@@ -13459,7 +14864,7 @@ function showAddProduct() {
     loadBrandsForEdit();
     loadCategoriesForEdit();
 
-    // Handle form submission â€” keep modal open on errors so work is not lost
+    // Handle form submission ? keep modal open on errors so work is not lost
     const form = document.getElementById('add-product-form');
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -13476,12 +14881,12 @@ async function createProduct(formData, formElement) {
     if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.dataset.hmOriginalLabel = submitBtn.textContent;
-        submitBtn.textContent = 'Creatingâ€¦';
+        submitBtn.textContent = 'Creating?';
     }
     try {
         const productData = {};
         for (let [key, value] of formData.entries()) {
-            if (key === 'is_active' || key === 'is_featured' || key === 'is_cannabis' || key === 'show_on_web') {
+            if (key === 'is_active' || key === 'is_featured' || key === 'is_cannabis' || key === 'show_on_web' || key === 'subscription_eligible') {
                 productData[key] = true; // Checkbox was checked
             } else if (key === 'brand_id' || key === 'category_id') {
                 productData[key] = value ? parseInt(value, 10) : null;
@@ -13498,6 +14903,7 @@ async function createProduct(formData, formElement) {
         if (!formData.has('is_featured')) productData.is_featured = false;
         if (!formData.has('is_cannabis')) productData.is_cannabis = false;
         if (!formData.has('show_on_web')) productData.show_on_web = false;
+        if (!formData.has('subscription_eligible')) productData.subscription_eligible = false;
 
         if (productData.long_description != null && typeof HMDescriptionHtml !== 'undefined') {
             productData.long_description = HMDescriptionHtml.prepareLongDescriptionForSave(productData.long_description);
@@ -13578,9 +14984,9 @@ function viewOrder(orderId) {
     }
 }
 
-function editEDSABooking(bookingId) {
-    if (window.adminApp && typeof window.adminApp.openEdsaBookingModal === 'function') {
-        window.adminApp.openEdsaBookingModal(bookingId);
+function editSchedulingBooking(bookingId) {
+    if (window.adminApp && typeof window.adminApp.openSchedulingBookingModal === 'function') {
+        window.adminApp.openSchedulingBookingModal(bookingId);
     }
 }
 
@@ -14762,7 +16168,7 @@ async function matchProductsToCategories() {
 
             // Log category assignments to console
             if (results.categoryAssignments && Object.keys(results.categoryAssignments).length > 0) {
-                console.log('Ã°Å¸â€œâ€¹ Category Assignments:');
+                console.log('???? Category Assignments:');
                 Object.entries(results.categoryAssignments).forEach(([category, count]) => {
                     console.log(`   ${category}: ${count} products`);
                 });
@@ -14797,7 +16203,7 @@ window.downloadProductCatalogBackup = downloadProductCatalogBackup;
 window.downloadProductImportTemplate = downloadProductImportTemplate;
 window.logout = logout;
 window.viewOrder = viewOrder;
-window.editEDSABooking = editEDSABooking;
+window.editSchedulingBooking = editSchedulingBooking;
 
 // Initialize the admin app when the page loads
 document.addEventListener('DOMContentLoaded', () => {
@@ -14808,6 +16214,65 @@ document.addEventListener('DOMContentLoaded', () => {
     if (marketingHubForm && window.adminApp) {
         marketingHubForm.addEventListener('submit', (ev) => window.adminApp.saveMarketingHub(ev));
     }
+
+    const loyaltySaveBtn = document.getElementById('loyalty-tiers-save-settings-btn');
+    if (loyaltySaveBtn && window.adminApp) {
+        loyaltySaveBtn.addEventListener('click', () => window.adminApp.saveLoyaltyTiersSettings());
+    }
+    const loyaltyRunNow = document.getElementById('loyalty-tiers-run-now-btn');
+    if (loyaltyRunNow && window.adminApp) {
+        loyaltyRunNow.addEventListener('click', () => window.adminApp.runLoyaltyEmailCheck());
+    }
+    const loyaltyPreviewCash = document.getElementById('loyalty-intro-preview-cash-btn');
+    if (loyaltyPreviewCash && window.adminApp) {
+        loyaltyPreviewCash.addEventListener('click', () => window.adminApp.previewLoyaltyIntroEmail('cashback'));
+    }
+    const loyaltyPreviewPoints = document.getElementById('loyalty-intro-preview-points-btn');
+    if (loyaltyPreviewPoints && window.adminApp) {
+        loyaltyPreviewPoints.addEventListener('click', () => window.adminApp.previewLoyaltyIntroEmail('points'));
+    }
+    const loyaltyRecalcAll = document.getElementById('loyalty-recalculate-all-btn');
+    if (loyaltyRecalcAll && window.adminApp) {
+        loyaltyRecalcAll.addEventListener('click', () => window.adminApp.recalculateAllLoyaltyTiers());
+    }
+    const loyaltyBackfill = document.getElementById('loyalty-backfill-earns-btn');
+    if (loyaltyBackfill && window.adminApp) {
+        loyaltyBackfill.addEventListener('click', () => window.adminApp.backfillLoyaltyEarns());
+    }
+    const loyaltyPendingPromo = document.getElementById('loyalty-send-pending-promo-btn');
+    if (loyaltyPendingPromo && window.adminApp) {
+        loyaltyPendingPromo.addEventListener('click', () => window.adminApp.sendPendingLoyaltyPromotionEmails());
+    }
+    const loyaltyIntroStatus = document.getElementById('loyalty-intro-status-btn');
+    if (loyaltyIntroStatus && window.adminApp) {
+        loyaltyIntroStatus.addEventListener('click', () => window.adminApp.loadLoyaltyIntroEmailStatus());
+    }
+    const loyaltyResumeIntro = document.getElementById('loyalty-resume-intro-btn');
+    if (loyaltyResumeIntro && window.adminApp) {
+        loyaltyResumeIntro.addEventListener('click', () => window.adminApp.resumeLoyaltyIntroEmails());
+    }
+    const loyaltyTiersBody = document.getElementById('loyalty-tiers-body');
+    if (loyaltyTiersBody && window.adminApp) {
+        loyaltyTiersBody.addEventListener('click', (ev) => {
+            const editBtn = ev.target.closest('[data-loyalty-tier-edit]');
+            if (editBtn) {
+                void window.adminApp.editLoyaltyTier(editBtn.getAttribute('data-loyalty-tier-edit'));
+            }
+        });
+    }
+    const abandonedCartSave = document.getElementById('abandoned-cart-save-btn');
+    if (abandonedCartSave && window.adminApp) {
+        abandonedCartSave.addEventListener('click', () => window.adminApp.saveAbandonedCartSettings());
+    }
+    const abandonedCartRun = document.getElementById('abandoned-cart-run-now-btn');
+    if (abandonedCartRun && window.adminApp) {
+        abandonedCartRun.addEventListener('click', () => window.adminApp.runAbandonedCartNow());
+    }
+    const abandonedCartReload = document.getElementById('abandoned-cart-reload-btn');
+    if (abandonedCartReload && window.adminApp) {
+        abandonedCartReload.addEventListener('click', () => window.adminApp.loadAbandonedCartSettings());
+    }
+
     document.querySelectorAll('[data-admin-nav="pos-equipment"]').forEach((link) => {
         link.addEventListener('click', (ev) => {
             ev.preventDefault();

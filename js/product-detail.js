@@ -31,6 +31,8 @@ class ProductDetailPage {
         this.product = null;
         this.selectedVariant = null;
         this.quantity = 1;
+        this.subscribe = false;
+        this.subscriptionIntervalDays = 30;
         this.backendOrigin = hmHerbsBackendOrigin();
         this.apiBaseUrl = `${this.backendOrigin}/api`;
         this.imageZoom = null;
@@ -114,6 +116,7 @@ class ProductDetailPage {
 
             this.product = await response.json();
             this.renderProduct();
+            await this.renderSubscriptionControls();
         } catch (error) {
             console.error('Error loading product:', error);
 
@@ -124,6 +127,36 @@ class ProductDetailPage {
                 this.showError('Failed to load product. Please try again.');
             }
         }
+    }
+
+    async renderSubscriptionControls() {
+        const container = document.getElementById('product-subscription');
+        if (!container || !this.product) return;
+
+        const subApi = window.BoCartSubscription || window.HmCartSubscription;
+        if (subApi?.loadCapabilities) {
+            await subApi.loadCapabilities(this.backendOrigin || undefined);
+        }
+
+        const selection = subApi?.renderPdpControls?.(this.product, container, {
+            initial: {
+                subscribe: this.subscribe,
+                subscriptionIntervalDays: this.subscriptionIntervalDays,
+            },
+            onChange: (next) => {
+                this.subscribe = Boolean(next?.subscribe);
+                this.subscriptionIntervalDays = Number(next?.subscriptionIntervalDays) || 30;
+                this.updatePrice();
+            },
+        });
+
+        if (selection) {
+            this.subscribe = Boolean(selection.subscribe);
+            this.subscriptionIntervalDays = Number(selection.subscriptionIntervalDays) || 30;
+        } else {
+            this.subscribe = false;
+        }
+        this.updatePrice();
     }
 
     renderProduct() {
@@ -819,17 +852,31 @@ class ProductDetailPage {
     updatePrice() {
         if (!this.product) return;
 
-        const price = this.selectedVariant?.price || this.product.price || 0;
+        const subApi = window.BoCartSubscription || window.HmCartSubscription;
+        const basePrice = this.selectedVariant?.price || this.product.price || 0;
+        const discountPct =
+            subApi?.parseDiscountPercent?.(this.product.subscription_discount_percent) || 0;
+        const displayPrice =
+            this.subscribe && discountPct > 0 && subApi?.subscriptionPrice
+                ? subApi.subscriptionPrice(basePrice, discountPct)
+                : basePrice;
+
         const priceEl = document.getElementById('product-price');
         if (priceEl) {
-            priceEl.textContent = this.formatPrice(price);
+            priceEl.textContent = this.formatPrice(displayPrice);
         }
 
         const comparePrice = this.selectedVariant?.compare_price || this.product.compare_price;
         const comparePriceEl = document.getElementById('product-compare-price');
         if (comparePriceEl) {
-            if (comparePrice && comparePrice > price) {
-                comparePriceEl.textContent = this.formatPrice(comparePrice);
+            const strikePrice =
+                this.subscribe && discountPct > 0 && Number(basePrice) > Number(displayPrice)
+                    ? basePrice
+                    : comparePrice && comparePrice > basePrice
+                      ? comparePrice
+                      : null;
+            if (strikePrice) {
+                comparePriceEl.textContent = this.formatPrice(strikePrice);
                 comparePriceEl.style.display = 'block';
             } else {
                 comparePriceEl.style.display = 'none';
@@ -862,7 +909,17 @@ class ProductDetailPage {
                 trackInventory: this.product.track_inventory !== false && this.product.track_inventory !== 0,
                 inStock: inventory !== undefined ? inventory > 0 : this.product.in_stock !== false,
                 can_purchase: canPurchase,
-                canPurchase: canPurchase
+                canPurchase: canPurchase,
+                slug: this.product.slug || '',
+                subscriptionEligible: this.product.subscription_eligible,
+                subscription_eligible: this.product.subscription_eligible,
+                subscriptionIntervalDays:
+                    this.subscriptionIntervalDays || this.product.subscription_interval_days,
+                subscription_interval_days:
+                    this.subscriptionIntervalDays || this.product.subscription_interval_days,
+                subscriptionDiscountPercent: this.product.subscription_discount_percent,
+                subscription_discount_percent: this.product.subscription_discount_percent,
+                subscribe: Boolean(this.subscribe),
             };
 
             const app = await this.waitForCartApp(1500);
@@ -882,8 +939,12 @@ class ProductDetailPage {
 
             if (existingIndex >= 0) {
                 cart[existingIndex].quantity += cartItem.quantity;
+                const subApi = window.BoCartSubscription || window.HmCartSubscription;
+                const subPatch = subApi?.enrichCartPayload?.(cartItem);
+                if (subPatch) Object.assign(cart[existingIndex], subPatch);
+                subApi?.normalizeCartItemSubscription?.(cart[existingIndex]);
             } else {
-                cart.push({
+                const line = {
                     id: cartItem.id || cartItem.product_id,
                     product_id: cartItem.product_id,
                     variant_id: cartItem.variant_id || null,
@@ -892,10 +953,17 @@ class ProductDetailPage {
                         ? `${cartItem.name} — ${cartItem.variant_name}`
                         : cartItem.name,
                     price: cartItem.price,
+                    basePrice: cartItem.price,
                     image: cartItem.image,
                     quantity: cartItem.quantity,
                     inventory_quantity: cartItem.inventory_quantity,
-                });
+                    slug: cartItem.slug || '',
+                };
+                const subApi = window.BoCartSubscription || window.HmCartSubscription;
+                const subPatch = subApi?.enrichCartPayload?.(cartItem);
+                if (subPatch) Object.assign(line, subPatch);
+                subApi?.normalizeCartItemSubscription?.(line);
+                cart.push(line);
             }
 
             localStorage.setItem('hmherbs_cart', JSON.stringify(cart));

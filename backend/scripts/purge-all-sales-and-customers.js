@@ -38,7 +38,7 @@ const TABLES_TO_CLEAR = [
     'shopping_carts',
     'wishlist_collections',
     'product_reviews',
-    'edsa_bookings',
+    'scheduling_bookings',
     'customer_communications',
     'customer_notes',
     'customer_loyalty',

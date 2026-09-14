@@ -52,8 +52,15 @@ class ProductsPage {
 
     async init() {
         try {
+            if (window.HmCartSubscription?.loadCapabilities) {
+                await window.HmCartSubscription.loadCapabilities();
+            }
+
             // Load cart from storage
             this.loadCartFromStorage();
+            if (window.HmCartSubscription?.normalizeCartItemSubscription) {
+                this.cart.forEach((item) => window.HmCartSubscription.normalizeCartItemSubscription(item));
+            }
 
             // Load products
             await this.loadProducts();
@@ -186,7 +193,13 @@ class ProductsPage {
                         featured: product.is_featured || false,
                         inStock: (product.inventory_quantity || 0) > 0 || product.inventory_quantity === null,
                         lowStockThreshold: 5,
-                        slug: product.slug || ''
+                        slug: product.slug || '',
+                        subscriptionEligible: product.subscription_eligible,
+                        subscription_eligible: product.subscription_eligible,
+                        subscriptionIntervalDays: product.subscription_interval_days,
+                        subscription_interval_days: product.subscription_interval_days,
+                        subscriptionDiscountPercent: product.subscription_discount_percent,
+                        subscription_discount_percent: product.subscription_discount_percent
                     }));
                     console.log(`Successfully loaded ${this.products.length} products`);
                 } else {
@@ -969,6 +982,13 @@ class ProductsPage {
         // Add or update cart item
         if (existingItem) {
             existingItem.quantity += quantity;
+            if (!existingItem.slug && product.slug) existingItem.slug = product.slug;
+            const subPatch = window.HmCartSubscription?.enrichCartPayload?.(product);
+            if (subPatch) Object.assign(existingItem, subPatch);
+            if (!Number.isFinite(Number(existingItem.basePrice))) {
+                existingItem.basePrice = typeof product.price === 'string' ? parseFloat(product.price) : (product.price || 0);
+            }
+            window.HmCartSubscription?.normalizeCartItemSubscription?.(existingItem);
         } else {
             // Ensure price is a number
             let priceValue = typeof product.price === 'string' ? parseFloat(product.price) : (product.price || 0);
@@ -977,13 +997,19 @@ class ProductsPage {
                 priceValue = 0;
             }
 
-            this.cart.push({
+            const line = {
                 id: productId,
                 name: product.name,
+                basePrice: priceValue,
                 price: priceValue,
                 image: product.image,
-                quantity: quantity
-            });
+                quantity: quantity,
+                slug: product.slug || ''
+            };
+            const subPatch = window.HmCartSubscription?.enrichCartPayload?.(product);
+            if (subPatch) Object.assign(line, subPatch);
+            window.HmCartSubscription?.normalizeCartItemSubscription?.(line);
+            this.cart.push(line);
         }
 
         this.updateCartDisplay();
@@ -1196,6 +1222,15 @@ class ProductsPage {
         details.appendChild(name);
         details.appendChild(price);
         details.appendChild(controls);
+
+        if (window.HmCartSubscription?.renderCartLineControls) {
+            window.HmCartSubscription.renderCartLineControls(item, details, {
+                onUpdate: () => {
+                    this.updateCartDisplay();
+                    this.saveCartToStorage();
+                }
+            });
+        }
 
         cartItem.appendChild(img);
         cartItem.appendChild(details);

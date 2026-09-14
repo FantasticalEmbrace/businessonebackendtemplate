@@ -112,14 +112,14 @@ async function runTests() {
 
     // Key JavaScript Files
     log('\n📜 JavaScript Files:', 'blue');
-    if (checkFile('js/edsa-booking.js', 'EDSA booking system')) passed++; else failed++;
+    if (checkFile('js/scheduling-booking.js', 'Scheduling booking system')) passed++; else failed++;
     if (checkFile('js/products.js', 'Products page script')) passed++; else failed++;
     if (checkFile('js/pwa-manager.js', 'PWA manager')) passed++; else failed++;
     if (checkFile('admin-app.js', 'Admin panel script')) passed++; else failed++;
 
     // CSS Files
     log('\n🎨 CSS Files:', 'blue');
-    if (checkFile('css/edsa-booking.css', 'EDSA booking styles')) passed++; else failed++;
+    if (checkFile('css/scheduling-booking.css', 'Scheduling booking styles')) passed++; else failed++;
     if (checkFile('css/products.css', 'Products page styles')) passed++; else failed++;
 
     // Backend Dependencies
@@ -169,7 +169,7 @@ async function runTests() {
     const apiTests = [
         ['/api/health', 'Health check endpoint'],
         ['/api/public/products?limit=1', 'Products API'],
-        ['/api/edsa/info', 'EDSA info API']
+        ['/api/scheduling/info', 'Scheduling info API']
     ];
 
     for (const [endpoint, description] of apiTests) {

@@ -7,7 +7,7 @@ function generateTrackingNumber() {
     const m = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
     const seq = String(Math.floor(Math.random() * 1000000)).padStart(6, '0');
-    return `HMTRK${y}${m}${day}-${seq}`;
+    return `BOTRK${y}${m}${day}-${seq}`;
 }
 
 module.exports = { generateTrackingNumber };

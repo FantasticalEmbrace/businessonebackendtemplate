@@ -96,3 +96,6 @@ deploy/_miami_key_audit.txt
 *.code-workspace
 commitmsg.txt
 
+
+.lh-tmp/
+

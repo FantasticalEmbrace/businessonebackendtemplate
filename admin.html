@@ -1274,8 +1274,8 @@
             }
         }
 
-        /* EDSA appointment calendar */
-        .edsa-cal-toolbar {
+        /* Scheduling appointment calendar */
+        .scheduling-cal-toolbar {
             display: flex;
             flex-wrap: wrap;
             align-items: center;
@@ -1284,14 +1284,14 @@
             margin-bottom: 1rem;
         }
 
-        .edsa-cal-nav {
+        .scheduling-cal-nav {
             display: flex;
             flex-wrap: wrap;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .edsa-cal-title {
+        .scheduling-cal-title {
             font-family: 'Playfair Display', Georgia, serif;
             font-size: 1.25rem;
             font-weight: 600;
@@ -1299,12 +1299,12 @@
             margin: 0 0 0 0.5rem;
         }
 
-        .edsa-cal-views {
+        .scheduling-cal-views {
             display: flex;
             gap: 0.35rem;
         }
 
-        .edsa-cal-legend {
+        .scheduling-cal-legend {
             display: flex;
             flex-wrap: wrap;
             gap: 1rem;
@@ -1313,7 +1313,7 @@
             margin-bottom: 1rem;
         }
 
-        .edsa-legend-dot {
+        .scheduling-legend-dot {
             display: inline-block;
             width: 0.65rem;
             height: 0.65rem;
@@ -1322,57 +1322,57 @@
             vertical-align: middle;
         }
 
-        .edsa-legend-dot.edsa-ev-confirmed { background: var(--primary-green); }
-        .edsa-legend-dot.edsa-ev-pending { background: var(--warning); }
-        .edsa-legend-dot.edsa-ev-cancelled { background: var(--gray-400); }
-        .edsa-legend-dot.edsa-ev-request { background: #7c3aed; }
-        .edsa-legend-dot.edsa-ev-blocked { background: #dc2626; }
+        .scheduling-legend-dot.scheduling-ev-confirmed { background: var(--primary-green); }
+        .scheduling-legend-dot.scheduling-ev-pending { background: var(--warning); }
+        .scheduling-legend-dot.scheduling-ev-cancelled { background: var(--gray-400); }
+        .scheduling-legend-dot.scheduling-ev-request { background: #7c3aed; }
+        .scheduling-legend-dot.scheduling-ev-blocked { background: #dc2626; }
 
-        .edsa-month-blocked {
+        .scheduling-month-blocked {
             background: #fef2f2;
         }
 
-        .edsa-month-blocked .edsa-month-num {
+        .scheduling-month-blocked .scheduling-month-num {
             color: #b91c1c;
         }
 
-        .edsa-blocked-mark {
+        .scheduling-blocked-mark {
             font-size: 0.75rem;
             margin-left: 0.15rem;
         }
 
-        .edsa-blocked-panel {
+        .scheduling-blocked-panel {
             margin: 0.75rem 0 0;
         }
 
-        .edsa-blocked-wrap {
+        .scheduling-blocked-wrap {
             display: flex;
             flex-wrap: wrap;
             gap: 0.5rem;
             align-items: center;
         }
 
-        .edsa-blocked-label {
+        .scheduling-blocked-label {
             font-size: 0.875rem;
             color: var(--gray-600);
         }
 
-        .edsa-blocked-hint {
+        .scheduling-blocked-hint {
             margin: 0;
             font-size: 0.875rem;
             color: var(--gray-600);
         }
 
-        .edsa-blocked-chip {
+        .scheduling-blocked-chip {
             font-size: 0.8125rem;
         }
 
-        .edsa-cal-toolbar {
+        .scheduling-cal-toolbar {
             flex-wrap: wrap;
             gap: 0.75rem;
         }
 
-        .edsa-month-grid {
+        .scheduling-month-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 1px;
@@ -1382,7 +1382,7 @@
             overflow: hidden;
         }
 
-        .edsa-month-dow {
+        .scheduling-month-dow {
             background: var(--gray-100);
             padding: 0.5rem;
             text-align: center;
@@ -1391,23 +1391,23 @@
             color: var(--gray-600);
         }
 
-        .edsa-month-cell {
+        .scheduling-month-cell {
             background: #fff;
             min-height: 6.5rem;
             padding: 0.35rem;
             cursor: pointer;
         }
 
-        .edsa-month-cell:hover {
+        .scheduling-month-cell:hover {
             background: var(--light-green);
         }
 
-        .edsa-month-other {
+        .scheduling-month-other {
             background: var(--gray-50);
             color: var(--gray-400);
         }
 
-        .edsa-month-today .edsa-month-num {
+        .scheduling-month-today .scheduling-month-num {
             background: var(--primary-green);
             color: #fff;
             border-radius: 50%;
@@ -1419,24 +1419,24 @@
             font-size: 0.75rem;
         }
 
-        .edsa-month-num {
+        .scheduling-month-num {
             font-size: 0.8125rem;
             font-weight: 600;
             margin-bottom: 0.25rem;
         }
 
-        .edsa-month-events {
+        .scheduling-month-events {
             display: flex;
             flex-direction: column;
             gap: 2px;
         }
 
-        .edsa-month-more {
+        .scheduling-month-more {
             font-size: 0.6875rem;
             color: var(--gray-500);
         }
 
-        .edsa-cal-event {
+        .scheduling-cal-event {
             display: block;
             width: 100%;
             text-align: left;
@@ -1451,100 +1451,100 @@
             text-overflow: ellipsis;
         }
 
-        .edsa-ev-confirmed {
+        .scheduling-ev-confirmed {
             background: #d1fae5;
             color: #065f46;
         }
 
-        .edsa-ev-pending {
+        .scheduling-ev-pending {
             background: #fef3c7;
             color: #92400e;
         }
 
-        .edsa-ev-cancelled {
+        .scheduling-ev-cancelled {
             background: var(--gray-200);
             color: var(--gray-600);
             text-decoration: line-through;
         }
 
-        .edsa-ev-completed {
+        .scheduling-ev-completed {
             background: #dbeafe;
             color: #1e40af;
         }
 
-        .edsa-ev-request {
+        .scheduling-ev-request {
             box-shadow: inset 0 0 0 2px #7c3aed;
         }
 
-        .edsa-week-wrap {
+        .scheduling-week-wrap {
             display: flex;
             border: 1px solid var(--gray-200);
             border-radius: var(--border-radius);
             overflow: hidden;
         }
 
-        .edsa-week-cols {
+        .scheduling-week-cols {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             flex: 1;
         }
 
-        .edsa-week-col {
+        .scheduling-week-col {
             border-left: 1px solid var(--gray-200);
             min-width: 0;
         }
 
-        .edsa-week-today {
+        .scheduling-week-today {
             background: var(--light-green);
         }
 
-        .edsa-week-head {
+        .scheduling-week-head {
             padding: 0.5rem;
             text-align: center;
             background: var(--gray-100);
             border-bottom: 1px solid var(--gray-200);
         }
 
-        .edsa-week-dow {
+        .scheduling-week-dow {
             display: block;
             font-size: 0.6875rem;
             color: var(--gray-500);
         }
 
-        .edsa-week-date {
+        .scheduling-week-date {
             font-weight: 700;
             font-size: 1rem;
         }
 
-        .edsa-week-slot {
+        .scheduling-week-slot {
             border-bottom: 1px solid var(--gray-100);
             padding: 0.25rem;
             min-height: 2.5rem;
         }
 
-        .edsa-week-slot-time {
+        .scheduling-week-slot-time {
             font-size: 0.625rem;
             color: var(--gray-400);
         }
 
-        .edsa-week-slot-events .edsa-cal-event {
+        .scheduling-week-slot-events .scheduling-cal-event {
             margin-top: 2px;
             font-size: 0.75rem;
         }
 
-        .edsa-day-view {
+        .scheduling-day-view {
             border: 1px solid var(--gray-200);
             border-radius: var(--border-radius);
             overflow: hidden;
         }
 
-        .edsa-day-row {
+        .scheduling-day-row {
             display: grid;
             grid-template-columns: 5rem 1fr;
             border-bottom: 1px solid var(--gray-100);
         }
 
-        .edsa-day-time {
+        .scheduling-day-time {
             padding: 0.75rem;
             background: var(--gray-50);
             font-size: 0.8125rem;
@@ -1552,40 +1552,40 @@
             color: var(--gray-600);
         }
 
-        .edsa-day-events {
+        .scheduling-day-events {
             padding: 0.5rem;
             display: flex;
             flex-direction: column;
             gap: 0.35rem;
         }
 
-        .edsa-day-empty {
+        .scheduling-day-empty {
             padding: 2rem;
             text-align: center;
             color: var(--gray-500);
         }
 
-        .edsa-cal-table-toggle {
+        .scheduling-cal-table-toggle {
             margin-top: 1.5rem;
             font-size: 0.875rem;
         }
 
-        .edsa-cal-table-toggle summary {
+        .scheduling-cal-table-toggle summary {
             cursor: pointer;
             color: var(--primary-green);
             font-weight: 600;
         }
 
-        /* EDSA calendar must not be clipped by .card overflow:hidden */
-        #edsa .edsa-calendar-card {
+        /* Scheduling calendar must not be clipped by .card overflow:hidden */
+        #scheduling .scheduling-calendar-card {
             overflow: visible;
         }
 
-        #edsa .edsa-calendar-card .card-content {
+        #scheduling .scheduling-calendar-card .card-content {
             overflow: visible;
         }
 
-        .edsa-cal-body {
+        .scheduling-cal-body {
             overflow-x: auto;
         }
 
@@ -1908,6 +1908,23 @@
             max-height: 90vh;
             overflow-y: auto;
             animation: modalSlideIn 0.3s ease-out;
+        }
+
+        /* Order eye/detail sheet: overlay scrolls; content must not clip on phones */
+        .hm-admin-order-modal .hm-order-detail-sheet {
+            max-height: none !important;
+            overflow: visible !important;
+            width: min(980px, 100%) !important;
+        }
+
+        .hm-order-detail-grid {
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        }
+
+        .hm-admin-order-modal .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            max-width: 100%;
         }
 
         @keyframes modalSlideIn {
@@ -3841,7 +3858,7 @@
                 <div class="nav-section">
                     <div class="nav-section-title">Schedule</div>
                     <div class="nav-item">
-                        <a href="#" class="nav-link" data-section="edsa">
+                        <a href="#" class="nav-link" data-section="scheduling">
                             <i class="fas fa-calendar-check"></i>
                             Schedule
                         </a>
@@ -4194,7 +4211,17 @@
                             <input type="file" id="csvFile" class="form-input" accept=".csv,text/csv">
                         </div>
 
-                        <button type="button" class="btn btn-primary" onclick="importProducts('csvFile','importProgress','importResults')">
+                        <label style="display:flex;align-items:flex-start;gap:0.5rem;margin:0 0 1rem;font-size:0.88rem;color:var(--gray-700);cursor:pointer;">
+                            <input type="checkbox" id="importCheckFirst" checked style="margin-top:0.2rem;">
+                            <span>
+                                Check for bad barcodes, price/image gaps first
+                                <span style="display:block;color:var(--gray-500);font-size:0.82rem;">
+                                    Rows with a real problem are held for a quick look; everything else imports right away — no big list to review.
+                                </span>
+                            </span>
+                        </label>
+
+                        <button type="button" class="btn btn-primary" id="importProductsBtn" onclick="importProducts('csvFile','importProgress','importResults')">
                             <i class="fas fa-upload"></i>
                             Import products
                         </button>
@@ -4202,9 +4229,10 @@
                         <div id="importProgress" style="margin-top: 1rem; display: none;">
                             <div class="loading">
                                 <div class="spinner"></div>
-                                Importing products…
+                                <span id="importProgressText">Importing products…</span>
                             </div>
                         </div>
+                        <div id="importReviewPanel" style="margin-top: 1rem; display: none;"></div>
                         <div id="importResults" style="margin-top: 1rem; display: none;"></div>
                     </div>
                 </div>
@@ -4215,6 +4243,14 @@
                 <div class="content-header">
                     <h1 class="page-title">Orders</h1>
                     <div class="button-group">
+                        <button type="button" class="btn btn-primary" id="orders-bulk-create-labels-btn" onclick="window.adminApp.bulkCreateShippingLabels()">
+                            <i class="fas fa-shipping-fast"></i>
+                            Create shipping labels
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="orders-bulk-print-labels-btn" onclick="window.adminApp.bulkPrintUnprintedLabels()">
+                            <i class="fas fa-print"></i>
+                            Print all Labels
+                        </button>
                         <button type="button" class="btn btn-secondary" onclick="window.adminApp.loadOrders()">
                             <i class="fas fa-sync-alt"></i>
                             Refresh
@@ -4226,7 +4262,10 @@
                     <div class="card-content">
                         <p class="form-help" style="margin:0 0 1rem;color:var(--gray-600);">
                             Webstore and online checkout orders. POS register sales appear under POS when enabled.
-                            Use the checkboxes to select orders on this page, then <strong>Print selected orders</strong> for customer receipts.
+                            <strong>Create shipping labels</strong> buys labels for paid orders that still need one (uses catalog weights + cheapest available rate).
+                            <strong>Print all Labels</strong> opens every shipping label that has not been printed yet.
+                            Use the checkboxes to select orders on this page, then <strong>Print selected orders</strong> for customer receipts (not shipping labels).
+                            Voided, refunded, and cancelled orders are never included in label bulk actions.
                         </p>
                         <div id="ordersBulkSelectBar" class="admin-orders-select-bar" hidden role="region" aria-label="Selected order actions">
                             <span id="ordersBulkSelectCount" class="admin-orders-select-count">No orders selected</span>
@@ -4403,7 +4442,7 @@
                             <div class="stat-icon"><i class="fas fa-star"></i></div>
                         </div>
                         <div class="stat-value" id="statLoyaltyMembers">-</div>
-                        <div class="stat-change"><span id="statLoyaltyPoints">0</span> pts outstanding</div>
+                        <div class="stat-change"><span id="statLoyaltyPoints">0</span> <span id="statLoyaltyOutstandingUnit">pts outstanding</span></div>
                     </div>
                     <div class="stat-card warning">
                         <div class="stat-header">
@@ -4587,8 +4626,8 @@
                 </div>
             </section>
 
-            <!-- Schedule / EDSA appointments -->
-            <section id="edsa" class="content-section">
+            <!-- Schedule / Scheduling appointments -->
+            <section id="scheduling" class="content-section">
                 <div class="content-header">
                     <h1 class="page-title">Schedule</h1>
                     <p style="color: var(--gray-500); margin-top: 0.35rem; font-size: 0.9375rem;">
@@ -4596,11 +4635,11 @@
                     </p>
                 </div>
 
-                <div class="card edsa-calendar-card">
+                <div class="card scheduling-calendar-card">
                     <div class="card-content">
-                        <div id="edsaBookingsTable" class="loading">
+                        <div id="schedulingBookingsTable" class="loading">
                             <div class="spinner"></div>
-                            Loading EDSA bookings...
+                            Loading Scheduling bookings...
                         </div>
                     </div>
                 </div>
@@ -4854,6 +4893,7 @@
                     <button type="button" class="btn btn-secondary btn-sm" data-marketing-tab="promotions" role="tab" aria-selected="false">Promotions</button>
                     <button type="button" class="btn btn-secondary btn-sm" data-marketing-tab="displays" role="tab" aria-selected="false">In-store displays</button>
                     <button type="button" class="btn btn-secondary btn-sm" data-marketing-tab="loyalty" role="tab" aria-selected="false">Loyalty</button>
+                    <button type="button" class="btn btn-secondary btn-sm" data-marketing-tab="abandoned-cart" role="tab" aria-selected="false">Abandoned cart</button>
                 </div>
 
                 <div class="admin-section-stack">
@@ -5109,12 +5149,53 @@
                             <button type="button" class="btn btn-secondary btn-sm" id="loyalty-tiers-run-now-btn">Run email check now</button>
                             <button type="button" class="btn btn-secondary btn-sm" id="loyalty-intro-preview-cash-btn">Preview intro — cash back</button>
                             <button type="button" class="btn btn-secondary btn-sm" id="loyalty-intro-preview-points-btn">Preview intro — points</button>
+                            <button type="button" class="btn btn-secondary btn-sm" id="loyalty-recalculate-all-btn">Recalculate all tiers</button>
+                            <button type="button" class="btn btn-secondary btn-sm" id="loyalty-backfill-earns-btn">Backfill earns</button>
+                            <button type="button" class="btn btn-secondary btn-sm" id="loyalty-send-pending-promo-btn">Send pending promotions</button>
+                            <button type="button" class="btn btn-secondary btn-sm" id="loyalty-intro-status-btn">Intro email status</button>
+                            <button type="button" class="btn btn-secondary btn-sm" id="loyalty-resume-intro-btn">Resume intro emails</button>
                             <span style="font-size:0.85rem;color:var(--gray-600);">Preview opens a draft in a new tab. Nothing is sent.</span>
                         </div>
                         <p id="loyalty-tiers-msg" style="min-height:1.25rem;font-size:0.9rem;margin:0.5rem 0 0;"></p>
                     </div>
                 </div>
                 </div>
+
+                <div data-marketing-panel="abandoned-cart" class="admin-section-stack" style="display:none;">
+                <div class="card" id="abandoned-cart-card">
+                    <div class="card-content">
+                        <h3 style="margin:0 0 0.35rem 0;">Abandoned cart emails</h3>
+                        <p style="margin:0 0 0.75rem 0;color:var(--gray-600);font-size:0.88rem;">
+                            Remind shoppers who leave items in their cart. Programs control delay, subject, and offer. Storefront tracking posts to <code>/api/abandoned-cart/track</code>.
+                        </p>
+                        <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;margin-bottom:1rem;">
+                            <input type="checkbox" id="abandoned-cart-enabled"> Enable abandoned cart emails
+                        </label>
+                        <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.75rem;">
+                            <button type="button" class="btn btn-primary btn-sm" id="abandoned-cart-save-btn">Save</button>
+                            <button type="button" class="btn btn-secondary btn-sm" id="abandoned-cart-run-now-btn">Send due reminders now</button>
+                            <button type="button" class="btn btn-secondary btn-sm" id="abandoned-cart-reload-btn">Reload</button>
+                        </div>
+                        <div style="overflow-x:auto;">
+                            <table class="data-table" style="width:100%;">
+                                <thead>
+                                    <tr>
+                                        <th>Program</th>
+                                        <th>Delay</th>
+                                        <th>Active</th>
+                                        <th>Sent</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="abandoned-cart-programs-body">
+                                    <tr><td colspan="4" style="padding:1rem;color:var(--gray-500);">Loading…</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p id="abandoned-cart-msg" style="min-height:1.25rem;font-size:0.9rem;margin:0.75rem 0 0;"></p>
+                    </div>
+                </div>
+                </div>
+
                 </div>
             </section>
 
@@ -6506,15 +6587,15 @@
 
                 <div class="card" id="gcal-connection-card">
                     <div class="card-content">
-                        <h3 style="margin: 0 0 0.25rem 0;">Google Calendar (EDSA appointments)</h3>
+                        <h3 style="margin: 0 0 0.25rem 0;">Google Calendar (Scheduling appointments)</h3>
                         <p style="margin: 0 0 1rem 0; color: var(--gray-600); font-size: 0.92rem;">
-                            Uses your connected Google account. When someone books an EDSA session on your website, it is added to the calendar you choose here. Times already booked on that calendar will not be offered online.
+                            Uses your connected Google account. When someone books an Scheduling session on your website, it is added to the calendar you choose here. Times already booked on that calendar will not be offered online.
                         </p>
                         <div id="gcal-status-panel" style="border:1px solid var(--gray-200);border-radius:8px;padding:0.85rem;background:var(--gray-50);margin-bottom:0.85rem;">
                             <p id="gcal-status-text" style="margin:0;color:var(--gray-600);font-size:0.9rem;">Checking connection…</p>
                         </div>
                         <div class="form-group" id="gcal-calendar-wrap" style="display:none;">
-                            <label for="gcal-calendar-select">Calendar for EDSA appointments</label>
+                            <label for="gcal-calendar-select">Calendar for Scheduling appointments</label>
                             <select class="form-input" id="gcal-calendar-select">
                                 <option value="">Select calendar…</option>
                             </select>
@@ -7632,7 +7713,7 @@
     <link rel="stylesheet" href="css/admin-vendors.css">
     <script src="js/description-html.js?v=disclaimer-2"></script>
     <script src="js/admin-product-sku.js?v=brand-lookup-1"></script>
-    <script src="js/admin-product-variants.js?v=variant-dropdown-1"></script>
+    <script src="js/admin-product-variants.js?v=hide-inactive-variants-20260910"></script>
     <script src="js/tracking-link.js?v=dropship-label-20260914a"></script>
     <script src="js/admin-shipping.js?v=dropship-label-20260914a"></script>
     <script src="admin-personnel-pos.js"></script>
@@ -7647,7 +7728,7 @@
     <script src="js/admin-shop-workflows.js?v=1"></script>
     <script src="admin-app.js?v=orders-multi-print-20260914a"></script>
     <script src="js/shop-calendar-widget.js?v=1"></script>
-    <script src="admin-edsa-calendar.js"></script>
+    <script src="admin-scheduling-calendar.js"></script>
     <script src="admin-shop-calendar.js?v=1"></script>
     <script src="admin-customers.js?v=customers-compact-1"></script>
     <script src="admin-customer-groups.js"></script>

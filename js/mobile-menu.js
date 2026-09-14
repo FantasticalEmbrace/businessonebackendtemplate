@@ -183,7 +183,7 @@
     function navIconForLink(anchor) {
         const href = String(anchor.getAttribute('href') || '').toLowerCase();
         if (href.includes('products.html') || href.includes('/products')) return 'fa-box-open';
-        if (href.includes('edsa')) return 'fa-hand-holding-medical';
+        if (href.includes('scheduling')) return 'fa-hand-holding-medical';
         if (href.includes('about')) return 'fa-seedling';
         if (href.includes('contact') || href.includes('#contact')) return 'fa-envelope';
         if (href.includes('index.html') || href === '/' || href.endsWith('#home') || href === '#home' || href === 'index.html') {

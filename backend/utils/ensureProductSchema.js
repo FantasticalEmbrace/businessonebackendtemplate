@@ -10,7 +10,10 @@ const logger = require('./logger');
 const PATCHES = [
     { column: 'is_cannabis', sql: 'ALTER TABLE products ADD COLUMN is_cannabis BOOLEAN NOT NULL DEFAULT FALSE' },
     { column: 'coa_url', sql: 'ALTER TABLE products ADD COLUMN coa_url VARCHAR(500) NULL' },
-    { column: 'coa_updated_at', sql: 'ALTER TABLE products ADD COLUMN coa_updated_at DATE NULL' }
+    { column: 'coa_updated_at', sql: 'ALTER TABLE products ADD COLUMN coa_updated_at DATE NULL' },
+    // Soft-delete marker: admin "Delete" with order/inventory history sets this so the
+    // product leaves the admin list while order_items history stays intact.
+    { column: 'deleted_at', sql: 'ALTER TABLE products ADD COLUMN deleted_at TIMESTAMP NULL DEFAULT NULL' }
 ];
 
 async function productsTableExists(pool) {

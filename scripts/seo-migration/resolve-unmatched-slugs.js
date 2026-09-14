@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Resolves the remaining unmatched old product slugs and appends to redirects-slug-aliases.csv.
- * Strategies: inactive SKU match, strip -1/-2 suffix, brand prefix, fuzzy slug, EDSA/gift specials, search, catalog.
+ * Strategies: inactive SKU match, strip -1/-2 suffix, brand prefix, fuzzy slug, Scheduling/gift specials, search, catalog.
  */
 
 const { loadBackendEnv, createPool, createConnection } = require('../../backend/utils/dbConfig');
@@ -93,8 +93,8 @@ function loadConcreteTitles() {
 
 function specialRedirect(oldSlug) {
     const s = oldSlug.toLowerCase();
-    if (s.includes('edsa') && (s.includes('test') || s.includes('biofeedback') || s.includes('association'))) {
-        return { to: '/index.html#edsa-service', method: 'special_edsa' };
+    if (s.includes('scheduling') && (s.includes('test') || s.includes('biofeedback') || s.includes('association'))) {
+        return { to: '/index.html#scheduling-service', method: 'special_scheduling' };
     }
     if (s.includes('gift-bag') || s.includes('gift-card')) {
         return { to: '/products.html', method: 'special_gift' };

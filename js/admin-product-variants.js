@@ -432,7 +432,9 @@
                 if (groups.length) {
                     groups.forEach((g) => addOptionGroup(g.name || '', (g.values || []).join(', ')));
                 }
-                const variants = product.variants || [];
+                const variants = (product.variants || []).filter(
+                    (v) => v && v.is_active !== 0 && v.is_active !== false
+                );
                 variants.forEach((v) => {
                     addVariantRow({
                         id: v.id,

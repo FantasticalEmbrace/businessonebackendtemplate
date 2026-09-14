@@ -155,7 +155,7 @@ class GoogleCalendarService {
             } = bookingData;
 
             const event = {
-                summary: `EDSA Session - ${firstName} ${lastName}`,
+                summary: `Scheduling Session - ${firstName} ${lastName}`,
                 description: this.buildEventDescription({
                     firstName,
                     lastName,
@@ -166,7 +166,7 @@ class GoogleCalendarService {
                 }),
                 start: buildStoreCalendarDateTime(preferredDate, preferredTime),
                 end: buildStoreCalendarEnd(preferredDate, preferredTime, 1),
-                location: 'Business One — see businessonecomprehensive.com',
+                location: 'Business One ï¿½ see businessonecomprehensive.com',
                 colorId: '10',
                 ...this.calendarEventOptions(email),
             };
@@ -199,7 +199,7 @@ class GoogleCalendarService {
                 bookingData;
 
             const event = {
-                summary: `EDSA Session - ${firstName} ${lastName}`,
+                summary: `Scheduling Session - ${firstName} ${lastName}`,
                 description: this.buildEventDescription({
                     firstName,
                     lastName,
@@ -263,11 +263,11 @@ class GoogleCalendarService {
         }
     }
 
-    isEdsaCalendarEvent(event) {
+    isSchedulingCalendarEvent(event) {
         const summary = String(event?.summary || '');
         const desc = String(event?.description || '');
         return (
-            /edsa/i.test(summary) ||
+            /scheduling/i.test(summary) ||
             /electro dermal/i.test(desc) ||
             /booking\s*id\s*:/i.test(desc)
         );
@@ -280,7 +280,7 @@ class GoogleCalendarService {
     }
 
     /** Bookings + calendar events for a day â€” cancelled slots must not block availability. */
-    async loadEdsaSlotBlockingContext(pool, dayYmd) {
+    async loadSchedulingSlotBlockingContext(pool, dayYmd) {
         const activeEventIds = new Set();
         const cancelledEventIds = new Set();
         const activeBookedTimes = new Set();
@@ -293,7 +293,7 @@ class GoogleCalendarService {
         try {
             const [rows] = await pool.execute(
                 `SELECT id, status, preferred_time, google_calendar_event_id
-                   FROM edsa_bookings
+                   FROM scheduling_bookings
                   WHERE preferred_date = ?`,
                 [dayYmd]
             );
@@ -313,7 +313,7 @@ class GoogleCalendarService {
                 }
             }
         } catch (err) {
-            logger.warn('[integration][google-calendar] Could not load EDSA slot context', {
+            logger.warn('[integration][google-calendar] Could not load Scheduling slot context', {
                 error: err.message,
             });
         }
@@ -336,7 +336,7 @@ class GoogleCalendarService {
             return true;
         }
 
-        if (this.isEdsaCalendarEvent(event)) {
+        if (this.isSchedulingCalendarEvent(event)) {
             return false;
         }
 
@@ -362,7 +362,7 @@ class GoogleCalendarService {
             });
 
             const existingEvents = response.data.items || [];
-            const ctx = await this.loadEdsaSlotBlockingContext(pool, dayYmd);
+            const ctx = await this.loadSchedulingSlotBlockingContext(pool, dayYmd);
 
             const bookedSlots = [];
             for (const event of existingEvents) {
@@ -403,7 +403,7 @@ class GoogleCalendarService {
     }
 
     buildEventDescription({ firstName, lastName, email, phone, notes, bookingId }) {
-        let description = `EDSA (Electro Dermal Stress Analysis) Appointment\n\n`;
+        let description = `Scheduling (Electro Dermal Stress Analysis) Appointment\n\n`;
         description += `Client: ${firstName} ${lastName}\n`;
         description += `Email: ${email}\n`;
         description += `Phone: ${phone}\n`;

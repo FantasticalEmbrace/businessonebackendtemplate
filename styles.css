@@ -538,7 +538,7 @@ li {
   border-color: var(--accent-gold);
 }
 
-/* Hero EDSA button — hover → site green + white text */
+/* Hero Scheduling button — hover → site green + white text */
 .btn-accent:hover,
 a.btn-accent:hover {
   background-color: var(--primary-green) !important;
@@ -1498,7 +1498,7 @@ body.hm-mobile-nav-open .top-bar ~ .breadcrumb-nav {
     .navbar #nav-menu a,
     .navbar #navbar-menu a,
     .hm-accent-link,
-    .edsa-nav-link
+    .scheduling-nav-link
   ):hover {
     background: var(--primary-green) !important;
     color: var(--white) !important;
@@ -2231,41 +2231,41 @@ body.hero-search-open .product-spotlight {
   margin: 0 auto;
 }
 
-/* EDSA Service Section */
-.edsa-service {
+/* Scheduling Service Section */
+.scheduling-service {
   background: linear-gradient(135deg, var(--gray-50) 0%, var(--white) 100%);
   padding: var(--space-20) 0;
 }
 
-.edsa-content {
+.scheduling-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-12);
   align-items: center;
 }
 
-.edsa-text h2 {
+.scheduling-text h2 {
   font-size: var(--text-4xl);
   color: var(--primary-green);
   margin-bottom: var(--space-6);
   line-height: 1.2;
 }
 
-.edsa-description {
+.scheduling-description {
   font-size: var(--text-lg);
   color: var(--gray-600);
   margin-bottom: var(--space-8);
   line-height: 1.6;
 }
 
-.edsa-features {
+.scheduling-features {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
   margin-bottom: var(--space-8);
 }
 
-.edsa-feature {
+.scheduling-feature {
   display: flex;
   align-items: center;
   gap: var(--space-3);
@@ -2273,32 +2273,32 @@ body.hero-search-open .product-spotlight {
   color: var(--gray-700);
 }
 
-.edsa-feature i {
+.scheduling-feature i {
   color: var(--primary-green);
   font-size: var(--text-lg);
   width: 24px;
   text-align: center;
 }
 
-.edsa-pricing {
+.scheduling-pricing {
   display: flex;
   align-items: baseline;
   gap: var(--space-2);
   margin-bottom: var(--space-6);
 }
 
-.edsa-price {
+.scheduling-price {
   font-size: var(--text-3xl);
   font-weight: 700;
   color: var(--primary-green);
 }
 
-.edsa-price-note {
+.scheduling-price-note {
   font-size: var(--text-base);
   color: var(--gray-500);
 }
 
-.edsa-book-btn {
+.scheduling-book-btn {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
@@ -2307,12 +2307,12 @@ body.hero-search-open .product-spotlight {
   font-weight: 600;
 }
 
-.edsa-manage-link {
+.scheduling-manage-link {
   margin-top: 0.75rem;
   font-size: 0.9rem;
 }
 
-.edsa-manage-link a {
+.scheduling-manage-link a {
   color: var(--primary-green);
   text-decoration: underline;
   text-decoration-color: var(--primary-green);
@@ -2322,13 +2322,13 @@ body.hero-search-open .product-spotlight {
   background-color: transparent;
 }
 
-.edsa-image {
+.scheduling-image {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.edsa-image img {
+.scheduling-image img {
   width: 100%;
   max-width: 500px;
   height: auto;
@@ -2339,56 +2339,56 @@ body.hero-search-open .product-spotlight {
   transition: opacity 0.3s ease, transform var(--transition-fast);
 }
 
-.edsa-image img.loaded {
+.scheduling-image img.loaded {
   opacity: 1;
 }
 
-.edsa-image img:hover {
+.scheduling-image img:hover {
   transform: scale(1.05);
 }
 
 /* Tablet + mobile: stack copy, then image, then centered CTA below both */
 @media (max-width: 1023px) {
-  .edsa-service {
+  .scheduling-service {
     padding: var(--space-12) 0;
   }
 
-  .edsa-content {
+  .scheduling-content {
     grid-template-columns: 1fr;
     gap: var(--space-8);
     text-align: center;
   }
 
-  /* Flatten .edsa-text so CTA can sit after the image in the grid */
-  .edsa-text {
+  /* Flatten .scheduling-text so CTA can sit after the image in the grid */
+  .scheduling-text {
     display: contents;
   }
 
-  .edsa-text h2 {
+  .scheduling-text h2 {
     order: 1;
     font-size: var(--text-3xl);
     text-align: center;
   }
 
-  .edsa-description {
+  .scheduling-description {
     order: 2;
     font-size: var(--text-base);
     text-align: center;
   }
 
-  .edsa-features {
+  .scheduling-features {
     order: 3;
     align-items: center;
     width: 100%;
     margin-bottom: var(--space-6);
   }
 
-  .edsa-image {
+  .scheduling-image {
     order: 4;
     width: 100%;
   }
 
-  .edsa-pricing {
+  .scheduling-pricing {
     order: 5;
     justify-content: center;
     justify-self: center;
@@ -2396,7 +2396,7 @@ body.hero-search-open .product-spotlight {
     margin-bottom: var(--space-6);
   }
 
-  .edsa-book-btn {
+  .scheduling-book-btn {
     order: 6;
     display: inline-flex;
     width: fit-content;
@@ -2405,14 +2405,14 @@ body.hero-search-open .product-spotlight {
     justify-content: center;
   }
 
-  .edsa-manage-link {
+  .scheduling-manage-link {
     order: 7;
     justify-self: center;
     text-align: center;
     width: 100%;
   }
 
-  .edsa-image img {
+  .scheduling-image img {
     max-width: 100%;
     width: 100%;
   }
@@ -3170,24 +3170,24 @@ body.hero-search-open .product-spotlight {
 /* In-page nav targets (sticky header clearance) */
 #home,
 #products,
-#edsa-service,
-#edsa-heading,
-#edsa-nav-target,
+#scheduling-service,
+#scheduling-heading,
+#scheduling-nav-target,
 #about,
 #contact {
   scroll-margin-top: calc(var(--hm-header-offset, 4.75rem) + 12px);
 }
 
-#edsa-nav-target {
+#scheduling-nav-target {
   scroll-margin-bottom: 1.25rem;
 }
 
 /* Cross-page section nav: hide page flash until scroll completes; keep age gate visible */
-html.hm-await-edsa-scroll body > :not(.hm-age-gate) {
+html.hm-await-scheduling-scroll body > :not(.hm-age-gate) {
   visibility: hidden;
 }
 
-html.hm-edsa-scroll-ready body > :not(.hm-age-gate),
+html.hm-scheduling-scroll-ready body > :not(.hm-age-gate),
 html.hm-section-scroll-ready body > :not(.hm-age-gate) {
   visibility: visible;
 }
@@ -5123,7 +5123,7 @@ body.cart-open .cart-sidebar.open {
 .modal-close .cart-close-svg,
 .gdpr-modal-close .cart-close-svg,
 .ccpa-modal-close .cart-close-svg,
-.edsa-modal-close .cart-close-svg,
+.scheduling-modal-close .cart-close-svg,
 .newsletter-popup-close .cart-close-svg,
 .acct-modal-close .cart-close-svg,
 .notification .notification-close .cart-close-svg {
@@ -5342,6 +5342,41 @@ a.order-item-image-link:focus-visible {
   font-size: var(--text-sm);
   color: var(--primary-green);
   font-weight: 600;
+}
+
+.cart-item-subscription {
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--gray-200);
+  font-size: var(--text-sm);
+  width: 100%;
+  text-align: left;
+}
+
+.cart-item-subscription-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--gray-800);
+}
+
+.cart-item-subscription-frequency {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+  color: var(--gray-700);
+}
+
+.cart-item-subscription-select {
+  font: inherit;
+  padding: 0.2rem 0.4rem;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  color: var(--gray-900);
 }
 
 .quantity-btn {

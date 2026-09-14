@@ -4,16 +4,16 @@
 /* FLICKER PREVENTION - Hardware acceleration for smooth rendering */
 /* Exclude overlays: translateZ on them breaks viewport-fixed positioning
    (dialog centers in document height instead of the visible viewport). */
-/* EDSA booking modal — must stay transform-free and viewport-fixed */
-#edsa-booking-modal,
-#edsa-booking-modal * {
+/* Scheduling booking modal — must stay transform-free and viewport-fixed */
+#scheduling-booking-modal,
+#scheduling-booking-modal * {
     -webkit-transform: none !important;
     transform: none !important;
     -webkit-backface-visibility: visible !important;
     backface-visibility: visible !important;
 }
 
-#edsa-booking-modal {
+#scheduling-booking-modal {
     will-change: auto !important;
 }
 
@@ -199,7 +199,7 @@ img {
 img.loaded,
 img.error,
 img[src*="data:"],
-.edsa-image img,
+.scheduling-image img,
 img[data-skip-error-handling] {
     opacity: 1;
 }

@@ -21,11 +21,11 @@
   will-change: transform;
 }
 
-/* EDSA booking modal must stay transform-free or fixed centering breaks */
-#edsa-booking-modal,
-#edsa-booking-modal *,
-.edsa-modal,
-.edsa-modal * {
+/* Scheduling booking modal must stay transform-free or fixed centering breaks */
+#scheduling-booking-modal,
+#scheduling-booking-modal *,
+.scheduling-modal,
+.scheduling-modal * {
   will-change: auto !important;
   transform: none !important;
   -webkit-transform: none !important;

@@ -2,7 +2,8 @@
 
 /** Internal placeholder IDs — not real carrier tracking numbers. */
 function isPlaceholderTracking(trackingNumber) {
-    return /^HMTRK/i.test(String(trackingNumber || '').trim());
+    // BOTRK = Business One; HMTRK kept for legacy rows copied from HM Herbs
+    return /^(BOTRK|HMTRK)/i.test(String(trackingNumber || '').trim());
 }
 
 function normalizeCarrier(carrier) {
