@@ -32,7 +32,7 @@ router.use(authenticateAdmin);
 
 router.get('/settings', async (req, res) => {
     try {
-        const settings = await loadPosShopSettings(req.pool);
+        const settings = await loadPosShopSettings(req.pool, { merchantId: req.merchantId || req.adminUser?.merchantId || null });
         res.json(settings);
     } catch (e) {
         logger.error('Shop settings error:', e);

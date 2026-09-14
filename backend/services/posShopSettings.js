@@ -30,8 +30,13 @@ const SETTING_UPHOLSTERY_REQUIRE_DEPOSIT = 'pos_shop_upholstery_require_deposit_
 const SETTING_UPHOLSTERY_BLOCK_PRODUCTION = 'pos_shop_upholstery_block_production_until_materials';
 const SETTING_BAYS = 'pos_shop_bays';
 const SETTING_BAY_LABELS = 'pos_shop_bay_labels';
+const SETTING_ADDON_WAREHOUSE = 'pos_addon_warehouse';
+const SETTING_ADDON_VIN_FITMENT = 'pos_addon_vin_fitment';
+const SETTING_ADDON_TIRE_PRO = 'pos_addon_tire_pro';
+const SETTING_ADDON_EXTRA_DISTRIBUTORS = 'pos_addon_extra_distributors';
+const SETTING_SHOP_CONTRACTOR = 'pos_shop_contractor';
 
-const SHOP_VERTICALS = Object.freeze(['auto', 'body', 'upholstery', 'tire']);
+const SHOP_VERTICALS = Object.freeze(['auto', 'body', 'upholstery', 'tire', 'contractor']);
 
 const DEFAULT_ALIGNMENT_PRICES = Object.freeze({ twoWheel: 59.99, fourWheel: 89.99 });
 const DEFAULT_UPHOLSTERY_DEPOSIT = Object.freeze({ percent: 30, minAmount: 150 });
@@ -339,7 +344,7 @@ function normalizeBayLabels(raw) {
     return base;
 }
 
-async function loadPosShopSettings(pool) {
+async function loadPosShopSettings(pool, options = {}) {
     const keys = [
         SETTING_SHOP_VERTICALS,
         SETTING_ALIGNMENT_2WHEEL_PRICE,
@@ -368,10 +373,50 @@ async function loadPosShopSettings(pool) {
         SETTING_UPHOLSTERY_REQUIRE_DEPOSIT,
         SETTING_UPHOLSTERY_BLOCK_PRODUCTION,
         SETTING_BAYS,
-        SETTING_BAY_LABELS
+        SETTING_BAY_LABELS,
+        SETTING_ADDON_WAREHOUSE,
+        SETTING_ADDON_VIN_FITMENT,
+        SETTING_ADDON_TIRE_PRO,
+        SETTING_ADDON_EXTRA_DISTRIBUTORS,
+        SETTING_SHOP_CONTRACTOR
     ];
     const map = await loadSettingMap(pool, keys);
-    const verticals = parseShopVerticals(map.get(SETTING_SHOP_VERTICALS));
+    let verticals = parseShopVerticals(map.get(SETTING_SHOP_VERTICALS));
+    if (parseBool(map.get(SETTING_SHOP_CONTRACTOR), false) && !verticals.includes('contractor')) {
+        verticals = verticals.concat(['contractor']);
+    }
+    let addons = {
+        warehouse: parseBool(map.get(SETTING_ADDON_WAREHOUSE), false),
+        vinFitment: parseBool(map.get(SETTING_ADDON_VIN_FITMENT), false),
+        tirePro: parseBool(map.get(SETTING_ADDON_TIRE_PRO), false),
+        extraDistributors: Math.max(0, Math.floor(Number(map.get(SETTING_ADDON_EXTRA_DISTRIBUTORS)) || 0))
+    };
+    const merchantId = options.merchantId || null;
+    if (merchantId) {
+        try {
+            const [rows] = await pool.execute(
+                'SELECT shop_config FROM platform_merchants WHERE id = ? LIMIT 1',
+                [merchantId]
+            );
+            const raw = rows[0] && rows[0].shop_config;
+            const cfg = raw == null ? null : (typeof raw === 'string' ? JSON.parse(raw) : raw);
+            if (cfg && typeof cfg === 'object') {
+                if (Array.isArray(cfg.shopVerticals)) {
+                    verticals = parseShopVerticals(cfg.shopVerticals);
+                }
+                if (cfg.addons && typeof cfg.addons === 'object') {
+                    const a = cfg.addons;
+                    const tirePro = Boolean(a.tirePro);
+                    addons = {
+                        warehouse: Boolean(a.warehouse || tirePro),
+                        vinFitment: Boolean(a.vinFitment || tirePro),
+                        tirePro,
+                        extraDistributors: Math.max(0, Math.floor(Number(a.extraDistributors) || 0))
+                    };
+                }
+            }
+        } catch (_) { /* shop_config optional */ }
+    }
     const alignment = {
         twoWheelPrice: parsePrice(map.get(SETTING_ALIGNMENT_2WHEEL_PRICE), DEFAULT_ALIGNMENT_PRICES.twoWheel),
         fourWheelPrice: parsePrice(map.get(SETTING_ALIGNMENT_4WHEEL_PRICE), DEFAULT_ALIGNMENT_PRICES.fourWheel)
@@ -422,6 +467,7 @@ async function loadPosShopSettings(pool) {
         shopVerticals: verticals,
         shopVertical: verticals[0] || null,
         shopJobsEnabled: verticals.length > 0,
+        addons,
         alignment,
         upholsteryDeposit,
         laborRates,

@@ -101,6 +101,22 @@ async function ensureTenantsSchema(pool) {
         await ensureMerchantIdColumn(pool, t);
     }
 
+    
+    try {
+        const [cols] = await pool.query(
+            `SELECT COUNT(*) AS c FROM INFORMATION_SCHEMA.COLUMNS
+             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'platform_merchants' AND COLUMN_NAME = 'shop_config'`
+        );
+        if (!Number(cols[0]?.c)) {
+            await pool.query(
+                `ALTER TABLE platform_merchants ADD COLUMN shop_config JSON NULL AFTER website_origin`
+            );
+            logger.info('Database: platform_merchants.shop_config added');
+        }
+    } catch (e) {
+        logger.warn(`Database: shop_config on platform_merchants — ${e.message}`);
+    }
+
     logger.info('Merchant tenancy: shared-schema tables ready');
 }
 

@@ -150,7 +150,7 @@ router.get('/config', async (req, res) => {
             listDisplayAdsForRegister(req.pool, req.posDeviceRecordId),
             loadPosPaymentMethodsSettings(req.pool),
             loadLoyaltyProgramSettings(req.pool),
-            loadPosShopSettings(req.pool),
+            loadPosShopSettings(req.pool, { merchantId: req.merchantId || null }),
             customerWorkflow.loadCustomerWorkflowConfig(req.pool)
         ]);
         const receipt = await loadPosReceiptSettings(req.pool, store.storeLogoUrl);
@@ -173,6 +173,7 @@ router.get('/config', async (req, res) => {
             currency: 'USD',
             shopVertical: shopSettings.shopVertical,
             shopVerticals: shopSettings.shopVerticals,
+            addons: shopSettings.addons || { warehouse: false, vinFitment: false, tirePro: false, extraDistributors: 0 },
             shopJobsEnabled: shopSettings.shopJobsEnabled,
             shop: shopSettings.shop,
             customerWorkflows: customerWorkflows,
@@ -1358,7 +1359,7 @@ router.post('/shop/jobs/:id/media/device', authenticatePosEmployee, async (req, 
 
 router.get('/shop/packages', authenticatePosEmployee, async (req, res) => {
     try {
-        const settings = await loadPosShopSettings(req.pool);
+        const settings = await loadPosShopSettings(req.pool, { merchantId: req.merchantId || null });
         const vertical = String(req.query.jobType || req.query.vertical || '').toLowerCase();
         res.json({
             packages: vertical ? settings.packages?.[vertical] || [] : settings.packages
@@ -1460,7 +1461,7 @@ router.patch('/shop/appointments/:id', authenticatePosEmployee, async (req, res)
 
 router.get('/shop/jobs/:id/recommendations', authenticatePosEmployee, async (req, res) => {
     try {
-        const settings = await loadPosShopSettings(req.pool);
+        const settings = await loadPosShopSettings(req.pool, { merchantId: req.merchantId || null });
         const jobResult = await shopJobs.getJob(req.pool, req.params.id);
         const job = jobResult.job;
         if (!job) return res.status(404).json({ error: 'Job not found' });

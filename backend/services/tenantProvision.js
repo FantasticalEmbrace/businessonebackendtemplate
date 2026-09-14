@@ -1,4 +1,4 @@
-'use strict';
+﻿'use strict';
 
 const bcrypt = require('bcrypt');
 const {
@@ -10,6 +10,15 @@ const {
 
 function publicMerchant(row) {
     if (!row) return null;
+    let shopConfig = null;
+    if (row.shop_config != null) {
+        try {
+            shopConfig =
+                typeof row.shop_config === 'string' ? JSON.parse(row.shop_config) : row.shop_config;
+        } catch {
+            shopConfig = null;
+        }
+    }
     return {
         id: row.id,
         slug: row.slug,
@@ -17,6 +26,7 @@ function publicMerchant(row) {
         billingEmail: row.billing_email || '',
         websiteOrigin: row.website_origin || '',
         status: row.status,
+        shopConfig,
         createdAt: row.created_at,
         updatedAt: row.updated_at
     };
@@ -94,7 +104,7 @@ async function ensureOwnerAdmin(pool, merchantId, billingEmail, businessName) {
         await pool
             .execute(`UPDATE admin_users SET merchant_id = ? WHERE id = ?`, [merchantId, existing[0].id])
             .catch(() => {});
-        return existing[0].id;
+        return { adminId: existing[0].id, tempPassword: null };
     }
 
     const tempPassword = `Bo-${randomId().slice(0, 8)}!`;
@@ -106,6 +116,125 @@ async function ensureOwnerAdmin(pool, merchantId, billingEmail, businessName) {
         [email, passwordHash, first, merchantId]
     );
     return { adminId: result.insertId, tempPassword };
+}
+
+function normalizeSignupAddons(raw) {
+    const a = raw && typeof raw === 'object' ? raw : {};
+    const tirePro = Boolean(a.tirePro || a.tire_pro);
+    const warehouse = Boolean(a.warehouse || tirePro);
+    const vinFitment = Boolean(a.vinFitment || a.vin_fitment || tirePro);
+    const extraDistributors = Math.max(
+        0,
+        Math.min(10, Math.floor(Number(a.extraDistributors ?? a.extra_distributors) || 0))
+    );
+    return {
+        warehouse,
+        vinFitment,
+        tirePro,
+        extraDistributors: warehouse || tirePro ? extraDistributors : 0
+    };
+}
+
+function normalizeSignupVerticals(raw) {
+    const allowed = new Set(['auto', 'body', 'upholstery', 'tire', 'contractor']);
+    let list = [];
+    if (Array.isArray(raw)) list = raw;
+    else if (typeof raw === 'string' && raw.trim()) {
+        try {
+            const parsed = JSON.parse(raw);
+            list = Array.isArray(parsed) ? parsed : String(raw).split(/[,+|]/);
+        } catch {
+            list = String(raw).split(/[,+|]/);
+        }
+    }
+    const unique = [];
+    for (const v of list) {
+        const key = String(v || '')
+            .trim()
+            .toLowerCase();
+        if (!allowed.has(key) || unique.includes(key)) continue;
+        unique.push(key);
+    }
+    if (unique.includes('contractor') && unique.length > 1) return ['contractor'];
+    return unique;
+}
+
+async function upsertSetting(pool, keyName, value, description, type = 'string') {
+    await pool.execute(
+        `INSERT INTO settings (key_name, value, description, type)
+         VALUES (?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE value = VALUES(value), description = VALUES(description), type = VALUES(type)`,
+        [keyName, value == null ? '' : String(value), description || keyName, type]
+    );
+}
+
+/**
+ * Persist shop modes + add-ons for a merchant (DB JSON + settings used by admin/POS).
+ */
+async function applySignupShopConfig(pool, merchantId, input = {}) {
+    const shopVerticals = normalizeSignupVerticals(input.shopVerticals ?? input.verticals);
+    const addons = normalizeSignupAddons(input.addons);
+    const storeType = String(input.storeType || '').trim().toLowerCase() === 'retail' ? 'retail' : 'shop';
+    const shopConfig = {
+        storeType: shopVerticals.length ? 'shop' : storeType,
+        shopVerticals,
+        addons,
+        updatedAt: new Date().toISOString()
+    };
+
+    try {
+        await pool.execute(`UPDATE platform_merchants SET shop_config = ? WHERE id = ?`, [
+            JSON.stringify(shopConfig),
+            merchantId
+        ]);
+    } catch (e) {
+        // Column may not exist yet on older DBs — settings fallback still applies.
+        if (!String(e.message || '').includes('shop_config')) throw e;
+    }
+
+    // Settings table drives admin POS form + loadPosShopSettings (global keys).
+    // Merchant-scoped overlay also reads platform_merchants.shop_config when merchantId is known.
+    const vehicleVerticals = shopVerticals.filter((v) => v !== 'contractor');
+    await upsertSetting(
+        pool,
+        'pos_shop_verticals',
+        JSON.stringify(vehicleVerticals),
+        'JSON array of shop verticals: auto, body, upholstery, tire',
+        'string'
+    );
+    if (shopVerticals.includes('contractor')) {
+        await upsertSetting(pool, 'pos_shop_contractor', 'true', 'Contractor / estimate mode enabled', 'boolean');
+    }
+    await upsertSetting(
+        pool,
+        'pos_addon_warehouse',
+        addons.warehouse ? 'true' : 'false',
+        'POS add-on: live warehouse inventory',
+        'boolean'
+    );
+    await upsertSetting(
+        pool,
+        'pos_addon_vin_fitment',
+        addons.vinFitment ? 'true' : 'false',
+        'POS add-on: VIN & vehicle fitment',
+        'boolean'
+    );
+    await upsertSetting(
+        pool,
+        'pos_addon_tire_pro',
+        addons.tirePro ? 'true' : 'false',
+        'POS add-on: Tire Pro bundle',
+        'boolean'
+    );
+    await upsertSetting(
+        pool,
+        'pos_addon_extra_distributors',
+        String(addons.extraDistributors || 0),
+        'POS add-on: extra wholesale distributors',
+        'number'
+    );
+
+    return shopConfig;
 }
 
 /**
@@ -133,9 +262,16 @@ async function provisionTenant(pool, input = {}) {
 
     const existing = await findByBillingEmail(pool, billingEmail);
     if (existing) {
+        // Re-apply modes if signup retries with verticals/addons (idempotent update).
+        let shopConfig = null;
+        try {
+            shopConfig = await applySignupShopConfig(pool, existing.id, input);
+        } catch {
+            shopConfig = null;
+        }
         return {
             alreadyProvisioned: true,
-            merchant: publicMerchant(existing),
+            merchant: { ...publicMerchant(existing), shopConfig: shopConfig || publicMerchant(existing).shopConfig },
             websiteApiKey: null,
             tempAdminPassword: null
         };
@@ -168,11 +304,19 @@ async function provisionTenant(pool, input = {}) {
 
     const owner = await ensureOwnerAdmin(pool, id, billingEmail, businessName);
 
+    let shopConfig = null;
+    try {
+        shopConfig = await applySignupShopConfig(pool, id, input);
+    } catch (e) {
+        // Non-fatal: merchant + admin still usable; modes can be set in admin.
+        console.warn('[tenantProvision] applySignupShopConfig failed:', e.message);
+    }
+
     try {
         const { persistMerchantStoreBranding } = require('./storeBranding');
         await persistMerchantStoreBranding(pool, {
             storeName: businessName,
-            logoUrl: input.logoUrl || input.storeLogoUrl || undefined,
+            logoUrl: input.logoUrl || input.storeLogoUrl || undefined
         });
     } catch {
         /* branding sync is best-effort during provision */
@@ -181,11 +325,13 @@ async function provisionTenant(pool, input = {}) {
     const row = await findById(pool, id);
     return {
         alreadyProvisioned: false,
-        merchant: publicMerchant(row),
+        merchant: { ...publicMerchant(row), shopConfig },
         websiteApiKey,
         websiteApiKeyPrefix: websitePrefix,
         tempAdminPassword: owner && owner.tempPassword ? owner.tempPassword : null,
-        sharedPosApiOrigin: String(process.env.SHARED_POS_PUBLIC_ORIGIN || process.env.FRONTEND_URL || 'http://127.0.0.1:3011')
+        sharedPosApiOrigin: String(
+            process.env.SHARED_POS_PUBLIC_ORIGIN || process.env.FRONTEND_URL || 'http://127.0.0.1:3011'
+        )
             .trim()
             .replace(/\/+$/, '')
     };
@@ -225,5 +371,8 @@ module.exports = {
     resolveByKey,
     provisionTenant,
     registerDeviceKey,
-    ensureOwnerAdmin
+    ensureOwnerAdmin,
+    applySignupShopConfig,
+    normalizeSignupAddons,
+    normalizeSignupVerticals
 };
