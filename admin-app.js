@@ -6172,7 +6172,7 @@ class AdminApp {
             box.innerHTML = `
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.75rem;padding:1.25rem 1.5rem;border-bottom:1px solid var(--gray-200);background:var(--gray-50, #f9fafb);">
                     <div>
-                        <h2 id="loyalty-tier-edit-title" style="margin:0 0 0.25rem;font-size:1.2rem;color:var(--primary-green);font-weight:600;letter-spacing:-0.02em;">Edit ${tierLabel}</h2>
+                        <h2 id="loyalty-tier-edit-title" style="margin:0 0 0.25rem;font-size:1.2rem;color:var(--primary, #2563eb);font-weight:600;letter-spacing:-0.02em;">Edit ${tierLabel}</h2>
                         <p style="margin:0;color:var(--gray-600);font-size:0.88rem;line-height:1.45;">
                             Tier rate % is for emails and checkout estimates. Live credit posts use the flat cash-back earn % above.
                         </p>
