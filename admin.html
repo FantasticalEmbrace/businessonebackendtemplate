@@ -5085,6 +5085,20 @@
                         <p style="margin:0 0 1rem 0;color:var(--gray-600);font-size:0.88rem;">
                             Reward repeat customers with tiered perks. Intro emails use your store branding and configured tier rates.
                         </p>
+                        <div class="form-group" style="margin-bottom:1rem;padding:0.85rem 1rem;border:1px solid var(--gray-200);border-radius:8px;background:var(--gray-50,#f9fafb);">
+                            <label for="loyalty-flat-cashback-percent" style="font-weight:600;">Flat cash-back earn %</label>
+                            <p style="margin:0.25rem 0 0.65rem;color:var(--gray-600);font-size:0.85rem;line-height:1.45;">
+                                This is the live credit post rate on qualifying paid orders. Tier table rates below are for emails/estimates and are not stacked on this earn %.
+                            </p>
+                            <div style="display:grid;gap:0.75rem;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));align-items:end;">
+                                <div class="form-group" style="margin:0;">
+                                    <label for="loyalty-flat-cashback-percent">Cash-back earn %</label>
+                                    <input class="form-input" id="loyalty-flat-cashback-percent" type="number" min="0" max="50" step="0.1" value="5">
+                                </div>
+                                <p style="margin:0;color:var(--gray-500);font-size:0.8rem;">0–50%. Saved with <strong>Save program settings</strong>.</p>
+                            </div>
+                        </div>
+
                         <div class="form-group" style="margin-bottom:1rem;">
                             <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
                                 <input type="checkbox" id="loyalty-tiers-enabled"> Enable loyalty tier program
@@ -5118,6 +5132,9 @@
                             <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;"><input type="checkbox" id="loyalty-tiers-combined-bonus" checked> Spend+frequency bonus</label>
                         </div>
                         <button type="button" class="btn btn-primary btn-sm" id="loyalty-tiers-save-settings-btn" style="margin-bottom:1rem;">Save program settings</button>
+                        <p style="margin:0 0 0.5rem;color:var(--gray-600);font-size:0.85rem;">
+                            Tier table: qualification thresholds and marketing/estimate rates. Click <strong>Edit</strong> for a styled popup (not browser prompts).
+                        </p>
                         <div style="overflow-x:auto;margin-bottom:1rem;">
                             <table class="data-table" style="width:100%;border-collapse:collapse;">
                                 <thead><tr>
@@ -5125,9 +5142,9 @@
                                     <th style="text-align:left;padding:0.5rem;border-bottom:1px solid var(--gray-200);">Min spend</th>
                                     <th style="text-align:left;padding:0.5rem;border-bottom:1px solid var(--gray-200);">Min orders</th>
                                     <th style="text-align:left;padding:0.5rem;border-bottom:1px solid var(--gray-200);">Min points</th>
-                                    <th style="text-align:left;padding:0.5rem;border-bottom:1px solid var(--gray-200);">% off</th>
+                                    <th style="text-align:left;padding:0.5rem;border-bottom:1px solid var(--gray-200);" title="Shown in emails/checkout estimates — not the flat earn rate that posts credit">Tier rate %</th>
                                     <th style="text-align:left;padding:0.5rem;border-bottom:1px solid var(--gray-200);">Free ship</th>
-                                    <th style="text-align:left;padding:0.5rem;border-bottom:1px solid var(--gray-200);">Freq %</th>
+                                    <th style="text-align:left;padding:0.5rem;border-bottom:1px solid var(--gray-200);" title="Extra % when spend + order goals are both met (emails/estimates)">Freq %</th>
                                     <th style="text-align:left;padding:0.5rem;border-bottom:1px solid var(--gray-200);">Active</th>
                                     <th></th>
                                 </tr></thead>
@@ -7726,7 +7743,7 @@
     <script src="js/password-toggle.js?v=4"></script>
     <script src="js/admin-table-sort.js?v=sortable-inp-20260914a"></script>
     <script src="js/admin-shop-workflows.js?v=1"></script>
-    <script src="admin-app.js?v=orders-multi-print-20260914a"></script>
+    <script src="admin-app.js?v=loyalty-cashback-admin-20260916"></script>
     <script src="js/shop-calendar-widget.js?v=1"></script>
     <script src="admin-scheduling-calendar.js"></script>
     <script src="admin-shop-calendar.js?v=1"></script>

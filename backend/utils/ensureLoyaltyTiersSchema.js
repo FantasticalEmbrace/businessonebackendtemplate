@@ -24,6 +24,9 @@ async function tableExists(pool, tableName) {
 
 
 
+const LOYALTY_EMAIL_TYPE_ENUM =
+    "ENUM('near_tier','promotion','winback','manual','birthday','anniversary','program_intro','loyalty_rate_correction')";
+
 async function ensureProgramIntroEmailType(pool) {
 
     try {
@@ -38,19 +41,19 @@ async function ensureProgramIntroEmailType(pool) {
 
         const colType = String(rows[0]?.COLUMN_TYPE || '');
 
-        if (colType.includes("'program_intro'")) return;
+        if (colType.includes("'loyalty_rate_correction'") && colType.includes("'program_intro'")) return;
 
         await pool.execute(
 
             `ALTER TABLE loyalty_email_sends
 
-             MODIFY COLUMN email_type ENUM('near_tier','promotion','winback','manual','birthday','anniversary','program_intro') NOT NULL`
+             MODIFY COLUMN email_type ${LOYALTY_EMAIL_TYPE_ENUM} NOT NULL`
 
         );
 
     } catch (e) {
 
-        logger.warn(`Database: loyalty_email_sends.email_type program_intro — ${logger.formatMysqlError(e)}`);
+        logger.warn(`Database: loyalty_email_sends.email_type enum — ${logger.formatMysqlError(e)}`);
 
     }
 
@@ -178,7 +181,7 @@ async function ensureLoyaltyTiersSchema(pool) {
 
                     email VARCHAR(255) NOT NULL,
 
-                    email_type ENUM('near_tier','promotion','winback','manual','birthday','anniversary','program_intro') NOT NULL,
+                    email_type ENUM('near_tier','promotion','winback','manual','birthday','anniversary','program_intro','loyalty_rate_correction') NOT NULL,
 
                     tier_key VARCHAR(50) NULL,
 

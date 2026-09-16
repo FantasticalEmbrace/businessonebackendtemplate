@@ -30,6 +30,11 @@ const {
 
 const PROGRAM_INTRO_EMAIL_TYPE = 'program_intro';
 
+const LOYALTY_RATE_CORRECTION_EMAIL_TYPE = 'loyalty_rate_correction';
+
+const LOYALTY_RATE_CORRECTION_SUBJECT =
+    'Quick update on our loyalty program tiers — flat 5% earn remains unchanged';
+
 
 
 function escapeHtml(str) {
@@ -2010,6 +2015,205 @@ async function sendProgramIntroToEligibleCustomers(pool, { dryRun = false, backg
 
 
 
+/**
+ * Approved Gemini correction copy for customers who already received program_intro
+ * with older tier percentages. Flat 5% earn is unchanged; tiers are not stacked on 5%.
+ */
+function buildLoyaltyRateCorrectionEmail({ branding, customerName, accountUrl, homeUrl } = {}) {
+    const urls = {
+        ...defaultIntroUrls(),
+        ...(accountUrl ? { accountUrl } : {}),
+        ...(homeUrl ? { homeUrl } : {}),
+    };
+    const b = branding || {};
+    const colors = b.colors || {};
+    const storeName = b.storeName || 'Business One';
+    const firstName = String(customerName || 'there').trim() || 'there';
+    const primary = colors.primary || '#2563eb';
+    const primaryDark = colors.primaryDark || '#1d4ed8';
+    const text = colors.text || '#111827';
+    const textMuted = colors.textMuted || '#4b5563';
+    const border = colors.border || '#e5e7eb';
+    const pageBg = colors.pageBg || '#f3f4f6';
+    const lightGreen = colors.lightGreen || '#eff6ff';
+    const font = String(b.font || 'Inter, system-ui, Arial, sans-serif').replace(/"/g, "'");
+    const subject = LOYALTY_RATE_CORRECTION_SUBJECT;
+    const previewText =
+        'Flat 5% store credit earn is unchanged. Updated tier display rates for sustainability.';
+
+    const textBody = [
+        `Hi ${firstName},`,
+        '',
+        "We're writing to share a quick correction regarding the cash-back loyalty program email we sent you recently.",
+        '',
+        "That initial email listed some older, higher tier percentages. We've since updated the tier display rates on our site so the program remains sustainable for our business as we grow.",
+        '',
+        "We want to be completely transparent so there's no confusion when you look at your account. Please note:",
+        '',
+        '• Your flat 5% store credit earn on qualifying paid orders remains completely unchanged.',
+        '• The tier base and frequency bonus describe our tier structure and are not stacked on top of your flat 5%.',
+        '• Your account access, current balances, and how you redeem your credit are all unchanged.',
+        '',
+        'For reference, the updated tier structure is:',
+        '',
+        '• Bronze: 0%',
+        '• Silver: 1% base with a +1% frequency bonus when spend and order goals are met (up to 2%)',
+        '• Gold: 2% base + 2% frequency bonus (up to 4%)',
+        '• Platinum: 3% base + 2% frequency bonus (up to 5%)',
+        '',
+        'We truly value you as a customer, and we wanted to clear this up right away to keep things honest and straightforward. If you have any questions at all, please feel free to reach out.',
+        '',
+        'Warmly,',
+        '',
+        `The Team at ${storeName}`,
+        '',
+        `View your loyalty account: ${urls.accountUrl}`,
+    ].join('\n');
+
+    const logo = b.logoUrl
+        ? `<a href="${escapeHtml(urls.homeUrl || '#')}" style="text-decoration:none;"><img src="${escapeHtml(b.logoUrl)}" alt="${escapeHtml(storeName)}" width="180" style="display:block;margin:0 auto;max-width:180px;height:auto;border:0;" /></a>`
+        : `<p style="margin:0;font-size:22px;font-weight:700;color:${primary};">${escapeHtml(storeName)}</p>`;
+
+    const html = `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(subject)}</title></head>
+<body style="margin:0;padding:0;background:${pageBg};font-family:${font};">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">${escapeHtml(previewText)}</div>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:${pageBg};margin:0;padding:24px 12px;">
+<tr><td align="center">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:600px;background:#ffffff;border:1px solid ${border};border-radius:12px;overflow:hidden;">
+<tr>
+  <td style="padding:24px 24px 16px;text-align:center;background:#ffffff;border-bottom:3px solid ${primary};">
+    ${logo}
+  </td>
+</tr>
+<tr>
+  <td style="padding:0;background:linear-gradient(135deg,${primary} 0%,${primaryDark} 100%);text-align:center;">
+    <p style="margin:0;padding:18px 24px 22px;font-size:22px;line-height:1.3;font-weight:700;color:#ffffff;">Quick update on loyalty tiers</p>
+  </td>
+</tr>
+<tr>
+  <td style="padding:28px 28px 8px;color:${text};font-size:15px;line-height:1.65;">
+    <p style="margin:0 0 16px;">Hi ${escapeHtml(firstName)},</p>
+    <p style="margin:0 0 16px;">We're writing to share a quick correction regarding the cash-back loyalty program email we sent you recently.</p>
+    <p style="margin:0 0 16px;">That initial email listed some older, higher tier percentages. We've since updated the tier display rates on our site so the program remains sustainable for our business as we grow.</p>
+    <p style="margin:0 0 12px;">We want to be completely transparent so there's no confusion when you look at your account. Please note:</p>
+    <ul style="margin:0 0 16px;padding-left:20px;color:${text};">
+      <li style="margin:0 0 8px;"><strong>Your flat 5% store credit earn</strong> on qualifying paid orders remains completely unchanged.</li>
+      <li style="margin:0 0 8px;">The tier base and frequency bonus describe our tier structure and are <strong>not stacked</strong> on top of your flat 5%.</li>
+      <li style="margin:0 0 8px;">Your account access, current balances, and how you redeem your credit are all unchanged.</li>
+    </ul>
+    <p style="margin:0 0 8px;">For reference, the updated tier structure is:</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 20px;border:1px solid ${border};border-radius:8px;overflow:hidden;">
+      <tr style="background:${lightGreen};"><td style="padding:10px 14px;font-weight:700;color:${text};">Bronze</td><td style="padding:10px 14px;color:${text};">0%</td></tr>
+      <tr><td style="padding:10px 14px;font-weight:700;color:${text};">Silver</td><td style="padding:10px 14px;color:${textMuted};">1% base + 1% frequency bonus when spend and order goals are met (up to 2%)</td></tr>
+      <tr style="background:${lightGreen};"><td style="padding:10px 14px;font-weight:700;color:${text};">Gold</td><td style="padding:10px 14px;color:${textMuted};">2% base + 2% frequency bonus (up to 4%)</td></tr>
+      <tr><td style="padding:10px 14px;font-weight:700;color:${text};">Platinum</td><td style="padding:10px 14px;color:${textMuted};">3% base + 2% frequency bonus (up to 5%)</td></tr>
+    </table>
+    <p style="margin:0 0 16px;">We truly value you as a customer, and we wanted to clear this up right away to keep things honest and straightforward. If you have any questions at all, please feel free to reach out.</p>
+    <p style="margin:0 0 8px;">Warmly,</p>
+    <p style="margin:0 0 24px;">The Team at ${escapeHtml(storeName)}</p>
+    <p style="margin:0 0 8px;"><a href="${escapeHtml(urls.accountUrl)}" style="display:inline-block;background:${primary};color:#fff;padding:12px 22px;border-radius:6px;text-decoration:none;font-weight:bold;">View your loyalty account</a></p>
+  </td>
+</tr>
+<tr>
+  <td style="padding:16px 28px 24px;background:${lightGreen};color:${textMuted};font-size:12px;line-height:1.5;">
+    Loyalty rewards from ${escapeHtml(storeName)}
+  </td>
+</tr>
+</table>
+</td></tr></table>
+</body></html>`;
+
+    return {
+        subject,
+        text: textBody,
+        html,
+        emailType: LOYALTY_RATE_CORRECTION_EMAIL_TYPE,
+        previewText,
+    };
+}
+
+async function hasReceivedLoyaltyRateCorrection(pool, userId) {
+    const [rows] = await pool.execute(
+        `SELECT id FROM loyalty_email_sends
+          WHERE user_id = ? AND email_type = ?
+          LIMIT 1`,
+        [userId, LOYALTY_RATE_CORRECTION_EMAIL_TYPE]
+    );
+    return rows.length > 0;
+}
+
+/**
+ * Send rate-correction email only if the customer already received program_intro
+ * and has not yet received loyalty_rate_correction.
+ */
+async function sendLoyaltyRateCorrectionEmail(pool, userId, { dryRun = false } = {}) {
+    if (!pool || !userId) {
+        return { sent: false, reason: 'invalid_args', emailType: LOYALTY_RATE_CORRECTION_EMAIL_TYPE };
+    }
+
+    const [[user]] = await pool.execute(
+        `SELECT id, email, first_name, customer_status
+           FROM users
+          WHERE id = ?`,
+        [userId]
+    );
+
+    if (!user || !user.email) {
+        return { sent: false, reason: 'user_not_found', emailType: LOYALTY_RATE_CORRECTION_EMAIL_TYPE, userId };
+    }
+    if (String(user.customer_status || '').toLowerCase() !== 'active') {
+        return { sent: false, reason: 'inactive', emailType: LOYALTY_RATE_CORRECTION_EMAIL_TYPE, userId };
+    }
+
+    if (!(await hasReceivedProgramIntro(pool, userId))) {
+        return { sent: false, reason: 'missing_program_intro', emailType: LOYALTY_RATE_CORRECTION_EMAIL_TYPE, userId };
+    }
+
+    if (await hasReceivedLoyaltyRateCorrection(pool, userId)) {
+        return { sent: false, reason: 'already_sent', emailType: LOYALTY_RATE_CORRECTION_EMAIL_TYPE, userId };
+    }
+
+    const branding = await resolveStoreBranding(pool);
+    const payload = buildLoyaltyRateCorrectionEmail({
+        branding,
+        customerName: user.first_name || 'there',
+    });
+
+    if (dryRun) {
+        return {
+            sent: false,
+            dryRun: true,
+            wouldSend: true,
+            emailType: LOYALTY_RATE_CORRECTION_EMAIL_TYPE,
+            userId,
+            subject: payload.subject,
+        };
+    }
+
+    await sendMail({
+        to: user.email,
+        subject: payload.subject,
+        html: payload.html,
+        text: payload.text,
+    });
+
+    await recordEmailSend(pool, {
+        userId,
+        email: user.email,
+        emailType: LOYALTY_RATE_CORRECTION_EMAIL_TYPE,
+        tierKey: null,
+        subject: payload.subject,
+        metadata: { trigger: 'loyalty_rate_correction' },
+    });
+
+    return {
+        sent: true,
+        emailType: LOYALTY_RATE_CORRECTION_EMAIL_TYPE,
+        userId,
+        subject: payload.subject,
+    };
+}
+
 function scheduleProgramIntroForUser(pool, userId, log) {
 
     if (!pool || !userId) return;
@@ -2038,6 +2242,10 @@ module.exports = {
 
     PROGRAM_INTRO_EMAIL_TYPE,
 
+    LOYALTY_RATE_CORRECTION_EMAIL_TYPE,
+
+    LOYALTY_RATE_CORRECTION_SUBJECT,
+
     sendTierPromotionEmail,
 
     sendPendingTierPromotionEmails,
@@ -2057,6 +2265,12 @@ module.exports = {
     scheduleProgramIntroForUser,
 
     hasReceivedProgramIntro,
+
+    hasReceivedLoyaltyRateCorrection,
+
+    buildLoyaltyRateCorrectionEmail,
+
+    sendLoyaltyRateCorrectionEmail,
 
     processLoyaltyEmails,
 

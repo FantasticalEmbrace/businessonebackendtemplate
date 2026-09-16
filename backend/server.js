@@ -69,6 +69,8 @@ const { startPosPayrollScheduler } = require('./services/posPayrollScheduler');
 const { startShippingTrackingScheduler } = require('./services/shippingTrackingScheduler');
 const { ensureSocialOAuthSchema } = require('./utils/ensureSocialOAuthSchema');
 const { startStoreSubscriptionScheduler } = require('./services/storeSubscriptionScheduler');
+const { startLoyaltyIntroEmailScheduler } = require('./services/loyaltyIntroEmailQueue');
+const { startLoyaltyRateCorrectionEmailScheduler } = require('./services/loyaltyRateCorrectionEmailQueue');
 const { ensureStoreSubscriptionSchema } = require('./utils/ensureStoreSubscriptionSchema');
 const { createCustomerGoogleRoutes, createAdminGoogleRoutes } = require('./routes/socialAuth');
 const secureLogger = require('./utils/secure-logger');
@@ -2156,6 +2158,18 @@ app.use('/api/*', (req, res) => {
     } catch (e) {
         logger.error(`startStoreSubscriptionScheduler failed: ${logger.formatMysqlError(e)}`);
     }
+    let stopLoyaltyIntroEmailScheduler = () => {};
+    try {
+        stopLoyaltyIntroEmailScheduler = startLoyaltyIntroEmailScheduler(pool) || (() => {});
+    } catch (e) {
+        logger.error(`startLoyaltyIntroEmailScheduler failed: ${logger.formatMysqlError(e)}`);
+    }
+    let stopLoyaltyRateCorrectionEmailScheduler = () => {};
+    try {
+        stopLoyaltyRateCorrectionEmailScheduler = startLoyaltyRateCorrectionEmailScheduler(pool) || (() => {});
+    } catch (e) {
+        logger.error(`startLoyaltyRateCorrectionEmailScheduler failed: ${logger.formatMysqlError(e)}`);
+    }
 
     const server = app.listen(PORT, () => {
         const { isSmtpConfigured } = require('./utils/smtpConfig');
@@ -2223,6 +2237,14 @@ app.use('/api/*', (req, res) => {
         if (typeof stopStoreSubscriptionScheduler === 'function') {
             process.on('SIGTERM', () => stopStoreSubscriptionScheduler());
             process.on('SIGINT', () => stopStoreSubscriptionScheduler());
+        }
+        if (typeof stopLoyaltyIntroEmailScheduler === 'function') {
+            process.on('SIGTERM', () => stopLoyaltyIntroEmailScheduler());
+            process.on('SIGINT', () => stopLoyaltyIntroEmailScheduler());
+        }
+        if (typeof stopLoyaltyRateCorrectionEmailScheduler === 'function') {
+            process.on('SIGTERM', () => stopLoyaltyRateCorrectionEmailScheduler());
+            process.on('SIGINT', () => stopLoyaltyRateCorrectionEmailScheduler());
         }
     }).on('error', (error) => {
         logger.error('Server startup error:', error);

@@ -410,7 +410,7 @@ class AdminApp {
                 empty: '<span style="color:var(--gray-500);">-</span>',
             })
             : (order.tracking_url && order.tracking_number
-                ? `<a href="${this.escapeHtml(order.tracking_url)}" target="_blank" rel="noopener" style="color:var(--primary-green);font-weight:600;overflow-wrap:anywhere;word-break:break-all;">${this.escapeHtml(order.tracking_number)}</a>`
+                ? `<a href="${this.escapeHtml(order.tracking_url)}" target="_blank" rel="noopener" style="color:var(--primary, #2563eb);font-weight:600;overflow-wrap:anywhere;word-break:break-all;">${this.escapeHtml(order.tracking_number)}</a>`
                 : '<span style="color:var(--gray-500);">-</span>');
 
         const gridCells = [
@@ -6007,6 +6007,8 @@ class AdminApp {
             }
             const ppd = document.getElementById('loyalty-tiers-points-per-dollar');
             if (ppd) ppd.value = s.pointsPerDollar ?? 1;
+            const flatCb = document.getElementById('loyalty-flat-cashback-percent');
+            if (flatCb) flatCb.value = s.cashbackPercent ?? 5;
             const near = document.getElementById('loyalty-tiers-near-threshold');
             if (near) near.value = s.nearThresholdPercent ?? s.nearTierThresholdPercent ?? 80;
             const win = document.getElementById('loyalty-tiers-winback-days');
@@ -6081,6 +6083,7 @@ class AdminApp {
             enabled: document.getElementById('loyalty-tiers-enabled')?.checked,
             mode: modeRaw,
             programMode: modeRaw === 'points' ? 'points' : 'cashback',
+            cashbackPercent: Number(document.getElementById('loyalty-flat-cashback-percent')?.value),
             pointsPerDollar: Number(document.getElementById('loyalty-tiers-points-per-dollar')?.value) || 1,
             nearTierThresholdPercent:
                 Number(document.getElementById('loyalty-tiers-near-threshold')?.value) || 80,
@@ -6107,48 +6110,25 @@ class AdminApp {
     async editLoyaltyTier(tierKey) {
         const tier = (this._loyaltyTiersCache || []).find((t) => t.tierKey === tierKey);
         if (!tier) return;
-        const displayName = window.prompt('Display name', tier.displayName || tier.tierKey);
-        if (displayName == null) return;
-        const minSpend = window.prompt(
-            'Minimum lifetime spend ($)',
-            String(tier.minLifetimeSpend ?? tier.minSpend ?? 0)
-        );
-        if (minSpend == null) return;
-        const minOrders = window.prompt(
-            'Minimum paid orders (lifetime)',
-            String(tier.minOrderCount ?? tier.minOrders ?? 0)
-        );
-        if (minOrders == null) return;
-        const minPoints = window.prompt('Minimum points balance (points mode)', String(tier.minPoints ?? 0));
-        if (minPoints == null) return;
-        const discountPercent = window.prompt(
-            'Cash back / discount percent',
-            String(tier.discountPercent ?? tier.cashbackPercent ?? 0)
-        );
-        if (discountPercent == null) return;
-        const freeShipping = window.confirm('Free shipping for this tier?');
-        const frequencyBonusPercent = window.prompt(
-            'Frequency bonus % (when spend+orders both met)',
-            String(tier.frequencyBonusPercent ?? 0)
-        );
-        if (frequencyBonusPercent == null) return;
-        const isActive = window.confirm('Tier active?');
+
+        const values = await this._openLoyaltyTierEditModal(tier);
+        if (!values) return;
 
         try {
             await this.apiRequest(`/admin/loyalty/tiers/${tierKey}`, {
                 method: 'PUT',
                 body: JSON.stringify({
-                    displayName: displayName.trim(),
-                    minSpend: Number(minSpend),
-                    minLifetimeSpend: Number(minSpend),
-                    minOrders: Number(minOrders),
-                    minOrderCount: Number(minOrders),
-                    minPoints: Number(minPoints),
-                    discountPercent: Number(discountPercent),
-                    cashbackPercent: Number(discountPercent),
-                    freeShipping,
-                    frequencyBonusPercent: Number(frequencyBonusPercent),
-                    isActive,
+                    displayName: values.displayName,
+                    minSpend: values.minSpend,
+                    minLifetimeSpend: values.minSpend,
+                    minOrders: values.minOrders,
+                    minOrderCount: values.minOrders,
+                    minPoints: values.minPoints,
+                    discountPercent: values.discountPercent,
+                    cashbackPercent: values.discountPercent,
+                    freeShipping: values.freeShipping,
+                    frequencyBonusPercent: values.frequencyBonusPercent,
+                    isActive: values.isActive,
                 }),
             });
             this.showToast(`${tierKey} tier updated`, 'success');
@@ -6156,6 +6136,156 @@ class AdminApp {
         } catch (err) {
             this.showToast('Update failed: ' + (err.message || 'error'), 'error');
         }
+    }
+
+    /**
+     * Branded loyalty tier editor (replaces window.prompt / confirm chain).
+     * @returns {Promise<object|null>}
+     */
+    _openLoyaltyTierEditModal(tier) {
+        return new Promise((resolve) => {
+            document.getElementById('loyalty-tier-edit-modal')?.remove();
+
+            const overlay = document.createElement('div');
+            overlay.id = 'loyalty-tier-edit-modal';
+            overlay.className = 'admin-branded-dialog-overlay';
+            overlay.style.cssText =
+                'position:fixed;inset:0;background:rgba(15,23,42,0.55);z-index:11000;display:flex;align-items:flex-start;justify-content:center;padding:1.5rem;overflow-y:auto;';
+
+            const box = document.createElement('div');
+            box.style.cssText =
+                'background:#fff;border-radius:var(--border-radius-lg,12px);max-width:520px;width:100%;box-shadow:var(--shadow-lg,0 20px 40px rgba(0,0,0,0.15));margin:auto;overflow:hidden;';
+            box.setAttribute('role', 'dialog');
+            box.setAttribute('aria-modal', 'true');
+            box.setAttribute('aria-labelledby', 'loyalty-tier-edit-title');
+
+            const tierLabel = this._escapeHtml(tier.displayName || tier.tierKey || 'Tier');
+            const displayName = this._escapeHtml(tier.displayName || tier.tierKey || '');
+            const minSpend = Number(tier.minLifetimeSpend ?? tier.minSpend ?? 0);
+            const minOrders = Number(tier.minOrderCount ?? tier.minOrders ?? 0);
+            const minPoints = Number(tier.minPoints ?? 0);
+            const discountPercent = Number(tier.discountPercent ?? tier.cashbackPercent ?? 0);
+            const frequencyBonusPercent = Number(tier.frequencyBonusPercent ?? 0);
+            const freeShipping = tier.freeShipping !== false && Boolean(tier.freeShipping);
+            const isActive = tier.isActive !== false;
+
+            box.innerHTML = `
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.75rem;padding:1.25rem 1.5rem;border-bottom:1px solid var(--gray-200);background:var(--gray-50, #f9fafb);">
+                    <div>
+                        <h2 id="loyalty-tier-edit-title" style="margin:0 0 0.25rem;font-size:1.2rem;color:var(--primary-green);font-weight:600;letter-spacing:-0.02em;">Edit ${tierLabel}</h2>
+                        <p style="margin:0;color:var(--gray-600);font-size:0.88rem;line-height:1.45;">
+                            Tier rate % is for emails and checkout estimates. Live credit posts use the flat cash-back earn % above.
+                        </p>
+                    </div>
+                    <button type="button" class="modal-close" id="loyalty-tier-edit-close" aria-label="Close">${HM_CLOSE_ICON_SVG}</button>
+                </div>
+                <form id="loyalty-tier-edit-form" style="padding:1.25rem 1.5rem 1.35rem;">
+                    <div class="form-group" style="margin-bottom:0.9rem;">
+                        <label for="loyalty-tier-edit-name">Display name</label>
+                        <input class="form-input" id="loyalty-tier-edit-name" name="displayName" required maxlength="80" value="${displayName}">
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.9rem;">
+                        <div class="form-group" style="margin:0;">
+                            <label for="loyalty-tier-edit-min-spend">Min lifetime spend ($)</label>
+                            <input class="form-input" id="loyalty-tier-edit-min-spend" name="minSpend" type="number" min="0" step="0.01" value="${minSpend}">
+                        </div>
+                        <div class="form-group" style="margin:0;">
+                            <label for="loyalty-tier-edit-min-orders">Min paid orders</label>
+                            <input class="form-input" id="loyalty-tier-edit-min-orders" name="minOrders" type="number" min="0" step="1" value="${minOrders}">
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.9rem;">
+                        <div class="form-group" style="margin:0;">
+                            <label for="loyalty-tier-edit-min-points">Min points (points mode)</label>
+                            <input class="form-input" id="loyalty-tier-edit-min-points" name="minPoints" type="number" min="0" step="1" value="${minPoints}">
+                        </div>
+                        <div class="form-group" style="margin:0;">
+                            <label for="loyalty-tier-edit-rate">Tier rate %</label>
+                            <input class="form-input" id="loyalty-tier-edit-rate" name="discountPercent" type="number" min="0" max="50" step="0.1" value="${discountPercent}">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0.9rem;">
+                        <label for="loyalty-tier-edit-freq">Frequency bonus %</label>
+                        <input class="form-input" id="loyalty-tier-edit-freq" name="frequencyBonusPercent" type="number" min="0" max="50" step="0.1" value="${frequencyBonusPercent}">
+                        <p style="margin:0.35rem 0 0;color:var(--gray-500);font-size:0.8rem;">Extra estimate/email % when spend and order goals are both met.</p>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0.35rem;display:flex;flex-wrap:wrap;gap:1rem;">
+                        <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
+                            <input type="checkbox" id="loyalty-tier-edit-free-ship" name="freeShipping" ${freeShipping ? 'checked' : ''}> Free shipping
+                        </label>
+                        <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
+                            <input type="checkbox" id="loyalty-tier-edit-active" name="isActive" ${isActive ? 'checked' : ''}> Tier active
+                        </label>
+                    </div>
+                    <p id="loyalty-tier-edit-msg" style="min-height:1.1rem;font-size:0.88rem;margin:0.5rem 0 0;color:var(--danger);"></p>
+                    <div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:0.85rem;">
+                        <button type="button" class="btn btn-secondary" id="loyalty-tier-edit-cancel">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save tier</button>
+                    </div>
+                </form>`;
+
+            overlay.appendChild(box);
+            document.body.appendChild(overlay);
+
+            const form = box.querySelector('#loyalty-tier-edit-form');
+            const msg = box.querySelector('#loyalty-tier-edit-msg');
+            const nameInput = box.querySelector('#loyalty-tier-edit-name');
+
+            const cleanup = (val) => {
+                overlay.remove();
+                document.removeEventListener('keydown', onKey);
+                resolve(val);
+            };
+            const onKey = (e) => {
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    cleanup(null);
+                }
+            };
+            document.addEventListener('keydown', onKey);
+
+            box.querySelector('#loyalty-tier-edit-close')?.addEventListener('click', () => cleanup(null));
+            box.querySelector('#loyalty-tier-edit-cancel')?.addEventListener('click', () => cleanup(null));
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) cleanup(null);
+            });
+
+            form?.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const displayNameVal = String(nameInput?.value || '').trim();
+                if (!displayNameVal) {
+                    if (msg) msg.textContent = 'Display name is required.';
+                    nameInput?.focus();
+                    return;
+                }
+                const minSpendVal = Number(box.querySelector('#loyalty-tier-edit-min-spend')?.value);
+                const minOrdersVal = Number(box.querySelector('#loyalty-tier-edit-min-orders')?.value);
+                const minPointsVal = Number(box.querySelector('#loyalty-tier-edit-min-points')?.value);
+                const rateVal = Number(box.querySelector('#loyalty-tier-edit-rate')?.value);
+                const freqVal = Number(box.querySelector('#loyalty-tier-edit-freq')?.value);
+                if (![minSpendVal, minOrdersVal, minPointsVal, rateVal, freqVal].every(Number.isFinite)) {
+                    if (msg) msg.textContent = 'Enter valid numbers for all fields.';
+                    return;
+                }
+                if (rateVal < 0 || rateVal > 50 || freqVal < 0 || freqVal > 50) {
+                    if (msg) msg.textContent = 'Percentages must be between 0 and 50.';
+                    return;
+                }
+                cleanup({
+                    displayName: displayNameVal,
+                    minSpend: minSpendVal,
+                    minOrders: minOrdersVal,
+                    minPoints: minPointsVal,
+                    discountPercent: rateVal,
+                    frequencyBonusPercent: freqVal,
+                    freeShipping: !!box.querySelector('#loyalty-tier-edit-free-ship')?.checked,
+                    isActive: !!box.querySelector('#loyalty-tier-edit-active')?.checked,
+                });
+            });
+
+            nameInput?.focus();
+            nameInput?.select?.();
+        });
     }
 
     async runLoyaltyEmailCheck() {

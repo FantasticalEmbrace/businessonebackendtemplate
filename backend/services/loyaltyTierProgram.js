@@ -2,7 +2,7 @@
 
 const TIER_KEYS = ['bronze', 'silver', 'gold', 'platinum'];
 
-/** discount_percent = cash-back earn % (cash mode) or points multiplier (points mode). */
+/** discount_percent = tier marketing/estimate rate (emails + checkout estimates). Live credit posts use loyalty_cashback_percent. */
 const DEFAULT_TIERS = [
     {
         tier_key: 'bronze',
@@ -78,6 +78,8 @@ const SETTING_KEYS = {
     minCashbackRedeem: 'loyalty_tiers_min_cashback_redeem',
     birthdayEnabled: 'loyalty_tiers_birthday_enabled',
     referralEnabled: 'loyalty_tiers_referral_enabled',
+    /** Flat store-credit earn rate posted on paid orders (customerLoyalty). */
+    flatCashbackPercent: 'loyalty_cashback_percent',
 };
 
 function normalizeProgramMode(raw, legacyRaw) {
@@ -167,6 +169,10 @@ async function getProgramSettings(pool) {
     let minCashbackRedeem = Number(map.get(SETTING_KEYS.minCashbackRedeem));
     if (!Number.isFinite(minCashbackRedeem) || minCashbackRedeem < 0) minCashbackRedeem = 0;
 
+    let cashbackPercent = Number(map.get(SETTING_KEYS.flatCashbackPercent));
+    if (!Number.isFinite(cashbackPercent) || cashbackPercent < 0) cashbackPercent = 5;
+    if (cashbackPercent > 50) cashbackPercent = 50;
+
     return {
         enabled: parseBool(map.get(SETTING_KEYS.enabled), false),
         programMode,
@@ -181,6 +187,7 @@ async function getProgramSettings(pool) {
         pointsPerDollar,
         dollarPerPoint,
         minCashbackRedeem,
+        cashbackPercent,
         combinedSpendFrequencyBonus: parseBool(map.get(SETTING_KEYS.combinedBonus), true),
         birthdayEnabled: parseBool(map.get(SETTING_KEYS.birthdayEnabled), false),
         referralEnabled: parseBool(map.get(SETTING_KEYS.referralEnabled), false),
@@ -252,7 +259,13 @@ async function saveProgramSettings(pool, body) {
             String(Math.max(0, Number(body.minCashbackRedeem) || 0)),
         ]);
     }
-    if ('combinedSpendFrequencyBonus' in body) {
+        if ('cashbackPercent' in body || 'flatCashbackPercent' in body) {
+        let pct = Number(body.cashbackPercent ?? body.flatCashbackPercent);
+        if (!Number.isFinite(pct) || pct < 0) pct = 5;
+        if (pct > 50) pct = 50;
+        updates.push([SETTING_KEYS.flatCashbackPercent, String(pct)]);
+    }
+if ('combinedSpendFrequencyBonus' in body) {
         updates.push([SETTING_KEYS.combinedBonus, body.combinedSpendFrequencyBonus ? 'true' : 'false']);
     }
     if ('nearTierThresholdPercent' in body) {
