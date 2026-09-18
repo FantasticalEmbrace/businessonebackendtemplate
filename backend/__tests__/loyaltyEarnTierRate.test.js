@@ -20,8 +20,8 @@ const {
 } = require('../services/loyaltyTierEngine');
 const { resolveOrderEarnSettings } = require('../services/customerLoyalty');
 
-describe('resolveOrderEarnSettings — tier earn vs flat', () => {
-    const flatSettings = {
+describe('resolveOrderEarnSettings — tier earn only (no flat fallback)', () => {
+    const baseSettings = {
         enabled: true,
         cashEnabled: true,
         pointsEnabled: true,
@@ -35,7 +35,7 @@ describe('resolveOrderEarnSettings — tier earn vs flat', () => {
         isPointsMode.mockImplementation((s) => (s?.programMode ?? s?.mode) === 'points');
     });
 
-    test('uses tier cashback % (not flat 5%) when tiers are enabled', async () => {
+    test('uses tier cashback % when tiers are enabled', async () => {
         getProgramSettings.mockResolvedValue({
             enabled: true,
             programMode: 'cash',
@@ -47,16 +47,15 @@ describe('resolveOrderEarnSettings — tier earn vs flat', () => {
         });
         resolveEffectiveCashbackPercent.mockReturnValue(4);
 
-        const result = await resolveOrderEarnSettings({}, 42, flatSettings);
+        const result = await resolveOrderEarnSettings({}, 42, baseSettings);
 
         expect(resolveEffectiveCashbackPercent).toHaveBeenCalled();
         expect(result.cashbackPercent).toBe(4);
         expect(result.earnRateSource).toBe('tier');
         expect(result.earnTierKey).toBe('gold');
-        expect(result.cashbackPercent).not.toBe(5);
     });
 
-    test('Bronze at 0% earns 0 — does not fall back to flat 5%', async () => {
+    test('Bronze at 0% earns 0 — does not use legacy flat rate', async () => {
         getProgramSettings.mockResolvedValue({
             enabled: true,
             programMode: 'cash',
@@ -68,31 +67,31 @@ describe('resolveOrderEarnSettings — tier earn vs flat', () => {
         });
         resolveEffectiveCashbackPercent.mockReturnValue(0);
 
-        const result = await resolveOrderEarnSettings({}, 7, flatSettings);
+        const result = await resolveOrderEarnSettings({}, 7, baseSettings);
 
         expect(result.cashbackPercent).toBe(0);
         expect(result.earnRateSource).toBe('tier');
         expect(result.earnTierKey).toBe('bronze');
     });
 
-    test('keeps flat rate when tier program is disabled', async () => {
+    test('tiers disabled → 0% earn (no flat fallback)', async () => {
         getProgramSettings.mockResolvedValue({ enabled: false, programMode: 'cash' });
 
-        const result = await resolveOrderEarnSettings({}, 1, flatSettings);
+        const result = await resolveOrderEarnSettings({}, 1, baseSettings);
 
         expect(evaluateCustomerTier).not.toHaveBeenCalled();
-        expect(result.cashbackPercent).toBe(5);
-        expect(result.earnRateSource).toBe('flat');
+        expect(result.cashbackPercent).toBe(0);
+        expect(result.earnRateSource).toBe('none');
     });
 
-    test('falls back to flat only when tier row is missing', async () => {
+    test('missing tier row → 0% earn (no flat fallback)', async () => {
         getProgramSettings.mockResolvedValue({ enabled: true, programMode: 'cash' });
         evaluateCustomerTier.mockResolvedValue({ tier: null, metrics: null });
 
-        const result = await resolveOrderEarnSettings({}, 9, flatSettings);
+        const result = await resolveOrderEarnSettings({}, 9, baseSettings);
 
-        expect(result.cashbackPercent).toBe(5);
-        expect(result.earnRateSource).toBe('fallback');
+        expect(result.cashbackPercent).toBe(0);
+        expect(result.earnRateSource).toBe('none');
     });
 
     test('points mode applies tier multiplier to points-per-dollar', async () => {
@@ -107,7 +106,7 @@ describe('resolveOrderEarnSettings — tier earn vs flat', () => {
         });
         resolveEffectivePointsMultiplier.mockReturnValue(2);
 
-        const result = await resolveOrderEarnSettings({}, 3, flatSettings);
+        const result = await resolveOrderEarnSettings({}, 3, baseSettings);
 
         expect(result.pointsPerDollar).toBe(4);
         expect(result.earnRateSource).toBe('tier');

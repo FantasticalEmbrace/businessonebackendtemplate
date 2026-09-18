@@ -37,7 +37,8 @@ async function loadLoyaltyProgramSettings(pool) {
         const cashEnabled = masterEnabled && parseBoolSetting(map.get(SETTING_CASH_ENABLED), true);
         const pointsEnabled = masterEnabled && parseBoolSetting(map.get(SETTING_POINTS_ENABLED), true);
         let cashbackPercent = Number(map.get(SETTING_CASHBACK_PERCENT));
-        if (!Number.isFinite(cashbackPercent) || cashbackPercent < 0) cashbackPercent = 5;
+        // Legacy key retained in DB but unused for earn (tiers only). Default 0.
+        if (!Number.isFinite(cashbackPercent) || cashbackPercent < 0) cashbackPercent = 0;
         if (cashbackPercent > 50) cashbackPercent = 50;
         let pointsPerDollar = Number(map.get(SETTING_POINTS_PER_DOLLAR));
         if (!Number.isFinite(pointsPerDollar) || pointsPerDollar <= 0) pointsPerDollar = 1;
@@ -56,7 +57,7 @@ async function loadLoyaltyProgramSettings(pool) {
             enabled: true,
             cashEnabled: true,
             pointsEnabled: true,
-            cashbackPercent: 5,
+            cashbackPercent: 0,
             pointsPerDollar: 1,
             dollarPerPoint: 0.01
         };
@@ -385,15 +386,14 @@ async function redeemLoyaltyPoints(connection, userId, pointsToRedeem, orderId, 
 }
 
 /**
- * When the loyalty tier program is enabled, live cash/points earn rates come from the
- * customer's current tier (base discount_percent + frequency bonus when goals met).
- * Flat loyalty_cashback_percent is only a fallback when tiers are off or no tier row exists.
- * A configured Bronze rate of 0% is intentional — it does NOT fall back to the flat rate.
+ * Live cash/points earn rates come from the customer's current loyalty tier only
+ * (base discount_percent + frequency bonus when goals met). There is no flat
+ * loyalty_cashback_percent fallback: tiers off / missing tier / errors → 0% cash earn.
  */
 async function resolveOrderEarnSettings(connection, userId, baseSettings) {
     const earnSettings = { ...baseSettings };
-    const flatFallback = Number(baseSettings?.cashbackPercent);
-    earnSettings.earnRateSource = 'flat';
+    earnSettings.cashbackPercent = 0;
+    earnSettings.earnRateSource = 'none';
     earnSettings.earnTierKey = null;
 
     try {
@@ -412,8 +412,7 @@ async function resolveOrderEarnSettings(connection, userId, baseSettings) {
 
         const { tier, metrics } = await evaluateCustomerTier(connection, userId);
         if (!tier) {
-            // Missing tier definition — keep flat as last-resort fallback only.
-            earnSettings.earnRateSource = 'fallback';
+            earnSettings.earnRateSource = 'none';
             return earnSettings;
         }
 
@@ -428,7 +427,6 @@ async function resolveOrderEarnSettings(connection, userId, baseSettings) {
             earnSettings.earnRateSource = 'tier';
             earnSettings.pointsMultiplier = multiplier;
         } else {
-            // Use tier rate even when 0 (Bronze at 0% must earn 0, not flat fallback).
             earnSettings.cashbackPercent = resolveEffectiveCashbackPercent(
                 tier,
                 metrics,
@@ -438,10 +436,8 @@ async function resolveOrderEarnSettings(connection, userId, baseSettings) {
         }
         return earnSettings;
     } catch {
-        if (Number.isFinite(flatFallback) && flatFallback >= 0) {
-            earnSettings.cashbackPercent = flatFallback;
-        }
-        earnSettings.earnRateSource = 'flat';
+        earnSettings.cashbackPercent = 0;
+        earnSettings.earnRateSource = 'none';
         return earnSettings;
     }
 }

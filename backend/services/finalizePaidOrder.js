@@ -195,7 +195,7 @@ async function finalizePaidOrder(
                             Math.round((Number(orderRow.subtotal) - nonEarn) * 100) / 100
                         );
                         // When tiers are enabled, earn % comes from the customer's tier
-                        // (base + frequency bonus); flat loyalty_cashback_percent is fallback only.
+                        // (base + frequency bonus). No flat loyalty_cashback_percent fallback.
                         const earnResult = await earnLoyaltyForOrder(
                             pool,
                             loyaltyUserId,

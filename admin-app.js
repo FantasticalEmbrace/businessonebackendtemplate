@@ -6338,8 +6338,6 @@ class AdminApp {
             }
             const ppd = document.getElementById('loyalty-tiers-points-per-dollar');
             if (ppd) ppd.value = s.pointsPerDollar ?? 1;
-            const flatCb = document.getElementById('loyalty-flat-cashback-percent');
-            if (flatCb) flatCb.value = s.cashbackPercent ?? 5;
             const near = document.getElementById('loyalty-tiers-near-threshold');
             if (near) near.value = s.nearThresholdPercent ?? s.nearTierThresholdPercent ?? 80;
             const win = document.getElementById('loyalty-tiers-winback-days');
@@ -6414,7 +6412,6 @@ class AdminApp {
             enabled: document.getElementById('loyalty-tiers-enabled')?.checked,
             mode: modeRaw,
             programMode: modeRaw === 'points' ? 'points' : 'cashback',
-            cashbackPercent: Number(document.getElementById('loyalty-flat-cashback-percent')?.value),
             pointsPerDollar: Number(document.getElementById('loyalty-tiers-points-per-dollar')?.value) || 1,
             nearTierThresholdPercent:
                 Number(document.getElementById('loyalty-tiers-near-threshold')?.value) || 80,
