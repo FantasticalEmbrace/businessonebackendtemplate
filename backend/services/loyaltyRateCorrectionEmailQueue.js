@@ -47,8 +47,9 @@ function isSmtpRateLimitError(err) {
 }
 
 /**
- * ONLY customers who already received program_intro and have not received
- * loyalty_rate_correction. Never targets never-emailed customers.
+ * ONLY customers who already received program_intro and do not have an
+ * active (non-superseded) loyalty_rate_correction. Never targets never-emailed.
+ * Prioritizes users whose prior flat-rate correction was superseded.
  */
 async function loadEligibleCorrectionUserIds(pool, { userIds } = {}) {
     if (Array.isArray(userIds) && userIds.length > 0) {
@@ -68,9 +69,16 @@ async function loadEligibleCorrectionUserIds(pool, { userIds } = {}) {
                 AND NOT EXISTS (
                     SELECT 1 FROM loyalty_email_sends s2
                      WHERE s2.user_id = u.id AND s2.email_type = ?
+                       AND COALESCE(JSON_UNQUOTE(JSON_EXTRACT(s2.metadata, '$.superseded')), 'false') NOT IN ('true', '1')
                 )
-              ORDER BY u.id ASC`,
-            [...unique, LOYALTY_RATE_CORRECTION_EMAIL_TYPE]
+              ORDER BY
+                CASE WHEN EXISTS (
+                    SELECT 1 FROM loyalty_email_sends sx
+                     WHERE sx.user_id = u.id AND sx.email_type = ?
+                       AND COALESCE(JSON_UNQUOTE(JSON_EXTRACT(sx.metadata, '$.superseded')), 'false') IN ('true', '1')
+                ) THEN 0 ELSE 1 END,
+                u.id ASC`,
+            [...unique, LOYALTY_RATE_CORRECTION_EMAIL_TYPE, LOYALTY_RATE_CORRECTION_EMAIL_TYPE]
         );
         return (users || []).map((row) => row.id);
     }
@@ -87,9 +95,16 @@ async function loadEligibleCorrectionUserIds(pool, { userIds } = {}) {
             AND NOT EXISTS (
                 SELECT 1 FROM loyalty_email_sends s2
                  WHERE s2.user_id = u.id AND s2.email_type = ?
+                   AND COALESCE(JSON_UNQUOTE(JSON_EXTRACT(s2.metadata, '$.superseded')), 'false') NOT IN ('true', '1')
             )
-          ORDER BY u.id ASC`,
-        [LOYALTY_RATE_CORRECTION_EMAIL_TYPE]
+          ORDER BY
+            CASE WHEN EXISTS (
+                SELECT 1 FROM loyalty_email_sends sx
+                 WHERE sx.user_id = u.id AND sx.email_type = ?
+                   AND COALESCE(JSON_UNQUOTE(JSON_EXTRACT(sx.metadata, '$.superseded')), 'false') IN ('true', '1')
+            ) THEN 0 ELSE 1 END,
+            u.id ASC`,
+        [LOYALTY_RATE_CORRECTION_EMAIL_TYPE, LOYALTY_RATE_CORRECTION_EMAIL_TYPE]
     );
     return (users || []).map((row) => row.id);
 }
@@ -105,11 +120,13 @@ function getDailyCap() {
 }
 
 async function countRateCorrectionSentToday(pool) {
+    // Count only active (non-superseded) sends toward the daily cap
     const [[row]] = await pool.execute(
         `SELECT COUNT(*) AS sentToday
            FROM loyalty_email_sends
           WHERE email_type = ?
-            AND DATE(sent_at) = CURDATE()`,
+            AND DATE(sent_at) = CURDATE()
+            AND COALESCE(JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.superseded')), 'false') NOT IN ('true', '1')`,
         [LOYALTY_RATE_CORRECTION_EMAIL_TYPE]
     );
     return Number(row?.sentToday) || 0;

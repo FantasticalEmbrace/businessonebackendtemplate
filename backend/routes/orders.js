@@ -306,6 +306,13 @@ router.post('/', async (req, res) => {
                 taxErr.code === 'TAX_PROVIDER_UNAVAILABLE'
                     ? 503
                     : 400;
+            if (taxErr.code === 'SHIPPING_REQUIRED_FOR_TAX') {
+                return res.status(400).json({
+                    error: 'Please enter your full shipping address.',
+                    code: 'SHIPPING_REQUIRED_FOR_TAX',
+                    field: 'shipping-address-1'
+                });
+            }
             return res.status(status).json({
                 error: taxErr.message || 'Unable to calculate sales tax for this shipping address.',
                 code: taxErr.code || 'TAX_CALCULATION_FAILED'

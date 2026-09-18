@@ -130,6 +130,14 @@ router.post('/preview', async (req, res) => {
         if (code === 'INVALID_CART_PRODUCT' || code === 'INVALID_CART_VARIANT') {
             return res.status(400).json({ error: 'One or more cart items could not be priced.', code });
         }
+        if (code === 'SHIPPING_REQUIRED_FOR_TAX') {
+            // Short, customer-facing copy — storefront highlights empty shipping fields.
+            return res.status(400).json({
+                error: 'Please enter your full shipping address.',
+                code,
+                field: 'shipping-address-1'
+            });
+        }
         logger.error('Promotion preview error:', e);
         res.status(500).json({ error: 'Promotion preview failed' });
     }

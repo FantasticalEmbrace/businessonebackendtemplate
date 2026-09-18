@@ -61,13 +61,13 @@ function buildTierEmailHtml({ intro, ctaLabel, ctaUrl, branding }) {
 
     const storeName = escapeHtml(b.storeName || 'Business One');
 
-    const primary = colors.primary || '#658d0b';
+    const primary = colors.primary || '#2563eb';
 
     const accent = colors.accent || '#354c8e';
 
     const text = colors.text || '#333';
 
-    const lightGreen = colors.lightGreen || '#f3f6e6';
+    const lightGreen = colors.lightGreen || '#eff6ff';
 
     return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,sans-serif;">
 
@@ -1298,9 +1298,9 @@ function buildProgramIntroEmailHtml({ copy, branding, tiers, isPoints, accountUr
 
     const storeName = escapeHtml(b.storeName || 'Business One');
 
-    const primary = colors.primary || '#658d0b';
+    const primary = colors.primary || '#2563eb';
 
-    const primaryDark = colors.primaryDark || '#4a6808';
+    const primaryDark = colors.primaryDark || '#1d4ed8';
 
     const text = colors.text || '#111827';
 
@@ -1310,7 +1310,7 @@ function buildProgramIntroEmailHtml({ copy, branding, tiers, isPoints, accountUr
 
     const pageBg = colors.pageBg || '#f3f4f6';
 
-    const lightGreen = colors.lightGreen || '#f3f6e6';
+    const lightGreen = colors.lightGreen || '#eff6ff';
 
     const font = String(b.font || 'Inter, system-ui, Arial, sans-serif').replace(/"/g, "'");
 
@@ -2035,7 +2035,7 @@ function buildLoyaltyRateCorrectionEmail({ branding, customerName, accountUrl, h
     const textMuted = colors.textMuted || '#4b5563';
     const border = colors.border || '#e5e7eb';
     const pageBg = colors.pageBg || '#f3f4f6';
-    const lightGreen = colors.lightGreen || '#eff6ff';
+    const lightAccent = colors.lightGreen || colors.lightAccent || '#eff6ff';
     const font = String(b.font || 'Inter, system-ui, Arial, sans-serif').replace(/"/g, "'");
     const subject = LOYALTY_RATE_CORRECTION_SUBJECT;
     const previewText =
@@ -2055,7 +2055,7 @@ function buildLoyaltyRateCorrectionEmail({ branding, customerName, accountUrl, h
         '• Gold: 2% base + 2% frequency bonus (up to 4%)',
         '• Platinum: 3% base + 2% frequency bonus (up to 5%)',
         '',
-        'Base is the earn rate for your tier. The frequency bonus can add on top when you meet that tier\'s spend and order goals.',
+        "Base is the earn rate for your tier. The frequency bonus can add on top when you meet that tier's spend and order goals.",
         '',
         'Your account access, current balances, and how you redeem your credit are all unchanged.',
         '',
@@ -2071,6 +2071,39 @@ function buildLoyaltyRateCorrectionEmail({ branding, customerName, accountUrl, h
     const logo = b.logoUrl
         ? `<a href="${escapeHtml(urls.homeUrl || '#')}" style="text-decoration:none;"><img src="${escapeHtml(b.logoUrl)}" alt="${escapeHtml(storeName)}" width="180" style="display:block;margin:0 auto;max-width:180px;height:auto;border:0;" /></a>`
         : `<p style="margin:0;font-size:22px;font-weight:700;color:${primary};">${escapeHtml(storeName)}</p>`;
+
+    // Aligned tier table matching program_intro email styling (header + bordered rows)
+    const tiersTable = `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;font-size:14px;margin:12px 0 16px;color:${text};">
+  <thead>
+    <tr>
+      <th align="left" width="22%" style="padding:8px 10px;border-bottom:2px solid ${border};font-size:12px;text-transform:uppercase;letter-spacing:0.04em;color:${textMuted};">Tier</th>
+      <th align="left" width="28%" style="padding:8px 10px;border-bottom:2px solid ${border};font-size:12px;text-transform:uppercase;letter-spacing:0.04em;color:${textMuted};">Base</th>
+      <th align="left" width="50%" style="padding:8px 10px;border-bottom:2px solid ${border};font-size:12px;text-transform:uppercase;letter-spacing:0.04em;color:${textMuted};">With frequency bonus</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="padding:10px;border-bottom:1px solid ${border};font-weight:600;vertical-align:top;">Bronze</td>
+      <td style="padding:10px;border-bottom:1px solid ${border};vertical-align:top;">0%</td>
+      <td style="padding:10px;border-bottom:1px solid ${border};color:${textMuted};vertical-align:top;">—</td>
+    </tr>
+    <tr>
+      <td style="padding:10px;border-bottom:1px solid ${border};font-weight:600;vertical-align:top;">Silver</td>
+      <td style="padding:10px;border-bottom:1px solid ${border};vertical-align:top;">1%</td>
+      <td style="padding:10px;border-bottom:1px solid ${border};color:${textMuted};vertical-align:top;">+1% when spend &amp; order goals met<br><strong style="color:${text};">up to 2%</strong></td>
+    </tr>
+    <tr>
+      <td style="padding:10px;border-bottom:1px solid ${border};font-weight:600;vertical-align:top;">Gold</td>
+      <td style="padding:10px;border-bottom:1px solid ${border};vertical-align:top;">2%</td>
+      <td style="padding:10px;border-bottom:1px solid ${border};color:${textMuted};vertical-align:top;">+2% when spend &amp; order goals met<br><strong style="color:${text};">up to 4%</strong></td>
+    </tr>
+    <tr>
+      <td style="padding:10px;border-bottom:1px solid ${border};font-weight:600;vertical-align:top;">Platinum</td>
+      <td style="padding:10px;border-bottom:1px solid ${border};vertical-align:top;">3%</td>
+      <td style="padding:10px;border-bottom:1px solid ${border};color:${textMuted};vertical-align:top;">+2% when spend &amp; order goals met<br><strong style="color:${text};">up to 5%</strong></td>
+    </tr>
+  </tbody>
+</table>`;
 
     const html = `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(subject)}</title></head>
 <body style="margin:0;padding:0;background:${pageBg};font-family:${font};">
@@ -2093,24 +2126,29 @@ function buildLoyaltyRateCorrectionEmail({ branding, customerName, accountUrl, h
     <p style="margin:0 0 16px;">Hi ${escapeHtml(firstName)},</p>
     <p style="margin:0 0 16px;">We're writing with a quick correction about the cash-back loyalty program email we sent you recently.</p>
     <p style="margin:0 0 16px;">That initial email listed older, higher tier percentages. We've since updated the tier rates so they match what's shown on our site.</p>
-    <p style="margin:0 0 8px;">Here is the corrected tier structure:</p>
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 16px;border:1px solid ${border};border-radius:8px;overflow:hidden;">
-      <tr style="background:${lightGreen};"><td style="padding:10px 14px;font-weight:700;color:${text};">Bronze</td><td style="padding:10px 14px;color:${text};">0%</td></tr>
-      <tr><td style="padding:10px 14px;font-weight:700;color:${text};">Silver</td><td style="padding:10px 14px;color:${textMuted};">1% base + 1% frequency bonus when spend and order goals are met (up to 2%)</td></tr>
-      <tr style="background:${lightGreen};"><td style="padding:10px 14px;font-weight:700;color:${text};">Gold</td><td style="padding:10px 14px;color:${textMuted};">2% base + 2% frequency bonus (up to 4%)</td></tr>
-      <tr><td style="padding:10px 14px;font-weight:700;color:${text};">Platinum</td><td style="padding:10px 14px;color:${textMuted};">3% base + 2% frequency bonus (up to 5%)</td></tr>
-    </table>
-    <p style="margin:0 0 16px;">Base is the earn rate for your tier. The frequency bonus can add on top when you meet that tier's spend and order goals.</p>
+    <p style="margin:0 0 6px;font-size:13px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:${primaryDark};">Corrected tier structure</p>
+    <p style="margin:0 0 8px;">Here are the updated rates:</p>
+    ${tiersTable}
+    <p style="margin:0 0 16px;padding:12px 16px;background:${lightAccent};border-radius:8px;">Base is the earn rate for your tier. The frequency bonus can add on top when you meet that tier's spend and order goals.</p>
     <p style="margin:0 0 16px;">Your account access, current balances, and how you redeem your credit are all unchanged.</p>
-    <p style="margin:0 0 16px;">We value you as a customer and wanted to clear this up promptly. If you have any questions, please feel free to reach out.</p>
-    <p style="margin:0 0 8px;">Warmly,</p>
-    <p style="margin:0 0 24px;">The Team at ${escapeHtml(storeName)}</p>
-    <p style="margin:0 0 8px;"><a href="${escapeHtml(urls.accountUrl)}" style="display:inline-block;background:${primary};color:#fff;padding:12px 22px;border-radius:6px;text-decoration:none;font-weight:bold;">View your loyalty account</a></p>
+    <p style="margin:0 0 20px;">We value you as a customer and wanted to clear this up promptly. If you have any questions, please feel free to reach out.</p>
+    <p style="margin:24px 0 8px;text-align:center;">
+      <a href="${escapeHtml(urls.accountUrl)}" style="display:inline-block;background:${primary};color:#ffffff;padding:12px 22px;border-radius:6px;text-decoration:none;font-weight:600;font-size:15px;">View your loyalty account</a>
+    </p>
+    <p style="margin:0 0 8px;font-size:14px;color:${textMuted};">Warmly,</p>
+    <p style="margin:0 0 20px;font-size:14px;color:${textMuted};">The Team at ${escapeHtml(storeName)}</p>
   </td>
 </tr>
 <tr>
-  <td style="padding:16px 28px 24px;background:${lightGreen};color:${textMuted};font-size:12px;line-height:1.5;">
-    Loyalty rewards from ${escapeHtml(storeName)}
+  <td style="padding:8px 28px 28px;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-top:1px solid ${border};">
+      <tr>
+        <td style="padding-top:18px;font-size:12px;line-height:1.6;color:${textMuted};text-align:center;">
+          <p style="margin:0 0 4px;font-weight:600;color:${primaryDark};">${escapeHtml(storeName)}</p>
+          <p style="margin:0;">Loyalty rewards from ${escapeHtml(storeName)}</p>
+        </td>
+      </tr>
+    </table>
   </td>
 </tr>
 </table>
@@ -2126,19 +2164,36 @@ function buildLoyaltyRateCorrectionEmail({ branding, customerName, accountUrl, h
     };
 }
 
+/** True when metadata marks a prior flat-rate correction as superseded (eligible for re-send). */
+function isSupersededCorrectionMetadata(metadata) {
+    if (metadata == null) return false;
+    let obj = metadata;
+    if (typeof metadata === 'string') {
+        try {
+            obj = JSON.parse(metadata);
+        } catch {
+            return false;
+        }
+    }
+    if (!obj || typeof obj !== 'object') return false;
+    return obj.superseded === true || obj.superseded === 1 || obj.superseded === 'true';
+}
+
 async function hasReceivedLoyaltyRateCorrection(pool, userId) {
     const [rows] = await pool.execute(
-        `SELECT id FROM loyalty_email_sends
+        `SELECT id, metadata FROM loyalty_email_sends
           WHERE user_id = ? AND email_type = ?
-          LIMIT 1`,
+          ORDER BY sent_at DESC
+          LIMIT 5`,
         [userId, LOYALTY_RATE_CORRECTION_EMAIL_TYPE]
     );
-    return rows.length > 0;
+    // Eligible again if every prior correction row is superseded
+    return (rows || []).some((row) => !isSupersededCorrectionMetadata(row.metadata));
 }
 
 /**
  * Send rate-correction email only if the customer already received program_intro
- * and has not yet received loyalty_rate_correction.
+ * and has not yet received an active (non-superseded) loyalty_rate_correction.
  */
 async function sendLoyaltyRateCorrectionEmail(pool, userId, { dryRun = false } = {}) {
     if (!pool || !userId) {
@@ -2197,7 +2252,7 @@ async function sendLoyaltyRateCorrectionEmail(pool, userId, { dryRun = false } =
         emailType: LOYALTY_RATE_CORRECTION_EMAIL_TYPE,
         tierKey: null,
         subject: payload.subject,
-        metadata: { trigger: 'loyalty_rate_correction' },
+        metadata: { trigger: 'loyalty_rate_correction', copy_version: 'tiers_only' },
     });
 
     return {

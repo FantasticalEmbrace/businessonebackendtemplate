@@ -147,6 +147,74 @@ class CheckoutManager {
         };
     }
 
+    /** Shipping field ids that are empty or invalid (street / city / state / ZIP). */
+    getIncompleteShippingFieldIds() {
+        const missing = [];
+        const line1 = document.getElementById('shipping-address-1')?.value?.trim() || '';
+        const city = document.getElementById('shipping-city')?.value?.trim() || '';
+        const state = document.getElementById('shipping-state')?.value?.trim() || '';
+        const zip = String(document.getElementById('shipping-zip')?.value || '')
+            .replace(/\s+/g, '')
+            .trim();
+        if (!line1) missing.push('shipping-address-1');
+        if (!city) missing.push('shipping-city');
+        if (!state || !/^[A-Za-z]{2}$/.test(state)) missing.push('shipping-state');
+        if (!zip || !/^\d{5}(-\d{4})?$/.test(zip)) missing.push('shipping-zip');
+        return missing;
+    }
+
+    /**
+     * Missing-shipping UX: highlight empty/invalid fields, short under-field
+     * copy (from validateField / HTML), focus the first gap, optional banner.
+     * @param {{ focus?: boolean, announce?: boolean }} [opts]
+     * @returns {boolean} true when shipping was incomplete
+     */
+    highlightIncompleteShippingAddress({ focus = true, announce = true } = {}) {
+        const missing = this.getIncompleteShippingFieldIds();
+        const ids = missing.length
+            ? missing
+            : ['shipping-address-1', 'shipping-city', 'shipping-state', 'shipping-zip'];
+        ids.forEach((id) => {
+            const el = document.getElementById(id);
+            if (el) this.validateField(el);
+            else this.setCheckoutFieldError(id, 'Required');
+        });
+        if (focus) {
+            const first = document.getElementById(ids[0]);
+            if (first && typeof first.focus === 'function') {
+                try {
+                    first.focus({ preventScroll: false });
+                } catch (_) {
+                    first.focus();
+                }
+            }
+        }
+        if (announce) this.showNotification('Please enter your full shipping address.', 'error');
+        return true;
+    }
+
+    clearShippingAddressFieldErrors() {
+        ['shipping-address-1', 'shipping-city', 'shipping-state', 'shipping-zip'].forEach((id) => {
+            this.clearCheckoutFieldError(id);
+        });
+    }
+
+    setCheckoutFieldError(fieldId, text) {
+        const el = document.getElementById(fieldId);
+        if (!el) return;
+        const formGroup = el.closest('.form-group');
+        if (formGroup) formGroup.classList.add('error');
+        const errorMessage = formGroup?.querySelector('.error-message');
+        if (errorMessage && text) errorMessage.textContent = text;
+    }
+
+    clearCheckoutFieldError(fieldId) {
+        const el = document.getElementById(fieldId);
+        if (!el) return;
+        const formGroup = el.closest('.form-group');
+        if (formGroup) formGroup.classList.remove('error');
+    }
+
     init() {
         this.loadCart();
         if (window.HmCartSubscription?.loadCapabilities) {
@@ -1591,7 +1659,11 @@ class CheckoutManager {
 
             if (!response.ok) {
                 const msg = data.error || data.message || response.statusText || 'Could not apply code';
-                throw new Error(msg);
+                const err = new Error(msg);
+                err.code = typeof data.code === 'string' ? data.code : '';
+                err.checkoutField =
+                    typeof data.field === 'string' ? data.field.trim() : '';
+                throw err;
             }
 
             if (!data.totals) {
@@ -1599,6 +1671,7 @@ class CheckoutManager {
             }
 
             this.promoPreview = data;
+            this.clearShippingAddressFieldErrors();
             if (fb) {
                 fb.style.color = 'var(--gray-700)';
                 const parts = [];
@@ -1621,15 +1694,35 @@ class CheckoutManager {
             this.calculateTotals();
         } catch (err) {
             this.promoPreview = null;
+            const shippingRequired =
+                err &&
+                (err.code === 'SHIPPING_REQUIRED_FOR_TAX' ||
+                    /full shipping address/i.test(String(err.message || '')));
+            if (shippingRequired) {
+                this.highlightIncompleteShippingAddress({
+                    focus: Boolean(code),
+                    announce: Boolean(code)
+                });
+                if (fb && code) {
+                    fb.style.color = 'var(--error, #dc2626)';
+                    fb.textContent = 'Please enter your full shipping address.';
+                }
+                this.calculateTotals();
+                return;
+            }
             const msg =
                 err && err.message ? err.message : 'Promo unavailable. Confirm the code or try again.';
+            const customerMsg =
+                /promotion preview failed/i.test(msg)
+                    ? 'Could not update totals. Check your shipping address and try again.'
+                    : msg;
             if (fb && code) {
                 fb.style.color = 'var(--error, #dc2626)';
-                fb.textContent = msg;
+                fb.textContent = customerMsg;
             }
             this.calculateTotals();
             if (code) {
-                this.showNotification(msg, 'error');
+                this.showNotification(customerMsg, 'error');
             }
         }
     }
@@ -2500,12 +2593,23 @@ class CheckoutManager {
                     trackingNumber: result.trackingNumber || null
                 });
             } else {
-                const error = await response.json();
-                throw new Error(error.error || error.message || 'Failed to place order');
+                const error = await response.json().catch(() => ({}));
+                const err = new Error(error.error || error.message || 'Failed to place order');
+                err.code = typeof error.code === 'string' ? error.code.trim() : '';
+                err.checkoutField = typeof error.field === 'string' ? error.field.trim() : '';
+                throw err;
             }
         } catch (error) {
             console.error('Error submitting order:', error);
-            this.showNotification(error.message || 'Failed to place order. Please try again.', 'error');
+            if (
+                error &&
+                (error.code === 'SHIPPING_REQUIRED_FOR_TAX' ||
+                    /full shipping address/i.test(String(error.message || '')))
+            ) {
+                this.highlightIncompleteShippingAddress({ focus: true, announce: true });
+            } else {
+                this.showNotification(error.message || 'Failed to place order. Please try again.', 'error');
+            }
         } finally {
             this.setCheckoutBusy(false);
         }

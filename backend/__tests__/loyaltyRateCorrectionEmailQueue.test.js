@@ -38,10 +38,12 @@ function makePool({
     ],
     introSentUserIds = [1, 2, 3],
     correctionSentUserIds = [],
+    supersededCorrectionUserIds = [],
     sentTodayCount = 0,
 } = {}) {
     const introSent = new Set(introSentUserIds);
     const correctionSent = new Set(correctionSentUserIds);
+    const superseded = new Set(supersededCorrectionUserIds);
     const todayCounter = { count: sentTodayCount };
 
     const pool = {
@@ -59,10 +61,16 @@ function makePool({
                         u.email &&
                         u.customer_status === 'active' &&
                         introSent.has(u.id) &&
-                        !correctionSent.has(u.id)
+                        !(correctionSent.has(u.id) && !superseded.has(u.id))
                 );
+                // Priority: superseded first
+                eligible.sort((a, b) => {
+                    const ap = superseded.has(a.id) ? 0 : 1;
+                    const bp = superseded.has(b.id) ? 0 : 1;
+                    return ap - bp || a.id - b.id;
+                });
                 if (q.includes('u.id IN')) {
-                    const ids = params.slice(0, -1).map(Number);
+                    const ids = params.slice(0, -2).map(Number);
                     return [eligible.filter((u) => ids.includes(u.id)).map((u) => ({ id: u.id }))];
                 }
                 return [eligible.map((u) => ({ id: u.id }))];
@@ -77,13 +85,19 @@ function makePool({
                 if (emailType === PROGRAM_INTRO_EMAIL_TYPE && introSent.has(userId)) {
                     return [[{ id: 1 }]];
                 }
-                if (emailType === LOYALTY_RATE_CORRECTION_EMAIL_TYPE && correctionSent.has(userId)) {
-                    return [[{ id: 2 }]];
+                if (emailType === LOYALTY_RATE_CORRECTION_EMAIL_TYPE) {
+                    if (correctionSent.has(userId) && !superseded.has(userId)) {
+                        return [[{ id: 2, metadata: { trigger: 'loyalty_rate_correction' } }]];
+                    }
+                    if (superseded.has(userId)) {
+                        return [[{ id: 2, metadata: { superseded: true } }]];
+                    }
                 }
                 return [[]];
             }
             if (q.includes('INSERT INTO loyalty_email_sends')) {
                 correctionSent.add(params[0]);
+                superseded.delete(params[0]);
                 todayCounter.count += 1;
                 return [{ insertId: correctionSent.size }];
             }
@@ -91,6 +105,7 @@ function makePool({
         }),
         correctionSent,
         introSent,
+        superseded,
     };
     return pool;
 }
@@ -117,6 +132,14 @@ describe('loyaltyRateCorrectionEmailQueue', () => {
         expect(payload.text).toMatch(/Gold: 2% base/);
         expect(payload.text).toMatch(/Platinum: 3% base/);
         expect(payload.text).toMatch(/frequency bonus/i);
+        expect(payload.html).toMatch(/Business One/);
+        expect(payload.html).toMatch(/With frequency bonus/);
+        expect(payload.html).toMatch(/border-collapse:collapse/);
+        expect(payload.html).toMatch(/up to 2%/);
+        expect(payload.html).toMatch(/up to 4%/);
+        expect(payload.html).toMatch(/up to 5%/);
+        expect(payload.html).not.toMatch(/#658d0b/i);
+        expect(payload.html).not.toMatch(/HM Herbs/i);
     });
 
     test('default daily cap is 25', () => {
@@ -178,5 +201,28 @@ describe('loyaltyRateCorrectionEmailQueue', () => {
         expect(result.sent).toBe(1);
         expect(pool.correctionSent.has(4)).toBe(false);
         expect(sendMail).toHaveBeenCalledTimes(1);
+    });
+
+    test('superseded flat-rate recipients are eligible again and prioritized', async () => {
+        const pool = makePool({
+            introSentUserIds: [1, 2, 3],
+            correctionSentUserIds: [2],
+            supersededCorrectionUserIds: [2],
+        });
+        const pending = await countPendingRateCorrectionEmails(pool);
+        expect(pending).toBe(3);
+        const ids = await require('../services/loyaltyRateCorrectionEmailQueue').loadEligibleCorrectionUserIds(
+            pool
+        );
+        expect(ids[0]).toBe(2);
+        const result = await runThrottledRateCorrectionSend(pool, {
+            trigger: 'test',
+            delayMs: 0,
+            batchPauseMs: 0,
+            maxEmails: 1,
+        });
+        expect(result.sent).toBe(1);
+        expect(pool.correctionSent.has(2)).toBe(true);
+        expect(pool.superseded.has(2)).toBe(false);
     });
 });
