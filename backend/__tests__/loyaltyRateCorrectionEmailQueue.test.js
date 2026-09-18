@@ -102,17 +102,21 @@ describe('loyaltyRateCorrectionEmailQueue', () => {
         _resetRateCorrectionSendStateForTests();
     });
 
-    test('copy uses approved subject and flat 5% language', () => {
+    test('copy uses tiers-only subject and rates (no flat-rate language)', () => {
         const payload = buildLoyaltyRateCorrectionEmail({
             branding: { storeName: 'Business One' },
             customerName: 'Pat',
         });
         expect(payload.subject).toBe(LOYALTY_RATE_CORRECTION_SUBJECT);
-        expect(payload.text).toMatch(/flat 5%/i);
-        expect(payload.text).toMatch(/not stacked/i);
+        expect(payload.subject).not.toMatch(/flat/i);
+        expect(payload.text).not.toMatch(/flat\s*5%/i);
+        expect(payload.text).not.toMatch(/not stacked/i);
+        expect(payload.html).not.toMatch(/flat\s*5%/i);
         expect(payload.text).toMatch(/Bronze: 0%/);
+        expect(payload.text).toMatch(/Silver: 1% base/);
+        expect(payload.text).toMatch(/Gold: 2% base/);
         expect(payload.text).toMatch(/Platinum: 3% base/);
-        expect(payload.html).toMatch(/H&amp;M Herbs/);
+        expect(payload.text).toMatch(/frequency bonus/i);
     });
 
     test('default daily cap is 25', () => {

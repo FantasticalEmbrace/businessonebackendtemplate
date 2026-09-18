@@ -33,7 +33,7 @@ const PROGRAM_INTRO_EMAIL_TYPE = 'program_intro';
 const LOYALTY_RATE_CORRECTION_EMAIL_TYPE = 'loyalty_rate_correction';
 
 const LOYALTY_RATE_CORRECTION_SUBJECT =
-    'Quick update on our loyalty program tiers — flat 5% earn remains unchanged';
+    'Quick update: corrected loyalty program tier rates';
 
 
 
@@ -2016,8 +2016,8 @@ async function sendProgramIntroToEligibleCustomers(pool, { dryRun = false, backg
 
 
 /**
- * Approved Gemini correction copy for customers who already received program_intro
- * with older tier percentages. Flat 5% earn is unchanged; tiers are not stacked on 5%.
+ * Correction copy for customers who already received program_intro with older
+ * tier percentages. Describes corrected tier rates only (no flat-rate language).
  */
 function buildLoyaltyRateCorrectionEmail({ branding, customerName, accountUrl, homeUrl } = {}) {
     const urls = {
@@ -2039,29 +2039,27 @@ function buildLoyaltyRateCorrectionEmail({ branding, customerName, accountUrl, h
     const font = String(b.font || 'Inter, system-ui, Arial, sans-serif').replace(/"/g, "'");
     const subject = LOYALTY_RATE_CORRECTION_SUBJECT;
     const previewText =
-        'Flat 5% store credit earn is unchanged. Updated tier display rates for sustainability.';
+        'Updated loyalty tier rates — here is the corrected structure.';
 
     const textBody = [
         `Hi ${firstName},`,
         '',
-        "We're writing to share a quick correction regarding the cash-back loyalty program email we sent you recently.",
+        "We're writing with a quick correction about the cash-back loyalty program email we sent you recently.",
         '',
-        "That initial email listed some older, higher tier percentages. We've since updated the tier display rates on our site so the program remains sustainable for our business as we grow.",
+        "That initial email listed older, higher tier percentages. We've since updated the tier rates so they match what's shown on our site.",
         '',
-        "We want to be completely transparent so there's no confusion when you look at your account. Please note:",
-        '',
-        '• Your flat 5% store credit earn on qualifying paid orders remains completely unchanged.',
-        '• The tier base and frequency bonus describe our tier structure and are not stacked on top of your flat 5%.',
-        '• Your account access, current balances, and how you redeem your credit are all unchanged.',
-        '',
-        'For reference, the updated tier structure is:',
+        'Here is the corrected tier structure:',
         '',
         '• Bronze: 0%',
-        '• Silver: 1% base with a +1% frequency bonus when spend and order goals are met (up to 2%)',
+        '• Silver: 1% base + 1% frequency bonus when spend and order goals are met (up to 2%)',
         '• Gold: 2% base + 2% frequency bonus (up to 4%)',
         '• Platinum: 3% base + 2% frequency bonus (up to 5%)',
         '',
-        'We truly value you as a customer, and we wanted to clear this up right away to keep things honest and straightforward. If you have any questions at all, please feel free to reach out.',
+        'Base is the earn rate for your tier. The frequency bonus can add on top when you meet that tier\'s spend and order goals.',
+        '',
+        'Your account access, current balances, and how you redeem your credit are all unchanged.',
+        '',
+        'We value you as a customer and wanted to clear this up promptly. If you have any questions, please feel free to reach out.',
         '',
         'Warmly,',
         '',
@@ -2087,28 +2085,24 @@ function buildLoyaltyRateCorrectionEmail({ branding, customerName, accountUrl, h
 </tr>
 <tr>
   <td style="padding:0;background:linear-gradient(135deg,${primary} 0%,${primaryDark} 100%);text-align:center;">
-    <p style="margin:0;padding:18px 24px 22px;font-size:22px;line-height:1.3;font-weight:700;color:#ffffff;">Quick update on loyalty tiers</p>
+    <p style="margin:0;padding:18px 24px 22px;font-size:22px;line-height:1.3;font-weight:700;color:#ffffff;">Corrected loyalty tier rates</p>
   </td>
 </tr>
 <tr>
   <td style="padding:28px 28px 8px;color:${text};font-size:15px;line-height:1.65;">
     <p style="margin:0 0 16px;">Hi ${escapeHtml(firstName)},</p>
-    <p style="margin:0 0 16px;">We're writing to share a quick correction regarding the cash-back loyalty program email we sent you recently.</p>
-    <p style="margin:0 0 16px;">That initial email listed some older, higher tier percentages. We've since updated the tier display rates on our site so the program remains sustainable for our business as we grow.</p>
-    <p style="margin:0 0 12px;">We want to be completely transparent so there's no confusion when you look at your account. Please note:</p>
-    <ul style="margin:0 0 16px;padding-left:20px;color:${text};">
-      <li style="margin:0 0 8px;"><strong>Your flat 5% store credit earn</strong> on qualifying paid orders remains completely unchanged.</li>
-      <li style="margin:0 0 8px;">The tier base and frequency bonus describe our tier structure and are <strong>not stacked</strong> on top of your flat 5%.</li>
-      <li style="margin:0 0 8px;">Your account access, current balances, and how you redeem your credit are all unchanged.</li>
-    </ul>
-    <p style="margin:0 0 8px;">For reference, the updated tier structure is:</p>
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 20px;border:1px solid ${border};border-radius:8px;overflow:hidden;">
+    <p style="margin:0 0 16px;">We're writing with a quick correction about the cash-back loyalty program email we sent you recently.</p>
+    <p style="margin:0 0 16px;">That initial email listed older, higher tier percentages. We've since updated the tier rates so they match what's shown on our site.</p>
+    <p style="margin:0 0 8px;">Here is the corrected tier structure:</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 16px;border:1px solid ${border};border-radius:8px;overflow:hidden;">
       <tr style="background:${lightGreen};"><td style="padding:10px 14px;font-weight:700;color:${text};">Bronze</td><td style="padding:10px 14px;color:${text};">0%</td></tr>
       <tr><td style="padding:10px 14px;font-weight:700;color:${text};">Silver</td><td style="padding:10px 14px;color:${textMuted};">1% base + 1% frequency bonus when spend and order goals are met (up to 2%)</td></tr>
       <tr style="background:${lightGreen};"><td style="padding:10px 14px;font-weight:700;color:${text};">Gold</td><td style="padding:10px 14px;color:${textMuted};">2% base + 2% frequency bonus (up to 4%)</td></tr>
       <tr><td style="padding:10px 14px;font-weight:700;color:${text};">Platinum</td><td style="padding:10px 14px;color:${textMuted};">3% base + 2% frequency bonus (up to 5%)</td></tr>
     </table>
-    <p style="margin:0 0 16px;">We truly value you as a customer, and we wanted to clear this up right away to keep things honest and straightforward. If you have any questions at all, please feel free to reach out.</p>
+    <p style="margin:0 0 16px;">Base is the earn rate for your tier. The frequency bonus can add on top when you meet that tier's spend and order goals.</p>
+    <p style="margin:0 0 16px;">Your account access, current balances, and how you redeem your credit are all unchanged.</p>
+    <p style="margin:0 0 16px;">We value you as a customer and wanted to clear this up promptly. If you have any questions, please feel free to reach out.</p>
     <p style="margin:0 0 8px;">Warmly,</p>
     <p style="margin:0 0 24px;">The Team at ${escapeHtml(storeName)}</p>
     <p style="margin:0 0 8px;"><a href="${escapeHtml(urls.accountUrl)}" style="display:inline-block;background:${primary};color:#fff;padding:12px 22px;border-radius:6px;text-decoration:none;font-weight:bold;">View your loyalty account</a></p>
