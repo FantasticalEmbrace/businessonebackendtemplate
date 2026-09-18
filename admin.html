@@ -3686,6 +3686,40 @@
                 </div>
             </form>
 
+            <div id="mustChangePasswordPanel" style="display: none;">
+                <p style="margin: 0 0 1rem; color: var(--gray-600); font-size: 0.9rem;">
+                    For security, set a new password before using the admin panel.
+                    Use at least 12 characters with upper and lower case, a number, and a special character (@$!%*?&).
+                </p>
+                <form id="mustChangePasswordForm">
+                    <div class="form-group">
+                        <label>
+                            <span class="sr-only">Current temporary password</span>
+                            <input type="password" id="mustChangeCurrentPassword" name="current_password" class="form-input"
+                                placeholder="Temporary password" required autocomplete="current-password">
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <span class="sr-only">New password</span>
+                            <input type="password" id="mustChangeNewPassword" name="new_password" class="form-input"
+                                placeholder="New password" required minlength="12" autocomplete="new-password">
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <span class="sr-only">Confirm new password</span>
+                            <input type="password" id="mustChangeConfirmPassword" name="confirm_password" class="form-input"
+                                placeholder="Confirm new password" required minlength="12" autocomplete="new-password">
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full-width" style="margin-top: 0.5rem;">
+                        <i class="fas fa-key"></i>
+                        Set new password
+                    </button>
+                </form>
+            </div>
+
             <div id="loginError" class="login-error"></div>
 
             <div style="text-align: center; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--gray-200, #e5e7eb);">
@@ -3933,6 +3967,8 @@
                         <span id="userName">Admin User</span>
                     </div>
                 </div>
+
+                <div id="dev-signup-unlock-banner" style="display:none;"></div>
 
                 <!-- Stats Grid -->
                 <div class="stats-grid">
@@ -5086,16 +5122,18 @@
                             Reward repeat customers with tiered perks. Intro emails use your store branding and configured tier rates.
                         </p>
                         <div class="form-group" style="margin-bottom:1rem;padding:0.85rem 1rem;border:1px solid var(--gray-200);border-radius:8px;background:var(--gray-50,#f9fafb);">
-                            <label for="loyalty-flat-cashback-percent" style="font-weight:600;">Flat cash-back earn %</label>
+                            <label style="font-weight:600;">How store-credit earn works</label>
                             <p style="margin:0.25rem 0 0.65rem;color:var(--gray-600);font-size:0.85rem;line-height:1.45;">
-                                This is the live credit post rate on qualifying paid orders. Tier table rates below are for emails/estimates and are not stacked on this earn %.
+                                When the tier program is enabled, each customer earns at their <strong>current tier rate</strong>
+                                (tier % below, plus frequency bonus when spend and order goals are both met).
+                                Checkout estimates and emails use the same calculation as the live credit post.
                             </p>
                             <div style="display:grid;gap:0.75rem;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));align-items:end;">
                                 <div class="form-group" style="margin:0;">
-                                    <label for="loyalty-flat-cashback-percent">Cash-back earn %</label>
+                                    <label for="loyalty-flat-cashback-percent">Fallback earn % (tiers off / missing tier)</label>
                                     <input class="form-input" id="loyalty-flat-cashback-percent" type="number" min="0" max="50" step="0.1" value="5">
                                 </div>
-                                <p style="margin:0;color:var(--gray-500);font-size:0.8rem;">0–50%. Saved with <strong>Save program settings</strong>.</p>
+                                <p style="margin:0;color:var(--gray-500);font-size:0.8rem;">Used only if tiers are disabled or a tier row is missing. Bronze at 0% earns 0% — it does not use this fallback. Saved with <strong>Save program settings</strong>.</p>
                             </div>
                         </div>
 
@@ -5133,7 +5171,7 @@
                         </div>
                         <button type="button" class="btn btn-primary btn-sm" id="loyalty-tiers-save-settings-btn" style="margin-bottom:1rem;">Save program settings</button>
                         <p style="margin:0 0 0.5rem;color:var(--gray-600);font-size:0.85rem;">
-                            Tier table: qualification thresholds and marketing/estimate rates. Click <strong>Edit</strong> for a styled popup (not browser prompts).
+                            Tier table: qualification thresholds and live earn rates (also used in emails/checkout estimates). Click <strong>Edit</strong> for a styled popup (not browser prompts).
                         </p>
                         <div style="overflow-x:auto;margin-bottom:1rem;">
                             <table class="data-table" style="width:100%;border-collapse:collapse;">
@@ -5142,9 +5180,9 @@
                                     <th style="text-align:left;padding:0.5rem;border-bottom:1px solid var(--gray-200);">Min spend</th>
                                     <th style="text-align:left;padding:0.5rem;border-bottom:1px solid var(--gray-200);">Min orders</th>
                                     <th style="text-align:left;padding:0.5rem;border-bottom:1px solid var(--gray-200);">Min points</th>
-                                    <th style="text-align:left;padding:0.5rem;border-bottom:1px solid var(--gray-200);" title="Shown in emails/checkout estimates — not the flat earn rate that posts credit">Tier rate %</th>
+                                    <th style="text-align:left;padding:0.5rem;border-bottom:1px solid var(--gray-200);" title="Live cash-back earn % for this tier (also shown in emails/checkout)">Earn %</th>
                                     <th style="text-align:left;padding:0.5rem;border-bottom:1px solid var(--gray-200);">Free ship</th>
-                                    <th style="text-align:left;padding:0.5rem;border-bottom:1px solid var(--gray-200);" title="Extra % when spend + order goals are both met (emails/estimates)">Freq %</th>
+                                    <th style="text-align:left;padding:0.5rem;border-bottom:1px solid var(--gray-200);" title="Extra % added when spend + order goals are both met">Freq %</th>
                                     <th style="text-align:left;padding:0.5rem;border-bottom:1px solid var(--gray-200);">Active</th>
                                     <th></th>
                                 </tr></thead>
@@ -5754,8 +5792,9 @@
                     <div class="card" id="pos-shop-verticals-card">
                         <div class="card-content">
                             <h3 style="margin:0 0 0.35rem 0;">Shop verticals</h3>
-                            <p style="margin:0 0 1rem;color:var(--gray-600);font-size:0.88rem;">Select one or more shop types to unlock industry-specific job workflows, fields, and catalog options on the register. Combine modes for shops that do multiple services (e.g. auto service + tire shop).</p>
+                            <p style="margin:0 0 1rem;color:var(--gray-600);font-size:0.88rem;">Select shop types to unlock industry-specific job workflows on the register. Vehicle modes can combine (e.g. auto + tire). <strong>Contractor / renovation runs alone</strong> (not with vehicle shop modes).</p>
                             <div style="display:grid;gap:0.55rem;margin-bottom:0.85rem;">
+                                <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;"><input type="checkbox" name="pos_shop_vertical" value="contractor"> <span><strong>Contractor / Renovation</strong> — job quotes, deposits, progress payments for GCs, handymen, and trades</span></label>
                                 <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;"><input type="checkbox" name="pos_shop_vertical" value="auto"> <span><strong>Auto service</strong> — repair orders, bays, parts receiving, diagnostic workflow</span></label>
                                 <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;"><input type="checkbox" name="pos_shop_vertical" value="body"> <span><strong>Body shop</strong> — collision estimates, insurance/claim fields, paint workflow</span></label>
                                 <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;"><input type="checkbox" name="pos_shop_vertical" value="upholstery"> <span><strong>Upholstery</strong> — furniture &amp; vehicle pieces, deposits, materials tracked on each job (fabric/COM orders)</span></label>
@@ -6754,6 +6793,8 @@
                     <h1 class="page-title">Developer Tools</h1>
                 </div>
 
+                <div id="dev-signup-unlock-banner-tools" style="display:none;"></div>
+
                 <div class="admin-section-stack">
                     <div class="card">
                         <div class="card-content">
@@ -7743,7 +7784,7 @@
     <script src="js/password-toggle.js?v=4"></script>
     <script src="js/admin-table-sort.js?v=sortable-inp-20260914a"></script>
     <script src="js/admin-shop-workflows.js?v=1"></script>
-    <script src="admin-app.js?v=loyalty-cashback-admin-20260916"></script>
+    <script src="admin-app.js?v=admin-dev-signup-unlock-20260917b"></script>
     <script src="js/shop-calendar-widget.js?v=1"></script>
     <script src="admin-scheduling-calendar.js"></script>
     <script src="admin-shop-calendar.js?v=1"></script>

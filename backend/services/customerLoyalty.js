@@ -384,6 +384,68 @@ async function redeemLoyaltyPoints(connection, userId, pointsToRedeem, orderId, 
     return { pointsRedeemed: points, dollarValue, newBalance };
 }
 
+/**
+ * When the loyalty tier program is enabled, live cash/points earn rates come from the
+ * customer's current tier (base discount_percent + frequency bonus when goals met).
+ * Flat loyalty_cashback_percent is only a fallback when tiers are off or no tier row exists.
+ * A configured Bronze rate of 0% is intentional — it does NOT fall back to the flat rate.
+ */
+async function resolveOrderEarnSettings(connection, userId, baseSettings) {
+    const earnSettings = { ...baseSettings };
+    const flatFallback = Number(baseSettings?.cashbackPercent);
+    earnSettings.earnRateSource = 'flat';
+    earnSettings.earnTierKey = null;
+
+    try {
+        const { getProgramSettings } = require('./loyaltyTierProgram');
+        const {
+            evaluateCustomerTier,
+            resolveEffectiveCashbackPercent,
+            resolveEffectivePointsMultiplier,
+            isPointsMode
+        } = require('./loyaltyTierEngine');
+
+        const tierSettings = await getProgramSettings(connection);
+        if (!tierSettings?.enabled) {
+            return earnSettings;
+        }
+
+        const { tier, metrics } = await evaluateCustomerTier(connection, userId);
+        if (!tier) {
+            // Missing tier definition — keep flat as last-resort fallback only.
+            earnSettings.earnRateSource = 'fallback';
+            return earnSettings;
+        }
+
+        earnSettings.earnTierKey = tier.tierKey || null;
+        if (isPointsMode(tierSettings)) {
+            const baseRate =
+                Number(tierSettings.pointsPerDollar) ||
+                Number(baseSettings?.pointsPerDollar) ||
+                1;
+            const multiplier = resolveEffectivePointsMultiplier(tier, tierSettings);
+            earnSettings.pointsPerDollar = baseRate * multiplier;
+            earnSettings.earnRateSource = 'tier';
+            earnSettings.pointsMultiplier = multiplier;
+        } else {
+            // Use tier rate even when 0 (Bronze at 0% must earn 0, not flat fallback).
+            earnSettings.cashbackPercent = resolveEffectiveCashbackPercent(
+                tier,
+                metrics,
+                tierSettings
+            );
+            earnSettings.earnRateSource = 'tier';
+        }
+        return earnSettings;
+    } catch {
+        if (Number.isFinite(flatFallback) && flatFallback >= 0) {
+            earnSettings.cashbackPercent = flatFallback;
+        }
+        earnSettings.earnRateSource = 'flat';
+        return earnSettings;
+    }
+}
+
 async function earnCashForOrder(connection, userId, orderId, eligibleSubtotal, settings, source = 'pos') {
     if (!settings?.cashEnabled) return { cashEarned: 0, newBalance: null };
 
@@ -410,6 +472,10 @@ async function earnCashForOrder(connection, userId, orderId, eligibleSubtotal, s
         [newBalance, cashEarned, userId]
     );
 
+    const tierNote =
+        settings.earnRateSource === 'tier' && settings.earnTierKey
+            ? ` ${String(settings.earnTierKey)} tier`
+            : '';
     await insertLoyaltyTransaction(connection, {
         userId,
         transactionType: 'earn',
@@ -420,10 +486,18 @@ async function earnCashForOrder(connection, userId, orderId, eligibleSubtotal, s
         cashBalanceAfter: newBalance,
         source,
         orderId,
-        description: `Earned $${cashEarned.toFixed(2)} store credit (${pct}% on $${subtotal.toFixed(2)})`
+        description: `Earned $${cashEarned.toFixed(2)} store credit (${pct}%${tierNote} on $${subtotal.toFixed(2)})`,
+        metadata:
+            settings.earnRateSource || settings.earnTierKey
+                ? {
+                      earnRateSource: settings.earnRateSource || null,
+                      earnTierKey: settings.earnTierKey || null,
+                      cashbackPercent: pct
+                  }
+                : null
     });
 
-    return { cashEarned, newBalance };
+    return { cashEarned, newBalance, cashbackPercent: pct };
 }
 
 async function earnPointsForOrder(connection, userId, orderId, eligibleSubtotal, settings, source = 'pos') {
@@ -471,24 +545,29 @@ async function earnLoyaltyForOrder(connection, userId, orderId, eligibleSubtotal
         return { pointsEarned: 0, cashEarned: 0, newPointsBalance: null, newCashBalance: null };
     }
 
+    const earnSettings = await resolveOrderEarnSettings(connection, userId, settingsResolved);
+
     const fresh = await ensureLoyaltyRow(connection, userId);
-    const { earnCash, earnPoints } = resolveEarnFlags(fresh.loyalty_enrollment, settingsResolved);
+    const { earnCash, earnPoints } = resolveEarnFlags(fresh.loyalty_enrollment, earnSettings);
 
     let pointsResult = { pointsEarned: 0, newBalance: null };
     let cashResult = { cashEarned: 0, newBalance: null };
 
     if (earnCash) {
-        cashResult = await earnCashForOrder(connection, userId, orderId, eligibleSubtotal, settingsResolved, source);
+        cashResult = await earnCashForOrder(connection, userId, orderId, eligibleSubtotal, earnSettings, source);
     }
     if (earnPoints) {
-        pointsResult = await earnPointsForOrder(connection, userId, orderId, eligibleSubtotal, settingsResolved, source);
+        pointsResult = await earnPointsForOrder(connection, userId, orderId, eligibleSubtotal, earnSettings, source);
     }
 
     return {
         pointsEarned: pointsResult.pointsEarned,
         cashEarned: cashResult.cashEarned,
         newPointsBalance: pointsResult.newBalance,
-        newCashBalance: cashResult.newBalance
+        newCashBalance: cashResult.newBalance,
+        cashbackPercent: earnSettings.cashbackPercent,
+        earnRateSource: earnSettings.earnRateSource,
+        earnTierKey: earnSettings.earnTierKey
     };
 }
 
@@ -511,5 +590,6 @@ module.exports = {
     redeemLoyaltyPoints,
     earnCashForOrder,
     earnPointsForOrder,
-    earnLoyaltyForOrder
+    earnLoyaltyForOrder,
+    resolveOrderEarnSettings
 };

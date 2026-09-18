@@ -2,7 +2,7 @@
 
 const TIER_KEYS = ['bronze', 'silver', 'gold', 'platinum'];
 
-/** discount_percent = tier marketing/estimate rate (emails + checkout estimates). Live credit posts use loyalty_cashback_percent. */
+/** discount_percent = live cash-back earn % for the tier (also used in emails + checkout estimates). Flat loyalty_cashback_percent is fallback only when tiers are disabled or no tier row exists. */
 const DEFAULT_TIERS = [
     {
         tier_key: 'bronze',
@@ -78,7 +78,7 @@ const SETTING_KEYS = {
     minCashbackRedeem: 'loyalty_tiers_min_cashback_redeem',
     birthdayEnabled: 'loyalty_tiers_birthday_enabled',
     referralEnabled: 'loyalty_tiers_referral_enabled',
-    /** Flat store-credit earn rate posted on paid orders (customerLoyalty). */
+    /** Fallback earn % when tiers are disabled or no tier definition exists (not primary when tiers are on). */
     flatCashbackPercent: 'loyalty_cashback_percent',
 };
 

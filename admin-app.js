@@ -73,6 +73,7 @@ class AdminApp {
         this.authToken = localStorage.getItem('adminToken');
         this.currentUser = null;
         this.allowedSections = null;
+        this.entitlements = null;
         this.defaultSection = 'dashboard';
         this.canManageStoreHours = false;
         this.canManageStoreHoursDelegation = false;
@@ -153,7 +154,11 @@ class AdminApp {
         const handoffOk = await this.tryPosHandoffFromUrl();
         if (handoffOk) {
             try {
-                await this.loadDashboard();
+                if (this.mustChangePassword) {
+                    this.showMustChangePasswordPanel();
+                } else {
+                    await this.loadDashboard();
+                }
             } catch (error) {
                 console.error('Failed to load dashboard after POS handoff:', error);
                 this.logout();
@@ -173,6 +178,11 @@ class AdminApp {
                     this.logout();
                     return;
                 }
+                if (this.mustChangePassword) {
+                    this.showMustChangePasswordPanel();
+                    return;
+                }
+                await this.applyDeveloperSignupUnlock();
                 await this.loadDashboard();
             } catch (error) {
                 // If dashboard load fails (e.g., invalid/expired token), logout silently
@@ -210,6 +220,11 @@ class AdminApp {
             localStorage.setItem('adminToken', this.authToken);
             window.history.replaceState({}, document.title, window.location.pathname);
             this.showToast('Signed in from POS register', 'success');
+            const sessionOk = await this.loadSession();
+            if (sessionOk && this.mustChangePassword) {
+                this.showMustChangePasswordPanel();
+                return true;
+            }
             return true;
         } catch (error) {
             console.warn('POS admin handoff:', error.message);
@@ -1235,6 +1250,11 @@ class AdminApp {
             forgotPasswordForm.addEventListener('submit', (e) => this.handleForgotPassword(e));
         }
 
+        const mustChangePasswordForm = document.getElementById('mustChangePasswordForm');
+        if (mustChangePasswordForm) {
+            mustChangePasswordForm.addEventListener('submit', (e) => this.handleMustChangePassword(e));
+        }
+
         // Close forgot password modal
         const closeForgotPasswordModal = document.getElementById('closeForgotPasswordModal');
         const cancelForgotPassword = document.getElementById('cancelForgotPassword');
@@ -1441,8 +1461,15 @@ class AdminApp {
                 this.defaultSection = data.defaultSection || 'dashboard';
                 this.isPrincipalStore = Boolean(data.isPrincipalStore);
                 this.chromeBranding = data.chromeBranding || null;
+                this.entitlements = data.entitlements || null;
                 localStorage.setItem('adminToken', this.authToken);
 
+                if (data.mustChangePassword) {
+                    this.showMustChangePasswordPanel();
+                    return;
+                }
+
+                await this.applyDeveloperSignupUnlock();
                 await this.loadDashboard();
             } else {
                 const errorMessage = data.error || data.details || 'Login failed';
@@ -1551,20 +1578,187 @@ class AdminApp {
             const data = await this.apiRequest('/admin/auth/me');
             if (!data?.admin) return false;
             this.currentUser = data.admin;
+            this.mustChangePassword = Boolean(data.mustChangePassword);
             this.allowedSections = data.allowedSections ?? null;
             this.canManageStoreHours = Boolean(data.canManageStoreHours);
             this.canManageStoreHoursDelegation = Boolean(data.canManageStoreHoursDelegation);
             this.defaultSection = data.defaultSection || 'dashboard';
             this.isPrincipalStore = Boolean(data.isPrincipalStore);
             this.chromeBranding = data.chromeBranding || null;
+            this.entitlements = data.entitlements || null;
             return true;
         } catch (error) {
             const msg = String(error?.message || '').toLowerCase();
+            if (msg.includes('must_change_password') || msg.includes('must set a new password')) {
+                this.mustChangePassword = true;
+                return true;
+            }
             if (msg.includes('authentication required') || msg.includes('invalid admin token')) {
                 return false;
             }
             console.warn('loadSession failed:', error.message || error);
             return false;
+        }
+    }
+
+    showMustChangePasswordPanel() {
+        const loginForm = document.getElementById('loginForm');
+        const panel = document.getElementById('mustChangePasswordPanel');
+        const loginScreen = document.getElementById('loginScreen');
+        const adminDashboard = document.getElementById('adminDashboard');
+        const subtitle = document.querySelector('.login-subtitle');
+        const oauthBlock = document.querySelector('[data-admin-oauth-block]');
+        const forgotLink = document.getElementById('forgotPasswordLink');
+        if (loginScreen) loginScreen.style.display = 'flex';
+        if (adminDashboard) adminDashboard.style.display = 'none';
+        if (loginForm) loginForm.style.display = 'none';
+        if (panel) panel.style.display = 'block';
+        if (subtitle) subtitle.textContent = 'Choose a new password to continue';
+        if (oauthBlock) oauthBlock.style.display = 'none';
+        if (forgotLink && forgotLink.parentElement) forgotLink.parentElement.style.display = 'none';
+        const current = document.getElementById('mustChangeCurrentPassword');
+        const fromLogin = document.getElementById('password');
+        if (current && fromLogin && fromLogin.value && !current.value) {
+            current.value = fromLogin.value;
+        }
+    }
+
+    hideMustChangePasswordPanel() {
+        const loginForm = document.getElementById('loginForm');
+        const panel = document.getElementById('mustChangePasswordPanel');
+        const subtitle = document.querySelector('.login-subtitle');
+        const oauthBlock = document.querySelector('[data-admin-oauth-block]');
+        const forgotLink = document.getElementById('forgotPasswordLink');
+        if (panel) panel.style.display = 'none';
+        if (loginForm) loginForm.style.display = 'block';
+        if (subtitle) subtitle.textContent = 'Sign in to your admin account';
+        if (oauthBlock) oauthBlock.style.display = '';
+        if (forgotLink && forgotLink.parentElement) forgotLink.parentElement.style.display = '';
+    }
+
+    async handleMustChangePassword(e) {
+        e.preventDefault();
+        const errorDiv = document.getElementById('loginError');
+        const currentPassword = document.getElementById('mustChangeCurrentPassword')?.value || '';
+        const newPassword = document.getElementById('mustChangeNewPassword')?.value || '';
+        const confirmPassword = document.getElementById('mustChangeConfirmPassword')?.value || '';
+        const showErr = (message) => {
+            if (!errorDiv) {
+                window.alert(message);
+                return;
+            }
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            errorDiv.classList.add('show');
+        };
+        if (errorDiv) {
+            errorDiv.textContent = '';
+            errorDiv.style.display = 'none';
+            errorDiv.classList.remove('show');
+        }
+        if (!currentPassword || !newPassword) {
+            showErr('Enter your temporary password and a new password.');
+            return;
+        }
+        if (newPassword !== confirmPassword) {
+            showErr('New passwords do not match.');
+            return;
+        }
+        if (newPassword.length < 12 || !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/.test(newPassword)) {
+            showErr('Password must be at least 12 characters and include upper, lower, a number, and a special character (@$!%*?&).');
+            return;
+        }
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/admin/auth/change-password`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${this.authToken}`
+                },
+                body: JSON.stringify({ currentPassword, newPassword })
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                showErr(data.error || 'Could not update password.');
+                return;
+            }
+            this.mustChangePassword = false;
+            this.hideMustChangePasswordPanel();
+            const pwField = document.getElementById('password');
+            if (pwField) pwField.value = '';
+            await this.loadDashboard();
+        } catch (error) {
+            showErr('Connection error. Please try again.');
+        }
+    }
+
+    async applyDeveloperSignupUnlock() {
+        if (String(this.currentUser?.role || '').toLowerCase() !== 'developer') {
+            return null;
+        }
+        try {
+            const data = await this.apiRequest('/admin/dev-tools/signup-unlock', { method: 'POST' });
+            if (!data?.token) return null;
+            this._devSignupUnlock = data;
+            this._writeDevSignupUnlockCookie(data);
+            this._renderDevSignupUnlockBanner(data);
+            return data;
+        } catch (error) {
+            console.warn('Developer signup unlock failed:', error?.message || error);
+            return null;
+        }
+    }
+
+    _writeDevSignupUnlockCookie(data) {
+        const token = String(data?.token || '').trim();
+        if (!token) return;
+        const name = data.cookieName || 'bo_dev_signup_unlock';
+        const maxAge = 8 * 60 * 60;
+        const host = window.location.hostname;
+        let domainPart = '';
+        if (host.endsWith('businessonecomprehensive.com')) {
+            domainPart = '; Domain=.businessonecomprehensive.com';
+        }
+        const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+        document.cookie = `${name}=${encodeURIComponent(token)}; Path=/; Max-Age=${maxAge}; SameSite=Lax${domainPart}${secure}`;
+        try {
+            localStorage.setItem(name, token);
+            if (data.expiresAt) localStorage.setItem(`${name}_expires`, data.expiresAt);
+        } catch (_) {
+            /* ignore */
+        }
+    }
+
+    _renderDevSignupUnlockBanner(data) {
+        let banner = document.getElementById('dev-signup-unlock-banner');
+        if (!banner) {
+            banner = document.createElement('div');
+            banner.id = 'dev-signup-unlock-banner';
+            const dashHeader = document.querySelector('#dashboard .content-header');
+            if (dashHeader) {
+                dashHeader.insertAdjacentElement('afterend', banner);
+            } else {
+                document.body.prepend(banner);
+            }
+        }
+        const url = data.signupUrl || 'https://businessonecomprehensive.com/pos-signup.html';
+        const withToken = `${url}${url.includes('?') ? '&' : '?'}devUnlock=${encodeURIComponent(data.token)}`;
+        banner.style.display = 'block';
+        banner.innerHTML = `
+            <div style="padding:0.85rem 1rem;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:8px;margin:0 0 1rem;">
+                <strong style="color:#065f46;">Developer signup pricing unlocked</strong>
+                <p style="margin:0.35rem 0 0.75rem;color:#047857;font-size:0.9rem;line-height:1.45;">
+                    Your developer login unlocked a private <strong>$0 due today</strong> price on the public signup form (you only).
+                    Customers still see normal pricing.
+                </p>
+                <a class="btn btn-primary" href="${this.escapeHtml(withToken)}" target="_blank" rel="noopener">
+                    Open signup form ($0 test)
+                </a>
+            </div>`;
+        const toolsBanner = document.getElementById('dev-signup-unlock-banner-tools');
+        if (toolsBanner && toolsBanner !== banner) {
+            toolsBanner.style.display = 'block';
+            toolsBanner.innerHTML = banner.innerHTML;
         }
     }
 
@@ -1626,6 +1820,75 @@ class AdminApp {
         });
 
         this._applyStoreHoursFieldAccess();
+    }
+
+    /**
+     * Hide admin nav/panels that the merchant's signup package does not include.
+     * Calendar = Standard website ($3k) and above. Shop workflows = shop verticals.
+     */
+    applyProductEntitlements() {
+        const ent = this.entitlements;
+        if (!ent || ent.fullAccess) {
+            const shopTab = document.getElementById('pos-tab-shop');
+            if (shopTab) shopTab.style.display = '';
+            return;
+        }
+
+        document.querySelectorAll('.nav-link[data-section]').forEach((link) => {
+            const section = link.getAttribute('data-section');
+            const item = link.closest('.nav-item');
+            if (!item || !section) return;
+            if (!this.canAccessSection(section)) {
+                item.style.display = 'none';
+            }
+        });
+        document.querySelectorAll('.sidebar-nav .nav-section').forEach((sec) => {
+            const visibleItems = [...sec.querySelectorAll('.nav-item')].filter(
+                (el) => el.style.display !== 'none'
+            );
+            sec.style.display = visibleItems.length ? '' : 'none';
+        });
+
+        const allowedTabs = new Set(Array.isArray(ent.posTabs) ? ent.posTabs : []);
+        document.querySelectorAll('[data-pos-tab]').forEach((btn) => {
+            const tab = btn.getAttribute('data-pos-tab');
+            if (!tab) return;
+            const show = !allowedTabs.size || allowedTabs.has(tab);
+            btn.style.display = show ? '' : 'none';
+            if (!show && btn.getAttribute('aria-selected') === 'true') {
+                const fallback = document.querySelector('[data-pos-tab="display"]');
+                if (fallback) fallback.click();
+            }
+        });
+        const shopTab = document.getElementById('pos-tab-shop');
+        if (shopTab) {
+            shopTab.style.display = ent.showShopWorkflows ? '' : 'none';
+        }
+
+        const verts = new Set(ent.shopVerticals || []);
+        document.querySelectorAll('[data-pos-bay-vertical]').forEach((el) => {
+            const v = el.getAttribute('data-pos-bay-vertical');
+            el.style.display = !v || verts.has(v) ? '' : 'none';
+        });
+        document.querySelectorAll('[data-pos-labor-vertical]').forEach((el) => {
+            const v = el.getAttribute('data-pos-labor-vertical');
+            el.style.display = !v || verts.has(v) ? '' : 'none';
+        });
+        const tireAlign = document.getElementById('pos-shop-tire-alignment-prices');
+        if (tireAlign) tireAlign.style.display = verts.has('tire') ? '' : 'none';
+        const upholstery = document.getElementById('pos-shop-upholstery-deposit');
+        if (upholstery) upholstery.style.display = verts.has('upholstery') ? '' : 'none';
+
+        const gcalCard = document.getElementById('gcal-connection-card');
+        if (gcalCard) gcalCard.style.display = ent.hasCalendar ? '' : 'none';
+
+        document.querySelectorAll('.admin-products-bulk-group--website').forEach((el) => {
+            el.style.display = ent.hasWebsite || ent.hasEcommerce ? '' : 'none';
+        });
+        const abandoned = document.querySelector('[data-marketing-tab="abandoned-cart"]');
+        if (abandoned) {
+            abandoned.style.display = ent.hasEcommerceAutomation ? '' : 'none';
+        }
     }
 
     _showStoreHoursPermissionAlert() {
@@ -1771,6 +2034,7 @@ class AdminApp {
         }
 
         this.applyRoleAccess();
+        this.applyProductEntitlements();
         if (this.chromeBranding) {
             this.applyAdminChromeBranding(this.chromeBranding);
         } else {
@@ -2212,6 +2476,7 @@ class AdminApp {
                 if (window.AdminPosTroubleshoot) {
                     await window.AdminPosTroubleshoot.init();
                 }
+                this.applyProductEntitlements();
                 break;
             case 'settings':
                 await this.loadStoreInfoSettings();
@@ -2229,6 +2494,8 @@ class AdminApp {
         const migrationsList = document.getElementById('dev-tools-migrations-list');
         const msg = document.getElementById('dev-tools-migrations-msg');
         if (!backupMeta || !migrationsSummary || !migrationsList) return;
+
+        await this.applyDeveloperSignupUnlock();
 
         backupMeta.textContent = 'Loading backup info...';
         migrationsSummary.textContent = 'Loading migration status...';
@@ -2830,7 +3097,7 @@ class AdminApp {
             pos_display_store_hours_idle: 'Show store hours on idle customer display',
             pos_show_cost_in_cart: 'Show product cost in POS cart for manual discounts',
             pos_personnel_mode: 'Personnel mode: time_clock_only or time_clock_and_pos',
-            pos_shop_verticals: 'JSON array of shop verticals: auto, body, upholstery, tire (combine as needed)',
+            pos_shop_verticals: 'JSON array of shop verticals: contractor, auto, body, upholstery, tire (contractor alone; vehicle modes may combine)',
             pos_shop_alignment_2wheel_price: 'Tire shop 2-wheel alignment price on POS estimates',
             pos_shop_alignment_4wheel_price: 'Tire shop 4-wheel alignment price on POS estimates',
             pos_display_card_checkout: 'NMI terminal card checkout enabled',
@@ -4104,9 +4371,12 @@ class AdminApp {
                 return { key_name: key, value: mode, description: meta[key], type: 'string' };
             }
             if (key === 'pos_shop_verticals') {
-                const selected = Array.from(form.querySelectorAll('[name="pos_shop_vertical"]:checked')).map(
+                let selected = Array.from(form.querySelectorAll('[name="pos_shop_vertical"]:checked')).map(
                     (el) => el.value
                 );
+                if (selected.includes('contractor') && selected.length > 1) {
+                    selected = ['contractor'];
+                }
                 return {
                     key_name: key,
                     value: JSON.stringify(selected),
@@ -4825,26 +5095,68 @@ class AdminApp {
             list.innerHTML = sorted
                 .map((d) => {
                     const seen = d.lastSeenAt ? this.formatAdminDateTime(d.lastSeenAt) : 'Never';
+                    const bindLabel = d.isBound
+                        ? `Bound${d.boundPlatform ? ` (${this.escapeHtml(d.boundPlatform)})` : ''}`
+                        : 'Not bound';
+                    const copyDisabled = d.hasStoredKey
+                        ? ''
+                        : 'disabled title="Key not stored yet — click New key once to enable Copy"';
                     return `<div data-pos-device-row="${d.id}" data-device-label="${this.escapeHtml(d.deviceLabel)}" style="display:flex;justify-content:space-between;gap:0.75rem;align-items:center;padding:0.55rem 0.35rem;border-bottom:1px solid var(--gray-200);">
                         <div>
                             <div style="font-weight:600;">${this.escapeHtml(d.deviceLabel)}</div>
-                            <div style="font-size:0.85rem;color:var(--gray-600);">${this.escapeHtml(d.keyPrefix)}... \u00B7 Last seen ${this.escapeHtml(seen)}</div>
+                            <div style="font-size:0.85rem;color:var(--gray-600);">${this.escapeHtml(d.keyPrefix)}... \u00B7 Last seen ${this.escapeHtml(seen)} \u00B7 ${bindLabel}</div>
                         </div>
                         <div style="display:flex;gap:0.35rem;flex-wrap:wrap;justify-content:flex-end;">
+                            <button type="button" class="btn btn-secondary btn-sm" data-copy-pos-device-key="${d.id}" ${copyDisabled}>Copy key</button>
+                            <button type="button" class="btn btn-secondary btn-sm" data-reset-pos-device-binding="${d.id}" ${d.isBound ? '' : 'disabled title="No device bound yet"'}>Reset binding</button>
                             <button type="button" class="btn btn-secondary btn-sm" data-regenerate-pos-device="${d.id}">New key</button>
                             <button type="button" class="btn btn-ghost btn-sm" data-revoke-pos-device="${d.id}">Revoke</button>
                         </div>
                     </div>`;
                 })
                 .join('');
+            list.querySelectorAll('[data-copy-pos-device-key]').forEach((btn) => {
+                btn.addEventListener('click', () => this.copyPosDeviceKey(btn.getAttribute('data-copy-pos-device-key')));
+            });
             list.querySelectorAll('[data-revoke-pos-device]').forEach((btn) => {
                 btn.addEventListener('click', () => this.revokePosDevice(btn.getAttribute('data-revoke-pos-device')));
             });
             list.querySelectorAll('[data-regenerate-pos-device]').forEach((btn) => {
                 btn.addEventListener('click', () => this.regeneratePosDevice(btn.getAttribute('data-regenerate-pos-device')));
             });
+            list.querySelectorAll('[data-reset-pos-device-binding]').forEach((btn) => {
+                btn.addEventListener('click', () =>
+                    this.resetPosDeviceBinding(btn.getAttribute('data-reset-pos-device-binding'))
+                );
+            });
         } catch (err) {
             list.innerHTML = `<p style="margin:0;color:var(--error);font-size:0.9rem;">${this.escapeHtml(err.message || 'Could not load devices')}</p>`;
+        }
+    }
+
+    async copyPosDeviceKey(id) {
+        const msg = document.getElementById('pos-device-create-msg');
+        try {
+            const res = await this.apiRequest(`/admin/pos/devices/${encodeURIComponent(id)}/api-key`);
+            const label =
+                res?.device?.deviceLabel ||
+                this._posDevicesList?.find((d) => String(d.id) === String(id))?.deviceLabel ||
+                '';
+            this._showPosDeviceKeyMessage(msg, res?.apiKey, label);
+            if (res?.apiKey && navigator.clipboard?.writeText) {
+                try {
+                    await navigator.clipboard.writeText(res.apiKey);
+                    this.showToast('Register key copied', 'success');
+                } catch {
+                    /* message area still shows the key for manual copy */
+                }
+            }
+        } catch (err) {
+            if (msg) {
+                msg.textContent = err.message || 'Could not load register key';
+                msg.style.color = 'var(--error)';
+            }
+            this.showToast(err.message || 'Could not load register key', 'error');
         }
     }
 
@@ -4862,12 +5174,12 @@ class AdminApp {
         const posUrl = this._posRegisterUrl(register);
         const openPos = `<a href="${this.escapeHtml(posUrl)}" target="_blank" rel="noopener noreferrer">Open POS setup</a>`;
         if (apiKey) {
-            msg.innerHTML = `<strong>Copy this key now</strong> (shown once):
+            msg.innerHTML = `<strong>Register key</strong> (one key = one tablet; you can copy this again anytime from Copy key):
                 <span style="display:inline-flex;align-items:center;gap:0.35rem;flex-wrap:wrap;margin:0.25rem 0;">
                     <code style="user-select:all">${this.escapeHtml(apiKey)}</code>
                     <button type="button" class="btn btn-secondary btn-sm" data-copy-pos-device-key>Copy</button>
                 </span>
-                <br><span style="font-size:0.9rem;">Paste this key on the tablet (${openPos}). The key already includes this store?s address.</span>`;
+                <br><span style="font-size:0.9rem;">Paste this key on the tablet (${openPos}). The key already includes this store's address.</span>`;
             msg.style.color = 'var(--gray-800)';
             const copyBtn = msg.querySelector('[data-copy-pos-device-key]');
             if (copyBtn) {
@@ -4883,7 +5195,7 @@ class AdminApp {
                             document.execCommand('copy');
                             document.body.removeChild(ta);
                         }
-                        this.showToast('Device key copied', 'success');
+                        this.showToast('Register key copied', 'success');
                     } catch {
                         this.showToast('Could not copy key', 'error');
                     }
@@ -4901,7 +5213,7 @@ class AdminApp {
             const ok = await this.showAdminConfirm({
                 title: 'Generate a new key?',
                 message:
-                    'The previous key for this register will stop working immediately. Copy the new key into POS setup on the tablet.',
+                    'The previous key for this register will stop working immediately. Device binding is also cleared. Copy the new key into POS setup on the tablet.',
                 confirmLabel: 'Generate new key',
                 cancelLabel: 'Cancel',
             });
@@ -4926,6 +5238,25 @@ class AdminApp {
                 msg.style.color = 'var(--error)';
             }
             this.showToast(err.message || 'Could not regenerate device key', 'error');
+        }
+    }
+
+    async resetPosDeviceBinding(id) {
+        if (!id) return;
+        const ok = await this.showAdminConfirm({
+            title: 'Reset device binding?',
+            message:
+                'The current phone or tablet keeps the key, but another device will be allowed to connect with the same key. The first device to reconnect becomes the only active install.',
+            confirmLabel: 'Reset binding',
+            cancelLabel: 'Cancel',
+        });
+        if (!ok) return;
+        try {
+            await this.apiRequest(`/admin/pos/devices/${id}/reset-binding`, { method: 'POST' });
+            await this.loadPosDevices();
+            this.showToast('Device binding cleared — next POS install can connect', 'success');
+        } catch (err) {
+            this.showToast(err.message || 'Could not reset device binding', 'error');
         }
     }
 
@@ -6174,7 +6505,7 @@ class AdminApp {
                     <div>
                         <h2 id="loyalty-tier-edit-title" style="margin:0 0 0.25rem;font-size:1.2rem;color:var(--primary, #2563eb);font-weight:600;letter-spacing:-0.02em;">Edit ${tierLabel}</h2>
                         <p style="margin:0;color:var(--gray-600);font-size:0.88rem;line-height:1.45;">
-                            Tier rate % is for emails and checkout estimates. Live credit posts use the flat cash-back earn % above.
+                            Earn % is the live store-credit rate for this tier (same rate used in emails and checkout estimates). Frequency bonus adds on when spend and order goals are both met.
                         </p>
                     </div>
                     <button type="button" class="modal-close" id="loyalty-tier-edit-close" aria-label="Close">${HM_CLOSE_ICON_SVG}</button>
@@ -6200,14 +6531,14 @@ class AdminApp {
                             <input class="form-input" id="loyalty-tier-edit-min-points" name="minPoints" type="number" min="0" step="1" value="${minPoints}">
                         </div>
                         <div class="form-group" style="margin:0;">
-                            <label for="loyalty-tier-edit-rate">Tier rate %</label>
+                            <label for="loyalty-tier-edit-rate">Earn %</label>
                             <input class="form-input" id="loyalty-tier-edit-rate" name="discountPercent" type="number" min="0" max="50" step="0.1" value="${discountPercent}">
                         </div>
                     </div>
                     <div class="form-group" style="margin-bottom:0.9rem;">
                         <label for="loyalty-tier-edit-freq">Frequency bonus %</label>
                         <input class="form-input" id="loyalty-tier-edit-freq" name="frequencyBonusPercent" type="number" min="0" max="50" step="0.1" value="${frequencyBonusPercent}">
-                        <p style="margin:0.35rem 0 0;color:var(--gray-500);font-size:0.8rem;">Extra estimate/email % when spend and order goals are both met.</p>
+                        <p style="margin:0.35rem 0 0;color:var(--gray-500);font-size:0.8rem;">Extra live earn % when spend and order goals are both met.</p>
                     </div>
                     <div class="form-group" style="margin-bottom:0.35rem;display:flex;flex-wrap:wrap;gap:1rem;">
                         <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
@@ -12250,6 +12581,10 @@ ${bodies.join('\n')}
                 this.logout();
                 throw new Error('Authentication required');
             }
+            if (data.code === 'MUST_CHANGE_PASSWORD') {
+                this.mustChangePassword = true;
+                this.showMustChangePasswordPanel();
+            }
             const err = new Error(data.error || 'Insufficient permissions');
             err.status = 403;
             err.code = data.code;
@@ -12295,6 +12630,7 @@ ${bodies.join('\n')}
         localStorage.removeItem('adminToken');
         this.authToken = null;
         this.currentUser = null;
+        this.mustChangePassword = false;
         this.chromeBranding = null;
         this.isPrincipalStore = false;
         this.applyAdminChromeBranding({ useDefault: true, displayName: 'Business One Admin' });
@@ -12311,6 +12647,7 @@ ${bodies.join('\n')}
         // Clear forms
         if (loginForm) loginForm.reset();
         if (loginError) loginError.style.display = 'none';
+        this.hideMustChangePasswordPanel();
         void this.setupGoogleSignIn();
     }
 
@@ -16510,6 +16847,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const posSettingsForm = document.getElementById('pos-settings-form');
     if (posSettingsForm && window.adminApp) {
         posSettingsForm.addEventListener('submit', (ev) => window.adminApp.savePosSettings(ev));
+        const vehicleShops = new Set(['auto', 'tire', 'body', 'upholstery']);
+        posSettingsForm.querySelectorAll('[name="pos_shop_vertical"]').forEach((input) => {
+            input.addEventListener('change', () => {
+                const value = String(input.value || '').toLowerCase();
+                if (!input.checked) return;
+                if (value === 'contractor') {
+                    posSettingsForm.querySelectorAll('[name="pos_shop_vertical"]').forEach((el) => {
+                        if (el !== input) el.checked = false;
+                    });
+                } else if (vehicleShops.has(value)) {
+                    const contractor = posSettingsForm.querySelector(
+                        '[name="pos_shop_vertical"][value="contractor"]'
+                    );
+                    if (contractor) contractor.checked = false;
+                }
+            });
+        });
     }
     const posSettingsReloadBtn = document.getElementById('pos-settings-reload-btn');
     if (posSettingsReloadBtn && window.adminApp) {

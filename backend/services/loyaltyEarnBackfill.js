@@ -91,7 +91,7 @@ async function hasLifetimeSpendBackfill(pool, userId) {
 
 /**
  * Credit paid orders that never got a loyalty earn row.
- * Uses the same earnLoyaltyForOrder path as checkout finalize (flat program rates).
+ * Uses the same earnLoyaltyForOrder path as checkout finalize (tier rates when enabled).
  * Resolves guest checkouts by matching order email → customer account.
  */
 async function backfillMissingOrderEarns(pool, { dryRun = false, limit = 5000 } = {}) {
