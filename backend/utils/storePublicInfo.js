@@ -1,9 +1,6 @@
 'use strict';
 
-const {
-    loadHolidaySchedule,
-    upcomingHolidayLines,
-} = require('./storeHolidaySchedule');
+const { loadHolidaySchedule } = require('./storeHolidaySchedule');
 
 const STORE_HOUR_KEYS = {
     weekdays: 'store_hours_weekdays',
@@ -42,31 +39,33 @@ async function loadStoreHours(pool) {
     };
 }
 
+/** Full weekday set for POS / internal displays (may include Sunday). */
 function storeHourFooterLines(hours) {
     return [hours.weekdays, hours.saturday, hours.sunday].filter((line) => String(line || '').trim());
 }
 
-function publicStoreInfoPayload(hours, { holidaySchedule = [] } = {}) {
-    const footerLines = storeHourFooterLines(hours);
-    const upcomingHolidays = upcomingHolidayLines(holidaySchedule);
+/** Storefront footers: Mon-Fri + Sat only — never Sunday or holiday lines. */
+function storefrontFooterLines(hours) {
+    return [hours.weekdays, hours.saturday].filter((line) => String(line || '').trim());
+}
+
+function publicStoreInfoPayload(hours) {
     return {
         hours: {
             weekdays: hours.weekdays,
             saturday: hours.saturday,
             sunday: hours.sunday,
         },
-        footerLines,
-        upcomingHolidays,
-        holidayFooterLines: upcomingHolidays,
+        footerLines: storefrontFooterLines(hours),
+        // Kept empty so older cached site-store-info.js never paints holiday rows.
+        upcomingHolidays: [],
+        holidayFooterLines: [],
     };
 }
 
 async function loadPublicStoreInfo(pool) {
-    const [hours, holidaySchedule] = await Promise.all([
-        loadStoreHours(pool),
-        loadHolidaySchedule(pool),
-    ]);
-    return publicStoreInfoPayload(hours, { holidaySchedule });
+    const hours = await loadStoreHours(pool);
+    return publicStoreInfoPayload(hours);
 }
 
 module.exports = {
@@ -75,6 +74,7 @@ module.exports = {
     loadStoreHours,
     loadHolidaySchedule,
     storeHourFooterLines,
+    storefrontFooterLines,
     publicStoreInfoPayload,
     loadPublicStoreInfo,
 };

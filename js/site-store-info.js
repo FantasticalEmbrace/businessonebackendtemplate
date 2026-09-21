@@ -1,5 +1,6 @@
 /**
  * Loads store hours from /api/store-info (same admin settings pushed to Google).
+ * Footers show regular Mon-Fri / Sat hours only — never holiday lines.
  */
 (function () {
     const DEFAULT_LINES = ['Mon-Fri: 10am-5pm', 'Sat: 10am-1pm'];
@@ -14,21 +15,20 @@
     }
 
     function linesFromPayload(data) {
-        const regular = [];
-        if (Array.isArray(data?.footerLines) && data.footerLines.length) {
-            regular.push(...data.footerLines.map((line) => String(line).trim()).filter(Boolean));
-        } else {
-            regular.push(...DEFAULT_LINES);
+        const weekdays = String(data?.hours?.weekdays || '').trim();
+        const saturday = String(data?.hours?.saturday || '').trim();
+        if (weekdays || saturday) {
+            return [weekdays, saturday].filter(Boolean);
         }
 
-        const holidays = Array.isArray(data?.upcomingHolidays)
-            ? data.upcomingHolidays.map((line) => String(line).trim()).filter(Boolean)
-            : Array.isArray(data?.holidayFooterLines)
-              ? data.holidayFooterLines.map((line) => String(line).trim()).filter(Boolean)
-              : [];
+        if (Array.isArray(data?.footerLines) && data.footerLines.length) {
+            return data.footerLines
+                .map((line) => String(line).trim())
+                .filter(Boolean)
+                .filter((line) => !/^holiday\b/i.test(line) && !/^sun(?:day)?\b/i.test(line));
+        }
 
-        if (!holidays.length) return regular;
-        return regular.concat(['Holiday hours:'], holidays);
+        return DEFAULT_LINES.slice();
     }
 
     function applyFooterHours(lines) {
@@ -61,10 +61,12 @@
         return cachedPromise;
     }
 
-    window.HMHERBS_getStoreHourLines = async function getStoreHourLines() {
+    window.BO_getStoreHourLines = async function getStoreHourLines() {
         const data = await fetchStoreInfo();
         return linesFromPayload(data);
     };
+    // Legacy alias kept for older storefront callers.
+    window.HMHERBS_getStoreHourLines = window.BO_getStoreHourLines;
 
     async function init() {
         const data = await fetchStoreInfo();

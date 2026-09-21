@@ -11,7 +11,7 @@ const scripts = [
   '    <!-- Scripts -->',
   '    <script src="js/age-gate.js" defer></script>',
   '    <script src="js/site-promo-banner.js" defer></script>',
-  '    <script src="js/site-store-info.js" defer></script>',
+  '    <script src="js/site-store-info.js?v=no-holiday-1" defer></script>',
   '    <script src="js/visual-bug-fixes.js"></script>',
   '    <script src="script.js" defer></script>',
   '    <script src="gdpr-compliance.js?v=20260617a" defer></script>'
