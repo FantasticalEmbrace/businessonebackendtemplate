@@ -2,10 +2,12 @@
 'use strict';
 
 /**
- * Backfill products.price from the lowest active variant price when parent price is 0.
+ * Backfill products.price from the primary active variant (SKU match / sort_order),
+ * not the cheapest variant.
  *
  *   node scripts/sync-parent-prices-from-variants.js --dry-run
  *   node scripts/sync-parent-prices-from-variants.js --apply
+ *   node scripts/sync-parent-prices-from-variants.js --apply --fix-mismatched
  */
 
 const path = require('path');
@@ -17,21 +19,24 @@ const { syncAllParentPricesFromVariants } = require('../utils/storefrontProductP
 
 async function main() {
     const dryRun = process.argv.includes('--dry-run') || !process.argv.includes('--apply');
+    const fixMismatched = process.argv.includes('--fix-mismatched');
     const pool = mysql.createPool(buildDbConfig());
 
     try {
-        const result = await syncAllParentPricesFromVariants(pool, { dryRun });
+        const result = await syncAllParentPricesFromVariants(pool, { dryRun, fixMismatched });
         const candidates = result.candidates || [];
 
         console.log(
             dryRun
-                ? `Dry run: ${candidates.length} product(s) would update parent price from variants`
+                ? `Dry run: ${candidates.length} product(s) would update parent price from primary variant`
                 : `Updated parent price on ${result.updated} product(s)`
         );
 
         for (const row of candidates.slice(0, 50)) {
+            const from = row.current_price != null ? Number(row.current_price).toFixed(2) : '—';
+            const to = Number(row.primary_variant_price).toFixed(2);
             console.log(
-                `  #${row.id} ${row.sku || '—'} ${String(row.name || '').slice(0, 60)} → $${Number(row.min_variant_price).toFixed(2)}`
+                `  #${row.id} ${row.sku || '—'} ${String(row.name || '').slice(0, 50)} $${from} → $${to}`
             );
         }
         if (candidates.length > 50) {
@@ -39,7 +44,7 @@ async function main() {
         }
 
         if (dryRun && candidates.length) {
-            console.log('\nRe-run with --apply to write changes.');
+            console.log('\nRe-run with --apply [--fix-mismatched] to write changes.');
         }
     } finally {
         await pool.end();

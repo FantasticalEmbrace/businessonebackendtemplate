@@ -368,12 +368,16 @@ async function saveProductVariants(connection, productId, productSku, variantOpt
     }
 
     if (rows.length) {
-        const minPrice = Math.min(...rows.map((r) => r.price));
+        // Primary (base) catalog price — not Math.min — so cheap accessories never become the list price.
+        const { primaryActiveVariantPrice } = require('./storefrontProductPrice');
+        const primaryPrice = primaryActiveVariantPrice(rows, productSku);
         const totalInv = rows.reduce((s, r) => s + (r.inventory_quantity || 0), 0);
-        await connection.execute(
-            'UPDATE products SET price = ?, inventory_quantity = ? WHERE id = ?',
-            [minPrice, totalInv, productId]
-        );
+        if (primaryPrice != null) {
+            await connection.execute(
+                'UPDATE products SET price = ?, inventory_quantity = ? WHERE id = ?',
+                [primaryPrice, totalInv, productId]
+            );
+        }
     }
 
     return rows.length;
