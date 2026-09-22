@@ -234,13 +234,51 @@ async function searchAddressSuggestions(query, options = {}) {
         if (collected.length >= 8) break;
     }
 
-    const stateCode = normalizeStateCode(stateHint);
     const ranked = dedupeSuggestions(collected);
+    const stateCode = normalizeStateCode(stateHint);
+    // Prefer suggestions whose street number matches what the customer typed.
+    const houseMatch = q.match(/^(\d+[A-Za-z]?)\b/);
+    if (houseMatch) {
+        const house = houseMatch[1].toLowerCase();
+        ranked.sort((a, b) => {
+            const aHit = String(a.line1 || '')
+                .trim()
+                .toLowerCase()
+                .startsWith(house)
+                ? 0
+                : 1;
+            const bHit = String(b.line1 || '')
+                .trim()
+                .toLowerCase()
+                .startsWith(house)
+                ? 0
+                : 1;
+            if (aHit !== bHit) return aHit - bHit;
+            return 0;
+        });
+    }
     if (stateCode) {
         ranked.sort((a, b) => {
             const aMatch = a.state === stateCode ? 0 : 1;
             const bMatch = b.state === stateCode ? 0 : 1;
-            return aMatch - bMatch;
+            if (aMatch !== bMatch) return aMatch - bMatch;
+            if (houseMatch) {
+                const house = houseMatch[1].toLowerCase();
+                const aHit = String(a.line1 || '')
+                    .trim()
+                    .toLowerCase()
+                    .startsWith(house)
+                    ? 0
+                    : 1;
+                const bHit = String(b.line1 || '')
+                    .trim()
+                    .toLowerCase()
+                    .startsWith(house)
+                    ? 0
+                    : 1;
+                return aHit - bHit;
+            }
+            return 0;
         });
     }
 

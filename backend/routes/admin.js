@@ -2462,6 +2462,7 @@ router.get('/orders/:id', ...adminAuth, async (req, res) => {
                    u.first_name AS account_first_name,
                    u.last_name AS account_last_name,
                    u.email AS account_email,
+                   u.phone AS account_phone,
                    u.customer_number
             FROM orders o
             LEFT JOIN users u ON o.user_id = u.id
@@ -2659,7 +2660,7 @@ router.post('/orders/:id/mark-label-printed', ...adminAuth, async (req, res) => 
     }
 });
 
-// Update order notes (status/tracking are automated via Shippo)
+// Update order notes and/or shipping address (fulfillment corrections)
 router.patch('/orders/:id', ...adminAuth, async (req, res) => {
     try {
         const orderId = parseInt(req.params.id, 10);
@@ -2667,26 +2668,141 @@ router.patch('/orders/:id', ...adminAuth, async (req, res) => {
             return res.status(400).json({ error: 'Invalid order id' });
         }
 
-        const [existing] = await req.pool.execute('SELECT id, status FROM orders WHERE id = ? LIMIT 1', [orderId]);
+        const [existing] = await req.pool.execute(
+            `SELECT id, status, notes, phone,
+                    shipping_first_name, shipping_last_name,
+                    shipping_address_line_1, shipping_address_line_2,
+                    shipping_city, shipping_state, shipping_postal_code, shipping_country
+               FROM orders WHERE id = ? LIMIT 1`,
+            [orderId]
+        );
         if (!existing.length) {
             return res.status(404).json({ error: 'Order not found' });
         }
+        const before = existing[0];
 
         const body = req.body || {};
         const blockedFields = ['status', 'fulfillment_status', 'tracking_number', 'tracking_url', 'payment_status'];
         const attempted = blockedFields.filter((f) => body[f] !== undefined);
         if (attempted.length) {
             return res.status(400).json({
-                error: 'Order status, fulfillment, payment, and tracking are updated automatically by Shippo. Only admin notes can be edited here.',
+                error: 'Order status, fulfillment, payment, and tracking are updated automatically by Shippo. Only notes and shipping address can be edited here.',
             });
         }
 
+        const { isUsPhoneDisplayOrEmpty, formatPhoneForStorage } = require('../utils/usPhoneDisplay');
+        const { normalizeUsStateCode } = require('../utils/usStateCode');
+
         const updates = [];
         const params = [];
+        const changed = [];
 
         if (body.notes !== undefined) {
             updates.push('notes = ?');
             params.push(body.notes ? String(body.notes) : null);
+            changed.push('notes');
+        }
+
+        const shippingPayload = body.shippingAddress || body.shipping || null;
+        const wantsShippingEdit =
+            shippingPayload != null ||
+            body.shipping_first_name !== undefined ||
+            body.shipping_last_name !== undefined ||
+            body.shipping_address_line_1 !== undefined ||
+            body.shipping_address_line_2 !== undefined ||
+            body.shipping_city !== undefined ||
+            body.shipping_state !== undefined ||
+            body.shipping_postal_code !== undefined ||
+            body.shipping_country !== undefined ||
+            body.phone !== undefined;
+
+        if (wantsShippingEdit) {
+            const src = shippingPayload && typeof shippingPayload === 'object' ? shippingPayload : body;
+            const firstName = String(
+                src.shipping_first_name ?? src.firstName ?? src.first_name ?? before.shipping_first_name ?? ''
+            ).trim();
+            const lastName = String(
+                src.shipping_last_name ?? src.lastName ?? src.last_name ?? before.shipping_last_name ?? ''
+            ).trim();
+            const line1 = String(
+                src.shipping_address_line_1 ?? src.line1 ?? src.address_line_1 ?? before.shipping_address_line_1 ?? ''
+            ).trim();
+            const line2Raw = src.shipping_address_line_2 ?? src.line2 ?? src.address_line_2;
+            const line2 =
+                line2Raw === undefined
+                    ? before.shipping_address_line_2
+                    : String(line2Raw || '').trim() || null;
+            const city = String(src.shipping_city ?? src.city ?? before.shipping_city ?? '').trim();
+            const rawState = String(src.shipping_state ?? src.state ?? before.shipping_state ?? '').trim();
+            const stateCode = normalizeUsStateCode(rawState) || rawState;
+            const postal = String(
+                src.shipping_postal_code ?? src.postalCode ?? src.postal_code ?? before.shipping_postal_code ?? ''
+            ).trim();
+            const country = String(
+                src.shipping_country ?? src.country ?? before.shipping_country ?? 'United States'
+            ).trim() || 'United States';
+
+            if (!firstName || !lastName) {
+                return res.status(400).json({ error: 'Shipping first and last name are required.' });
+            }
+            if (!line1 || !city || !stateCode || !postal) {
+                return res.status(400).json({ error: 'Shipping street, city, state, and ZIP are required.' });
+            }
+
+            let phoneVal = before.phone;
+            if (src.phone !== undefined || body.phone !== undefined) {
+                const phoneRaw = src.phone !== undefined ? src.phone : body.phone;
+                const phoneTrim = String(phoneRaw == null ? '' : phoneRaw).trim();
+                if (!isUsPhoneDisplayOrEmpty(phoneTrim)) {
+                    return res.status(400).json({
+                        error: 'Phone must be formatted as (555) 123-4567 or left blank.',
+                    });
+                }
+                phoneVal = phoneTrim ? formatPhoneForStorage(phoneTrim) || phoneTrim : null;
+            }
+
+            const shippingFields = [
+                ['shipping_first_name', firstName],
+                ['shipping_last_name', lastName],
+                ['shipping_address_line_1', line1],
+                ['shipping_address_line_2', line2],
+                ['shipping_city', city],
+                ['shipping_state', stateCode],
+                ['shipping_postal_code', postal],
+                ['shipping_country', country],
+                ['phone', phoneVal],
+            ];
+            for (const [col, val] of shippingFields) {
+                updates.push(`${col} = ?`);
+                params.push(val);
+            }
+            changed.push('shipping_address');
+
+            if (body.notes === undefined) {
+                const stamp = new Date().toISOString().replace('T', ' ').slice(0, 19);
+                const fromLine = [
+                    [before.shipping_first_name, before.shipping_last_name].filter(Boolean).join(' '),
+                    before.shipping_address_line_1,
+                    [before.shipping_city, before.shipping_state, before.shipping_postal_code]
+                        .filter(Boolean)
+                        .join(', '),
+                    before.phone || '',
+                ]
+                    .filter((x) => x && String(x).trim())
+                    .join(' · ');
+                const toLine = [
+                    [firstName, lastName].filter(Boolean).join(' '),
+                    line1,
+                    [city, stateCode, postal].filter(Boolean).join(', '),
+                    phoneVal || '',
+                ]
+                    .filter((x) => x && String(x).trim())
+                    .join(' · ');
+                const auditLine = `[${stamp} UTC] Shipping address updated by admin.\nWas: ${fromLine}\nNow: ${toLine}`;
+                const prevNotes = before.notes ? String(before.notes).trim() : '';
+                updates.push('notes = ?');
+                params.push(prevNotes ? `${prevNotes}\n\n${auditLine}` : auditLine);
+            }
         }
 
         if (!updates.length) {
@@ -2702,6 +2818,7 @@ router.patch('/orders/:id', ...adminAuth, async (req, res) => {
                    u.first_name AS account_first_name,
                    u.last_name AS account_last_name,
                    u.email AS account_email,
+                   u.phone AS account_phone,
                    u.customer_number
             FROM orders o
             LEFT JOIN users u ON o.user_id = u.id
@@ -2722,7 +2839,8 @@ router.patch('/orders/:id', ...adminAuth, async (req, res) => {
             [orderId]
         );
 
-        res.json({ order: orders[0], items, message: 'Order updated' });
+        logger.info(`Admin updated order ${orderId}: ${changed.join(', ')}`);
+        res.json({ order: orders[0], items, message: 'Order updated', changed });
     } catch (error) {
         logger.error('Admin order update error:', error);
         res.status(500).json({ error: 'Internal server error' });

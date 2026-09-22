@@ -765,10 +765,107 @@ class AdminApp {
             order[`${prefix}_address_line_2`],
             [order[`${prefix}_city`], order[`${prefix}_state`], order[`${prefix}_postal_code`]].filter(Boolean).join(', '),
             order[`${prefix}_country`],
-        ].filter((line) => line && String(line).trim());
-        return lines.length
-            ? lines.map((line) => `<div>${this.escapeHtml(line)}</div>`).join('')
+        ];
+        if (prefix === 'shipping') {
+            const phone = String(order.phone || order.account_phone || '').trim();
+            if (phone) lines.push(phone);
+        }
+        const filtered = lines.filter((line) => line && String(line).trim());
+        return filtered.length
+            ? filtered.map((line) => `<div>${this.escapeHtml(line)}</div>`).join('')
             : '<div style="color:var(--gray-500);">-</div>';
+    }
+
+    _resolveOrderPhone(order) {
+        return String(order?.phone || order?.account_phone || '').trim();
+    }
+
+    _bindShippingAddressEditor(modal, orderId, order) {
+        const editBtn = modal.querySelector('#orderEditShippingBtn');
+        const form = modal.querySelector('#order-shipping-edit-form');
+        const display = modal.querySelector('#order-shipping-display');
+        const cancelBtn = modal.querySelector('#orderShippingEditCancel');
+        const saveBtn = modal.querySelector('#orderShippingEditSave');
+        if (!editBtn || !form || !display) return;
+
+        const fillForm = (o) => {
+            const set = (id, val) => {
+                const el = form.querySelector(`#${id}`);
+                if (el) el.value = val != null ? String(val) : '';
+            };
+            set('ship-edit-first', o.shipping_first_name);
+            set('ship-edit-last', o.shipping_last_name);
+            set('ship-edit-line1', o.shipping_address_line_1);
+            set('ship-edit-line2', o.shipping_address_line_2);
+            set('ship-edit-city', o.shipping_city);
+            set('ship-edit-state', o.shipping_state);
+            set('ship-edit-zip', o.shipping_postal_code);
+            set('ship-edit-phone', this._resolveOrderPhone(o));
+        };
+
+        editBtn.addEventListener('click', () => {
+            fillForm(order);
+            display.style.display = 'none';
+            form.style.display = 'block';
+            editBtn.style.display = 'none';
+        });
+
+        cancelBtn?.addEventListener('click', () => {
+            form.style.display = 'none';
+            display.style.display = '';
+            editBtn.style.display = '';
+        });
+
+        saveBtn?.addEventListener('click', async () => {
+            const payload = {
+                shipping_first_name: form.querySelector('#ship-edit-first')?.value?.trim() || '',
+                shipping_last_name: form.querySelector('#ship-edit-last')?.value?.trim() || '',
+                shipping_address_line_1: form.querySelector('#ship-edit-line1')?.value?.trim() || '',
+                shipping_address_line_2: form.querySelector('#ship-edit-line2')?.value?.trim() || '',
+                shipping_city: form.querySelector('#ship-edit-city')?.value?.trim() || '',
+                shipping_state: form.querySelector('#ship-edit-state')?.value?.trim() || '',
+                shipping_postal_code: form.querySelector('#ship-edit-zip')?.value?.trim() || '',
+                phone: form.querySelector('#ship-edit-phone')?.value?.trim() || '',
+            };
+            if (!payload.shipping_first_name || !payload.shipping_last_name) {
+                this.showNotification('First and last name are required.', 'error');
+                return;
+            }
+            if (!payload.shipping_address_line_1 || !payload.shipping_city || !payload.shipping_state || !payload.shipping_postal_code) {
+                this.showNotification('Street, city, state, and ZIP are required.', 'error');
+                return;
+            }
+            saveBtn.disabled = true;
+            try {
+                const data = await this.apiRequest(`/admin/orders/${orderId}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify(payload),
+                });
+                const updated = data?.order || { ...order, ...payload };
+                Object.assign(order, updated);
+                display.innerHTML = this._formatAddressBlock('shipping', order);
+                const phoneEl = modal.querySelector('#order-customer-phone');
+                if (phoneEl) {
+                    const phone = this._resolveOrderPhone(order);
+                    phoneEl.textContent = phone || '';
+                    phoneEl.style.display = phone ? '' : 'none';
+                }
+                form.style.display = 'none';
+                display.style.display = '';
+                editBtn.style.display = '';
+                this.showNotification('Shipping address updated', 'success');
+                // Refresh Shippo panel so label rates use the corrected address.
+                const shipSlot = modal.querySelector('#order-shipping-fulfillment');
+                if (shipSlot && window.HMShippingFulfillment) {
+                    shipSlot.innerHTML = '';
+                    void window.HMShippingFulfillment.mount(orderId, shipSlot, this, modal);
+                }
+            } catch (err) {
+                this.showNotification(err.message || 'Could not update shipping address', 'error');
+            } finally {
+                saveBtn.disabled = false;
+            }
+        });
     }
 
     async refreshOrderProgressPanel(orderId, modal) {
@@ -1042,6 +1139,7 @@ class AdminApp {
             const customerName = [order.shipping_first_name, order.shipping_last_name].filter(Boolean).join(' ')
                 || [order.account_first_name, order.account_last_name].filter(Boolean).join(' ')
                 || '-';
+            const customerPhone = this._resolveOrderPhone(order);
             const closeBtn =
                 `<button type="button" class="modal-close" onclick="this.closest('.modal').remove()" aria-label="Close">${HM_CLOSE_ICON_SVG}</button>`;
 
@@ -1099,8 +1197,58 @@ class AdminApp {
             const addressBlocks = shop
                 ? ''
                 : `<div>
-                        <h4 style="margin:0 0 0.75rem;color:var(--gray-800);">Shipping address</h4>
-                        ${this._formatAddressBlock('shipping', order)}
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;margin-bottom:0.75rem;">
+                            <h4 style="margin:0;color:var(--gray-800);">Shipping address</h4>
+                            <button type="button" class="btn btn-sm btn-secondary" id="orderEditShippingBtn" title="Correct shipping address for fulfillment">
+                                <i class="fas fa-pen"></i> Edit
+                            </button>
+                        </div>
+                        <div id="order-shipping-display" style="font-size:0.95rem;line-height:1.5;">
+                            ${this._formatAddressBlock('shipping', order)}
+                        </div>
+                        <form id="order-shipping-edit-form" style="display:none;font-size:0.9rem;" autocomplete="off">
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+                                <div>
+                                    <label for="ship-edit-first" style="display:block;font-size:0.8rem;color:var(--gray-600);margin-bottom:0.2rem;">First name</label>
+                                    <input id="ship-edit-first" class="form-input" type="text" required>
+                                </div>
+                                <div>
+                                    <label for="ship-edit-last" style="display:block;font-size:0.8rem;color:var(--gray-600);margin-bottom:0.2rem;">Last name</label>
+                                    <input id="ship-edit-last" class="form-input" type="text" required>
+                                </div>
+                            </div>
+                            <div style="margin-top:0.5rem;">
+                                <label for="ship-edit-line1" style="display:block;font-size:0.8rem;color:var(--gray-600);margin-bottom:0.2rem;">Address line 1</label>
+                                <input id="ship-edit-line1" class="form-input" type="text" required>
+                            </div>
+                            <div style="margin-top:0.5rem;">
+                                <label for="ship-edit-line2" style="display:block;font-size:0.8rem;color:var(--gray-600);margin-bottom:0.2rem;">Address line 2</label>
+                                <input id="ship-edit-line2" class="form-input" type="text">
+                            </div>
+                            <div style="display:grid;grid-template-columns:1.4fr 0.6fr 0.8fr;gap:0.5rem;margin-top:0.5rem;">
+                                <div>
+                                    <label for="ship-edit-city" style="display:block;font-size:0.8rem;color:var(--gray-600);margin-bottom:0.2rem;">City</label>
+                                    <input id="ship-edit-city" class="form-input" type="text" required>
+                                </div>
+                                <div>
+                                    <label for="ship-edit-state" style="display:block;font-size:0.8rem;color:var(--gray-600);margin-bottom:0.2rem;">State</label>
+                                    <input id="ship-edit-state" class="form-input" type="text" maxlength="2" required style="text-transform:uppercase;">
+                                </div>
+                                <div>
+                                    <label for="ship-edit-zip" style="display:block;font-size:0.8rem;color:var(--gray-600);margin-bottom:0.2rem;">ZIP</label>
+                                    <input id="ship-edit-zip" class="form-input" type="text" required>
+                                </div>
+                            </div>
+                            <div style="margin-top:0.5rem;">
+                                <label for="ship-edit-phone" style="display:block;font-size:0.8rem;color:var(--gray-600);margin-bottom:0.2rem;">Phone</label>
+                                <input id="ship-edit-phone" class="form-input" type="tel" data-phone-us maxlength="14" inputmode="numeric" placeholder="(555) 555-0100">
+                            </div>
+                            <div style="display:flex;gap:0.5rem;margin-top:0.75rem;flex-wrap:wrap;">
+                                <button type="button" class="btn btn-sm btn-primary" id="orderShippingEditSave"><i class="fas fa-save"></i> Save address</button>
+                                <button type="button" class="btn btn-sm btn-secondary" id="orderShippingEditCancel">Cancel</button>
+                            </div>
+                            <p style="margin:0.5rem 0 0;font-size:0.8rem;color:var(--gray-500);">Updates the ship-to address for labels and invoices. Payment history is unchanged.</p>
+                        </form>
                     </div>
                     <div>
                         <h4 style="margin:0 0 0.75rem;color:var(--gray-800);">Billing address</h4>
@@ -1145,6 +1293,7 @@ class AdminApp {
                         <div style="font-size:0.95rem;line-height:1.5;">
                             <div><strong>${this.escapeHtml(customerName)}</strong></div>
                             <div>${this.escapeHtml(order.email || order.account_email || '')}</div>
+                            <div id="order-customer-phone" style="margin-top:0.15rem;${customerPhone ? '' : 'display:none;'}">${this.escapeHtml(customerPhone)}</div>
                             ${order.customer_number ? `<div style="color:var(--gray-500);margin-top:0.25rem;"><code>${this.escapeHtml(order.customer_number)}</code></div>` : ''}
                             ${order.user_id ? `<button type="button" class="btn btn-sm btn-secondary" id="orderViewCustomerBtn" style="margin-top:0.75rem;"><i class="fas fa-user"></i> View customer</button>` : ''}
                         </div>
@@ -1169,6 +1318,7 @@ class AdminApp {
 
             if (!shop) {
                 this._bindManualTrackingForm(modal, modal);
+                this._bindShippingAddressEditor(modal, orderId, order);
             }
 
             const shipSlot = modal.querySelector('#order-shipping-fulfillment');

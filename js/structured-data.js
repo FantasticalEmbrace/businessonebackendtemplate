@@ -334,7 +334,10 @@ class StructuredDataManager {
             "@type": "Product",
             "name": productData.name,
             "description": productData.description,
-            "image": productData.image,
+            // image may be a string or an array of URLs already linked to this product
+            "image": Array.isArray(productData.images) && productData.images.length
+                ? productData.images
+                : productData.image,
             "sku": productData.sku,
             "brand": {
                 "@type": "Brand",

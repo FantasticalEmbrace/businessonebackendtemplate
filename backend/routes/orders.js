@@ -391,6 +391,7 @@ router.post('/', async (req, res) => {
                     order_number,
                     user_id,
                     email,
+                    phone,
                     status,
                     payment_status,
                     subtotal,
@@ -420,12 +421,13 @@ router.post('/', async (req, res) => {
                     shipping_method,
                     payment_method,
                     sales_channel
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `,
                 sqlBinds([
                     orderNumber,
                     userId,
                     orderEmail,
+                    phoneTrim,
                     'pending',
                     'pending',
                     merchandiseSubtotal,

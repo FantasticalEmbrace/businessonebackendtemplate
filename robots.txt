@@ -15,6 +15,10 @@ Disallow: /order-confirmation.html
 Disallow: /account.html
 Disallow: /reset-password.html
 
+# Google Merchant supplemental product feed (read-only; allow fetchers)
+Allow: /feeds/google-merchant-products.txt
+Allow: /feeds/google-merchant-products.tsv
+
 # Utility / dev pages
 Disallow: /check-upload.html
 Disallow: /unregister-sw.html

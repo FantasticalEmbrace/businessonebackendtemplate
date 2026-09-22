@@ -53,6 +53,13 @@ function resolveCustomerName(order) {
     return '';
 }
 
+/** Order checkout phone, falling back to linked account phone for older orders. */
+function resolveCustomerPhone(order) {
+    const orderPhone = String(order?.phone || '').trim();
+    if (orderPhone) return orderPhone;
+    return String(order?.account_phone || '').trim();
+}
+
 /** Storefront PDP href for a receipt line (null when no product reference). */
 function getReceiptLineProductHref(line) {
     if (!line) return null;
@@ -64,7 +71,7 @@ function getReceiptLineProductHref(line) {
     return null;
 }
 
-function formatAddressBlock(order, prefix) {
+function formatAddressBlock(order, prefix, { includePhone = false } = {}) {
     const lines = [
         [order[`${prefix}_first_name`], order[`${prefix}_last_name`]].filter(Boolean).join(' '),
         order[`${prefix}_company`],
@@ -74,8 +81,12 @@ function formatAddressBlock(order, prefix) {
             .filter(Boolean)
             .join(', '),
         order[`${prefix}_country`]
-    ].filter((line) => line && String(line).trim());
-    return lines;
+    ];
+    if (includePhone) {
+        const phone = resolveCustomerPhone(order);
+        if (phone) lines.push(phone);
+    }
+    return lines.filter((line) => line && String(line).trim());
 }
 
 async function loadAdminOrderReceiptContext(pool, orderId) {
@@ -91,6 +102,7 @@ async function loadAdminOrderReceiptContext(pool, orderId) {
                 u.first_name AS account_first_name,
                 u.last_name AS account_last_name,
                 u.email AS account_email,
+                u.phone AS account_phone,
                 e.first_name AS cashier_first_name,
                 e.last_name AS cashier_last_name
            FROM orders o
@@ -170,12 +182,23 @@ async function loadAdminOrderReceiptContext(pool, orderId) {
         paymentTenders,
         customerEmail: resolveCustomerEmail(order),
         customerName: resolveCustomerName(order),
+        customerPhone: resolveCustomerPhone(order),
         isInStore: isInStoreOrder(order)
     };
 }
 
 function buildOrderReceiptHtml(context, { autoPrint = false } = {}) {
-    const { order, lineItems, branding, receiptSettings, posReceipt, paymentTenders, customerName, isInStore } = context;
+    const {
+        order,
+        lineItems,
+        branding,
+        receiptSettings,
+        posReceipt,
+        paymentTenders,
+        customerName,
+        customerPhone,
+        isInStore
+    } = context;
     const { formatTenderLinesHtml, paymentMethodLabel } = require('../utils/paymentTenderLines');
     const primary = branding.colors?.primary || '#658d0b';
     const orderNumber = String(order.order_number || order.id || '');
@@ -218,7 +241,7 @@ function buildOrderReceiptHtml(context, { autoPrint = false } = {}) {
 
     const shippingBlock = !isInStore
         ? (() => {
-              const ship = formatAddressBlock(order, 'shipping');
+              const ship = formatAddressBlock(order, 'shipping', { includePhone: true });
               if (!ship.length) return '';
               return `<div style="margin-top:16px;">
                 <div style="font-weight:600;margin-bottom:4px;">Ship to</div>
@@ -316,6 +339,7 @@ function buildOrderReceiptHtml(context, { autoPrint = false } = {}) {
       <div><strong>Order:</strong> ${escapeHtml(orderNumber)}</div>
       <div><strong>Date:</strong> ${escapeHtml(createdAt)}</div>
       ${customerName ? `<div><strong>Customer:</strong> ${escapeHtml(customerName)}</div>` : ''}
+      ${customerPhone ? `<div><strong>Phone:</strong> ${escapeHtml(customerPhone)}</div>` : ''}
       ${receiptSettings.showCashier && cashierName ? `<div><strong>Cashier:</strong> ${escapeHtml(cashierName)}</div>` : ''}
     </div>
     <table style="width:100%;border-collapse:collapse;font-size:14px;">
@@ -355,7 +379,16 @@ function padLine(left, right, width = 42) {
 }
 
 function buildOrderReceiptEscposLines(context) {
-    const { order, lineItems, branding, receiptSettings, posReceipt, customerName, isInStore } = context;
+    const {
+        order,
+        lineItems,
+        branding,
+        receiptSettings,
+        posReceipt,
+        customerName,
+        customerPhone,
+        isInStore
+    } = context;
     const lines = [];
     const width = 42;
 
@@ -373,6 +406,7 @@ function buildOrderReceiptEscposLines(context) {
     lines.push(`Order: ${String(order.order_number || order.id || '').slice(0, width - 7)}`);
     lines.push(`Date: ${formatReceiptDate(order.created_at).slice(0, width - 6)}`);
     if (customerName) lines.push(`Customer: ${customerName.slice(0, width - 10)}`);
+    if (customerPhone) lines.push(`Phone: ${String(customerPhone).slice(0, width - 7)}`);
     const cashierName =
         posReceipt?.cashierName ||
         [order.cashier_first_name, order.cashier_last_name].filter(Boolean).join(' ').trim();

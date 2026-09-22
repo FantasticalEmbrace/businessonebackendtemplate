@@ -44,6 +44,85 @@ class ProductDetailPage {
         return resolveHmHerbsMediaUrl(url, this.backendOrigin);
     }
 
+    /**
+     * Absolute image URLs already linked to this product in product_images.
+     * Primary first; no scrape/folder/fuzzy attach — only this.product.images.
+     */
+    getLinkedProductImageUrls(maxTotal = 11) {
+        const rows = Array.isArray(this.product?.images) ? this.product.images : [];
+        const ordered = [...rows].sort((a, b) => {
+            const ap = a.is_primary ? 1 : 0;
+            const bp = b.is_primary ? 1 : 0;
+            if (bp !== ap) return bp - ap;
+            return Number(a.sort_order || 0) - Number(b.sort_order || 0);
+        });
+        const out = [];
+        const seen = new Set();
+        for (const row of ordered) {
+            const abs = this.resolveProductImageUrl(row.image_url);
+            if (!abs || /^data:/i.test(abs) || seen.has(abs)) continue;
+            seen.add(abs);
+            out.push(abs);
+            if (out.length >= maxTotal) break;
+        }
+        return out;
+    }
+
+    updateProductStructuredData() {
+        if (!this.product) return;
+        const images = this.getLinkedProductImageUrls(11);
+        const slug = this.product.slug || '';
+        const url = slug
+            ? `${window.location.origin}${window.location.pathname}?slug=${encodeURIComponent(slug)}`
+            : window.location.href;
+        const price = Number(this.selectedVariant?.price || this.product.price || 0);
+        const inStock = this.product.track_inventory === 0 || this.product.track_inventory === false
+            ? true
+            : Number(this.product.inventory_quantity) > 0;
+        const storeLabel =
+            (document.querySelector('meta[name="application-name"]')?.getAttribute('content') || '').trim() ||
+            (document.querySelector('meta[property="og:site_name"]')?.getAttribute('content') || '').trim() ||
+            'Store';
+
+        const schema = {
+            '@context': 'https://schema.org',
+            '@type': 'Product',
+            name: this.product.name || '',
+            description:
+                (this.product.short_description && String(this.product.short_description).trim()) ||
+                (this.product.meta_description && String(this.product.meta_description).trim()) ||
+                '',
+            sku: this.product.sku || undefined,
+            url,
+            image: images.length === 1 ? images[0] : images.length > 1 ? images : undefined,
+            brand: this.product.brand_name
+                ? { '@type': 'Brand', name: this.product.brand_name }
+                : undefined,
+            offers: {
+                '@type': 'Offer',
+                priceCurrency: 'USD',
+                price: Number.isFinite(price) ? price.toFixed(2) : undefined,
+                availability: inStock
+                    ? 'https://schema.org/InStock'
+                    : 'https://schema.org/OutOfStock',
+                url,
+                seller: {
+                    '@type': 'Organization',
+                    name: storeLabel,
+                },
+            },
+        };
+
+        let script = document.getElementById('product-jsonld');
+        if (!script) {
+            script = document.createElement('script');
+            script.id = 'product-jsonld';
+            script.type = 'application/ld+json';
+            document.head.appendChild(script);
+        }
+        script.textContent = JSON.stringify(schema);
+    }
+
     async init() {
         try {
             // Slug from query/path/hash, or legacy ?id=123 (wishlist / old links)
@@ -193,8 +272,26 @@ class ProductDetailPage {
             canonical.setAttribute('href', canonicalHref);
         }
 
-        // Breadcrumb
+        // Product JSON-LD: image array from this product's product_images only (no cross-attach).
+        this.updateProductStructuredData();
+
+        // Breadcrumb: Home / Products / {Brand?} / {Product}
         const breadcrumbProduct = document.getElementById('breadcrumb-product');
+        const breadcrumbBrandItem = document.getElementById('breadcrumb-brand-item');
+        const breadcrumbBrand = document.getElementById('breadcrumb-brand');
+        const brandName = String(this.product.brand_name || '').trim();
+        const brandSlug = String(this.product.brand_slug || '').trim();
+        if (breadcrumbBrandItem && breadcrumbBrand) {
+            if (brandName) {
+                breadcrumbBrand.textContent = brandName;
+                breadcrumbBrand.href = `products.html?brand=${encodeURIComponent(brandSlug || brandName)}`;
+                breadcrumbBrandItem.style.display = '';
+            } else {
+                breadcrumbBrand.textContent = '';
+                breadcrumbBrand.removeAttribute('href');
+                breadcrumbBrandItem.style.display = 'none';
+            }
+        }
         if (breadcrumbProduct) {
             breadcrumbProduct.textContent = this.product.name;
         }

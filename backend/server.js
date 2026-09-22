@@ -653,6 +653,23 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
+// Google Merchant product feed (READ ONLY — emits existing product_images per product_id).
+// Not under /api so robots.txt Disallow:/api/ does not block Merchant Center fetchers.
+const { buildGoogleMerchantProductFeedTsv } = require('./services/googleMerchantProductFeed');
+app.get(['/feeds/google-merchant-products.txt', '/feeds/google-merchant-products.tsv'], async (req, res) => {
+    try {
+        const { tsv, productCount, multiImageCount } = await buildGoogleMerchantProductFeedTsv(pool);
+        res.setHeader('Content-Type', 'text/tab-separated-values; charset=utf-8');
+        res.setHeader('Cache-Control', 'public, max-age=300');
+        res.setHeader('X-Product-Count', String(productCount));
+        res.setHeader('X-Multi-Image-Product-Count', String(multiImageCount));
+        res.send(tsv);
+    } catch (error) {
+        logger.error('Google Merchant product feed error:', error);
+        res.status(500).type('text/plain').send('Failed to build Google Merchant product feed');
+    }
+});
+
 // Database + catalog readiness (use when /api/products returns empty)
 app.get('/api/health/ready', async (req, res) => {
     try {

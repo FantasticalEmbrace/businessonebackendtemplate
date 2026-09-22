@@ -27,6 +27,11 @@ const ORDER_PATCHES = [
               ENUM('online', 'in_store', 'mobile', 'phone', 'other') NOT NULL DEFAULT 'online'
               COMMENT 'online=website checkout; in_store=POS/retail'`
     },
+    {
+        column: 'phone',
+        sql: `ALTER TABLE orders ADD COLUMN phone VARCHAR(32) NULL
+              COMMENT 'Checkout phone (guest + account); used on invoice and labels'`
+    },
 ];
 
 async function tableExists(pool, tableName) {
