@@ -9,15 +9,59 @@
  *
  * Brand / store domain come from store branding + STOREFRONT_PUBLIC_URL (or opts),
  * not a hard-coded merchant domain.
+ *
+ * Offer matching: `id` MUST equal the Product.sku / productID emitted in PDP
+ * JSON-LD (see productPageJsonLd.js). Google Merchant website-crawl primary
+ * sources use that sku as the offer identifier.
+ *
+ * Pricing: parent `products.price`, with primary variant fallback when parent is
+ * missing/zero. Google `price` is always a positive `12.99 USD` value; on sale,
+ * regular goes in `price` and the discounted amount in `sale_price`.
+ *
+ * Shipping: offer-level `shipping` + `free_shipping_threshold` match checkout
+ * (`FREE_SHIPPING_THRESHOLD` / flat first-class rate from shippingConfig). US only.
  */
 
 const { STOREFRONT_VISIBLE_WHERE } = require('../utils/storefrontProductVisibility');
 const { sanitizeLegacyProductImageUrl } = require('../utils/catalogOverrides');
 const { getStorefrontPublicBaseUrl } = require('../utils/storefrontUrl');
+const { enrichProductListPricesFromVariants } = require('../utils/storefrontProductPrice');
+const { getShippingConfig } = require('../config/shippingConfig');
 const { resolveStoreBranding } = require('./storeBranding');
 
 /** Google allows 1 image_link + up to 10 additional_image_link. */
 const MAX_ADDITIONAL_IMAGES = 10;
+
+/**
+ * Standard USPS transit (business days) — matches typical Standard checkout copy
+ * ("3–7 business days"). US only. Service label is generic, not store-branded.
+ */
+const FEED_SHIPPING_MIN_TRANSIT_DAYS = 3;
+const FEED_SHIPPING_MAX_TRANSIT_DAYS = 7;
+const FEED_SHIPPING_SERVICE = 'USPS Standard';
+
+/**
+ * Offer-level shipping for Google Merchant TSV.
+ * Cost + free threshold come from the same env as checkout (`shippingConfig`).
+ * Format: https://support.google.com/merchants/answer/6324484
+ * free_shipping_threshold: https://support.google.com/merchants/answer/14768922
+ */
+function buildFeedShippingFields() {
+    const cfg = getShippingConfig();
+    const threshold = Number(cfg.FREE_SHIPPING_THRESHOLD);
+    const flat = Math.max(
+        Number(cfg.FIRST_CLASS_SHIPPING) || 0,
+        Number(cfg.MIN_PAID_SHIPPING_RATE) || 0
+    );
+    const price = Number.isFinite(flat) && flat > 0 ? flat.toFixed(2) : '0.00';
+    const freeAt =
+        Number.isFinite(threshold) && threshold > 0 ? threshold.toFixed(2) : '0.00';
+
+    return {
+        shipping: `US:${FEED_SHIPPING_SERVICE}:${price} USD:${FEED_SHIPPING_MIN_TRANSIT_DAYS}:${FEED_SHIPPING_MAX_TRANSIT_DAYS}`,
+        freeShippingThreshold: `US:${freeAt} USD`,
+    };
+}
 
 function stripHtml(text) {
     return String(text || '')
@@ -49,10 +93,35 @@ function productLink(base, slug) {
     return `${String(base).replace(/\/+$/, '')}/product.html?slug=${encodeURIComponent(s)}`;
 }
 
+/** Google requires amount > 0 with ISO 4217 currency, e.g. `12.99 USD`. */
 function moneyWithCurrency(price) {
     const n = Number(price);
-    if (!Number.isFinite(n)) return '';
+    if (!Number.isFinite(n) || n <= 0) return '';
     return `${n.toFixed(2)} USD`;
+}
+
+/**
+ * Resolve Google price + optional sale_price from storefront fields.
+ * @returns {{ price: string, salePrice: string } | null}
+ */
+function resolveFeedPrices(product) {
+    const selling = Number(product && product.price);
+    if (!Number.isFinite(selling) || selling <= 0) return null;
+
+    const compare = Number(product && product.compare_price);
+    const onSale = Number.isFinite(compare) && compare > selling;
+
+    if (onSale) {
+        return {
+            price: moneyWithCurrency(compare),
+            salePrice: moneyWithCurrency(selling),
+        };
+    }
+
+    return {
+        price: moneyWithCurrency(selling),
+        salePrice: '',
+    };
 }
 
 function availabilityForRow(row) {
@@ -110,7 +179,7 @@ function pickImagesForProduct(imageRows, product, baseUrl) {
  * Build Google Merchant TSV from live catalog (READ ONLY).
  * @param {import('mysql2/promise').Pool} pool
  * @param {{ baseUrl?: string, defaultBrand?: string }} [opts]
- * @returns {Promise<{ tsv: string, productCount: number, multiImageCount: number }>}
+ * @returns {Promise<{ tsv: string, productCount: number, multiImageCount: number, skippedNoPrice: number }>}
  */
 async function buildGoogleMerchantProductFeedTsv(pool, opts = {}) {
     const baseUrl = String(opts.baseUrl || getStorefrontPublicBaseUrl()).replace(/\/+$/, '');
@@ -130,7 +199,7 @@ async function buildGoogleMerchantProductFeedTsv(pool, opts = {}) {
 
     const [products] = await pool.execute(
         `SELECT p.id, p.sku, p.slug, p.name, p.short_description, p.long_description,
-                p.price, p.inventory_quantity, p.track_inventory,
+                p.price, p.compare_price, p.inventory_quantity, p.track_inventory,
                 b.name AS brand_name
            FROM products p
            LEFT JOIN brands b ON b.id = p.brand_id
@@ -143,8 +212,10 @@ async function buildGoogleMerchantProductFeedTsv(pool, opts = {}) {
 
     if (!products.length) {
         const header = buildHeaderRow(0);
-        return { tsv: `${header}\n`, productCount: 0, multiImageCount: 0 };
+        return { tsv: `${header}\n`, productCount: 0, multiImageCount: 0, skippedNoPrice: 0 };
     }
+
+    await enrichProductListPricesFromVariants(pool, products);
 
     const ids = products.map((p) => p.id);
     const placeholders = ids.map(() => '?').join(',');
@@ -165,21 +236,30 @@ async function buildGoogleMerchantProductFeedTsv(pool, opts = {}) {
     }
 
     let maxAdditional = 0;
+    let skippedNoPrice = 0;
     const prepared = [];
     for (const product of products) {
         const imgs = imagesByProductId.get(Number(product.id)) || [];
         const { imageLink, additional } = pickImagesForProduct(imgs, product, baseUrl);
         if (!imageLink) continue;
+
+        const priced = resolveFeedPrices(product);
+        if (!priced || !priced.price) {
+            skippedNoPrice += 1;
+            continue;
+        }
+
         if (additional.length > maxAdditional) maxAdditional = additional.length;
-        prepared.push({ product, imageLink, additional });
+        prepared.push({ product, imageLink, additional, priced });
     }
 
+    const ship = buildFeedShippingFields();
     const header = buildHeaderRow(maxAdditional);
     const lines = [header];
     let multiImageCount = 0;
 
     for (const item of prepared) {
-        const { product, imageLink, additional } = item;
+        const { product, imageLink, additional, priced } = item;
         if (additional.length > 0) multiImageCount += 1;
 
         const description =
@@ -187,22 +267,24 @@ async function buildGoogleMerchantProductFeedTsv(pool, opts = {}) {
             stripHtml(product.long_description) ||
             stripHtml(product.name);
 
+        // Required attrs before additional images so positional mappers still see price.
         const cells = [
             escapeTsvCell(product.sku),
             escapeTsvCell(product.name),
             escapeTsvCell(description),
             escapeTsvCell(productLink(baseUrl, product.slug)),
             escapeTsvCell(imageLink),
+            escapeTsvCell(availabilityForRow(product)),
+            escapeTsvCell(priced.price),
+            escapeTsvCell(priced.salePrice),
+            escapeTsvCell(product.brand_name || defaultBrand),
+            'new',
+            escapeTsvCell(ship.shipping),
+            escapeTsvCell(ship.freeShippingThreshold),
         ];
         for (let i = 0; i < maxAdditional; i += 1) {
             cells.push(escapeTsvCell(additional[i] || ''));
         }
-        cells.push(
-            escapeTsvCell(availabilityForRow(product)),
-            escapeTsvCell(moneyWithCurrency(product.price)),
-            escapeTsvCell(product.brand_name || defaultBrand),
-            'new'
-        );
         lines.push(cells.join('\t'));
     }
 
@@ -210,22 +292,41 @@ async function buildGoogleMerchantProductFeedTsv(pool, opts = {}) {
         tsv: `${lines.join('\n')}\n`,
         productCount: prepared.length,
         multiImageCount,
+        skippedNoPrice,
     };
 }
 
 function buildHeaderRow(additionalCount) {
-    const cols = ['id', 'title', 'description', 'link', 'image_link'];
+    const cols = [
+        'id',
+        'title',
+        'description',
+        'link',
+        'image_link',
+        'availability',
+        'price',
+        'sale_price',
+        'brand',
+        'condition',
+        'shipping(country:service:price:min_transit_time:max_transit_time)',
+        'free_shipping_threshold(country:price_threshold)',
+    ];
     for (let i = 0; i < additionalCount; i += 1) {
         cols.push('additional_image_link');
     }
-    cols.push('availability', 'price', 'brand', 'condition');
     return cols.join('\t');
 }
 
 module.exports = {
     MAX_ADDITIONAL_IMAGES,
+    FEED_SHIPPING_MIN_TRANSIT_DAYS,
+    FEED_SHIPPING_MAX_TRANSIT_DAYS,
+    FEED_SHIPPING_SERVICE,
+    buildFeedShippingFields,
     buildGoogleMerchantProductFeedTsv,
     pickImagesForProduct,
     toAbsoluteUrl,
     productLink,
+    moneyWithCurrency,
+    resolveFeedPrices,
 };

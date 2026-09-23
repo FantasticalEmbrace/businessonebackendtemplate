@@ -1634,6 +1634,7 @@ class HMHerbsApp {
         const productCard = document.createElement('div');
         productCard.className = `product-card ${product.inventory === 0 ? 'out-of-stock' : ''} ${product.inventory <= product.lowStockThreshold ? 'low-stock' : ''}`;
         productCard.setAttribute('data-product-id', product.id);
+        if (product.sku) productCard.setAttribute('data-sku', String(product.sku).trim());
 
         // Create image element (blank area when no photo — never set src="" which resolves to the page URL)
         if (product.image) {

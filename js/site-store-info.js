@@ -48,6 +48,29 @@
             .replace(/"/g, '&quot;');
     }
 
+    function formatMoney(n) {
+        const v = Number(n);
+        if (!Number.isFinite(v) || v < 0) return '';
+        return `$${v.toFixed(2)}`;
+    }
+
+    function applyShippingRates(data) {
+        const ship = data && data.shipping;
+        if (!ship) return;
+        const threshold = formatMoney(ship.freeShippingThreshold);
+        const flat = formatMoney(ship.firstClassRate);
+        if (threshold) {
+            document.querySelectorAll('[data-ship-threshold]').forEach((el) => {
+                el.textContent = threshold;
+            });
+        }
+        if (flat) {
+            document.querySelectorAll('[data-ship-flat]').forEach((el) => {
+                el.textContent = flat;
+            });
+        }
+    }
+
     let cachedPromise = null;
 
     function fetchStoreInfo() {
@@ -71,6 +94,7 @@
     async function init() {
         const data = await fetchStoreInfo();
         applyFooterHours(linesFromPayload(data));
+        applyShippingRates(data);
     }
 
     if (document.readyState === 'loading') {

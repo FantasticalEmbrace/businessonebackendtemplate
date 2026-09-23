@@ -488,6 +488,32 @@ if (process.env.STAGING_BLOCK_INDEXING === 'true') {
 // Permanent SEO redirects from repo-root redirects-301.csv (see file header).
 app.use(createSeoRedirectMiddleware({ rootPath, logger }));
 
+// PDP: inject Product JSON-LD (sku/productID) into initial HTML for Google Merchant crawl.
+// Merchant ignores JS-only schema; offer id must match supplemental feed `id` (= catalog SKU).
+const {
+    renderProductHtmlWithJsonLd,
+} = require('./services/productPageJsonLd');
+const { getStorefrontPublicBaseUrl } = require('./utils/storefrontUrl');
+app.get('/product.html', async (req, res, next) => {
+    const slug = String(req.query.slug || req.query.id || '').trim();
+    if (!slug) return next();
+    try {
+        const rendered = await renderProductHtmlWithJsonLd(pool, {
+            rootPath,
+            slug,
+            baseUrl: getStorefrontPublicBaseUrl(),
+        });
+        if (!rendered) return next();
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader('Cache-Control', 'public, max-age=120');
+        res.setHeader('X-Product-Offer-Id', rendered.sku);
+        return res.send(rendered.html);
+    } catch (error) {
+        logger.warn('product.html JSON-LD SSR failed:', error.message);
+        return next();
+    }
+});
+
 // Business One POS UI — hosted on the dedicated POS platform (pos.businessonecomprehensive.com), not on store servers.
 // Local dev only: set SERVE_POS_UI=true to serve ../business-one-pos at /pos/ from this server.
 const posAppPath = path.join(rootPath, '..', 'business-one-pos');
@@ -658,11 +684,12 @@ app.get('/api/health', (req, res) => {
 const { buildGoogleMerchantProductFeedTsv } = require('./services/googleMerchantProductFeed');
 app.get(['/feeds/google-merchant-products.txt', '/feeds/google-merchant-products.tsv'], async (req, res) => {
     try {
-        const { tsv, productCount, multiImageCount } = await buildGoogleMerchantProductFeedTsv(pool);
+        const { tsv, productCount, multiImageCount, skippedNoPrice } = await buildGoogleMerchantProductFeedTsv(pool);
         res.setHeader('Content-Type', 'text/tab-separated-values; charset=utf-8');
         res.setHeader('Cache-Control', 'public, max-age=300');
         res.setHeader('X-Product-Count', String(productCount));
         res.setHeader('X-Multi-Image-Product-Count', String(multiImageCount));
+        res.setHeader('X-Skipped-No-Price', String(skippedNoPrice || 0));
         res.send(tsv);
     } catch (error) {
         logger.error('Google Merchant product feed error:', error);
@@ -717,7 +744,17 @@ app.get('/api/store-info', async (req, res) => {
             loadPublicStoreInfo(pool),
             loadStoreTaxRate(pool)
         ]);
-        res.json({ ...storeInfo, taxRate });
+        const { getShippingConfig } = require('./config/shippingConfig');
+        const ship = getShippingConfig();
+        res.json({
+            ...storeInfo,
+            taxRate,
+            shipping: {
+                freeShippingThreshold: ship.FREE_SHIPPING_THRESHOLD,
+                firstClassRate: ship.FIRST_CLASS_SHIPPING,
+                minPaidRate: ship.MIN_PAID_SHIPPING_RATE,
+            },
+        });
     } catch (error) {
         logger.error('Store info route error:', error);
         res.status(200).json({ ...publicStoreInfoPayload(DEFAULT_FOOTER_HOURS), taxRate: 0.08 });
@@ -923,7 +960,6 @@ app.post('/api/auth/login', authLimiter, userLoginValidation, async (req, res) =
     }
 });
 
-const { getStorefrontPublicBaseUrl } = require('./utils/storefrontUrl');
 const { sendMail } = require('./utils/mailTransporter');
 
 // Customer password reset (self-service; same email privacy pattern as admin)
@@ -1186,7 +1222,19 @@ app.get('/api/user/orders', authenticateToken, async (req, res) => {
         );
 
         const { enrichOrderTracking } = require('./utils/trackingUrl');
-        res.json({ orders: jsonSafeDeep(orders.map(enrichOrderTracking)) });
+        const { customerFacingTrackingDetail } = require('./utils/orderProgress');
+        res.json({
+            orders: jsonSafeDeep(
+                orders.map((o) => {
+                    const enriched = enrichOrderTracking(o);
+                    return {
+                        ...enriched,
+                        tracking_status_detail:
+                            customerFacingTrackingDetail(enriched.tracking_status_detail) || null,
+                    };
+                })
+            ),
+        });
     } catch (error) {
         logger.error('Get user orders error:', error);
         res.status(500).json({ error: 'Internal server error' });

@@ -20,6 +20,7 @@ const crypto = require('crypto');
 const { jsonSafeDeep } = require('../utils/jsonSafeMysql');
 const { syncOrderTracking } = require('../services/shippoTracking');
 const { enrichOrderTracking } = require('../utils/trackingUrl');
+const { customerFacingTrackingDetail } = require('../utils/orderProgress');
 
 function buildRouter({ pool, authenticateToken, logger }) {
     const router = express.Router();
@@ -303,7 +304,7 @@ function buildRouter({ pool, authenticateToken, logger }) {
             tracking_number: raw.tracking_number,
             tracking_url: raw.tracking_url,
             shipping_carrier: raw.shipping_carrier,
-            shipping_service: raw.shipping_service,
+            shipping_service: customerFacingTrackingDetail(raw.shipping_service) || null,
             label_url: raw.label_url,
             shipped_at: raw.shipped_at,
             delivered_at: raw.delivered_at,
@@ -311,7 +312,7 @@ function buildRouter({ pool, authenticateToken, logger }) {
             fulfillment_status: raw.fulfillment_status,
             shipping_method: raw.shipping_method,
             tracking_status: raw.tracking_status,
-            tracking_status_detail: raw.tracking_status_detail,
+            tracking_status_detail: customerFacingTrackingDetail(raw.tracking_status_detail) || null,
             tracking_status_updated_at: raw.tracking_status_updated_at,
         };
 

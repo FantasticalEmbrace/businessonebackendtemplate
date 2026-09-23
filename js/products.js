@@ -614,6 +614,7 @@ class ProductsPage {
         const card = document.createElement('div');
         card.className = 'product-card';
         card.setAttribute('data-product-id', product.id);
+        if (product.sku) card.setAttribute('data-sku', String(product.sku).trim());
 
         // Product link wrapper for image and title
         const productLink = document.createElement('a');

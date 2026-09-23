@@ -923,8 +923,13 @@ class SEOOptimizer {
     addProductSchemas() {
         const products = document.querySelectorAll('[data-product-id]');
         products.forEach(productElement => {
+            // Prefer catalog SKU (Merchant offer id). Never use DB id as sku.
             const productId = productElement.dataset.productId;
-            const name = productElement.querySelector('.product-name')?.textContent;
+            const sku =
+                (productElement.dataset.sku && String(productElement.dataset.sku).trim()) ||
+                null;
+            if (!sku) return;
+            const name = productElement.querySelector('.product-name, .product-title')?.textContent;
             const price = productElement.querySelector('.product-price')?.textContent;
             const image = productElement.querySelector('img')?.src;
 
@@ -935,7 +940,8 @@ class SEOOptimizer {
                     "name": name,
                     "image": image,
                     "description": productElement.querySelector('.product-description')?.textContent,
-                    "sku": productId,
+                    "sku": sku,
+                    "productID": sku,
                     "offers": {
                         "@type": "Offer",
                         "price": price.replace(/[^0-9.]/g, ''),
@@ -947,6 +953,7 @@ class SEOOptimizer {
                         }
                     }
                 };
+                if (productId) schema.url = productElement.querySelector('a.product-link, a')?.href;
 
                 this.addStructuredData(schema);
             }

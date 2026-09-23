@@ -93,6 +93,8 @@ class ProductDetailPage {
                 (this.product.meta_description && String(this.product.meta_description).trim()) ||
                 '',
             sku: this.product.sku || undefined,
+            // Merchant Center offer id = Product.sku; mirror as productID for crawl matching.
+            productID: this.product.sku || undefined,
             url,
             image: images.length === 1 ? images[0] : images.length > 1 ? images : undefined,
             brand: this.product.brand_name
@@ -105,6 +107,7 @@ class ProductDetailPage {
                 availability: inStock
                     ? 'https://schema.org/InStock'
                     : 'https://schema.org/OutOfStock',
+                itemCondition: 'https://schema.org/NewCondition',
                 url,
                 seller: {
                     '@type': 'Organization',

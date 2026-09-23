@@ -33,9 +33,29 @@ function buildOrderProgressSteps(order) {
     ];
 }
 
+/**
+ * Strip staff-only dropship wording from customer-facing tracking copy.
+ * e.g. "Manual / dropship tracking", "UPS Ground (dropshipped)"
+ */
+function customerFacingTrackingDetail(raw) {
+    let detail = String(raw || '').trim();
+    if (!detail) return '';
+    // Legacy manual-tracking status — replace with neutral copy
+    if (/manual\s*\/\s*drop\s*-?\s*ship/i.test(detail)) {
+        return 'Tracking entered — awaiting carrier update';
+    }
+    detail = detail
+        .replace(/\s*\(\s*drop\s*-?\s*ship(?:ped)?\s*\)/gi, '')
+        .replace(/\bdrop\s*-?\s*ship(?:ped)?\b/gi, '')
+        .replace(/\s{2,}/g, ' ')
+        .replace(/\s*\/\s*$/g, '')
+        .trim();
+    return detail;
+}
+
 function stepDetailFor(order, step) {
     const st = String(order?.status || '').toLowerCase();
-    const detail = String(order?.tracking_status_detail || '').trim();
+    const detail = customerFacingTrackingDetail(order?.tracking_status_detail);
     if (!detail || !step.done) return '';
     if (step.key === 'label' && st === 'label_created') return detail;
     if (step.key === 'shipped' && (st === 'shipped' || st === 'in_transit')) return detail;
@@ -142,6 +162,7 @@ function renderOrderProgressEmailHtml(order, opts = {}) {
 module.exports = {
     buildOrderProgressSteps,
     stepDetailFor,
+    customerFacingTrackingDetail,
     formatProgressDate,
     renderOrderProgressEmailHtml,
 };

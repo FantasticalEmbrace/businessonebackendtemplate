@@ -680,7 +680,8 @@ async function setManualTracking(
         num.slice(0, 128),
         url ? String(url).slice(0, 500) : null,
         carrier.slice(0, 32),
-        'Manual / dropship tracking',
+        // Customer-facing status line — never include "dropship" (staff-only term)
+        'Tracking entered — awaiting carrier update',
     ];
 
     if (service) {
