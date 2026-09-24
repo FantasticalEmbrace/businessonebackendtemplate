@@ -126,7 +126,14 @@
             if (item.line1) line1.value = item.line1;
             if (line2 && item.line2 != null) line2.value = item.line2 || '';
             if (city && item.city) city.value = item.city;
-            if (state && item.state) state.value = String(item.state).toUpperCase().slice(0, 2);
+            if (state && item.state) {
+                const code = String(item.state).toUpperCase().slice(0, 2);
+                if (window.STORE_US_STATE?.setStateFieldValue) {
+                    window.STORE_US_STATE.setStateFieldValue(state, code);
+                } else {
+                    state.value = code;
+                }
+            }
             if (zip && item.postalCode) zip.value = item.postalCode;
 
             hideList();

@@ -141,7 +141,9 @@ class CheckoutManager {
         return {
             line1: document.getElementById('shipping-address-1')?.value?.trim() || '',
             city: document.getElementById('shipping-city')?.value?.trim() || '',
-            state: document.getElementById('shipping-state')?.value?.trim() || '',
+            state: this.normalizeCheckoutState(
+                document.getElementById('shipping-state')?.value?.trim() || ''
+            ),
             postalCode: document.getElementById('shipping-zip')?.value?.trim() || '',
             name: [first, last].filter(Boolean).join(' ')
         };
@@ -152,13 +154,15 @@ class CheckoutManager {
         const missing = [];
         const line1 = document.getElementById('shipping-address-1')?.value?.trim() || '';
         const city = document.getElementById('shipping-city')?.value?.trim() || '';
-        const state = document.getElementById('shipping-state')?.value?.trim() || '';
+        const state = this.normalizeCheckoutState(
+            document.getElementById('shipping-state')?.value?.trim() || ''
+        );
         const zip = String(document.getElementById('shipping-zip')?.value || '')
             .replace(/\s+/g, '')
             .trim();
         if (!line1) missing.push('shipping-address-1');
         if (!city) missing.push('shipping-city');
-        if (!state || !/^[A-Za-z]{2}$/.test(state)) missing.push('shipping-state');
+        if (!state) missing.push('shipping-state');
         if (!zip || !/^\d{5}(-\d{4})?$/.test(zip)) missing.push('shipping-zip');
         return missing;
     }
@@ -216,6 +220,7 @@ class CheckoutManager {
     }
 
     init() {
+        this.populateUsStateSelects();
         this.loadCart();
         if (window.HmCartSubscription?.loadCapabilities) {
             void window.HmCartSubscription.loadCapabilities().then(() => {
@@ -236,6 +241,49 @@ class CheckoutManager {
         this.bindCheckoutRewardsUi();
         void this.loadCheckoutRewards();
         this.setupLoyaltyBanner();
+    }
+
+    /** Fill shipping/billing state dropdowns with all 50 states + DC. */
+    populateUsStateSelects() {
+        const api = window.STORE_US_STATE;
+        if (!api || typeof api.populateStateSelect !== 'function') return;
+        api.populateStateSelect(document.getElementById('shipping-state'));
+        api.populateStateSelect(document.getElementById('billing-state'));
+    }
+
+    /** Normalize free-text or select value to a USPS 2-letter code (or ''). */
+    normalizeCheckoutState(raw) {
+        const api = window.STORE_US_STATE;
+        if (api && typeof api.normalizeUsStateCode === 'function') {
+            return api.normalizeUsStateCode(raw) || '';
+        }
+        const s = String(raw || '').trim();
+        return /^[A-Za-z]{2}$/.test(s) ? s.toUpperCase() : '';
+    }
+
+    /**
+     * Populate country selects from /api/store-info shipping.shipCountries
+     * (STORE_SHIP_COUNTRIES; default US only).
+     */
+    applyShipCountryOptions(options) {
+        const list = Array.isArray(options) && options.length
+            ? options
+            : [{ code: 'US', label: 'United States' }];
+        document.querySelectorAll('[data-ship-country-select]').forEach((sel) => {
+            if (!sel || sel.tagName !== 'SELECT') return;
+            const prev = sel.value || 'United States';
+            sel.innerHTML = '';
+            for (const opt of list) {
+                const el = document.createElement('option');
+                el.value = opt.label || opt.code;
+                el.textContent = opt.label || opt.code;
+                sel.appendChild(el);
+            }
+            const match = [...sel.options].find(
+                (o) => o.value === prev || o.textContent === prev || o.value === 'United States'
+            );
+            sel.value = match ? match.value : sel.options[0]?.value || 'United States';
+        });
     }
 
     /**
@@ -483,7 +531,14 @@ class CheckoutManager {
         this._setInputIfEmpty(document.getElementById('shipping-address-1'), addr.address_line_1);
         this._setInputIfEmpty(document.getElementById('shipping-address-2'), addr.address_line_2);
         this._setInputIfEmpty(document.getElementById('shipping-city'), addr.city);
-        this._setInputIfEmpty(document.getElementById('shipping-state'), addr.state);
+        const shipStateEl = document.getElementById('shipping-state');
+        if (shipStateEl && addr.state && !String(shipStateEl.value || '').trim()) {
+            if (window.STORE_US_STATE?.setStateFieldValue) {
+                window.STORE_US_STATE.setStateFieldValue(shipStateEl, addr.state);
+            } else {
+                this._setInputIfEmpty(shipStateEl, addr.state);
+            }
+        }
         this._setInputIfEmpty(document.getElementById('shipping-zip'), addr.postal_code);
         this._setSelectCountryIfEmpty(
             document.getElementById('shipping-country'),
@@ -1359,7 +1414,9 @@ class CheckoutManager {
     getShippingAddressForQuote() {
         return {
             postalCode: document.getElementById('shipping-zip')?.value?.trim() || '',
-            state: document.getElementById('shipping-state')?.value?.trim() || '',
+            state: this.normalizeCheckoutState(
+                document.getElementById('shipping-state')?.value?.trim() || ''
+            ),
             country: document.getElementById('shipping-country')?.value || 'United States',
         };
     }
@@ -1470,6 +1527,9 @@ class CheckoutManager {
             const data = await response.json();
             const rate = Number(data.taxRate);
             if (Number.isFinite(rate) && rate >= 0) this.storeTaxRate = rate;
+            if (data.shipping?.shipCountries) {
+                this.applyShipCountryOptions(data.shipping.shipCountries);
+            }
         } catch (error) {
             console.warn('Unable to load store tax rate:', error);
         }
@@ -3159,7 +3219,7 @@ class CheckoutManager {
             address_line_1: document.getElementById('shipping-address-1')?.value || '',
             address_line_2: document.getElementById('shipping-address-2')?.value || '',
             city: document.getElementById('shipping-city')?.value || '',
-            state: document.getElementById('shipping-state')?.value || '',
+            state: this.normalizeCheckoutState(document.getElementById('shipping-state')?.value || ''),
             postal_code: document.getElementById('shipping-zip')?.value || '',
             country: document.getElementById('shipping-country')?.value || 'United States'
         };
@@ -3170,7 +3230,7 @@ class CheckoutManager {
                 address_line_1: document.getElementById('billing-address-1')?.value || '',
                 address_line_2: document.getElementById('billing-address-2')?.value || '',
                 city: document.getElementById('billing-city')?.value || '',
-                state: document.getElementById('billing-state')?.value || '',
+                state: this.normalizeCheckoutState(document.getElementById('billing-state')?.value || ''),
                 postal_code: document.getElementById('billing-zip')?.value || '',
                 country: document.getElementById('billing-country')?.value || 'United States'
             };

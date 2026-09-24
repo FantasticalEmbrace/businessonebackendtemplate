@@ -753,6 +753,7 @@ app.get('/api/store-info', async (req, res) => {
                 freeShippingThreshold: ship.FREE_SHIPPING_THRESHOLD,
                 firstClassRate: ship.FIRST_CLASS_SHIPPING,
                 minPaidRate: ship.MIN_PAID_SHIPPING_RATE,
+                shipCountries: ship.shipCountryOptions || [{ code: 'US', label: 'United States' }],
             },
         });
     } catch (error) {

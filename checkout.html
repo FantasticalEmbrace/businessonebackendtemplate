@@ -805,9 +805,11 @@
                             </div>
                             <div class="form-group">
                                 <label for="shipping-state">State <span class="required">*</span></label>
-                                <input type="text" id="shipping-state" name="shipping_state" class="form-input" required
+                                <select id="shipping-state" name="shipping_state" class="form-select" required
                                     autocomplete="address-level1">
-                                <span class="error-message">Please enter your state</span>
+                                    <option value="">Select state</option>
+                                </select>
+                                <span class="error-message">Please select your state</span>
                             </div>
                         </div>
                         <div class="form-row">
@@ -820,10 +822,8 @@
                             <div class="form-group">
                                 <label for="shipping-country">Country <span class="required">*</span></label>
                                 <select id="shipping-country" name="shipping_country" class="form-select" required
-                                    autocomplete="country-name">
+                                    autocomplete="country-name" data-ship-country-select>
                                     <option value="United States" selected>United States</option>
-                                    <option value="Canada">Canada</option>
-                                    <option value="Mexico">Mexico</option>
                                 </select>
                                 <span class="error-message">Please select your country</span>
                             </div>
@@ -859,9 +859,11 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="billing-state">State <span class="required">*</span></label>
-                                    <input type="text" id="billing-state" name="billing_state" class="form-input"
+                                    <select id="billing-state" name="billing_state" class="form-select"
                                         autocomplete="billing address-level1">
-                                    <span class="error-message">Please enter your billing state</span>
+                                        <option value="">Select state</option>
+                                    </select>
+                                    <span class="error-message">Please select your billing state</span>
                                 </div>
                             </div>
                             <div class="form-row">
@@ -874,10 +876,8 @@
                                 <div class="form-group">
                                     <label for="billing-country">Country <span class="required">*</span></label>
                                     <select id="billing-country" name="billing_country" class="form-select"
-                                        autocomplete="billing country-name">
+                                        autocomplete="billing country-name" data-ship-country-select>
                                         <option value="United States" selected>United States</option>
-                                        <option value="Canada">Canada</option>
-                                        <option value="Mexico">Mexico</option>
                                     </select>
                                     <span class="error-message">Please select your billing country</span>
                                 </div>
@@ -1495,7 +1495,8 @@
     <script src="js/hm-notify.js"></script>
     <script src="js/visual-bug-fixes.js"></script>
     <script src="js/phone-us-format.js"></script>
-    <script src="js/address-autocomplete.js?v=no-auto-apply-20260922a"></script>
+    <script src="js/us-state-code.js?v=us50-20260323a"></script>
+    <script src="js/address-autocomplete.js?v=us50-20260323a"></script>
     <script src="js/password-toggle.js?v=4"></script>
     <script src="js/customer-auth.js?v=20260515" defer></script>
     <!-- Optional NMI public key fallback (see file header). Primary: backend .env → /api/payments/nmi-client-config -->
@@ -1503,7 +1504,7 @@
     <script src="js/hm-gift-card.js"></script>
     <script src="js/mxmerchant-checkout.js?v=20260708" defer></script>
     <script src="js/cart-subscription-ui.js?v=subscribe-save-5" defer></script>
-    <script src="js/checkout.js?v=ship-msg-20260918a" defer></script>
+    <script src="js/checkout.js?v=us50-20260323a" defer></script>
     <script src="script.js" defer></script>
     <script src="js/hm-choice-toggles.js"></script>
     <script src="js/accessibility.js?v=a11y-1" defer></script>

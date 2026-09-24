@@ -27,6 +27,13 @@ const {
 } = require('../utils/orderAccess');
 const { reverseOrderFinancials } = require('../services/orderTenderReversal');
 const { reverseOrderCardPayment } = require('../services/orderPaymentReversal');
+const { normalizeUsStateCode, isUsStateCode } = require('../utils/usStateCode');
+const {
+    getShippingConfig,
+    isAllowedShipCountry,
+    shipCountryLabel,
+    isUsShipCountry,
+} = require('../config/shippingConfig');
 
 function mapCheckoutPromoHttpError(err) {
     const code = err && err.code ? String(err.code) : '';
@@ -246,6 +253,47 @@ router.post('/', async (req, res) => {
 
         const ship = mapAddress(shippingAddress);
         const bill = mapAddress(billingAddress || shippingAddress);
+        const shipCfg = getShippingConfig();
+        const allowedCountries = shipCfg.STORE_SHIP_COUNTRIES || ['US'];
+
+        // Normalize USPS state codes when destination is US (or US-only store).
+        if (isUsShipCountry(ship.country) || (allowedCountries.length === 1 && allowedCountries[0] === 'US')) {
+            const shipState = normalizeUsStateCode(ship.state);
+            if (shipState) ship.state = shipState;
+        }
+        if (isUsShipCountry(bill.country) || (allowedCountries.length === 1 && allowedCountries[0] === 'US')) {
+            const billState = normalizeUsStateCode(bill.state);
+            if (billState) bill.state = billState;
+        }
+
+        if (!isAllowedShipCountry(ship.country, allowedCountries)) {
+            return res.status(400).json({
+                error: 'Shipping is not available to that country.',
+                field: 'shipping-country'
+            });
+        }
+        ship.country = shipCountryLabel(ship.country);
+        if (isUsShipCountry(ship.country) && !isUsStateCode(ship.state)) {
+            return res.status(400).json({
+                error: 'Select a valid US state.',
+                field: 'shipping-state'
+            });
+        }
+
+        if (!isAllowedShipCountry(bill.country, allowedCountries)) {
+            return res.status(400).json({
+                error: 'Billing country is not allowed for this store.',
+                field: 'billing-country'
+            });
+        }
+        bill.country = shipCountryLabel(bill.country);
+        if (isUsShipCountry(bill.country) && !isUsStateCode(bill.state)) {
+            return res.status(400).json({
+                error: 'Select a valid US billing state.',
+                field: 'billing-state'
+            });
+        }
+
         const orderEmail = authUser?.email || normalizedCustomer.email;
 
         let checkout;
