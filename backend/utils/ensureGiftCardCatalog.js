@@ -91,15 +91,8 @@ async function upsertGiftCardProduct(pool, { sku, slug, name, cardType, category
     const hasGiftTypeCol = await columnExists(pool, 'products', 'gift_card_type');
 
     if (existing?.id) {
-        if (hasGiftTypeCol) {
-            await pool.execute(
-                `UPDATE products SET gift_card_type = ?, category_id = ?, requires_shipping = ?,
-                        track_inventory = 0, is_active = 1, is_taxable = 0
-                 WHERE id = ?`,
-                [cardType, categoryId, requiresShipping, existing.id]
-            );
-        }
-        return existing.id;
+        // Never overwrite category, name, visibility, or other catalog fields on boot.
+        return { id: existing.id, created: false };
     }
 
     const minPrice = Math.min(...DENOMINATIONS);
@@ -136,7 +129,7 @@ async function upsertGiftCardProduct(pool, { sku, slug, name, cardType, category
         vals
     );
     logger.info(`[gift-card-catalog] Created product ${sku}`);
-    return r.insertId;
+    return { id: r.insertId, created: true };
 }
 
 function isGiftCardProductImageUrl(url) {
@@ -259,7 +252,7 @@ async function ensureGiftCardCatalog(pool) {
         const brandId = await resolveBrandId(pool);
         const categoryId = await ensureCategory(pool);
 
-        const digitalId = await upsertGiftCardProduct(pool, {
+        const digital = await upsertGiftCardProduct(pool, {
             sku: 'GC-DIGITAL',
             slug: 'digital-gift-card',
             name: 'Digital Gift Card',
@@ -267,10 +260,12 @@ async function ensureGiftCardCatalog(pool) {
             categoryId,
             brandId
         });
-        await ensureGiftCardProductImage(pool, digitalId, 'digital', 'Digital Gift Card');
-        await ensureVariants(pool, digitalId, 'digital');
+        if (digital.created) {
+            await ensureGiftCardProductImage(pool, digital.id, 'digital', 'Digital Gift Card');
+        }
+        await ensureVariants(pool, digital.id, 'digital');
 
-        const physicalId = await upsertGiftCardProduct(pool, {
+        const physical = await upsertGiftCardProduct(pool, {
             sku: 'GC-PHYSICAL',
             slug: 'physical-gift-card',
             name: 'Physical Gift Card',
@@ -278,11 +273,10 @@ async function ensureGiftCardCatalog(pool) {
             categoryId,
             brandId
         });
-        await ensureGiftCardProductImage(pool, physicalId, 'physical', 'Physical Gift Card');
-        await ensureVariants(pool, physicalId, 'physical');
-
-        await stripGenericPlaceholderProductImages(pool);
-        await repairAllGiftCardProductImages(pool);
+        if (physical.created) {
+            await ensureGiftCardProductImage(pool, physical.id, 'physical', 'Physical Gift Card');
+        }
+        await ensureVariants(pool, physical.id, 'physical');
     } catch (err) {
         logger.warn(`[gift-card-catalog] seed skipped or partial — ${logger.formatMysqlError(err)}`);
     }

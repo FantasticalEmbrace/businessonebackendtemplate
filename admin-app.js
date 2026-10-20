@@ -1,4 +1,4 @@
-﻿// Business One merchant admin
+// Business One merchant admin
 
 const HM_CLOSE_ICON_SVG = '<svg class="cart-close-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12 5.7 16.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4z"/></svg>';
 
@@ -157,7 +157,7 @@ class AdminApp {
                 if (this.mustChangePassword) {
                     this.showMustChangePasswordPanel();
                 } else {
-                    await this.loadDashboard();
+                await this.loadDashboard();
                 }
             } catch (error) {
                 console.error('Failed to load dashboard after POS handoff:', error);
@@ -1204,7 +1204,7 @@ class AdminApp {
                             </button>
                         </div>
                         <div id="order-shipping-display" style="font-size:0.95rem;line-height:1.5;">
-                            ${this._formatAddressBlock('shipping', order)}
+                        ${this._formatAddressBlock('shipping', order)}
                         </div>
                         <form id="order-shipping-edit-form" style="display:none;font-size:0.9rem;" autocomplete="off">
                             <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
@@ -9535,7 +9535,7 @@ class AdminApp {
             const customerName = `${order.shipping_first_name || ''} ${order.shipping_last_name || ''}`.trim() || 'Customer';
             const orderLabel = order.order_number || String(orderId);
             const isSelected = this.selectedOrderIds.has(orderId);
-            return `
+        return `
                             <tr class="${isSelected ? 'admin-row-selected' : ''}">
                                 <td class="col-select">
                                     <input type="checkbox" class="order-row-select"
@@ -9595,7 +9595,7 @@ class AdminApp {
                             <th>Items</th>
                             <th>Date</th>
                             <th>Actions</th>
-                        </tr>
+                            </tr>
                     </thead>
                     <tbody>
                         ${rows}
@@ -12256,6 +12256,7 @@ ${bodies.join('\n')}
                             <th>Name</th>
                             <th>Slug</th>
                             <th>Parent</th>
+                            <th>Products</th>
                             <th>Sort Order</th>
                             <th>Status</th>
                             <th>Actions</th>
@@ -12268,6 +12269,7 @@ ${bodies.join('\n')}
                                 <td>${this.escapeHtml(category.name || 'N/A')}</td>
                                 <td><code>${this.escapeHtml(category.slug || 'N/A')}</code></td>
                                 <td>${category.parent_id ? this.escapeHtml(categoryMap[category.parent_id] || `ID: ${category.parent_id}`) : '<em>None</em>'}</td>
+                                <td>${Number(category.product_count) || 0}</td>
                                 <td>${category.sort_order || 0}</td>
                                 <td>
                                     <span class="badge ${category.is_active ? 'badge-success' : 'badge-danger'}">
@@ -13344,66 +13346,11 @@ ${bodies.join('\n')}
 // Global functions for button clicks
 async function matchProductsToBrands() {
     const app = window.adminApp;
-    const btn = document.getElementById('matchBrandsBtn');
-
-    if (!app || !app.authToken) {
-        app.showNotification('Please log in to match products to brands', 'error');
-        return;
-    }
-
-    const proceed = await app.showAdminConfirm({
-        title: 'Match products to brands?',
-        message:
-            'Business One will match catalog products to brands using name prefixes. Many product rows may be updated. Continue?',
-        confirmLabel: 'Run match',
-        cancelLabel: 'Cancel',
-    });
-    if (!proceed) return;
-
-    try {
-        // Disable button and show loading
-        if (btn) {
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Matching...';
-        }
-
-        app.showNotification('Matching products to brands...', 'info');
-
-        const response = await app.apiRequest('/admin/products/match-brands', {
-            method: 'POST'
-        });
-
-        if (response && response.success) {
-            const results = response.results;
-            let message = `Matching complete! `;
-            message += `Matched: ${results.matched}, Updated: ${results.updated}`;
-            if (results.notMatched > 0) {
-                message += `, Not matched: ${results.notMatched}`;
-            }
-
-            app.showNotification(message, 'success');
-
-            // Reload products to show updated brand associations
-            setTimeout(() => {
-                app.loadProducts();
-            }, 1000);
-
-            // Show details if there are unmatched products
-            if (results.notMatchedProducts && results.notMatchedProducts.length > 0) {
-                console.log('Products that could not be matched:', results.notMatchedProducts);
-            }
-        } else {
-            app.showNotification(response?.error || 'Failed to match products to brands', 'error');
-        }
-    } catch (error) {
-        app.showNotification('Error matching products to brands: ' + error.message, 'error');
-        console.error('Match products to brands error:', error);
-    } finally {
-        // Re-enable button
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-link"></i> Match Products to Brands';
-        }
+    if (app) {
+        app.showNotification(
+            'Bulk brand matching is turned off. Change a product brand on that product only.',
+            'error'
+        );
     }
 }
 
@@ -16741,73 +16688,11 @@ window.matchProductsToBrands = matchProductsToBrands;
 
 async function matchProductsToCategories() {
     const app = window.adminApp;
-    const btn = document.getElementById('matchCategoriesBtn');
-
-    if (!app || !app.authToken) {
-        app.showNotification('Please log in to match products to categories', 'error');
-        return;
-    }
-
-    const go = await app.showAdminConfirm({
-        title: 'Match products to categories?',
-        message:
-            'Business One will match catalog products to categories using names and descriptions. Many rows may be updated. Continue?',
-        confirmLabel: 'Run match',
-        cancelLabel: 'Cancel',
-    });
-    if (!go) return;
-
-    try {
-        // Disable button and show loading
-        if (btn) {
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Matching...';
-        }
-
-        app.showNotification('Matching products to categories...', 'info');
-
-        const response = await app.apiRequest('/admin/products/match-categories', {
-            method: 'POST'
-        });
-
-        if (response && response.success) {
-            const results = response.results;
-            let message = `Matching complete! `;
-            message += `Matched: ${results.matched}, Updated: ${results.updated}`;
-            if (results.notMatched > 0) {
-                message += `, Not matched: ${results.notMatched}`;
-            }
-
-            app.showNotification(message, 'success');
-
-            // Log category assignments to console
-            if (results.categoryAssignments && Object.keys(results.categoryAssignments).length > 0) {
-                console.log('???? Category Assignments:');
-                Object.entries(results.categoryAssignments).forEach(([category, count]) => {
-                    console.log(`   ${category}: ${count} products`);
-                });
-            }
-
-            // Reload products to show updated category associations
-            setTimeout(() => {
-                app.loadProducts();
-            }, 1000);
-
-            // Show details if there are unmatched products
-            if (results.notMatchedProducts && results.notMatchedProducts.length > 0) {
-                console.log('Products that could not be matched:', results.notMatchedProducts);
-            }
-        } else {
-            app.showNotification(response?.error || 'Failed to match products to categories', 'error');
-        }
-    } catch (error) {
-        console.error('Match products to categories error:', error);
-        app.showNotification('Error matching products to categories: ' + error.message, 'error');
-    } finally {
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-tags"></i> Match Products to Categories';
-        }
+    if (app) {
+        app.showNotification(
+            'Bulk category matching is turned off. Change a product category on that product only.',
+            'error'
+        );
     }
 }
 

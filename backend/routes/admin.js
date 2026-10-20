@@ -186,7 +186,6 @@ const {
 const HMHerbsScraper = require('../scripts/scrape-hmherbs');
 const activeScrapeJobs = require('../utils/activeScrapeJobs');
 const ProductImporter = require('../scripts/import-products');
-const ProductCategoryMatcher = require('../scripts/match-products-to-categories');
 const InventoryService = require('../services/inventory');
 const VendorService = require('../services/vendor');
 const POSService = require('../services/pos');
@@ -1385,139 +1384,17 @@ router.post('/products', ...adminAuth, requirePermission('manager'), productVali
     }
 });
 
-// Match products to brands - MUST be before /products/:id route to avoid route conflict
+// Bulk brand/category matching disabled — staff assign each product in admin only.
 router.post('/products/match-brands', ...adminAuth, async (req, res) => {
-    try {
-        // Run the matching process
-        const results = {
-            matched: 0,
-            updated: 0,
-            notMatched: 0,
-            notMatchedProducts: []
-        };
-
-        // Get all brands
-        const [brands] = await req.pool.execute(
-            'SELECT id, name FROM brands WHERE is_active = 1 ORDER BY name'
-        );
-
-        if (brands.length === 0) {
-            return res.status(400).json({ error: 'No brands found in database' });
-        }
-
-        // Get all products
-        const [products] = await req.pool.execute(
-            'SELECT id, name, brand_id FROM products ORDER BY name'
-        );
-
-        if (products.length === 0) {
-            return res.status(400).json({ error: 'No products found in database' });
-        }
-
-        // Process each product
-        for (const product of products) {
-            const productName = (product.name || '').trim();
-
-            if (!productName) {
-                results.notMatched++;
-                results.notMatchedProducts.push({
-                    id: product.id,
-                    name: productName,
-                    reason: 'Empty product name'
-                });
-                continue;
-            }
-
-            // Try to find matching brand
-            let matchedBrand = null;
-            let bestMatchLength = 0;
-
-            // Check if product name starts with brand name (case-insensitive)
-            for (const brand of brands) {
-                const brandName = (brand.name || '').trim();
-                if (!brandName) continue;
-
-                if (productName.toLowerCase().startsWith(brandName.toLowerCase())) {
-                    // Prefer longer brand names (more specific matches)
-                    if (brandName.length > bestMatchLength) {
-                        matchedBrand = brand;
-                        bestMatchLength = brandName.length;
-                    }
-                }
-            }
-
-            if (matchedBrand) {
-                results.matched++;
-
-                // Only update if brand_id is different
-                if (product.brand_id !== matchedBrand.id) {
-                    await req.pool.execute(
-                        'UPDATE products SET brand_id = ?, updated_at = NOW() WHERE id = ?',
-                        [matchedBrand.id, product.id]
-                    );
-                    results.updated++;
-                }
-            } else {
-                results.notMatched++;
-                results.notMatchedProducts.push({
-                    id: product.id,
-                    name: productName,
-                    reason: 'No brand name found at start of product name'
-                });
-            }
-        }
-
-        logger.info('Product brand matching completed', {
-            total: products.length,
-            matched: results.matched,
-            updated: results.updated,
-            notMatched: results.notMatched
-        });
-
-        res.json({
-            success: true,
-            message: 'Product brand matching completed',
-            results: {
-                total: products.length,
-                matched: results.matched,
-                updated: results.updated,
-                notMatched: results.notMatched,
-                notMatchedProducts: results.notMatchedProducts.slice(0, 50) // Limit to first 50 for response size
-            }
-        });
-    } catch (error) {
-        logger.error('Match products to brands error:', error);
-        res.status(500).json({
-            error: 'Failed to match products to brands',
-            message: process.env.NODE_ENV === 'development' ? error.message : undefined
-        });
-    }
+    return res.status(403).json({
+        error: 'Bulk brand matching is disabled. Assign brands on each product in admin.',
+    });
 });
 
-// Match products to categories
 router.post('/products/match-categories', ...adminAuth, async (req, res) => {
-    try {
-        const matcher = new ProductCategoryMatcher();
-        const result = await matcher.matchAndAssignCategories();
-
-        res.json({
-            success: true,
-            message: 'Product category matching completed',
-            results: {
-                matched: result.matched,
-                updated: result.updated,
-                notMatched: result.notMatched,
-                categoryAssignments: result.categoryAssignments,
-                notMatchedProducts: result.notMatchedProducts.slice(0, 50) // Limit to first 50 for response size
-            }
-        });
-    } catch (error) {
-        logger.error('Match products to categories error:', error);
-        res.status(500).json({
-            error: 'Failed to match products to categories',
-            message: process.env.NODE_ENV === 'development' ? error.message : undefined
-        });
-    }
+    return res.status(403).json({
+        error: 'Bulk category matching is disabled. Assign categories on each product in admin.',
+    });
 });
 
 // Upload product image - MUST be before /products/:id route to avoid route conflict
@@ -2154,9 +2031,23 @@ router.delete('/brands/:id', ...adminAuth, requirePermission('admin'), async (re
 router.get('/categories', ...adminAuth, async (req, res) => {
     try {
         const [categories] = await req.pool.execute(
-            `SELECT id, name, slug, description, image_url, parent_id, sort_order, is_active, created_at 
-             FROM product_categories 
-             ORDER BY sort_order, name`
+            `SELECT
+                pc.id,
+                pc.name,
+                pc.slug,
+                pc.description,
+                pc.image_url,
+                pc.parent_id,
+                pc.sort_order,
+                pc.is_active,
+                pc.created_at,
+                (
+                    SELECT COUNT(*)
+                    FROM products p
+                    WHERE p.category_id = pc.id
+                ) AS product_count
+             FROM product_categories pc
+             ORDER BY pc.sort_order, pc.name`
         );
         res.json(categories);
     } catch (error) {
