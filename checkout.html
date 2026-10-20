@@ -1157,11 +1157,34 @@
                             </div>
                         </div>
                         <div id="tax-status-note" style="display:none;margin-top:0.75rem;padding:0.65rem 0.75rem;border-radius:8px;font-size:0.9rem;line-height:1.35;"></div>
+                        <div class="checkout-marketing-consent" aria-describedby="checkout-marketing-disclaimer">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="newsletter-opt-in" name="newsletter_opt_in">
+                                <label for="newsletter-opt-in">Email me deals, new products, and loyalty updates</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="sms-opt-in" name="sms_opt_in">
+                                <label for="sms-opt-in">Text me order updates and exclusive offers</label>
+                            </div>
+                            <small id="checkout-marketing-disclaimer" style="display:block;margin-top:0.35rem;color:var(--gray-500);font-size:0.8rem;">Optional. Unsubscribe any time. Your purchase is never affected.</small>
+                        </div>
                         <div class="checkout-age-attestation" id="checkout-age-attestation">
                             <label for="checkout-age-confirm">
                                 <input type="checkbox" id="checkout-age-confirm" name="age_confirm" required>
                                 <span>I confirm I am at least <strong>21 years of age</strong> and agree to purchase hemp/CBD products in compliance with applicable laws.</span>
                             </label>
+                        </div>
+                        <div style="position:absolute;left:-9999px;opacity:0;height:0;overflow:hidden;" aria-hidden="true">
+                            <label for="checkout-company-website">Company Website</label>
+                            <input type="text" id="checkout-company-website" name="company_website"
+                                autocomplete="off" tabindex="-1" value="">
+                        </div>
+                        <div id="checkout-turnstile-wrap" class="checkout-turnstile-wrap" hidden
+                            style="margin:0.75rem 0 0.35rem;min-height:0;">
+                            <div id="checkout-turnstile" class="cf-turnstile"></div>
+                            <small id="checkout-turnstile-hint" style="display:block;margin-top:0.35rem;color:var(--gray-600);font-size:0.85rem;">
+                                Complete the security check to place your order.
+                            </small>
                         </div>
                         <button type="submit" form="checkout-form" class="btn-checkout" id="submit-order-btn">
                             <i class="fas fa-lock" aria-hidden="true"></i> Place Order

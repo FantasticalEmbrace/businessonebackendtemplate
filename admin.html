@@ -1879,6 +1879,90 @@
             display: block;
         }
 
+        .login-card--2fa {
+            max-width: 440px;
+        }
+
+        .admin-2fa-copy {
+            color: var(--gray-600);
+            font-size: 0.875rem;
+            line-height: 1.5;
+            margin: 0 0 1rem;
+        }
+
+        .admin-2fa-qr {
+            display: flex;
+            justify-content: center;
+            margin: 0 0 1rem;
+        }
+
+        .admin-2fa-qr svg {
+            width: 220px;
+            height: 220px;
+        }
+
+        .admin-2fa-key-label {
+            margin: 0 0 0.35rem;
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            text-align: center;
+        }
+
+        .admin-2fa-key {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.85rem;
+            letter-spacing: 0.04em;
+            word-break: break-all;
+            background: var(--gray-50, #f9fafb);
+            border: 1px solid var(--gray-200, #e5e7eb);
+            border-radius: var(--border-radius);
+            padding: 0.75rem;
+            text-align: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .admin-2fa-codes {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .admin-2fa-codes code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            background: var(--gray-50, #f9fafb);
+            border: 1px solid var(--gray-200, #e5e7eb);
+            border-radius: var(--border-radius);
+            padding: 0.45rem 0.5rem;
+            text-align: center;
+        }
+
+        .admin-2fa-remember {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0 0 1rem;
+            font-size: 0.875rem;
+            color: var(--gray-700, #374151);
+            cursor: pointer;
+        }
+
+        .admin-2fa-remember input {
+            width: 1rem;
+            height: 1rem;
+            margin: 0;
+            flex: 0 0 auto;
+        }
+
+        .admin-2fa-back {
+            background: none;
+            border: 0;
+            color: var(--primary-green);
+            font-size: 0.875rem;
+            cursor: pointer;
+            padding: 0;
+        }
+
         .button-group {
             display: flex;
             gap: 1rem;
@@ -3730,6 +3814,77 @@
                 </a>
             </div>
         </div>
+
+        <div class="login-card login-card--2fa" id="admin2faCard" style="display: none;">
+            <div id="admin2faSetup">
+                <div class="login-header">
+                    <div class="login-logo">
+                        <i class="fas fa-shield-alt"></i>
+                        Admin
+                    </div>
+                    <p class="login-subtitle">Set up your authenticator</p>
+                </div>
+                <p class="admin-2fa-copy">Install Google Authenticator, Authy, or a similar app. Scan this QR code or type the key, then enter the 6-digit code. Admin stays locked until this is finished.</p>
+                <div id="admin2faQr" class="admin-2fa-qr"></div>
+                <p id="admin2faQrFallback" class="admin-2fa-copy" style="display: none;">The QR code could not be drawn. Type the key into your authenticator app.</p>
+                <p class="admin-2fa-key-label">Manual key</p>
+                <div id="admin2faManualKey" class="admin-2fa-key"></div>
+                <button type="button" class="btn btn-secondary btn-full-width" id="admin2faCopyKey">Copy key</button>
+                <form id="admin2faSetupForm">
+                    <div class="form-group">
+                        <label>
+                            <span class="sr-only">6-digit code</span>
+                            <input type="text" id="admin2faSetupCode" name="totp_setup_code" class="form-input" inputmode="numeric" autocomplete="off" maxlength="6" placeholder="6-digit code" required>
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full-width">Confirm and continue</button>
+                </form>
+                <div id="admin2faSetupError" class="login-error"></div>
+                <div style="text-align: center; margin-top: 1rem;">
+                    <button type="button" class="admin-2fa-back" id="admin2faSetupBack">Back to sign in</button>
+                </div>
+            </div>
+
+            <div id="admin2faVerify" style="display: none;">
+                <div class="login-header">
+                    <div class="login-logo">
+                        <i class="fas fa-shield-alt"></i>
+                        Admin
+                    </div>
+                    <p class="login-subtitle">Enter your authentication code</p>
+                </div>
+                <p class="admin-2fa-copy">This phone is a different browser, so it needs the code once. Enter the 6-digit code from your authenticator app, or one of your backup codes.</p>
+                <form id="admin2faVerifyForm" autocomplete="off">
+                    <div class="form-group">
+                        <label for="admin2faVerifyCode">Authentication code</label>
+                        <input type="text" id="admin2faVerifyCode" name="totp_code" class="form-input" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="6-digit code or backup code" required>
+                    </div>
+                    <label class="admin-2fa-remember" for="admin2faRemember">
+                        <input type="checkbox" id="admin2faRemember" name="remember_browser" checked>
+                        Remember this browser for 30 days
+                    </label>
+                    <button type="submit" class="btn btn-primary btn-full-width">Verify and sign in</button>
+                </form>
+                <div id="admin2faVerifyError" class="login-error"></div>
+                <div style="text-align: center; margin-top: 1rem;">
+                    <button type="button" class="admin-2fa-back" id="admin2faVerifyBack">Back to sign in</button>
+                </div>
+            </div>
+
+            <div id="admin2faBackup" style="display: none;">
+                <div class="login-header">
+                    <div class="login-logo">
+                        <i class="fas fa-key"></i>
+                        Admin
+                    </div>
+                    <p class="login-subtitle">Save your backup codes</p>
+                </div>
+                <p class="admin-2fa-copy">Each code works once if you lose your phone. This is the only time they will be shown. Admin password reset by email is turned off, so keep these somewhere safe.</p>
+                <div id="admin2faBackupCodes" class="admin-2fa-codes"></div>
+                <button type="button" class="btn btn-secondary btn-full-width" id="admin2faCopyCodes">Copy backup codes</button>
+                <button type="button" class="btn btn-primary btn-full-width" id="admin2faBackupContinue">I've saved these codes</button>
+            </div>
+        </div>
     </div>
 
     <!-- Forgot Password Modal -->
@@ -5265,14 +5420,10 @@
                     <div class="card personnel-card">
                         <div class="card-content">
                             <div class="personnel-card-head">
-                                <h3>Add team member</h3>
-                                <p>New accounts are active immediately — share login details securely.</p>
+                                <h3>Add personnel</h3>
+                                <p>Add one person. Turn on only the permissions they need. Leave every permission off if they should use the register and not this website.</p>
                             </div>
-                            <form id="admin-team-create-form" class="personnel-form">
-                                <div class="form-group">
-                                    <label for="team-create-email">Email</label>
-                                    <input class="form-input" id="team-create-email" name="email" type="email" required maxlength="255" autocomplete="off">
-                                </div>
+                            <form id="admin-team-create-form" class="personnel-form" style="max-width:36rem;">
                                 <div class="personnel-form-row">
                                     <div class="form-group">
                                         <label for="team-create-first">First name</label>
@@ -5284,59 +5435,85 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label for="team-create-role">Role</label>
-                                    <select class="form-input" id="team-create-role" name="role" required></select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="team-create-password">Temporary password</label>
-                                    <input class="form-input" id="team-create-password" name="password" type="password" required minlength="8" autocomplete="new-password">
-                                    <small class="form-help">At least 8 characters. Share securely; they can use Forgot password on the login screen.</small>
-                                </div>
-                                <button type="submit" class="btn btn-primary personnel-form-submit"><i class="fas fa-user-plus"></i> Create account</button>
-                                <p id="admin-team-form-msg" class="personnel-form-msg"></p>
-                            </form>
-                        </div>
-                    </div>
-
-                    <div class="card personnel-card">
-                        <div class="card-content">
-                            <div class="personnel-card-head">
-                                <h3>Add register-only staff</h3>
-                                <p>Cashiers who only need a register PIN (no admin login).</p>
-                            </div>
-                            <form id="register-only-create-form" class="personnel-form">
-                                <div class="form-group">
-                                    <label for="register-only-employee-code">Register employee ID</label>
-                                    <input class="form-input" id="register-only-employee-code" name="employeeCode" required maxlength="8" placeholder="e.g. 1042" autocomplete="off">
+                                    <label for="team-create-email">Email</label>
+                                    <input class="form-input" id="team-create-email" name="email" type="email" maxlength="255" autocomplete="off">
+                                    <small class="form-help">Required only when a website permission is on.</small>
                                 </div>
                                 <div class="personnel-form-row">
                                     <div class="form-group">
-                                        <label for="register-only-first-name">First name</label>
-                                        <input class="form-input" id="register-only-first-name" name="firstName" required autocomplete="given-name">
+                                        <label for="team-create-employee-code">Register employee ID</label>
+                                        <input class="form-input" id="team-create-employee-code" name="employeeCode" maxlength="8" placeholder="e.g. 1042" autocomplete="off">
+                                        <small class="form-help">Required when every website permission is off.</small>
                                     </div>
                                     <div class="form-group">
-                                        <label for="register-only-last-name">Last name</label>
-                                        <input class="form-input" id="register-only-last-name" name="lastName" required autocomplete="family-name">
+                                        <label for="team-create-pin">Register PIN</label>
+                                        <input class="form-input" id="team-create-pin" name="pin" type="password" inputmode="numeric" maxlength="4" placeholder="4 digits" autocomplete="off">
+                                        <small class="form-help">4 digits. Required when every website permission is off.</small>
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label for="register-only-email">Email (optional)</label>
-                                    <input class="form-input" id="register-only-email" name="email" type="email" autocomplete="email">
+                                    <label for="team-create-password">Temporary password</label>
+                                    <input class="form-input" id="team-create-password" name="password" type="password" minlength="8" autocomplete="new-password">
+                                    <small class="form-help">Required only when a website permission is on. At least 8 characters. Share it in person.</small>
                                 </div>
-                                <div class="form-group">
-                                    <label for="register-only-pin">4-digit register PIN</label>
-                                    <input class="form-input" id="register-only-pin" name="pin" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" required placeholder="••••" autocomplete="off">
-                                </div>
-                                <div class="personnel-permission-toggles" data-hm-choice-large>
-                                    <label><input type="checkbox" id="register-can-authorize" name="canAuthorize" value="true"> Can approve line and sale discounts (manager PIN)</label>
-                                    <label><input type="checkbox" id="register-allow-manual-discounts" name="allowManualDiscounts" value="true"> Can apply manual line and sale discounts</label>
-                                    <label><input type="checkbox" id="register-can-view-shop-floor" name="canViewShopFloor" value="true"> Can view shop floor (ongoing jobs &amp; WIP status)</label>
-                                    <label><input type="checkbox" id="register-is-technician" name="isTechnician" value="true"> Shop technician (stations at a bay on clock-in; assignable on appointments)</label>
-                                    <label><input type="checkbox" id="register-can-build-shop-estimate" name="canBuildShopEstimate" value="true"> Can build shop repair estimates (parts &amp; labor)</label>
-                                    <label id="register-refund-permission-row"><input type="checkbox" id="register-can-process-refunds" name="canProcessRefunds" value="true"> Can process refunds <span class="form-optional-hint">(Admin/Developer only)</span></label>
-                                    <label id="register-view-cost-permission-row"><input type="checkbox" id="register-can-view-cost" name="canViewCost" value="true"> Can view product cost at register <span class="form-optional-hint">(Admin/Developer only)</span></label>
-                                </div>
-                                <button type="submit" class="btn btn-secondary personnel-form-submit"><i class="fas fa-cash-register"></i> Add register-only employee</button>
+                                <fieldset style="border:1px solid var(--gray-200);border-radius:8px;padding:0.85rem 1rem;margin:0;">
+                                    <legend style="padding:0 0.35rem;font-weight:600;">Website permissions</legend>
+                                    <p style="margin:0 0 0.75rem;color:var(--gray-600);font-size:0.85rem;">Leave all of these off if this person should not sign in here.</p>
+                                    <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;margin-bottom:0.65rem;">
+                                        <input type="checkbox" name="permOrders" value="true" style="margin-top:0.2rem;">
+                                        <span>Orders, customers, and marketing</span>
+                                    </label>
+                                    <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;margin-bottom:0.65rem;">
+                                        <input type="checkbox" name="permProducts" value="true" style="margin-top:0.2rem;">
+                                        <span>Products, inventory, and store settings</span>
+                                    </label>
+                                    <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;margin-bottom:0.65rem;">
+                                        <input type="checkbox" name="permFullAdmin" value="true" style="margin-top:0.2rem;">
+                                        <span>Full admin (team accounts and the rest of the site)</span>
+                                    </label>
+                                    <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;">
+                                        <input type="checkbox" name="permStoreHours" value="true" style="margin-top:0.2rem;">
+                                        <span>Edit store hours and holidays <span style="color:var(--gray-600);font-weight:400;">(only applies with products and store settings, and is included with full admin)</span></span>
+                                    </label>
+                                </fieldset>
+                                <fieldset style="border:1px solid var(--gray-200);border-radius:8px;padding:0.85rem 1rem;margin:0;">
+                                    <legend style="padding:0 0.35rem;font-weight:600;">Register permissions</legend>
+                                    <p style="margin:0 0 0.75rem;color:var(--gray-600);font-size:0.85rem;">These can all stay off. They only affect the register.</p>
+                                    <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;margin-bottom:0.65rem;">
+                                        <input type="checkbox" name="allowManualDiscounts" value="true" style="margin-top:0.2rem;">
+                                        <span>Can apply manual line and sale discounts</span>
+                                    </label>
+                                    <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;margin-bottom:0.65rem;">
+                                        <input type="checkbox" name="canAuthorize" value="true" style="margin-top:0.2rem;">
+                                        <span>Can approve line and sale discounts</span>
+                                    </label>
+                                    <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;margin-bottom:0.65rem;">
+                                        <input type="checkbox" name="canViewShopFloor" value="true" style="margin-top:0.2rem;">
+                                        <span>Can view shop floor (ongoing jobs &amp; WIP status)</span>
+                                    </label>
+                                    <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;margin-bottom:0.65rem;">
+                                        <input type="checkbox" name="isTechnician" value="true" style="margin-top:0.2rem;">
+                                        <span>Shop technician (stations at a bay on clock-in; assignable on appointments)</span>
+                                    </label>
+                                    <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;margin-bottom:0.65rem;">
+                                        <input type="checkbox" name="canBuildShopEstimate" value="true" style="margin-top:0.2rem;">
+                                        <span>Can build shop repair estimates (parts &amp; labor)</span>
+                                    </label>
+                                    <label id="register-refund-permission-row" style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;margin-bottom:0.65rem;">
+                                        <input type="checkbox" id="register-can-process-refunds" name="canProcessRefunds" value="true" style="margin-top:0.2rem;">
+                                        <span>Can process refunds</span>
+                                    </label>
+                                    <label id="register-drawer-permission-row" style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;margin-bottom:0.65rem;">
+                                        <input type="checkbox" id="register-can-open-drawer" name="canOpenDrawer" value="true" style="margin-top:0.2rem;">
+                                        <span>Can open the cash drawer without a sale</span>
+                                    </label>
+                                    <label id="register-view-cost-permission-row" style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;">
+                                        <input type="checkbox" id="register-can-view-cost" name="canViewCost" value="true" style="margin-top:0.2rem;">
+                                        <span>Can view product cost at the register</span>
+                                    </label>
+                                </fieldset>
+                                <button type="submit" class="btn btn-primary personnel-form-submit"><i class="fas fa-user-plus"></i> Add personnel</button>
+                                <p id="admin-team-form-msg" class="personnel-form-msg"></p>
                             </form>
                         </div>
                     </div>

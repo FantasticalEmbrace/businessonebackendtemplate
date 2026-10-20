@@ -6,6 +6,7 @@ const { sendOrderConfirmationEmail } = require('./orderConfirmationEmail');
 const { loadLoyaltyProgramSettings, earnLoyaltyForOrder } = require('./customerLoyalty');
 const { fulfillGiftCardsForOrder } = require('./giftCardFulfillment');
 const { getNonEarnTenderTotal } = require('./webCheckoutPayments');
+const { processOrderNewsletterOptIns } = require('./newsletterSubscribe');
 
 async function recalcUserOrderAggregates(connection, userId) {
     const uid = Number(userId);
@@ -225,6 +226,18 @@ async function finalizePaidOrder(
         void fulfillGiftCardsForOrder(pool, oid).catch((giftErr) => {
             logger.error(`Order ${oid} gift card fulfillment error:`, giftErr);
         });
+
+        void (async () => {
+            try {
+                const [itemRows] = await pool.execute(
+                    'SELECT metadata FROM order_items WHERE order_id = ?',
+                    [oid]
+                );
+                await processOrderNewsletterOptIns(pool, orderRow, itemRows || []);
+            } catch (nlErr) {
+                logger.error(`Order ${oid} newsletter opt-in error:`, nlErr);
+            }
+        })();
 
         if (orderRow.email) {
             try {

@@ -151,6 +151,12 @@ router.post('/signup', signupLimiter, async (req, res) => {
         if (!req.body?.authorized) {
             return res.status(400).json({ error: 'Authorization required', code: 'AUTHORIZATION_REQUIRED' });
         }
+        if (!req.body?.agreementsAccepted) {
+            return res.status(400).json({
+                error: 'You must accept the Terms of Service, Privacy Policy, Return & Refund Policy, and Shipping & Delivery to continue.',
+                code: 'AGREEMENTS_REQUIRED'
+            });
+        }
 
         assertNoRawPaymentData(req.body);
 

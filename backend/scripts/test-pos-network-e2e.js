@@ -464,7 +464,9 @@ async function httpApiTests(pool) {
             headers: {
                 'Content-Type': 'application/json',
                 'X-POS-API-Key': device.apiKey,
-                'X-POS-Device-Id': device.deviceLabel
+                'X-POS-Device-Id': device.deviceLabel,
+                'X-POS-Install-Id': `e2e-install-${device.id}`,
+                'X-POS-Platform': 'test'
             },
             body: JSON.stringify({ localIp: '192.168.60.88' })
         });

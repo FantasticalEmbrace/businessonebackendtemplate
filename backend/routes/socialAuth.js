@@ -248,10 +248,20 @@ function createAdminGoogleRoutes(pool, logger) {
             const redirectUri = getGoogleRedirectUri(req, 'admin');
             const profile = await fetchGoogleProfile(String(code), redirectUri);
             const admin = await linkAdminFromGoogle(pool, profile);
-            const payload = buildAdminLoginPayload(admin);
+            const { finishPasswordOrGoogleLogin } = require('../services/adminRememberBrowser');
+            const result = await finishPasswordOrGoogleLogin(req, pool, admin);
+            if (result.remembered) {
+                const url = new URL(base);
+                if (returnTo) url.searchParams.set('returnTo', returnTo);
+                url.hash = `token=${encodeURIComponent(result.session.token)}`;
+                res.redirect(url.toString());
+                return;
+            }
+            const pending = result.pending;
             res.redirect(
                 redirectWithParams(base, {
-                    token: payload.token,
+                    twoFactor: pending.twoFactor,
+                    challenge: pending.challengeToken,
                     returnTo
                 })
             );

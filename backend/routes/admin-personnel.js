@@ -6,6 +6,7 @@ const router = express.Router();
 const logger = require('../utils/logger');
 const personnel = require('../services/posPersonnel');
 const { hasMinAdminRole, normalizeAdminRole } = require('../utils/adminRoles');
+const { isFullAdminSession } = require('../utils/adminSessionClaims');
 
 async function authenticateAdmin(req, res, next) {
     const authHeader = req.headers['authorization'];
@@ -14,6 +15,9 @@ async function authenticateAdmin(req, res, next) {
     if (!process.env.JWT_SECRET) return res.status(500).json({ error: 'Server configuration error' });
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (!isFullAdminSession(decoded)) {
+            return res.status(401).json({ error: 'Invalid admin token' });
+        }
         const [rows] = await req.pool.execute(
             'SELECT id, email, first_name, last_name, role FROM admin_users WHERE id = ? AND is_active = 1',
             [decoded.adminId]
@@ -25,7 +29,7 @@ async function authenticateAdmin(req, res, next) {
         };
         next();
     } catch {
-        return res.status(403).json({ error: 'Invalid admin token' });
+        return res.status(401).json({ error: 'Invalid admin token' });
     }
 }
 

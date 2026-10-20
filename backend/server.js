@@ -21,6 +21,10 @@ require('dotenv').config({ path: envPath });
 const logger = require('./utils/logger');
 const { handlePromoBannerGet, disabledPayload } = require('./utils/promoBanner');
 const { createSeoRedirectMiddleware } = require('./middleware/seoRedirects');
+const {
+    createHtmlToCleanRedirectMiddleware,
+    createCleanHtmlServeMiddleware,
+} = require('./middleware/cleanHtmlUrls');
 const { ensureProductSchema } = require('./utils/ensureProductSchema');
 const { ensureInventorySettings } = require('./utils/ensureInventorySettings');
 const {
@@ -40,6 +44,7 @@ const { ensurePosSignupSchema } = require('./utils/ensurePosSignupSchema');
 const { ensureMenuSchema } = require('./utils/ensureMenuSchema');
 const { ensurePlatformSupportSchema } = require('./utils/ensurePlatformSupportSchema');
 const { ensurePersonnelSchema } = require('./utils/ensurePersonnelSchema');
+const { ensureAdminTotpSchema } = require('./utils/ensureAdminTotpSchema');
 const { ensureShopJobsSchema } = require('./utils/ensureShopJobsSchema');
 const { ensureGiftCardPurchaseSchema } = require('./utils/ensureGiftCardPurchaseSchema');
 const { ensureGiftCardCatalog } = require('./utils/ensureGiftCardCatalog');
@@ -94,6 +99,25 @@ const {
 
 const { jsonSafeDeep } = require('./utils/jsonSafeMysql');
 const { buildDbConfig } = require('./utils/dbConfig');
+
+const SEARCH_STOPWORDS = new Set([
+    'a', 'an', 'the', 'of', 'and', 'or', 'for', 'to', 'in', 'on', 'with', 'by'
+]);
+
+/** Same tokenization as js/product-search-utils.js tokenizeSearchQuery. */
+function tokenizeProductSearch(search) {
+    const raw = String(search || '')
+        .toLowerCase()
+        .trim();
+    if (!raw) return [];
+    const tokens = raw.split(/\s+/).filter((word) => word.length > 0);
+    const meaningful = tokens.filter(
+        (word) => word.length >= 2 && !SEARCH_STOPWORDS.has(word)
+    );
+    if (meaningful.length > 0) return meaningful;
+    const collapsed = raw.replace(/[^a-z0-9]+/g, '');
+    return collapsed ? [collapsed] : tokens;
+}
 
 const app = express();
 app.set('trust proxy', 1);
@@ -485,6 +509,9 @@ if (process.env.STAGING_BLOCK_INDEXING === 'true') {
     });
 }
 
+// Clean URLs: /products.html → 301 /products (before SEO CSV + static).
+app.use(createHtmlToCleanRedirectMiddleware());
+
 // Permanent SEO redirects from repo-root redirects-301.csv (see file header).
 app.use(createSeoRedirectMiddleware({ rootPath, logger }));
 
@@ -555,6 +582,9 @@ app.get('/support-desk/viewer', (req, res) => {
 app.get('/platform-support.html', (req, res) => {
     res.redirect(302, '/support-desk');
 });
+
+// Extensionless public pages (/about → about.html). product/products SSR runs above.
+app.use(createCleanHtmlServeMiddleware({ rootPath }));
 
 // Serve admin panel and frontend files
 app.use(express.static(rootPath)); // Serve files from project root
@@ -1474,24 +1504,35 @@ app.get('/api/products', async (req, res) => {
         }
 
         if (search) {
-            const searchTerm = `%${search}%`;
-            const cleanSearch = String(search).toLowerCase().replace(/[^a-z0-9]/g, '');
-            whereConditions.push(`(
-                p.name LIKE ? OR
-                p.short_description LIKE ? OR
-                p.long_description LIKE ? OR
-                b.name LIKE ? OR
-                b.slug LIKE ? OR
-                REPLACE(REPLACE(LOWER(b.slug), '-', ''), ' ', '') LIKE ?
-            )`);
-            queryParams.push(
-                searchTerm,
-                searchTerm,
-                searchTerm,
-                searchTerm,
-                searchTerm,
-                `%${cleanSearch}%`
-            );
+            const keywords = tokenizeProductSearch(search);
+
+            keywords.forEach((keyword) => {
+                const searchTerm = `%${keyword}%`;
+                const cleanSearch = keyword.replace(/[^a-z0-9]/g, '');
+                const keywordClauses = [
+                    'p.name LIKE ?',
+                    'p.slug LIKE ?',
+                    'p.sku LIKE ?',
+                    'p.short_description LIKE ?',
+                    'b.name LIKE ?',
+                    'b.slug LIKE ?',
+                    'pc.name LIKE ?',
+                    'pc.slug LIKE ?',
+                ];
+                const params = [
+                    searchTerm, searchTerm, searchTerm, searchTerm,
+                    searchTerm, searchTerm, searchTerm, searchTerm,
+                ];
+                if (cleanSearch && cleanSearch !== keyword) {
+                    keywordClauses.push(
+                        'REPLACE(REPLACE(LOWER(b.slug), \'-\', \'\'), \' \', \'\') LIKE ?',
+                        'REPLACE(REPLACE(LOWER(p.name), \'-\', \'\'), \' \', \'\') LIKE ?'
+                    );
+                    params.push(`%${cleanSearch}%`, `%${cleanSearch}%`);
+                }
+                whereConditions.push(`(${keywordClauses.join(' OR ')})`);
+                queryParams.push(...params);
+            });
         }
 
         if (minPrice) {
@@ -2114,6 +2155,7 @@ app.use('/api/*', (req, res) => {
         await refreshStoreBaseUrlFromDb(pool);
         await ensurePlatformSupportSchema(pool);
         await ensurePersonnelSchema(pool);
+        await ensureAdminTotpSchema(pool);
         await ensureShopJobsSchema(pool);
         const { ensureLoyaltyTiersSchema } = require('./utils/ensureLoyaltyTiersSchema');
         const { seedDefaultTiersIfEmpty } = require('./services/loyaltyTierProgram');
@@ -2259,6 +2301,11 @@ app.use('/api/*', (req, res) => {
             'Checkout API: orders INSERT v2 (order_number + shipping_address_line_1); NMI skip-preflight=' +
                 (process.env.NMI_SKIP_TOKENIZATION_PREFLIGHT || '0')
         );
+        try {
+            require('./services/botProtection').warnIfCaptchaNotConfigured();
+        } catch (_) {
+            /* ignore */
+        }
         logger.info(
             'Account SQL v3: GET /api/user/orders uses total_amount + item subquery; ' +
             'wishlist items JOIN product_images (not products.image_url). If errors still cite o.total or p.image_url, restart the server from backend/ after save.'

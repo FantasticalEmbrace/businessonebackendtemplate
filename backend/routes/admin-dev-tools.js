@@ -17,6 +17,7 @@ const {
 const shippo = require('../services/shippoClient');
 const { auditShippoCarriers } = require('../services/shippoCarrierAudit');
 const mxmerchant = require('../services/mxmerchantGateway');
+const { mintDevSignupUnlock, COOKIE_NAME, publicSignupUrl } = require('../utils/devSignupUnlock');
 
 const devAuth = [authenticateAdmin, requireDeveloperRole];
 
@@ -208,6 +209,52 @@ router.post('/integrations/test', ...devAuth, async (req, res) => {
     } catch (error) {
         logger.error('Integration credentials test error:', error);
         res.status(500).json({ error: error.message || 'Connection test failed' });
+    }
+});
+
+router.post('/signup-unlock', ...devAuth, async (req, res) => {
+    try {
+        const unlock = mintDevSignupUnlock({
+            adminId: req.admin.id,
+            email: req.admin.email,
+            role: req.admin.role
+        });
+        res.json({
+            unlocked: true,
+            ...unlock,
+            message:
+                'Developer signup pricing is unlocked. Open the signup form — it will show $0 due today for you only.'
+        });
+    } catch (error) {
+        logger.error('Signup unlock mint error:', error);
+        res.status(500).json({
+            error: error.message || 'Failed to unlock developer signup pricing',
+            code: error.code || 'UNLOCK_FAILED'
+        });
+    }
+});
+
+router.get('/signup-unlock', ...devAuth, async (req, res) => {
+    try {
+        const unlock = mintDevSignupUnlock({
+            adminId: req.admin.id,
+            email: req.admin.email,
+            role: req.admin.role
+        });
+        res.json({
+            unlocked: true,
+            cookieName: COOKIE_NAME,
+            signupUrl: unlock.signupUrl || publicSignupUrl(),
+            expiresAt: unlock.expiresAt,
+            priceLabel: unlock.priceLabel,
+            dueTodayCents: unlock.dueTodayCents,
+            mode: unlock.mode,
+            token: unlock.token,
+            cookieDomain: unlock.cookieDomain
+        });
+    } catch (error) {
+        logger.error('Signup unlock status error:', error);
+        res.status(500).json({ error: error.message || 'Failed to load signup unlock' });
     }
 });
 

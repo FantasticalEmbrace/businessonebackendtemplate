@@ -310,12 +310,15 @@ const {
     adminAuth,
     requirePermission,
 } = require('../middleware/adminAuth');
+const { finishPasswordOrGoogleLogin } = require('../services/adminRememberBrowser');
+const { registerAdminTotpRoutes } = require('./admin-totp-auth');
 
 // Rate limiting for admin authentication
 // Completely disabled in development mode to allow for testing
 const adminAuthLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: process.env.NODE_ENV === 'production' ? 5 : 10000, // 5 attempts in production, effectively unlimited in development
+    // Shared office/NAT IPs burn through 5 quickly; keep a real cap but allow retries.
+    max: process.env.NODE_ENV === 'production' ? 30 : 10000,
     validate: { trustProxy: true },
     message: {
         error: 'Too many admin authentication attempts, please try again later.',
@@ -390,7 +393,7 @@ router.post('/auth/login', adminAuthLimiter, ...adminLoginValidation, async (req
 
         if (!admin.password_hash) {
             return res.status(401).json({
-                error: 'This account uses Google sign-in. Click Continue with Google instead.'
+                error: 'This account does not have a password yet. Ask the store owner to set one, then sign in.'
             });
         }
 
@@ -400,43 +403,22 @@ router.post('/auth/login', adminAuthLimiter, ...adminLoginValidation, async (req
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
-        // Update last login
-        await req.pool.execute(
-            'UPDATE admin_users SET last_login = CURRENT_TIMESTAMP WHERE id = ?',
-            [admin.id]
-        );
-
         if (!process.env.JWT_SECRET) {
             logger.error('CRITICAL: JWT_SECRET environment variable is not set');
             return res.status(500).json({ error: 'Server configuration error' });
         }
 
-        const token = jwt.sign(
-            { adminId: admin.id },
-            process.env.JWT_SECRET,
-            { expiresIn: '8h' }
-        );
-
-        const role = normalizeAdminRole(admin.role);
-        const canHours = await resolveCanManageStoreHours(req.pool, role, admin.id);
-        const chromeBranding = await resolveAdminChromeBranding(req.pool);
-        res.json({
-            message: 'Admin login successful',
-            token,
-            admin: {
-                id: admin.id,
-                email: admin.email,
-                firstName: admin.first_name,
-                lastName: admin.last_name,
-                role,
-                roleLabel: ROLE_LABELS[role] || role,
-            },
-            allowedSections: allowedSectionsForRole(role),
-            defaultSection: defaultSectionForRole(role),
-            canManageStoreHours: canHours,
-            canManageStoreHoursDelegation: canManageStoreHours(role),
-            chromeBranding,
-            isPrincipalStore: Boolean(chromeBranding.isPrincipalStore),
+        const result = await finishPasswordOrGoogleLogin(req, req.pool, admin);
+        if (result.remembered) {
+            return res.json(result.session);
+        }
+        const pending = result.pending;
+        return res.json({
+            message: pending.twoFactor === 'setup'
+                ? 'Password accepted. Set up two-factor authentication to continue.'
+                : 'Password accepted. Enter your authentication code.',
+            twoFactor: pending.twoFactor,
+            challengeToken: pending.challengeToken
         });
     } catch (error) {
         // Log full error details for debugging
@@ -448,6 +430,10 @@ router.post('/auth/login', adminAuthLimiter, ...adminLoginValidation, async (req
             sqlMessage: error.sqlMessage,
             stack: error.stack
         });
+
+        if (!res.headersSent && error.status && error.code && !error.sqlMessage) {
+            return res.status(error.status).json({ error: error.message, code: error.code });
+        }
 
         // Provide more specific error messages for common issues
         const errorCode = error.code || error.errno;
@@ -515,124 +501,16 @@ router.post('/auth/login', adminAuthLimiter, ...adminLoginValidation, async (req
     }
 });
 
-// Forgot Password - Request reset link
-router.post('/auth/forgot-password', adminAuthLimiter, async (req, res) => {
-    try {
-        const { email } = req.body;
+function rejectAdminPasswordReset(_req, res) {
+    res.status(403).json({
+        error: 'Admin password reset is turned off. Sign in with your password and authenticator app. If you lost your phone, use a backup code.'
+    });
+}
 
-        if (!email) {
-            return res.status(400).json({ error: 'Email is required' });
-        }
-
-        // Check if admin exists
-        const [admins] = await req.pool.execute(
-            'SELECT id, email, first_name, last_name FROM admin_users WHERE email = ? AND is_active = 1',
-            [email]
-        );
-
-        // Always return success message (security best practice - don't reveal if email exists)
-        if (admins.length > 0) {
-            const admin = admins[0];
-
-            // Generate reset token
-            const crypto = require('crypto');
-            const resetToken = crypto.randomBytes(32).toString('hex');
-            const resetTokenExpires = new Date(Date.now() + 3600000); // 1 hour from now
-
-            // Save token to database
-            await req.pool.execute(
-                'UPDATE admin_users SET password_reset_token = ?, password_reset_token_expires = ? WHERE id = ?',
-                [resetToken, resetTokenExpires, admin.id]
-            );
-
-            const { getAdminPasswordResetBaseUrl } = require('../utils/storefrontUrl');
-            const { sendMail } = require('../utils/mailTransporter');
-            const resetBase = getAdminPasswordResetBaseUrl();
-            const resetUrl = `${resetBase}/admin-reset-password.html?token=${encodeURIComponent(resetToken)}`;
-
-            try {
-                const first = String(admin.first_name || '').trim() || 'there';
-                const result = await sendMail({
-                    to: admin.email,
-                    subject: 'Business One Admin — reset your password',
-                    html: `
-                        <h2>Password reset</h2>
-                        <p>Hello ${first},</p>
-                        <p>You requested to reset your Business One admin password.</p>
-                        <p><a href="${resetUrl}" style="background:#ff9b1f;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;display:inline-block;">Choose a new password</a></p>
-                        <p>Or copy this link into your browser:</p>
-                        <p style="word-break:break-all;">${resetUrl}</p>
-                        <p>This link expires in one hour. If you did not ask for this, you can ignore this email.</p>
-                    `,
-                    logTag: 'Admin password reset email'
-                });
-                if (!result.sent) {
-                    logger.info('Admin password reset (SMTP not configured):', {
-                        email: admin.email,
-                        resetUrl
-                    });
-                    console.log('\n🔑 Admin password reset link (set SMTP_* in backend/.env to send email):\n');
-                    console.log(`   ${resetUrl}\n`);
-                }
-            } catch (emailError) {
-                logger.error('Failed to send admin password reset email:', emailError);
-            }
-        }
-
-        // Always return success (security best practice)
-        res.json({
-            message: 'If an account with that email exists, a password reset link has been sent.'
-        });
-    } catch (error) {
-        logger.error('Forgot password error:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-});
-
-// Reset Password - Verify token and reset password
-router.post('/auth/reset-password', adminAuthLimiter, async (req, res) => {
-    try {
-        const { token, newPassword } = req.body;
-
-        if (!token || !newPassword) {
-            return res.status(400).json({ error: 'Token and new password are required' });
-        }
-
-        // Validate password strength
-        if (newPassword.length < 8) {
-            return res.status(400).json({ error: 'Password must be at least 8 characters long' });
-        }
-
-        // Find admin with valid token
-        const [admins] = await req.pool.execute(
-            'SELECT id, email FROM admin_users WHERE password_reset_token = ? AND password_reset_token_expires > NOW() AND is_active = 1',
-            [token]
-        );
-
-        if (admins.length === 0) {
-            return res.status(400).json({ error: 'Invalid or expired reset token' });
-        }
-
-        const admin = admins[0];
-
-        // Hash new password
-        const saltRounds = 12;
-        const passwordHash = await bcrypt.hash(newPassword, saltRounds);
-
-        // Update password and clear reset token
-        await req.pool.execute(
-            'UPDATE admin_users SET password_hash = ?, password_reset_token = NULL, password_reset_token_expires = NULL, updated_at = NOW() WHERE id = ?',
-            [passwordHash, admin.id]
-        );
-
-        res.json({
-            message: 'Password reset successfully. You can now login with your new password.'
-        });
-    } catch (error) {
-        logger.error('Reset password error:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-});
+// Public admin reset is disabled. Customer reset stays on /api/auth/forgot-password.
+router.post('/auth/forgot-password', adminAuthLimiter, rejectAdminPasswordReset);
+router.post('/auth/reset-password', adminAuthLimiter, rejectAdminPasswordReset);
+registerAdminTotpRoutes(router);
 
 // Current session (used by admin panel on load)
 router.get('/auth/me', ...adminAuth, async (req, res) => {
@@ -2369,11 +2247,15 @@ router.get('/orders/:id', ...adminAuth, async (req, res) => {
 
         const [items] = await req.pool.execute(
             `
-            SELECT id, product_id, variant_id, product_name, product_sku,
-                   variant_name, quantity, price, total, created_at
-            FROM order_items
-            WHERE order_id = ?
-            ORDER BY id ASC
+            SELECT oi.id, oi.product_id, oi.variant_id, oi.product_name, oi.product_sku,
+                   oi.variant_name, oi.quantity, oi.price, oi.total, oi.created_at,
+                   p.slug AS product_slug,
+                   NULLIF(TRIM(b.name), '') AS brand_name
+            FROM order_items oi
+            LEFT JOIN products p ON p.id = oi.product_id
+            LEFT JOIN brands b ON b.id = p.brand_id
+            WHERE oi.order_id = ?
+            ORDER BY oi.id ASC
             `,
             [orderId]
         );

@@ -1,6 +1,7 @@
 'use strict';
 
 const crypto = require('crypto');
+const { encryptSupportSecret, decryptSupportSecret } = require('../utils/posSupportCrypto');
 
 function hashDeviceKey(apiKey) {
     const pepper = String(process.env.POS_DEVICE_KEY_PEPPER || process.env.JWT_SECRET || 'pos-device').trim();
@@ -88,19 +89,48 @@ function keyPrefix(apiKey) {
     return String(apiKey || '').slice(0, 12);
 }
 
+/** Stable per-install id from X-POS-Install-Id (UUID or machine id). */
+function normalizeInstallId(raw) {
+    const id = String(raw || '')
+        .trim()
+        .slice(0, 64);
+    if (!id || id.length < 8) return '';
+    if (!/^[A-Za-z0-9._:-]+$/.test(id)) return '';
+    return id;
+}
+
+function normalizeBoundPlatform(raw) {
+    const p = String(raw || '')
+        .trim()
+        .toLowerCase()
+        .slice(0, 16);
+    return p || null;
+}
+
 function resolveStoreUrlForNewKey() {
     try {
-        const { getStoreBaseUrl } = require('../utils/platformSupportEnv');
-        return getStoreBaseUrl();
+        const { getStoreBaseUrl, normalizeStoreBaseUrl } = require('../utils/platformSupportEnv');
+        return (
+            getStoreBaseUrl() ||
+            normalizeStoreBaseUrl(
+                process.env.SHARED_POS_PUBLIC_ORIGIN ||
+                    process.env.FRONTEND_URL ||
+                    process.env.POS_PLATFORM_STORE_URL ||
+                    'https://pos.businessonecomprehensive.com'
+            ) ||
+            'https://pos.businessonecomprehensive.com'
+        );
     } catch {
-        return '';
+        return 'https://pos.businessonecomprehensive.com';
     }
 }
 
 async function listDevices(pool, merchantId = null) {
     if (merchantId) {
         const [rows] = await pool.execute(
-            `SELECT id, device_label, key_prefix, is_active, last_seen_at, created_at, updated_at
+            `SELECT id, device_label, key_prefix, is_active, last_seen_at, created_at, updated_at,
+                    bound_install_id, bound_at, bound_platform,
+                    (api_key_enc IS NOT NULL AND api_key_enc != '') AS has_stored_key
              FROM pos_devices
              WHERE is_active = 1 AND merchant_id = ?
              ORDER BY device_label ASC`,
@@ -109,12 +139,59 @@ async function listDevices(pool, merchantId = null) {
         return rows || [];
     }
     const [rows] = await pool.execute(
-        `SELECT id, device_label, key_prefix, is_active, last_seen_at, created_at, updated_at
+        `SELECT id, device_label, key_prefix, is_active, last_seen_at, created_at, updated_at,
+                bound_install_id, bound_at, bound_platform,
+                (api_key_enc IS NOT NULL AND api_key_enc != '') AS has_stored_key
          FROM pos_devices
          WHERE is_active = 1
          ORDER BY device_label ASC`
     );
     return rows || [];
+}
+
+async function getDeviceApiKey(pool, deviceId, merchantId = null) {
+    const id = Number(deviceId);
+    if (!Number.isInteger(id) || id <= 0) {
+        const err = new Error('Invalid register id');
+        err.code = 'INVALID_DEVICE_ID';
+        throw err;
+    }
+
+    let rows;
+    if (merchantId) {
+        [rows] = await pool.execute(
+            `SELECT id, device_label, api_key_enc FROM pos_devices
+             WHERE id = ? AND is_active = 1 AND merchant_id = ?
+             LIMIT 1`,
+            [id, merchantId]
+        );
+    } else {
+        [rows] = await pool.execute(
+            `SELECT id, device_label, api_key_enc FROM pos_devices WHERE id = ? AND is_active = 1 LIMIT 1`,
+            [id]
+        );
+    }
+    if (!rows.length) {
+        const err = new Error('Register not found');
+        err.code = 'DEVICE_NOT_FOUND';
+        throw err;
+    }
+
+    const row = rows[0];
+    const apiKey = decryptSupportSecret(row.api_key_enc);
+    if (!apiKey) {
+        const err = new Error(
+            'This register key was created before copy-again was available. Click New key once, then Copy key will work.'
+        );
+        err.code = 'KEY_NOT_STORED';
+        throw err;
+    }
+
+    return {
+        id: row.id,
+        deviceLabel: row.device_label,
+        apiKey
+    };
 }
 
 async function findDeviceByLabel(pool, deviceLabel, merchantId = null) {
@@ -158,13 +235,14 @@ async function createDevice(pool, deviceLabel, merchantId = null) {
     const apiKeyHash = hashDeviceKey(apiKey);
     const prefix = keyPrefix(apiKey);
     const parsed = parseDeviceApiKey(apiKey);
+    const apiKeyEnc = encryptSupportSecret(apiKey);
 
     let result;
     if (merchantId) {
         [result] = await pool.execute(
-            `INSERT INTO pos_devices (device_label, api_key_hash, key_prefix, is_active, merchant_id)
-             VALUES (?, ?, ?, 1, ?)`,
-            [label, apiKeyHash, prefix, merchantId]
+            `INSERT INTO pos_devices (device_label, api_key_hash, key_prefix, api_key_enc, is_active, merchant_id)
+             VALUES (?, ?, ?, ?, 1, ?)`,
+            [label, apiKeyHash, prefix, apiKeyEnc, merchantId]
         );
         try {
             const { hashTenantSecret } = require('../utils/ensureTenantsSchema');
@@ -181,9 +259,9 @@ async function createDevice(pool, deviceLabel, merchantId = null) {
         }
     } else {
         [result] = await pool.execute(
-            `INSERT INTO pos_devices (device_label, api_key_hash, key_prefix, is_active)
-             VALUES (?, ?, ?, 1)`,
-            [label, apiKeyHash, prefix]
+            `INSERT INTO pos_devices (device_label, api_key_hash, key_prefix, api_key_enc, is_active)
+             VALUES (?, ?, ?, ?, 1)`,
+            [label, apiKeyHash, prefix, apiKeyEnc]
         );
     }
 
@@ -257,12 +335,15 @@ async function regenerateDeviceKey(pool, deviceId) {
     const apiKeyHash = hashDeviceKey(apiKey);
     const prefix = keyPrefix(apiKey);
     const parsed = parseDeviceApiKey(apiKey);
+    const apiKeyEnc = encryptSupportSecret(apiKey);
 
     await pool.execute(
         `UPDATE pos_devices
-         SET api_key_hash = ?, key_prefix = ?, is_active = 1, updated_at = CURRENT_TIMESTAMP
+         SET api_key_hash = ?, key_prefix = ?, api_key_enc = ?, is_active = 1,
+             bound_install_id = NULL, bound_at = NULL, bound_platform = NULL,
+             updated_at = CURRENT_TIMESTAMP
          WHERE id = ?`,
-        [apiKeyHash, prefix, id]
+        [apiKeyHash, prefix, apiKeyEnc, id]
     );
 
     return {
@@ -274,12 +355,104 @@ async function regenerateDeviceKey(pool, deviceId) {
     };
 }
 
+/** Clear exclusive install binding so another phone/tablet can activate this register key. */
+async function clearDeviceBinding(pool, deviceId) {
+    const id = Number(deviceId);
+    if (!Number.isInteger(id) || id <= 0) {
+        const err = new Error('Invalid register id');
+        err.code = 'INVALID_DEVICE_ID';
+        throw err;
+    }
+
+    const [rows] = await pool.execute(
+        `SELECT id, device_label, bound_install_id FROM pos_devices WHERE id = ? AND is_active = 1 LIMIT 1`,
+        [id]
+    );
+    if (!rows.length) {
+        const err = new Error('Register not found');
+        err.code = 'DEVICE_NOT_FOUND';
+        throw err;
+    }
+
+    await pool.execute(
+        `UPDATE pos_devices
+         SET bound_install_id = NULL, bound_at = NULL, bound_platform = NULL, updated_at = CURRENT_TIMESTAMP
+         WHERE id = ?`,
+        [id]
+    );
+
+    return {
+        id,
+        deviceLabel: rows[0].device_label,
+        wasBound: Boolean(rows[0].bound_install_id)
+    };
+}
+
 async function touchDeviceSeen(pool, deviceRowId) {
     if (!deviceRowId) return;
     await pool.execute(`UPDATE pos_devices SET last_seen_at = CURRENT_TIMESTAMP WHERE id = ?`, [deviceRowId]).catch(() => {});
 }
 
-async function authenticateDevice(pool, deviceLabel, providedKey, merchantId = null) {
+/**
+ * Enforce one physical install per register key.
+ * First successful auth with X-POS-Install-Id binds; later mismatch → DEVICE_BOUND_ELSEWHERE.
+ */
+async function enforceInstallBinding(pool, registered, bindOpts = {}) {
+    const installId = normalizeInstallId(bindOpts.installId);
+    const platform = normalizeBoundPlatform(bindOpts.platform);
+    const bound = registered.bound_install_id ? String(registered.bound_install_id).trim() : '';
+
+    const elsewhereMsg =
+        'This register key is already linked to another device. Ask an admin to Reset device binding or generate a new key, then connect again.';
+
+    if (!installId) {
+        if (bound) {
+            return { ok: false, code: 'DEVICE_BOUND_ELSEWHERE', message: elsewhereMsg };
+        }
+        return {
+            ok: false,
+            code: 'INSTALL_ID_REQUIRED',
+            message:
+                'This POS app must send a stable install id (X-POS-Install-Id). Update the POS app and try again.'
+        };
+    }
+
+    if (!bound) {
+        const [result] = await pool.execute(
+            `UPDATE pos_devices
+             SET bound_install_id = ?, bound_at = CURRENT_TIMESTAMP, bound_platform = ?,
+                 last_seen_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+             WHERE id = ? AND bound_install_id IS NULL`,
+            [installId, platform, registered.id]
+        );
+        if (result.affectedRows === 0) {
+            const [again] = await pool.execute(
+                `SELECT bound_install_id FROM pos_devices WHERE id = ? LIMIT 1`,
+                [registered.id]
+            );
+            if (String(again[0]?.bound_install_id || '').trim() !== installId) {
+                return { ok: false, code: 'DEVICE_BOUND_ELSEWHERE', message: elsewhereMsg };
+            }
+        }
+        return { ok: true, bound: true };
+    }
+
+    if (bound !== installId) {
+        return { ok: false, code: 'DEVICE_BOUND_ELSEWHERE', message: elsewhereMsg };
+    }
+
+    if (platform && !registered.bound_platform) {
+        await pool
+            .execute(`UPDATE pos_devices SET bound_platform = ? WHERE id = ? AND bound_platform IS NULL`, [
+                platform,
+                registered.id
+            ])
+            .catch(() => {});
+    }
+    return { ok: true, bound: true };
+}
+
+async function authenticateDevice(pool, deviceLabel, providedKey, merchantId = null, bindOpts = {}) {
     const label = String(deviceLabel || 'register-1').trim().slice(0, 64);
     const key = String(providedKey || '').trim();
     if (!key) {
@@ -289,13 +462,14 @@ async function authenticateDevice(pool, deviceLabel, providedKey, merchantId = n
     let rows;
     if (merchantId) {
         [rows] = await pool.execute(
-            `SELECT id, device_label, api_key_hash, is_active FROM pos_devices
+            `SELECT id, device_label, api_key_hash, is_active, bound_install_id, bound_platform FROM pos_devices
              WHERE LOWER(device_label) = LOWER(?) AND merchant_id = ? LIMIT 1`,
             [label, merchantId]
         );
     } else {
         [rows] = await pool.execute(
-            `SELECT id, device_label, api_key_hash, is_active FROM pos_devices WHERE LOWER(device_label) = LOWER(?) LIMIT 1`,
+            `SELECT id, device_label, api_key_hash, is_active, bound_install_id, bound_platform
+             FROM pos_devices WHERE LOWER(device_label) = LOWER(?) LIMIT 1`,
             [label]
         );
     }
@@ -309,6 +483,12 @@ async function authenticateDevice(pool, deviceLabel, providedKey, merchantId = n
         if (hash !== registered.api_key_hash) {
             return { ok: false, code: 'POS_AUTH_FAILED' };
         }
+
+        const bind = await enforceInstallBinding(pool, registered, bindOpts);
+        if (!bind.ok) {
+            return { ok: false, code: bind.code, message: bind.message };
+        }
+
         await touchDeviceSeen(pool, registered.id);
         return {
             ok: true,
@@ -341,9 +521,12 @@ module.exports = {
     hashDeviceKey,
     generateDeviceApiKey,
     parseDeviceApiKey,
+    normalizeInstallId,
     listDevices,
+    getDeviceApiKey,
     createDevice,
     regenerateDeviceKey,
+    clearDeviceBinding,
     revokeDevice,
     deleteDevice,
     pruneRevokedDevices,

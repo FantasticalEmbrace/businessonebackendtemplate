@@ -246,6 +246,25 @@ class AdminApp {
         return div.innerHTML;
     }
 
+    escapeAttr(text) {
+        return String(text ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;')
+            .replace(/'/g, '&#39;');
+    }
+
+    /** Relative storefront PDP URL for an order line item (null when unresolvable). */
+    getOrderItemProductHref(item) {
+        if (!item) return null;
+        const slug = String(item.product_slug || item.slug || '').trim();
+        if (slug) return `product.html?slug=${encodeURIComponent(slug)}`;
+        if (item.product_id != null && item.product_id !== '') {
+            return `product.html?id=${encodeURIComponent(item.product_id)}`;
+        }
+        return null;
+    }
+
     formatAdminMoney(amount) {
         const value = Number(amount) || 0;
         return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
@@ -1146,16 +1165,26 @@ class AdminApp {
             const itemsHeading = shop ? `Parts & labor (${items.length})` : `Items (${items.length})`;
             const itemsHtml = items.length
                 ? `<div class="table-container" style="overflow-x:auto;-webkit-overflow-scrolling:touch;"><table class="table">
-                    <thead><tr><th>Product</th><th>SKU</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
+                    <thead><tr><th>Product</th><th>Brand</th><th>SKU</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
                     <tbody>
-                    ${items.map((item) => `
-                        <tr>
-                            <td>${this.escapeHtml(item.product_name || '')}${item.variant_name ? `<div style="font-size:0.8rem;color:var(--gray-500);">${this.escapeHtml(item.variant_name)}</div>` : ''}</td>
+                    ${items.map((item) => {
+                        const productHref = this.getOrderItemProductHref(item);
+                        const nameText = this.escapeHtml(item.product_name || '');
+                        const nameHtml = productHref
+                            ? `<a href="${this.escapeAttr(productHref)}" target="_blank" rel="noopener noreferrer">${nameText}</a>`
+                            : nameText;
+                        const variantHtml = item.variant_name
+                            ? `<div style="font-size:0.8rem;color:var(--gray-500);">${this.escapeHtml(item.variant_name)}</div>`
+                            : '';
+                        return `<tr>
+                            <td>${nameHtml}${variantHtml}</td>
+                            <td>${this.escapeHtml(item.brand_name || '')}</td>
                             <td><code>${this.escapeHtml(item.product_sku || '')}</code></td>
                             <td>${item.quantity || 0}</td>
                             <td>${this.formatAdminMoney(item.price)}</td>
                             <td>${this.formatAdminMoney(item.total)}</td>
-                        </tr>`).join('')}
+                        </tr>`;
+                    }).join('')}
                     </tbody></table></div>`
                 : `<p style="color:var(--gray-500);">${shop ? 'No parts or labor lines yet.' : 'No line items.'}</p>`;
 
@@ -1405,6 +1434,34 @@ class AdminApp {
             mustChangePasswordForm.addEventListener('submit', (e) => this.handleMustChangePassword(e));
         }
 
+        const admin2faSetupForm = document.getElementById('admin2faSetupForm');
+        if (admin2faSetupForm) {
+            admin2faSetupForm.addEventListener('submit', (e) => this.handleAdmin2faSetup(e));
+        }
+        const admin2faVerifyForm = document.getElementById('admin2faVerifyForm');
+        if (admin2faVerifyForm) {
+            admin2faVerifyForm.addEventListener('submit', (e) => this.handleAdmin2faVerify(e));
+        }
+        const admin2faSetupBack = document.getElementById('admin2faSetupBack');
+        const admin2faVerifyBack = document.getElementById('admin2faVerifyBack');
+        if (admin2faSetupBack) admin2faSetupBack.addEventListener('click', () => this.cancelAdminTwoFactor());
+        if (admin2faVerifyBack) admin2faVerifyBack.addEventListener('click', () => this.cancelAdminTwoFactor());
+        const admin2faCopyKey = document.getElementById('admin2faCopyKey');
+        if (admin2faCopyKey) {
+            admin2faCopyKey.addEventListener('click', () => this.copyAdminText(this._admin2faManualKey || '', admin2faCopyKey, 'Copy key'));
+        }
+        const admin2faCopyCodes = document.getElementById('admin2faCopyCodes');
+        if (admin2faCopyCodes) {
+            admin2faCopyCodes.addEventListener('click', () => {
+                const codes = Array.isArray(this._admin2faBackupCodes) ? this._admin2faBackupCodes.join('\n') : '';
+                this.copyAdminText(codes, admin2faCopyCodes, 'Copy backup codes');
+            });
+        }
+        const admin2faBackupContinue = document.getElementById('admin2faBackupContinue');
+        if (admin2faBackupContinue) {
+            admin2faBackupContinue.addEventListener('click', () => this.finishAdminTwoFactor());
+        }
+
         // Close forgot password modal
         const closeForgotPasswordModal = document.getElementById('closeForgotPasswordModal');
         const cancelForgotPassword = document.getElementById('cancelForgotPassword');
@@ -1602,7 +1659,12 @@ class AdminApp {
 
             const data = await response.json().catch(() => ({}));
 
-            if (response.ok) {
+            if (response.ok && data.twoFactor && data.challengeToken) {
+                localStorage.removeItem('adminToken');
+                this.authToken = null;
+                this.pauseAdminPasswordForm();
+                await this.openAdminTwoFactor(data.twoFactor, data.challengeToken, '');
+            } else if (response.ok && data.token) {
                 this.authToken = data.token;
                 this.currentUser = data.admin;
                 this.allowedSections = data.allowedSections ?? null;
@@ -1638,6 +1700,245 @@ class AdminApp {
                 submitBtn.disabled = false;
             }
         }
+    }
+
+    pauseAdminPasswordForm() {
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) {
+            loginForm.querySelectorAll('input, button').forEach((el) => { el.disabled = true; });
+        }
+    }
+
+    resumeAdminPasswordForm() {
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) {
+            loginForm.querySelectorAll('input, button').forEach((el) => { el.disabled = false; });
+        }
+    }
+
+    showAdmin2faError(elementId, message) {
+        const errorDiv = document.getElementById(elementId);
+        if (!errorDiv) return;
+        errorDiv.textContent = message || '';
+        errorDiv.style.display = message ? 'block' : 'none';
+        errorDiv.classList.toggle('show', Boolean(message));
+    }
+
+    showAdmin2faPane(name) {
+        const setup = document.getElementById('admin2faSetup');
+        const verify = document.getElementById('admin2faVerify');
+        const backup = document.getElementById('admin2faBackup');
+        if (setup) setup.style.display = name === 'setup' ? 'block' : 'none';
+        if (verify) verify.style.display = name === 'verify' ? 'block' : 'none';
+        if (backup) backup.style.display = name === 'backup' ? 'block' : 'none';
+    }
+
+    focusAdminCodeField(input) {
+        if (!input) return;
+        const reveal = () => {
+            try { input.focus(); } catch (_) { /* ignore */ }
+        };
+        setTimeout(reveal, 350);
+    }
+
+    async openAdminTwoFactor(step, challengeToken, returnTo) {
+        this._admin2faChallenge = challengeToken;
+        this._admin2faReturn = returnTo || '';
+        this._pendingAdminSession = null;
+        this.pauseAdminPasswordForm();
+        const passwordCard = document.getElementById('adminPasswordCard');
+        const card = document.getElementById('admin2faCard');
+        const loginScreen = document.getElementById('loginScreen');
+        const dashboard = document.getElementById('adminDashboard');
+        document.body.classList.remove('admin-layout-locked');
+        if (loginScreen) loginScreen.style.display = 'flex';
+        if (dashboard) dashboard.style.display = 'none';
+        if (passwordCard) passwordCard.style.display = 'none';
+        if (card) card.style.display = 'block';
+        this.showAdmin2faError('admin2faSetupError', '');
+        this.showAdmin2faError('admin2faVerifyError', '');
+        if (step === 'verify') {
+            this.showAdmin2faPane('verify');
+            this.focusAdminCodeField(document.getElementById('admin2faVerifyCode'));
+            return;
+        }
+        this.showAdmin2faPane('setup');
+        await this.loadAdmin2faSetup();
+        this.focusAdminCodeField(document.getElementById('admin2faSetupCode'));
+    }
+
+    cancelAdminTwoFactor() {
+        this._admin2faChallenge = null;
+        this._admin2faManualKey = '';
+        this._admin2faBackupCodes = null;
+        this._pendingAdminSession = null;
+        const passwordCard = document.getElementById('adminPasswordCard');
+        const card = document.getElementById('admin2faCard');
+        if (card) card.style.display = 'none';
+        if (passwordCard) passwordCard.style.display = 'block';
+        this.resumeAdminPasswordForm();
+    }
+
+    copyAdminText(text, button, resetLabel) {
+        try {
+            navigator.clipboard.writeText(text);
+            if (button) {
+                button.textContent = 'Copied!';
+                setTimeout(() => { button.textContent = resetLabel; }, 2000);
+            }
+        } catch (_) {
+            /* ignore */
+        }
+    }
+
+    formatAdmin2faKey(secret) {
+        return String(secret || '').replace(/(.{4})/g, '$1 ').trim();
+    }
+
+    async loadAdmin2faSetup() {
+        this.showAdmin2faError('admin2faSetupError', '');
+        const qr = document.getElementById('admin2faQr');
+        const keyEl = document.getElementById('admin2faManualKey');
+        const fallback = document.getElementById('admin2faQrFallback');
+        if (qr) qr.innerHTML = '';
+        if (keyEl) keyEl.textContent = '';
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/admin/auth/2fa/setup`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ challengeToken: this._admin2faChallenge })
+            });
+            const data = await response.json().catch(() => ({}));
+            if (response.status === 409) {
+                this.showAdmin2faPane('verify');
+                return;
+            }
+            if (!response.ok) {
+                this.showAdmin2faError('admin2faSetupError', data.error || 'Could not start authenticator setup.');
+                return;
+            }
+            this._admin2faManualKey = data.manualKey || '';
+            if (keyEl) keyEl.textContent = this.formatAdmin2faKey(this._admin2faManualKey);
+            const svg = String(data.qrSvg || '').trim();
+            if (qr && svg.startsWith('<svg') && !/<script/i.test(svg)) {
+                qr.innerHTML = svg;
+            } else if (fallback) {
+                fallback.style.display = 'block';
+            }
+            const input = document.getElementById('admin2faSetupCode');
+            if (input) input.focus();
+        } catch (_) {
+            this.showAdmin2faError('admin2faSetupError', 'Connection error. Please try again.');
+        }
+    }
+
+    async handleAdmin2faSetup(e) {
+        e.preventDefault();
+        const input = document.getElementById('admin2faSetupCode');
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const code = input ? input.value.trim() : '';
+        if (!code) {
+            this.showAdmin2faError('admin2faSetupError', 'Enter the 6-digit code from your app.');
+            return;
+        }
+        this.showAdmin2faError('admin2faSetupError', '');
+        if (submitBtn) submitBtn.disabled = true;
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/admin/auth/2fa/confirm`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ challengeToken: this._admin2faChallenge, code })
+            });
+            const data = await response.json().catch(() => ({}));
+            if (response.status === 409) {
+                this.showAdmin2faPane('verify');
+                return;
+            }
+            if (!response.ok || !data.token) {
+                this.showAdmin2faError('admin2faSetupError', data.error || 'That code is not valid. Try again.');
+                return;
+            }
+            this._pendingAdminSession = data;
+            this._admin2faBackupCodes = Array.isArray(data.backupCodes) ? data.backupCodes : [];
+            const list = document.getElementById('admin2faBackupCodes');
+            if (list) {
+                list.replaceChildren();
+                this._admin2faBackupCodes.forEach((codeValue) => {
+                    const el = document.createElement('code');
+                    el.textContent = codeValue;
+                    list.appendChild(el);
+                });
+            }
+            this.showAdmin2faPane('backup');
+        } catch (_) {
+            this.showAdmin2faError('admin2faSetupError', 'Connection error. Please try again.');
+        } finally {
+            if (submitBtn) submitBtn.disabled = false;
+        }
+    }
+
+    async handleAdmin2faVerify(e) {
+        e.preventDefault();
+        const input = document.getElementById('admin2faVerifyCode');
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const code = input ? input.value.trim() : '';
+        if (!code) {
+            this.showAdmin2faError('admin2faVerifyError', 'Enter the code from your authenticator app or a backup code.');
+            return;
+        }
+        this.showAdmin2faError('admin2faVerifyError', '');
+        if (submitBtn) submitBtn.disabled = true;
+        const rememberEl = document.getElementById('admin2faRemember');
+        const rememberBrowser = Boolean(rememberEl && rememberEl.checked);
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/admin/auth/2fa/verify`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
+                body: JSON.stringify({ challengeToken: this._admin2faChallenge, code, rememberBrowser })
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok || !data.token) {
+                this.showAdmin2faError('admin2faVerifyError', data.error || 'That code is not valid. Try again.');
+                return;
+            }
+            await this.applyAdminSession(data);
+        } catch (_) {
+            this.showAdmin2faError('admin2faVerifyError', 'Connection error. Please try again.');
+        } finally {
+            if (submitBtn) submitBtn.disabled = false;
+        }
+    }
+
+    finishAdminTwoFactor() {
+        if (!this._pendingAdminSession || !this._pendingAdminSession.token) {
+            return;
+        }
+        const session = this._pendingAdminSession;
+        this._admin2faBackupCodes = null;
+        this._pendingAdminSession = null;
+        this.applyAdminSession(session);
+    }
+
+    async applyAdminSession(data) {
+        this.authToken = data.token;
+        this.currentUser = data.admin;
+        this.allowedSections = data.allowedSections ?? null;
+        this.canManageStoreHours = Boolean(data.canManageStoreHours);
+        this.canManageStoreHoursDelegation = Boolean(data.canManageStoreHoursDelegation);
+        this.defaultSection = data.defaultSection || 'dashboard';
+        localStorage.setItem('adminToken', this.authToken);
+        const returnTo = String(this._admin2faReturn || '').replace(/^\/+/, '');
+        this._admin2faChallenge = null;
+        this._admin2faManualKey = '';
+        if (returnTo && !/^admin\.html(?:$|\?|#)/i.test(returnTo)) {
+            window.location.href = returnTo;
+            return;
+        }
+        const card = document.getElementById('admin2faCard');
+        if (card) card.style.display = 'none';
+        await this.applyDeveloperSignupUnlock();
+        await this.loadDashboard();
     }
 
     showForgotPasswordModal() {
@@ -7634,48 +7935,91 @@ class AdminApp {
         }
     }
 
-    async handleCreateRegisterOnlyEmployee(ev) {
-        if (ev) ev.preventDefault();
-        const form = document.getElementById('register-only-create-form');
-        if (!form) return;
-        const fd = new FormData(form);
-        const pin = this._normalizeRegisterPin(fd.get('pin'));
-        if (!this._isValidRegisterPin(pin)) {
-            this.showToast('Register PIN must be exactly 4 digits', 'warning');
+    _onPersonnelPermissionToggle(root, changedName) {
+        if (!root || root.querySelector('[data-permissions-locked="1"]')) return;
+        const orders = root.querySelector('[name="permOrders"]');
+        const products = root.querySelector('[name="permProducts"]');
+        const full = root.querySelector('[name="permFullAdmin"]');
+        if (!orders || !products || !full) return;
+        if (changedName === 'permOrders' && !orders.checked) {
+            products.checked = false;
+            full.checked = false;
+        }
+        if (changedName === 'permProducts' && !products.checked) {
+            full.checked = false;
+        }
+        if (changedName === 'permProducts' && products.checked) {
+            orders.checked = true;
+        }
+        if (changedName === 'permFullAdmin' && full.checked) {
+            products.checked = true;
+            orders.checked = true;
+        }
+        this._syncPersonnelPermissionToggles(root);
+    }
+
+    _syncPersonnelPermissionToggles(root) {
+        if (!root) return;
+        const orders = root.querySelector('[name="permOrders"]');
+        const products = root.querySelector('[name="permProducts"]');
+        const full = root.querySelector('[name="permFullAdmin"]');
+        const hours = root.querySelector('[name="permStoreHours"]');
+        if (!orders || !products || !full) return;
+        const locked = !!root.querySelector('[data-permissions-locked="1"]');
+        if (full.checked) {
+            products.checked = true;
+            orders.checked = true;
+        } else if (products.checked) {
+            orders.checked = true;
+        }
+        if (locked) {
+            orders.disabled = true;
+            products.disabled = true;
+            full.disabled = true;
+            if (hours) hours.disabled = true;
             return;
         }
-        try {
-            await this.apiRequest('/admin/personnel/employees', {
-                method: 'POST',
-                body: JSON.stringify({
-                    employeeCode: fd.get('employeeCode'),
-                    firstName: fd.get('firstName'),
-                    lastName: fd.get('lastName'),
-                    email: fd.get('email'),
-                    pin,
-                    canAuthorize: fd.get('canAuthorize') === 'on' || fd.get('canAuthorize') === 'true',
-                    allowManualDiscounts:
-                        fd.get('allowManualDiscounts') === 'on' || fd.get('allowManualDiscounts') === 'true',
-                    canViewShopFloor:
-                        fd.get('canViewShopFloor') === 'on' || fd.get('canViewShopFloor') === 'true',
-                    ...(this.isFullAdmin
-                        ? {
-                              canProcessRefunds:
-                                  fd.get('canProcessRefunds') === 'on' || fd.get('canProcessRefunds') === 'true',
-                              canOpenDrawer:
-                                  fd.get('canOpenDrawer') === 'on' || fd.get('canOpenDrawer') === 'true',
-                              canViewCost:
-                                  fd.get('canViewCost') === 'on' || fd.get('canViewCost') === 'true'
-                          }
-                        : {}),
-                }),
-            });
-            this.showToast('Register employee added', 'success');
-            form.reset();
-            await this.loadAdminTeam();
-        } catch (err) {
-            this.showToast(err.message || 'Create failed', 'error');
+        orders.disabled = false;
+        products.disabled = false;
+        full.disabled = false;
+        if (!hours) return;
+        if (full.checked) {
+            hours.checked = true;
+            hours.disabled = true;
+        } else if (products.checked) {
+            hours.disabled = false;
+        } else {
+            hours.checked = false;
+            hours.disabled = true;
         }
+    }
+
+    _accessFromPermissionForm(root) {
+        const full = !!root?.querySelector('[name="permFullAdmin"]')?.checked;
+        const products = !!root?.querySelector('[name="permProducts"]')?.checked;
+        const orders = !!root?.querySelector('[name="permOrders"]')?.checked;
+        const hours = !!root?.querySelector('[name="permStoreHours"]')?.checked;
+        if (full) return { hasAdmin: true, role: 'admin', canManageStoreHours: false };
+        if (products) return { hasAdmin: true, role: 'manager', canManageStoreHours: hours };
+        if (orders) return { hasAdmin: true, role: 'assistant_manager', canManageStoreHours: false };
+        return { hasAdmin: false, role: null, canManageStoreHours: false };
+    }
+
+    _registerPermissionPayload(form) {
+        const on = (name) => !!form?.querySelector(`[name="${name}"]`)?.checked;
+        const payload = {
+            canAuthorize: on('canAuthorize'),
+            allowManualDiscounts: on('allowManualDiscounts'),
+            canViewShopFloor: on('canViewShopFloor'),
+            isTechnician: on('isTechnician'),
+            canBuildShopEstimate: on('canBuildShopEstimate'),
+        };
+        if (this.isFullAdmin) {
+            payload.canProcessRefunds = on('canProcessRefunds');
+            payload.canOpenDrawer = on('canOpenDrawer');
+            payload.canViewCost = on('canViewCost');
+        }
+        return payload;
     }
 
     openAdminTeamProfile(id) {
@@ -7709,30 +8053,126 @@ class AdminApp {
         const form = document.getElementById('admin-team-create-form');
         const msg = document.getElementById('admin-team-form-msg');
         if (!form || !this.isFullAdmin) return;
-        const email = form.querySelector('#team-create-email')?.value?.trim();
+        const setMsg = (text, ok = false) => {
+            if (!msg) return;
+            msg.textContent = text || '';
+            msg.style.color = text ? (ok ? 'var(--success)' : 'var(--error)') : '';
+        };
+        setMsg('');
         const firstName = form.querySelector('#team-create-first')?.value?.trim();
         const lastName = form.querySelector('#team-create-last')?.value?.trim();
-        const role = form.querySelector('#team-create-role')?.value;
-        const password = form.querySelector('#team-create-password')?.value;
-        if (msg) msg.textContent = '';
+        const email = form.querySelector('#team-create-email')?.value?.trim();
+        const employeeCode = String(form.querySelector('#team-create-employee-code')?.value || '').trim();
+        const pin = this._normalizeRegisterPin(form.querySelector('#team-create-pin')?.value);
+        const password = String(form.querySelector('#team-create-password')?.value || '');
+        const access = this._accessFromPermissionForm(form);
+        const registerPerms = this._registerPermissionPayload(form);
+
+        if (!firstName || !lastName) {
+            setMsg('Enter a first and last name.');
+            return;
+        }
+        if (!access || access.role === 'developer') {
+            setMsg('This form cannot create a Developer account.');
+            return;
+        }
+        if (pin && !this._isValidRegisterPin(pin)) {
+            setMsg('Register PIN must be exactly 4 digits.');
+            return;
+        }
+        if (employeeCode && (employeeCode.length < 2 || employeeCode.length > 8)) {
+            setMsg('Register employee ID must be 2-8 characters.');
+            return;
+        }
+
+        const wantsRegister = !!(employeeCode || pin);
+        if (!access.hasAdmin) {
+            if (employeeCode.length < 2) {
+                setMsg('Enter a register employee ID (2-8 characters) when every website permission is off.');
+                return;
+            }
+            if (!this._isValidRegisterPin(pin)) {
+                setMsg('Enter a 4-digit register PIN when every website permission is off.');
+                return;
+            }
+        } else {
+            if (!email) {
+                setMsg('Enter an email when a website permission is on.');
+                return;
+            }
+            if (password.length < 8) {
+                setMsg('Enter a temporary password of at least 8 characters when a website permission is on.');
+                return;
+            }
+            if (wantsRegister && (employeeCode.length < 2 || !this._isValidRegisterPin(pin))) {
+                setMsg('Enter both a register employee ID and a 4-digit PIN, or leave both blank.');
+                return;
+            }
+        }
+
         try {
-            await this.apiRequest('/admin/team', {
-                method: 'POST',
-                body: JSON.stringify({ email, firstName, lastName, role, password }),
-            });
-            if (msg) {
-                msg.textContent = 'Account created. Send them the email and password securely.';
-                msg.style.color = 'var(--success)';
+            if (!access.hasAdmin) {
+                await this.apiRequest('/admin/personnel/employees', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        employeeCode,
+                        firstName,
+                        lastName,
+                        email: email || null,
+                        pin,
+                        ...registerPerms,
+                    }),
+                });
+                setMsg('Added. They can use the register and cannot sign in to this website.', true);
+            } else {
+                const created = await this.apiRequest('/admin/team', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        email,
+                        firstName,
+                        lastName,
+                        role: access.role,
+                        password,
+                    }),
+                });
+                const id = created?.user?.id;
+                if (!id) throw new Error('Website account was not created');
+                try {
+                    if (access.role === 'manager') {
+                        await this.apiRequest(`/admin/team/${id}`, {
+                            method: 'PATCH',
+                            body: JSON.stringify({ canManageStoreHours: access.canManageStoreHours }),
+                        });
+                    }
+                    if (wantsRegister) {
+                        await this.apiRequest(`/admin/team/${id}/register`, {
+                            method: 'PUT',
+                            body: JSON.stringify({
+                                registerEnabled: true,
+                                employeeCode,
+                                pin,
+                                firstName,
+                                lastName,
+                                email,
+                                isActive: true,
+                                ...registerPerms,
+                            }),
+                        });
+                    }
+                } catch (setupErr) {
+                    setMsg(`Website account created, but setup did not finish: ${setupErr.message || 'error'}`);
+                    form.reset();
+                    this._syncPersonnelPermissionToggles(form);
+                    await this.loadAdminTeam();
+                    return;
+                }
+                setMsg('Added. Share the email and temporary password in person.', true);
             }
             form.reset();
-            const assistantOpt = form.querySelector('#team-create-role option[value="assistant_manager"]');
-            if (assistantOpt) assistantOpt.selected = true;
+            this._syncPersonnelPermissionToggles(form);
             await this.loadAdminTeam();
         } catch (err) {
-            if (msg) {
-                msg.textContent = err.message || 'Create failed';
-                msg.style.color = 'var(--error)';
-            }
+            setMsg(err.message || 'Could not add this person.');
         }
     }
 
@@ -15094,9 +15534,9 @@ function editProduct(productId) {
 function isDeprecatedPlaceholderImageUrl(url) {
     const u = String(url || '').trim();
     if (!u) return true;
-    if (u === '/images/products/advanced-blood-pressure-support-id1233-hmherbs-primary.jpg') return true;
+    // Known bad seed/placeholder filenames from older catalog imports.
     if (u === '/images/products/nature-s-puls-probiotic-mega.jpg') return true;
-    return /\/advanced-blood-pressure-support-id\d+-hmherbs-primary\.(jpe?g|webp|png)$/i.test(u);
+    return false;
 }
 
 async function loadProductForEdit(productId) {
@@ -16783,14 +17223,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const adminTeamForm = document.getElementById('admin-team-create-form');
     if (adminTeamForm && window.adminApp) {
         adminTeamForm.addEventListener('submit', (ev) => window.adminApp.handleCreateTeamMember(ev));
+        adminTeamForm.addEventListener('change', (ev) => {
+            const name = ev.target?.name || '';
+            if (name.startsWith('perm')) window.adminApp._onPersonnelPermissionToggle(adminTeamForm, name);
+        });
+        window.adminApp._syncPersonnelPermissionToggles(adminTeamForm);
     }
     const adminTeamRefresh = document.getElementById('admin-team-refresh-btn');
     if (adminTeamRefresh && window.adminApp) {
         adminTeamRefresh.addEventListener('click', () => window.adminApp.loadAdminTeam());
-    }
-    const registerOnlyForm = document.getElementById('register-only-create-form');
-    if (registerOnlyForm && window.adminApp) {
-        registerOnlyForm.addEventListener('submit', (ev) => window.adminApp.handleCreateRegisterOnlyEmployee(ev));
     }
     const employeeDiscountForm = document.getElementById('employee-discount-settings-form');
     if (employeeDiscountForm && window.adminApp) {

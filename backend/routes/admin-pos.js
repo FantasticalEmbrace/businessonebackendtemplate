@@ -7,11 +7,13 @@ const fs = require('fs');
 const multer = require('multer');
 const router = express.Router();
 const logger = require('../utils/logger');
-const { POS_SETTING_KEYS, POS_SETTING_META, loadPosSettings } = require('../services/posSettings');
+const { POS_SETTING_KEYS, POS_SETTING_META, loadPosSettings, syncMerchantShopConfigFromSettings } = require('../services/posSettings');
 const {
     listDevices,
+    getDeviceApiKey,
     createDevice,
     regenerateDeviceKey,
+    clearDeviceBinding,
     revokeDevice
 } = require('../services/posDeviceRegistry');
 const {
@@ -157,7 +159,7 @@ router.use(requireManager);
 
 router.get('/settings', async (req, res) => {
     try {
-        const values = await loadPosSettings(req.pool);
+        const values = await loadPosSettings(req.pool, { merchantId: req.merchantId || null });
         const settings = POS_SETTING_KEYS.map((key) => ({
             key_name: key,
             value: values[key] ?? '',
@@ -203,6 +205,13 @@ router.put('/settings', async (req, res) => {
         } finally {
             connection.release();
         }
+        if (req.merchantId) {
+            try {
+                await syncMerchantShopConfigFromSettings(req.pool, req.merchantId, filtered);
+            } catch (syncErr) {
+                logger.warn('POS settings shop_config sync failed:', syncErr.message);
+            }
+        }
         res.json({ success: true });
     } catch (e) {
         logger.error('POS settings save error:', e);
@@ -220,12 +229,34 @@ router.get('/devices', async (req, res) => {
                 keyPrefix: d.key_prefix,
                 isActive: Boolean(d.is_active),
                 lastSeenAt: d.last_seen_at,
-                createdAt: d.created_at
+                createdAt: d.created_at,
+                isBound: Boolean(d.bound_install_id),
+                boundAt: d.bound_at || null,
+                boundPlatform: d.bound_platform || null,
+                hasStoredKey: Boolean(d.has_stored_key)
             }))
         });
     } catch (e) {
         logger.error('List POS devices error:', e);
         res.status(500).json({ error: 'Failed to list registers' });
+    }
+});
+
+/** Reveal the register key so admins can copy it again (one key still = one physical install). */
+router.get('/devices/:id/api-key', async (req, res) => {
+    try {
+        const revealed = await getDeviceApiKey(req.pool, Number(req.params.id), req.merchantId || null);
+        res.json({
+            device: {
+                id: revealed.id,
+                deviceLabel: revealed.deviceLabel
+            },
+            apiKey: revealed.apiKey
+        });
+    } catch (e) {
+        const status =
+            e.code === 'DEVICE_NOT_FOUND' ? 404 : e.code === 'KEY_NOT_STORED' ? 409 : e.code ? 400 : 500;
+        res.status(status).json({ error: e.message, code: e.code });
     }
 });
 
@@ -269,6 +300,25 @@ router.post('/devices/:id/regenerate-key', async (req, res) => {
                 keyPrefix: regenerated.keyPrefix
             },
             apiKey: regenerated.apiKey
+        });
+    } catch (e) {
+        const status = e.code === 'DEVICE_NOT_FOUND' ? 404 : e.code ? 400 : 500;
+        res.status(status).json({ error: e.message, code: e.code });
+    }
+});
+
+/** Allow a different phone/tablet to use this register key without rotating the secret. */
+router.post('/devices/:id/reset-binding', async (req, res) => {
+    try {
+        const cleared = await clearDeviceBinding(req.pool, Number(req.params.id));
+        res.json({
+            success: true,
+            device: {
+                id: cleared.id,
+                deviceLabel: cleared.deviceLabel,
+                isBound: false
+            },
+            wasBound: cleared.wasBound
         });
     } catch (e) {
         const status = e.code === 'DEVICE_NOT_FOUND' ? 404 : e.code ? 400 : 500;

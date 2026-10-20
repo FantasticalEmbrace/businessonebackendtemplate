@@ -60,7 +60,15 @@ const POS_SETTING_KEYS = Object.freeze([
     'pos_hardware_printer',
     'pos_display_card_checkout',
     'pos_poi_device_id',
-    'pos_card_display_mode'
+    'pos_card_display_mode',
+    'pos_shop_verticals',
+    'pos_shop_contractor',
+    'pos_shop_alignment_2wheel_price',
+    'pos_shop_alignment_4wheel_price',
+    'pos_addon_warehouse',
+    'pos_addon_vin_fitment',
+    'pos_addon_tire_pro',
+    'pos_addon_extra_distributors'
 ]);
 
 const POS_SETTING_META = Object.freeze({
@@ -131,10 +139,21 @@ const POS_SETTING_META = Object.freeze({
     pos_hardware_printer: { description: 'POS receipt printer: auto, elo_star, star_android, or browser', type: 'string' },
     pos_display_card_checkout: { description: 'NMI terminal card checkout enabled', type: 'boolean' },
     pos_poi_device_id: { description: 'NMI POI device ID for A3700', type: 'string' },
-    pos_card_display_mode: { description: 'Card checkout mode (NMI NMI terminal)', type: 'string' }
+    pos_card_display_mode: { description: 'Card checkout mode (NMI NMI terminal)', type: 'string' },
+    pos_shop_verticals: {
+        description: 'JSON array of shop verticals: contractor, auto, body, upholstery, tire',
+        type: 'string'
+    },
+    pos_shop_contractor: { description: 'Contractor / estimate mode enabled', type: 'boolean' },
+    pos_shop_alignment_2wheel_price: { description: '2-wheel alignment price', type: 'number' },
+    pos_shop_alignment_4wheel_price: { description: '4-wheel alignment price', type: 'number' },
+    pos_addon_warehouse: { description: 'POS add-on: live warehouse inventory', type: 'boolean' },
+    pos_addon_vin_fitment: { description: 'POS add-on: VIN & vehicle fitment', type: 'boolean' },
+    pos_addon_tire_pro: { description: 'POS add-on: Tire Pro bundle', type: 'boolean' },
+    pos_addon_extra_distributors: { description: 'POS add-on: extra wholesale distributors', type: 'number' }
 });
 
-async function loadPosSettings(pool) {
+async function loadPosSettings(pool, options = {}) {
     if (!pool || !POS_SETTING_KEYS.length) return {};
     const placeholders = POS_SETTING_KEYS.map(() => '?').join(', ');
     const [rows] = await pool.execute(
@@ -145,11 +164,126 @@ async function loadPosSettings(pool) {
     for (const row of rows || []) {
         out[row.key_name] = row.value != null ? String(row.value) : '';
     }
+
+    const merchantId = options.merchantId || null;
+    if (merchantId) {
+        try {
+            const [mrows] = await pool.execute(
+                'SELECT shop_config FROM platform_merchants WHERE id = ? LIMIT 1',
+                [merchantId]
+            );
+            const raw = mrows[0]?.shop_config;
+            const cfg = raw == null ? null : typeof raw === 'string' ? JSON.parse(raw) : raw;
+            if (cfg && typeof cfg === 'object') {
+                if (Array.isArray(cfg.shopVerticals)) {
+                    out.pos_shop_verticals = JSON.stringify(cfg.shopVerticals);
+                    out.pos_shop_contractor = cfg.shopVerticals.includes('contractor')
+                        ? 'true'
+                        : 'false';
+                }
+                if (cfg.addons && typeof cfg.addons === 'object') {
+                    const a = cfg.addons;
+                    const tirePro = Boolean(a.tirePro);
+                    out.pos_addon_warehouse = a.warehouse || tirePro ? 'true' : 'false';
+                    out.pos_addon_vin_fitment = a.vinFitment || tirePro ? 'true' : 'false';
+                    out.pos_addon_tire_pro = tirePro ? 'true' : 'false';
+                    out.pos_addon_extra_distributors = String(
+                        Math.max(0, Math.floor(Number(a.extraDistributors) || 0))
+                    );
+                }
+            }
+        } catch {
+            /* shop_config optional */
+        }
+    }
+
+    try {
+        let verts = [];
+        try {
+            verts = JSON.parse(out.pos_shop_verticals || '[]');
+            if (!Array.isArray(verts)) verts = [];
+        } catch {
+            verts = [];
+        }
+        if (
+            String(out.pos_shop_contractor || '').toLowerCase() === 'true' &&
+            !verts.includes('contractor')
+        ) {
+            verts = verts.concat(['contractor']);
+            out.pos_shop_verticals = JSON.stringify(verts);
+        }
+    } catch {
+        /* ignore */
+    }
+
     return out;
+}
+
+async function syncMerchantShopConfigFromSettings(pool, merchantId, settingsRows = []) {
+    if (!pool || !merchantId) return null;
+    const map = new Map(
+        (settingsRows || []).filter((s) => s?.key_name).map((s) => [s.key_name, s.value])
+    );
+    let verticals = [];
+    try {
+        verticals = JSON.parse(String(map.get('pos_shop_verticals') || '[]'));
+        if (!Array.isArray(verticals)) verticals = [];
+    } catch {
+        verticals = [];
+    }
+    verticals = verticals.map((v) => String(v).toLowerCase().trim()).filter(Boolean);
+    if (
+        String(map.get('pos_shop_contractor') || '').toLowerCase() === 'true' &&
+        !verticals.includes('contractor')
+    ) {
+        verticals.push('contractor');
+    }
+    const tirePro = String(map.get('pos_addon_tire_pro') || '').toLowerCase() === 'true';
+    const shopConfig = {
+        storeType: verticals.length ? 'shop' : 'retail',
+        shopVerticals: verticals,
+        addons: {
+            warehouse:
+                String(map.get('pos_addon_warehouse') || '').toLowerCase() === 'true' || tirePro,
+            vinFitment:
+                String(map.get('pos_addon_vin_fitment') || '').toLowerCase() === 'true' || tirePro,
+            tirePro,
+            extraDistributors: Math.max(
+                0,
+                Math.floor(Number(map.get('pos_addon_extra_distributors')) || 0)
+            )
+        },
+        updatedAt: new Date().toISOString()
+    };
+    // Preserve website package entitlements when admin saves POS settings
+    try {
+        const [rows] = await pool.execute(
+            'SELECT shop_config FROM platform_merchants WHERE id = ? LIMIT 1',
+            [merchantId]
+        );
+        const raw = rows[0]?.shop_config;
+        const prev = raw == null ? null : typeof raw === 'string' ? JSON.parse(raw) : raw;
+        if (prev && typeof prev === 'object') {
+            if (prev.hostingTier) shopConfig.hostingTier = prev.hostingTier;
+            if (prev.buildTier) shopConfig.buildTier = prev.buildTier;
+        }
+    } catch {
+        /* ignore */
+    }
+    try {
+        await pool.execute(`UPDATE platform_merchants SET shop_config = ? WHERE id = ?`, [
+            JSON.stringify(shopConfig),
+            merchantId
+        ]);
+    } catch (e) {
+        if (!String(e.message || '').includes('shop_config')) throw e;
+    }
+    return shopConfig;
 }
 
 module.exports = {
     POS_SETTING_KEYS,
     POS_SETTING_META,
-    loadPosSettings
+    loadPosSettings,
+    syncMerchantShopConfigFromSettings
 };

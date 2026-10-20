@@ -1,10 +1,19 @@
 const jwt = require('jsonwebtoken');
 const logger = require('../utils/logger');
+const { isFullAdminSession } = require('../utils/adminSessionClaims');
 const {
     normalizeAdminRole,
     hasMinAdminRole,
     isDeveloperRole,
 } = require('../utils/adminRoles');
+
+function isPasswordChangeAllowedPath(req) {
+    const url = String(req.originalUrl || req.url || '').split('?')[0];
+    return (
+        /\/admin\/auth\/me\/?$/i.test(url) ||
+        /\/admin\/auth\/change-password\/?$/i.test(url)
+    );
+}
 
 async function authenticateAdmin(req, res, next) {
     const authHeader = req.headers['authorization'];
@@ -21,34 +30,55 @@ async function authenticateAdmin(req, res, next) {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (!isFullAdminSession(decoded)) {
+            return res.status(401).json({ error: 'Invalid admin token' });
+        }
         let rows;
         try {
             [rows] = await req.pool.execute(
-                'SELECT id, email, first_name, last_name, role, is_active, merchant_id FROM admin_users WHERE id = ? AND is_active = 1',
+                'SELECT id, email, first_name, last_name, role, is_active, merchant_id, must_change_password FROM admin_users WHERE id = ? AND is_active = 1',
                 [decoded.adminId]
             );
         } catch {
-            [rows] = await req.pool.execute(
-                'SELECT id, email, first_name, last_name, role, is_active FROM admin_users WHERE id = ? AND is_active = 1',
-                [decoded.adminId]
-            );
+            try {
+                [rows] = await req.pool.execute(
+                    'SELECT id, email, first_name, last_name, role, is_active, merchant_id FROM admin_users WHERE id = ? AND is_active = 1',
+                    [decoded.adminId]
+                );
+            } catch {
+                [rows] = await req.pool.execute(
+                    'SELECT id, email, first_name, last_name, role, is_active FROM admin_users WHERE id = ? AND is_active = 1',
+                    [decoded.adminId]
+                );
+            }
         }
 
         if (rows.length === 0) {
             return res.status(401).json({ error: 'Invalid admin token' });
         }
 
+        const row = rows[0];
         req.admin = {
-            ...rows[0],
-            role: normalizeAdminRole(rows[0].role),
+            ...row,
+            role: normalizeAdminRole(row.role),
+            must_change_password: Boolean(row.must_change_password),
         };
-        if (rows[0].merchant_id) {
-            req.merchantId = rows[0].merchant_id;
-            req.merchantAccount = req.merchantAccount || { id: rows[0].merchant_id };
+        if (row.merchant_id) {
+            req.merchantId = row.merchant_id;
+            req.merchantAccount = req.merchantAccount || { id: row.merchant_id };
         }
+
+        if (req.admin.must_change_password && !isPasswordChangeAllowedPath(req)) {
+            return res.status(403).json({
+                error: 'You must set a new password before continuing.',
+                code: 'MUST_CHANGE_PASSWORD',
+            });
+        }
+
         next();
     } catch {
-        return res.status(403).json({ error: 'Invalid admin token' });
+        // Expired / malformed / wrong-secret JWT = unauthenticated (401), not "forbidden" (403).
+        return res.status(401).json({ error: 'Invalid admin token' });
     }
 }
 

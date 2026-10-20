@@ -28,8 +28,13 @@ const {
     buildWebsitePosData,
 } = require('../utils/mxmerchantEnv');
 const { markUnpaidPaymentOutcome } = require('../services/unpaidPaymentStatus');
+const {
+    createCheckoutPaymentLimiter,
+    requireBotProtection
+} = require('../middleware/checkoutBotProtection');
 
 const router = express.Router();
+const checkoutPaymentLimiter = createCheckoutPaymentLimiter();
 
 async function getAuthenticatedUserFromRequest(req) {
     const authHeader = req.headers['authorization'];
@@ -113,7 +118,7 @@ router.get('/mx-client-config', async (req, res) => {
  * POST { orderId, mxPaymentId, customerEmail? }
  * Verifies payment with MX and finalizes the order.
  */
-router.post('/process-mx-payment', async (req, res) => {
+router.post('/process-mx-payment', checkoutPaymentLimiter, requireBotProtection, async (req, res) => {
     try {
         const processor = await loadStorePaymentProcessor(req.pool);
         if (processor !== MX_PROCESSOR_ID) {

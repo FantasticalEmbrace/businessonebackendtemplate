@@ -73,11 +73,131 @@ class CheckoutManager {
         this._checkoutInFlight = false;
         /** @type {null | (() => void)} */
         this._nmiConsoleNoiseFilterRestore = null;
+        this._draftOrderStorageKey = 'bo_checkout_draft_order';
+        /** Cloudflare Turnstile (optional until TURNSTILE_* keys are set on the server). */
+        this.captchaRequired = false;
+        this.turnstileSiteKey = '';
+        this._turnstileWidgetId = null;
+        this._turnstileScriptPromise = null;
+        this._turnstileToken = '';
         this.init();
     }
 
     getApiOrigin() {
         return hmHerbsApiOrigin();
+    }
+
+    getCheckoutHoneypotValue() {
+        return String(document.getElementById('checkout-company-website')?.value || '').trim();
+    }
+
+    getCheckoutCaptchaToken() {
+        const fromWidget =
+            this._turnstileWidgetId != null &&
+            typeof window.turnstile?.getResponse === 'function'
+                ? String(window.turnstile.getResponse(this._turnstileWidgetId) || '').trim()
+                : '';
+        return fromWidget || String(this._turnstileToken || '').trim();
+    }
+
+    resetCheckoutCaptcha() {
+        this._turnstileToken = '';
+        if (
+            this._turnstileWidgetId != null &&
+            typeof window.turnstile?.reset === 'function'
+        ) {
+            try {
+                window.turnstile.reset(this._turnstileWidgetId);
+            } catch (_) {
+                /* ignore */
+            }
+        }
+    }
+
+    loadTurnstileScript() {
+        if (typeof window.turnstile?.render === 'function') {
+            return Promise.resolve();
+        }
+        if (this._turnstileScriptPromise) return this._turnstileScriptPromise;
+        this._turnstileScriptPromise = new Promise((resolve, reject) => {
+            const existing = document.querySelector('script[data-bo-turnstile="1"]');
+            if (existing) {
+                existing.addEventListener('load', () => resolve(), { once: true });
+                existing.addEventListener('error', () => reject(new Error('Turnstile failed to load')), {
+                    once: true
+                });
+                return;
+            }
+            const s = document.createElement('script');
+            s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+            s.async = true;
+            s.defer = true;
+            s.dataset.boTurnstile = '1';
+            s.onload = () => resolve();
+            s.onerror = () => reject(new Error('Turnstile failed to load'));
+            document.head.appendChild(s);
+        });
+        return this._turnstileScriptPromise;
+    }
+
+    async initBotProtection() {
+        const wrap = document.getElementById('checkout-turnstile-wrap');
+        const host = document.getElementById('checkout-turnstile');
+        try {
+            const apiOrigin = this.getApiOrigin();
+            const r = await fetch(`${apiOrigin}/api/store/bot-protection`);
+            const cfg = await r.json().catch(() => ({}));
+            this.captchaRequired = Boolean(cfg.captchaRequired);
+            this.turnstileSiteKey = String(cfg.turnstileSiteKey || '').trim();
+        } catch (e) {
+            console.warn('Bot protection config unavailable', e);
+            this.captchaRequired = false;
+            this.turnstileSiteKey = '';
+        }
+        if (!this.captchaRequired || !this.turnstileSiteKey || !wrap || !host) {
+            if (wrap) wrap.hidden = true;
+            return;
+        }
+        wrap.hidden = false;
+        try {
+            await this.loadTurnstileScript();
+            if (typeof window.turnstile?.render !== 'function') {
+                throw new Error('Turnstile API missing');
+            }
+            if (this._turnstileWidgetId != null) return;
+            this._turnstileWidgetId = window.turnstile.render(host, {
+                sitekey: this.turnstileSiteKey,
+                theme: 'light',
+                callback: (token) => {
+                    this._turnstileToken = String(token || '').trim();
+                },
+                'expired-callback': () => {
+                    this._turnstileToken = '';
+                },
+                'error-callback': () => {
+                    this._turnstileToken = '';
+                }
+            });
+        } catch (e) {
+            console.error('Turnstile init failed', e);
+            this.showCheckoutError('Security check failed to load. Refresh the page and try again.');
+        }
+    }
+
+    assertCheckoutCaptchaReady() {
+        if (!this.captchaRequired) return true;
+        const token = this.getCheckoutCaptchaToken();
+        if (token) return true;
+        const wrap = document.getElementById('checkout-turnstile-wrap');
+        if (wrap) {
+            try {
+                wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } catch (_) {
+                /* ignore */
+            }
+        }
+        this.showCheckoutError('Please complete the security check before placing your order.');
+        return false;
     }
 
     setCheckoutBusy(busy) {
@@ -236,6 +356,7 @@ class CheckoutManager {
         this.loadTaxExemptStatus();
         void this.loadStoreTaxRate();
         void this.initPaymentProcessorIfConfigured();
+        void this.initBotProtection();
         void this.loadSavedCards();
         this.schedulePrefillLoggedInCustomer();
         this.bindCheckoutRewardsUi();
@@ -845,7 +966,9 @@ class CheckoutManager {
             body: JSON.stringify({
                 orderId,
                 savedCardId: this.selectedSavedCardId,
-                customerEmail: email
+                customerEmail: email,
+                captchaToken: this.getCheckoutCaptchaToken(),
+                company_website: this.getCheckoutHoneypotValue()
             })
         });
         const payJson = await payRes.json().catch(() => ({}));
@@ -977,6 +1100,8 @@ class CheckoutManager {
                     orderId: orderJson.orderId,
                     mxPaymentId: mxResult.paymentId,
                     customerEmail: email,
+                    captchaToken: this.getCheckoutCaptchaToken(),
+                    company_website: this.getCheckoutHoneypotValue(),
                 }),
             });
             const payJson = await payRes.json().catch(() => ({}));
@@ -1322,6 +1447,8 @@ class CheckoutManager {
                     orderId,
                     payment_token: response.token,
                     customerEmail: email,
+                    captchaToken: this.getCheckoutCaptchaToken(),
+                    company_website: this.getCheckoutHoneypotValue(),
                     saveCard: document.getElementById('save-card-checkbox')?.checked !== false,
                     setAsDefault: true
                 })
@@ -3322,7 +3449,11 @@ class CheckoutManager {
             tax: this.tax,
             shipping: this.shipping,
             total: this.total,
-            awaitingNmiPayment: needsCard && this.isCardPaymentMethod(effectiveMethod)
+            awaitingNmiPayment: needsCard && this.isCardPaymentMethod(effectiveMethod),
+            captchaToken: this.getCheckoutCaptchaToken(),
+            company_website: this.getCheckoutHoneypotValue(),
+            newsletterOptIn: Boolean(document.getElementById('newsletter-opt-in')?.checked),
+            smsOptIn: Boolean(document.getElementById('sms-opt-in')?.checked)
         };
     }
 

@@ -611,9 +611,54 @@ async function ensurePosSchema(pool) {
         {
             column: 'support_rustdesk_id',
             sql: `ALTER TABLE pos_devices ADD COLUMN support_rustdesk_id VARCHAR(32) NULL`
+        },
+        {
+            column: 'bound_install_id',
+            sql: `ALTER TABLE pos_devices ADD COLUMN bound_install_id VARCHAR(64) NULL`
+        },
+        {
+            column: 'bound_at',
+            sql: `ALTER TABLE pos_devices ADD COLUMN bound_at TIMESTAMP NULL`
+        },
+        {
+            column: 'bound_platform',
+            sql: `ALTER TABLE pos_devices ADD COLUMN bound_platform VARCHAR(16) NULL`
+        },
+        {
+            column: 'api_key_enc',
+            sql: `ALTER TABLE pos_devices ADD COLUMN api_key_enc TEXT NULL`
         }
     ];
     await applyColumnPatches(pool, 'pos_devices', DEVICE_PATCHES);
+
+    // Shared tenancy: same register name (e.g. Front counter) must be allowed per merchant.
+    // merchant_id is added by ensureTenantsSchema; only swap the unique key once that column exists.
+    try {
+        const [midCols] = await pool.query(
+            `SHOW COLUMNS FROM pos_devices LIKE 'merchant_id'`
+        );
+        if (midCols && midCols.length) {
+            const [oldIdx] = await pool.query(
+                `SHOW INDEX FROM pos_devices WHERE Key_name = 'uq_pos_devices_label'`
+            );
+            if (oldIdx && oldIdx.length) {
+                await pool.query(`ALTER TABLE pos_devices DROP INDEX uq_pos_devices_label`);
+                logger.info('Database: dropped global uq_pos_devices_label on pos_devices');
+            }
+            const [newIdx] = await pool.query(
+                `SHOW INDEX FROM pos_devices WHERE Key_name = 'uq_pos_devices_merchant_label'`
+            );
+            if (!newIdx || !newIdx.length) {
+                await pool.query(
+                    `ALTER TABLE pos_devices
+                     ADD UNIQUE KEY uq_pos_devices_merchant_label (merchant_id, device_label)`
+                );
+                logger.info('Database: added uq_pos_devices_merchant_label on pos_devices');
+            }
+        }
+    } catch (e) {
+        logger.warn(`Database: pos_devices merchant label unique — ${logger.formatMysqlError(e)}`);
+    }
 
     try {
         await pool.query(`

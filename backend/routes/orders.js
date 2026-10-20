@@ -9,6 +9,12 @@ const { finalizePaidOrder, recalcUserOrderAggregates } = require('../services/fi
 const { cartLookupBinds, hasCartIdentity } = require('../utils/cartSession');
 const { validateGiftCardCartItems } = require('../services/giftCardFulfillment');
 const { validateSubscriptionCart } = require('../services/storeSubscriptionService');
+const {
+    createCheckoutOrderLimiter,
+    requireOrderBotProtection
+} = require('../middleware/checkoutBotProtection');
+
+const checkoutOrderLimiter = createCheckoutOrderLimiter();
 const { isUsPhoneDisplay } = require('../utils/usPhoneDisplay');
 const {
     normalizeWebStoreTenders,
@@ -133,6 +139,15 @@ function buildOrderNotes(orderNotes) {
     return note || null;
 }
 
+function appendCheckoutMeta(base, meta) {
+    const parts = [];
+    if (meta.newsletterOptIn) parts.push('Newsletter opt-in: yes');
+    if (meta.smsOptIn) parts.push('SMS opt-in: yes');
+    if (!parts.length) return base;
+    const suffix = `[checkout] ${parts.join('; ')}`;
+    return base ? `${base}\n${suffix}` : suffix;
+}
+
 function normalizeCustomerInfo(customerInfo = {}) {
     return {
         firstName: customerInfo.firstName ?? customerInfo.first_name ?? '',
@@ -166,7 +181,7 @@ function normalizeCartItems(cartItems = []) {
 
 
 // Create order (checkout process)
-router.post('/', async (req, res) => {
+router.post('/', checkoutOrderLimiter, requireOrderBotProtection, async (req, res) => {
     try {
         const {
             customerInfo,
@@ -368,7 +383,23 @@ router.post('/', async (req, res) => {
         }
 
         const orderNumber = generateOrderNumber();
-        const baseOrderNotes = buildOrderNotes(rawOrderNotes);
+        const newsletterOptIn = Boolean(
+            req.body?.newsletterOptIn === true ||
+                req.body?.newsletterOptIn === 1 ||
+                req.body?.newsletterOptIn === '1' ||
+                req.body?.newsletter_opt_in === true
+        );
+        const smsOptIn = Boolean(
+            req.body?.smsOptIn === true ||
+                req.body?.smsOptIn === 1 ||
+                req.body?.smsOptIn === '1' ||
+                req.body?.sms_opt_in === true ||
+                req.body?.marketingSmsOptIn === true
+        );
+        const baseOrderNotes = appendCheckoutMeta(buildOrderNotes(rawOrderNotes), {
+            newsletterOptIn,
+            smsOptIn,
+        });
 
         const loyaltySettings = await loadLoyaltyProgramSettings(req.pool);
         let storeTenders = normalizeWebStoreTenders(req.body, loyaltySettings);

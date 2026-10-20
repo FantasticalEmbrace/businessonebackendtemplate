@@ -58,6 +58,8 @@ async function posApi(path, { apiKey, deviceLabel, token, method = 'GET', body }
         'Content-Type': 'application/json',
         'X-POS-API-Key': apiKey,
         'X-POS-Device-Id': deviceLabel,
+        'X-POS-Install-Id': `diag-install-${TEST_TAG || 'local'}`.slice(0, 64),
+        'X-POS-Platform': 'test',
     };
     if (token) headers.Authorization = `Bearer ${token}`;
     const res = await fetch(`${BASE}/api/pos/v1${path}`, {

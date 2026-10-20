@@ -36,8 +36,14 @@ const {
     failPaymentAttempt
 } = require('../services/paymentIdempotency');
 const { formatNmiDeclineMessage } = require('../services/nmiDeclineMessages');
+const { getPublicCaptchaConfig } = require('../services/botProtection');
+const {
+    createCheckoutPaymentLimiter,
+    requireBotProtection
+} = require('../middleware/checkoutBotProtection');
 
 const router = express.Router();
+const checkoutPaymentLimiter = createCheckoutPaymentLimiter();
 
 function getOrderPaymentMethod(orderRow) {
     const fromColumn = String(orderRow?.payment_method || '').trim().toLowerCase();
@@ -242,7 +248,7 @@ router.delete('/saved-cards/:id', async (req, res) => {
  * OR { orderId, savedCardId } for vault charge
  * Re-prices from order lines, charges NMI, finalizes order, clears server cart when session matches.
  */
-router.post('/process-payment', async (req, res) => {
+router.post('/process-payment', checkoutPaymentLimiter, requireBotProtection, async (req, res) => {
     let attemptToken = null;
     let attemptOrderId = null;
     let attemptIdempotencyKey = '';

@@ -7,6 +7,10 @@ const {
     randomId,
     slugify
 } = require('../utils/ensureTenantsSchema');
+const {
+    ADMIN_PASSWORD_BCRYPT_ROUNDS,
+    generateTempAdminPassword
+} = require('../utils/adminPassword');
 
 function publicMerchant(row) {
     if (!row) return null;
@@ -107,14 +111,27 @@ async function ensureOwnerAdmin(pool, merchantId, billingEmail, businessName) {
         return { adminId: existing[0].id, tempPassword: null };
     }
 
-    const tempPassword = `Bo-${randomId().slice(0, 8)}!`;
-    const passwordHash = await bcrypt.hash(tempPassword, 10);
+    const tempPassword = generateTempAdminPassword();
+    const passwordHash = await bcrypt.hash(tempPassword, ADMIN_PASSWORD_BCRYPT_ROUNDS);
     const first = String(businessName || 'Owner').trim().slice(0, 80) || 'Owner';
-    const [result] = await pool.execute(
-        `INSERT INTO admin_users (email, password_hash, first_name, last_name, role, is_active, merchant_id)
-         VALUES (?, ?, ?, '', 'admin', 1, ?)`,
-        [email, passwordHash, first, merchantId]
-    );
+    let result;
+    try {
+        [result] = await pool.execute(
+            `INSERT INTO admin_users (email, password_hash, first_name, last_name, role, is_active, merchant_id, must_change_password)
+             VALUES (?, ?, ?, '', 'admin', 1, ?, 1)`,
+            [email, passwordHash, first, merchantId]
+        );
+    } catch (err) {
+        if (err && (err.code === 'ER_BAD_FIELD_ERROR' || /must_change_password/i.test(String(err.message || '')))) {
+            [result] = await pool.execute(
+                `INSERT INTO admin_users (email, password_hash, first_name, last_name, role, is_active, merchant_id)
+                 VALUES (?, ?, ?, '', 'admin', 1, ?)`,
+                [email, passwordHash, first, merchantId]
+            );
+        } else {
+            throw err;
+        }
+    }
     return { adminId: result.insertId, tempPassword };
 }
 
@@ -175,10 +192,15 @@ async function applySignupShopConfig(pool, merchantId, input = {}) {
     const shopVerticals = normalizeSignupVerticals(input.shopVerticals ?? input.verticals);
     const addons = normalizeSignupAddons(input.addons);
     const storeType = String(input.storeType || '').trim().toLowerCase() === 'retail' ? 'retail' : 'shop';
+    const { normalizeHostingTier, buildTierFromHosting } = require('./merchantEntitlements');
+    const hostingTier = normalizeHostingTier(input.hostingTier ?? input.hosting_tier);
+    const buildTier = buildTierFromHosting(hostingTier) || null;
     const shopConfig = {
         storeType: shopVerticals.length ? 'shop' : storeType,
         shopVerticals,
         addons,
+        hostingTier: hostingTier || null,
+        buildTier,
         updatedAt: new Date().toISOString()
     };
 
@@ -194,17 +216,21 @@ async function applySignupShopConfig(pool, merchantId, input = {}) {
 
     // Settings table drives admin POS form + loadPosShopSettings (global keys).
     // Merchant-scoped overlay also reads platform_merchants.shop_config when merchantId is known.
-    const vehicleVerticals = shopVerticals.filter((v) => v !== 'contractor');
+    // Keep contractor inside pos_shop_verticals so Admin checkboxes match signup choices.
     await upsertSetting(
         pool,
         'pos_shop_verticals',
-        JSON.stringify(vehicleVerticals),
-        'JSON array of shop verticals: auto, body, upholstery, tire',
+        JSON.stringify(shopVerticals),
+        'JSON array of shop verticals: contractor, auto, body, upholstery, tire',
         'string'
     );
-    if (shopVerticals.includes('contractor')) {
-        await upsertSetting(pool, 'pos_shop_contractor', 'true', 'Contractor / estimate mode enabled', 'boolean');
-    }
+    await upsertSetting(
+        pool,
+        'pos_shop_contractor',
+        shopVerticals.includes('contractor') ? 'true' : 'false',
+        'Contractor / estimate mode enabled',
+        'boolean'
+    );
     await upsertSetting(
         pool,
         'pos_addon_warehouse',
@@ -322,6 +348,50 @@ async function provisionTenant(pool, input = {}) {
         /* branding sync is best-effort during provision */
     }
 
+    // Create first register key so signup includes a usable POS device key.
+    let deviceApiKey = null;
+    let deviceLabel = 'Front counter';
+    let deviceKeyPrefix = null;
+    try {
+        const {
+            getStoreBaseUrl,
+            setStoreBaseUrlOverride,
+            normalizeStoreBaseUrl
+        } = require('../utils/platformSupportEnv');
+        let storeUrl = getStoreBaseUrl();
+        if (!storeUrl) {
+            storeUrl =
+                normalizeStoreBaseUrl(
+                    process.env.SHARED_POS_PUBLIC_ORIGIN ||
+                        process.env.FRONTEND_URL ||
+                        process.env.POS_PLATFORM_STORE_URL ||
+                        'https://pos.businessonecomprehensive.com'
+                ) || 'https://pos.businessonecomprehensive.com';
+            setStoreBaseUrlOverride(storeUrl);
+            try {
+                await upsertSetting(
+                    pool,
+                    'pos_store_base_url',
+                    storeUrl,
+                    'Public store / POS API base URL embedded in register keys',
+                    'string'
+                );
+            } catch {
+                /* settings write is best-effort */
+            }
+        }
+        const { createDevice } = require('./posDeviceRegistry');
+        const created = await createDevice(pool, deviceLabel, id);
+        deviceApiKey = created.apiKey || null;
+        deviceLabel = created.deviceLabel || deviceLabel;
+        deviceKeyPrefix = created.keyPrefix || null;
+        if (!deviceApiKey) {
+            console.warn('[tenantProvision] createDevice returned no apiKey');
+        }
+    } catch (e) {
+        console.warn('[tenantProvision] createDevice failed:', e.message);
+    }
+
     const row = await findById(pool, id);
     return {
         alreadyProvisioned: false,
@@ -329,6 +399,9 @@ async function provisionTenant(pool, input = {}) {
         websiteApiKey,
         websiteApiKeyPrefix: websitePrefix,
         tempAdminPassword: owner && owner.tempPassword ? owner.tempPassword : null,
+        deviceApiKey,
+        deviceLabel,
+        deviceKeyPrefix,
         sharedPosApiOrigin: String(
             process.env.SHARED_POS_PUBLIC_ORIGIN || process.env.FRONTEND_URL || 'http://127.0.0.1:3011'
         )

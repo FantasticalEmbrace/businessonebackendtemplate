@@ -8,7 +8,7 @@ const router = express.Router();
 
 const logger = require('../utils/logger');
 
-const { requireEcommerceStoreAccess } = require('../middleware/requireEcommerceStore');
+const { requireOnlineShopAccess } = require('../middleware/requireEcommerceStore');
 
 const { resolveStoreBranding, brandingForPublicApi } = require('../services/storeBranding');
 
@@ -58,7 +58,7 @@ const { runFullLoyaltyEarnBackfill } = require('../services/loyaltyEarnBackfill'
 
 
 
-router.use(requireEcommerceStoreAccess);
+router.use(requireOnlineShopAccess);
 
 
 

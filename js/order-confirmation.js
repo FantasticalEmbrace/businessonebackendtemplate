@@ -44,6 +44,56 @@ function getQueryParams() {
     };
 }
 
+/**
+ * Optional paid-purchase page view for a Google tag when configured.
+ * No-ops when no gtag function exists or when GOOGLE_TAG_ID meta tag is missing.
+ */
+function reportPaidPurchaseConversion(data) {
+    try {
+        if (String(data.paymentStatus || '').toLowerCase() !== 'paid') return;
+
+        var metaTag = document.querySelector('meta[name="google-tag-id"]');
+        var tagId = metaTag && metaTag.getAttribute('content');
+        if (!tagId) return;
+
+        var transactionId = String(data.orderNumber || data.orderId || '').trim();
+        if (data.totalAmount == null || data.totalAmount === '') return;
+        var value = Number(data.totalAmount);
+        if (!transactionId || !Number.isFinite(value) || value <= 0) return;
+
+        window.__boAdsPurchaseSent = window.__boAdsPurchaseSent || {};
+        if (window.__boAdsPurchaseSent[transactionId]) return;
+        window.__boAdsPurchaseSent[transactionId] = true;
+
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = window.gtag || function gtag() {
+            window.dataLayer.push(arguments);
+        };
+        window.gtag('js', new Date());
+        window.gtag('config', tagId, { send_page_view: false });
+        var pageLocation = (typeof window.storeAdClickPageLocation === 'function'
+            && window.storeAdClickPageLocation())
+            || (location.origin.replace(/\/+$/, '') + '/order-confirmation');
+        var hasAdClick = /[?&](?:gclid|wbraid|gbraid)=/.test(pageLocation);
+        var consentUpdate = { analytics_storage: 'granted' };
+        if (hasAdClick) {
+            consentUpdate.ad_storage = 'granted';
+            consentUpdate.ad_user_data = 'granted';
+            consentUpdate.ad_personalization = 'denied';
+        }
+        window.gtag('consent', 'update', consentUpdate);
+        window.gtag('event', 'page_view', {
+            page_location: pageLocation,
+            page_path: '/order-confirmation',
+            value: value,
+            currency: 'USD',
+            transaction_id: transactionId
+        });
+    } catch (err) {
+        console.warn('Purchase page view skipped:', err);
+    }
+}
+
 function renderConfirmation(root, data) {
     const paid = String(data.paymentStatus || '').toLowerCase() === 'paid';
     const pending = !paid;
@@ -105,6 +155,8 @@ function renderConfirmation(root, data) {
             <a href="index.html" class="btn btn-primary">Continue shopping</a>
             <a href="account.html" class="btn btn-secondary">My account</a>
         </div>`;
+
+    reportPaidPurchaseConversion(data);
 }
 
 function renderError(root, message) {

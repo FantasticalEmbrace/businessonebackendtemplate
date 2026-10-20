@@ -15,22 +15,45 @@ const { getProgramSettings, listTiers } = require('../services/loyaltyTierProgra
 const { evaluateCustomerTier, nextTier, progressTowardTier } = require('../services/loyaltyTierEngine');
 const { getLoyaltyBenefitsForUser } = require('../services/loyaltyCheckout');
 
-/** Public — whether this store offers product subscriptions (ecommerce tier). */
+const { getPublicCaptchaConfig } = require('../services/botProtection');
+
+/** Public — storefront capability flags by website package. */
 router.get('/capabilities', async (req, res) => {
     try {
-        const access = await resolveStoreProductSubscriptionsAccess(req.pool);
+        const {
+            resolveOnlineShopAccess,
+            resolveEcommerceAutomationAccess
+        } = require('../services/storeEcommerceTier');
+        const onlineShop = await resolveOnlineShopAccess(req.pool, {
+            merchantId: req.merchantId || null
+        });
+        const automation = await resolveEcommerceAutomationAccess(req.pool, {
+            merchantId: req.merchantId || null
+        });
         res.json({
-            productSubscriptions: Boolean(access.enabled),
-            ecommerceStore: Boolean(access.enabled),
-            abandonedCartEmails: Boolean(access.enabled),
-            loyaltyProgram: Boolean(access.enabled),
+            onlineShop: Boolean(onlineShop.enabled),
+            productSubscriptions: Boolean(automation.enabled),
+            ecommerceStore: Boolean(onlineShop.enabled),
+            ecommerceAutomation: Boolean(automation.enabled),
+            abandonedCartEmails: Boolean(automation.enabled),
+            loyaltyProgram: Boolean(onlineShop.enabled),
             subscriptionIntervals: ALLOWED_INTERVALS,
-            reason: access.reason,
+            reason: automation.enabled
+                ? automation.reason
+                : onlineShop.enabled
+                  ? onlineShop.reason
+                  : onlineShop.reason || automation.reason,
+            ...getPublicCaptchaConfig(),
         });
     } catch (e) {
         logger.error('Store capabilities error:', e);
         res.status(500).json({ error: 'Internal server error' });
     }
+});
+
+/** Public — Turnstile site key + whether captcha is enforced (no secrets). */
+router.get('/bot-protection', (req, res) => {
+    res.json(getPublicCaptchaConfig());
 });
 
 /** Public — merchant branding for storefront marketing surfaces (promo bar, emails). */

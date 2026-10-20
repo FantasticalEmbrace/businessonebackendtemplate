@@ -176,6 +176,11 @@ async function ensurePersonnelSchema(pool) {
             sql: `ALTER TABLE admin_users ADD COLUMN can_manage_store_hours TINYINT(1) NOT NULL DEFAULT 0
                   COMMENT 'When 1, Manager role may edit store hours and holidays'`,
         },
+        {
+            column: 'must_change_password',
+            sql: `ALTER TABLE admin_users ADD COLUMN must_change_password TINYINT(1) NOT NULL DEFAULT 0
+                  COMMENT 'When 1, admin must set a new password before using the panel'`,
+        },
     ]);
     await applyColumnPatches(pool, 'pos_employees', [
         {
