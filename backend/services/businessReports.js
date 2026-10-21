@@ -6,6 +6,9 @@
  * (MySQL DATE comparisons on DATETIME columns).
  */
 
+const LIST_LIMIT = 2000;
+const TOP_PRODUCTS_LIMIT = 100;
+
 function parseRange(query = {}) {
     const today = new Date();
     const defaultTo = today.toISOString().slice(0, 10);
@@ -44,6 +47,16 @@ async function safeQuery(pool, sql, params, fallback) {
     }
 }
 
+function personName(first, last, fallback) {
+    const name = [first, last].filter(Boolean).join(' ').trim();
+    return name || fallback || '—';
+}
+
+function dayKey(dayVal) {
+    if (dayVal instanceof Date) return dayVal.toISOString().slice(0, 10);
+    return String(dayVal || '').slice(0, 10);
+}
+
 async function getBusinessReport(pool, query = {}) {
     const { from, to, fromStart, toEnd } = parseRange(query);
     const rangeParams = [fromStart, toEnd];
@@ -61,7 +74,7 @@ async function getBusinessReport(pool, query = {}) {
         [{ new_accounts: 0, new_accounts_marketing_opt_in: 0, new_vip: 0 }]
     );
 
-    // Cash store-credit rewards activity (cash loyalty by default; points columns may also exist)
+    // Cash store-credit rewards activity (HM uses cash loyalty by default; points columns may also exist)
     const rewardsRows = await safeQuery(
         pool,
         `SELECT
@@ -227,10 +240,6 @@ async function getBusinessReport(pool, query = {}) {
         []
     );
 
-    const dayKey = (dayVal) => {
-        if (dayVal instanceof Date) return dayVal.toISOString().slice(0, 10);
-        return String(dayVal || '').slice(0, 10);
-    };
     const dayMap = new Map();
     const ensureDay = (key) => {
         if (!dayMap.has(key)) {
@@ -280,36 +289,168 @@ async function getBusinessReport(pool, query = {}) {
         }
     }
 
-    const recentMembers = await safeQuery(
-        pool,
-        `SELECT u.id, u.first_name, u.last_name, u.email, u.created_at,
-                cl.tier, cl.loyalty_enrollment, cl.member_since
-         FROM users u
-         LEFT JOIN customer_loyalty cl ON cl.user_id = u.id
-         WHERE u.created_at BETWEEN ? AND ?
-           AND (u.is_active IS NULL OR u.is_active <> 0)
-         ORDER BY u.created_at DESC
-         LIMIT 50`,
-        rangeParams,
-        []
-    );
-
-    const topProducts = await safeQuery(
-        pool,
-        `SELECT p.id, p.name, p.sku,
-                SUM(oi.quantity) AS units_sold,
-                COALESCE(SUM(oi.total), 0) AS revenue
-         FROM order_items oi
-         JOIN orders o ON o.id = oi.order_id
-         LEFT JOIN products p ON p.id = oi.product_id
-         WHERE o.payment_status = 'paid'
-           AND o.created_at BETWEEN ? AND ?
-         GROUP BY p.id, p.name, p.sku
-         ORDER BY units_sold DESC
-         LIMIT 15`,
-        rangeParams,
-        []
-    );
+    const [
+        recentMembers,
+        newsletterList,
+        rewardsList,
+        paidOrdersList,
+        buyersList,
+        giftCardsList,
+        edsaList,
+        catalogList,
+        topProducts,
+    ] = await Promise.all([
+        safeQuery(
+            pool,
+            `SELECT u.id, u.first_name, u.last_name, u.email, u.created_at,
+                    cl.tier, cl.loyalty_enrollment, cl.member_since
+             FROM users u
+             LEFT JOIN customer_loyalty cl ON cl.user_id = u.id
+             WHERE u.created_at BETWEEN ? AND ?
+               AND (u.is_active IS NULL OR u.is_active <> 0)
+             ORDER BY u.created_at DESC
+             LIMIT ${LIST_LIMIT}`,
+            rangeParams,
+            []
+        ),
+        safeQuery(
+            pool,
+            `SELECT id, email, first_name, last_name, status, subscription_source, subscribed_at
+             FROM email_subscribers
+             WHERE subscribed_at BETWEEN ? AND ?
+             ORDER BY subscribed_at DESC
+             LIMIT ${LIST_LIMIT}`,
+            rangeParams,
+            []
+        ),
+        safeQuery(
+            pool,
+            `SELECT lt.id, lt.user_id, lt.cash_change, lt.transaction_type, lt.source,
+                    lt.order_id, lt.description, lt.created_at,
+                    u.first_name, u.last_name, u.email,
+                    o.order_number
+             FROM loyalty_transactions lt
+             LEFT JOIN users u ON u.id = lt.user_id
+             LEFT JOIN orders o ON o.id = lt.order_id
+             WHERE lt.created_at BETWEEN ? AND ?
+               AND lt.cash_change IS NOT NULL
+               AND lt.cash_change <> 0
+             ORDER BY lt.created_at DESC
+             LIMIT ${LIST_LIMIT}`,
+            rangeParams,
+            []
+        ),
+        safeQuery(
+            pool,
+            `SELECT o.id, o.order_number, o.email, o.total_amount, o.created_at,
+                    COALESCE(o.sales_channel, 'online') AS sales_channel,
+                    o.shipping_first_name, o.shipping_last_name,
+                    u.first_name AS user_first_name, u.last_name AS user_last_name
+             FROM orders o
+             LEFT JOIN users u ON u.id = o.user_id
+             WHERE o.payment_status = 'paid'
+               AND o.created_at BETWEEN ? AND ?
+             ORDER BY o.created_at DESC
+             LIMIT ${LIST_LIMIT}`,
+            rangeParams,
+            []
+        ),
+        safeQuery(
+            pool,
+            `SELECT
+                r.buyer_key,
+                r.email,
+                r.customer_name,
+                r.order_count,
+                r.spend_in_range,
+                r.first_order_in_range,
+                f.first_paid_at,
+                CASE
+                    WHEN f.first_paid_at BETWEEN ? AND ? THEN 'first-time'
+                    ELSE 'returning'
+                END AS buyer_type
+             FROM (
+                SELECT
+                    COALESCE(o.user_id, LOWER(o.email)) AS buyer_key,
+                    MAX(o.email) AS email,
+                    MAX(TRIM(CONCAT(
+                        COALESCE(NULLIF(u.first_name, ''), NULLIF(o.shipping_first_name, ''), ''),
+                        ' ',
+                        COALESCE(NULLIF(u.last_name, ''), NULLIF(o.shipping_last_name, ''), '')
+                    ))) AS customer_name,
+                    COUNT(*) AS order_count,
+                    COALESCE(SUM(o.total_amount), 0) AS spend_in_range,
+                    MIN(o.created_at) AS first_order_in_range
+                FROM orders o
+                LEFT JOIN users u ON u.id = o.user_id
+                WHERE o.payment_status = 'paid'
+                  AND o.created_at BETWEEN ? AND ?
+                  AND COALESCE(o.user_id, o.email) IS NOT NULL
+                GROUP BY COALESCE(o.user_id, LOWER(o.email))
+             ) r
+             LEFT JOIN (
+                SELECT COALESCE(o2.user_id, LOWER(o2.email)) AS buyer_key,
+                       MIN(o2.created_at) AS first_paid_at
+                FROM orders o2
+                WHERE o2.payment_status = 'paid'
+                  AND COALESCE(o2.user_id, o2.email) IS NOT NULL
+                GROUP BY COALESCE(o2.user_id, LOWER(o2.email))
+             ) f ON f.buyer_key = r.buyer_key
+             ORDER BY r.spend_in_range DESC
+             LIMIT ${LIST_LIMIT}`,
+            [fromStart, toEnd, fromStart, toEnd],
+            []
+        ),
+        safeQuery(
+            pool,
+            `SELECT id, code, card_type, status, initial_balance, current_balance,
+                    recipient_name, recipient_email, sender_name, created_at, issued_at
+             FROM gift_cards
+             WHERE created_at BETWEEN ? AND ?
+             ORDER BY created_at DESC
+             LIMIT ${LIST_LIMIT}`,
+            rangeParams,
+            []
+        ),
+        safeQuery(
+            pool,
+            `SELECT id, first_name, last_name, email, phone, status,
+                    preferred_date, preferred_time, created_at
+             FROM edsa_bookings
+             WHERE created_at BETWEEN ? AND ?
+             ORDER BY created_at DESC
+             LIMIT ${LIST_LIMIT}`,
+            rangeParams,
+            []
+        ),
+        safeQuery(
+            pool,
+            `SELECT id, name, sku, is_active, inventory_quantity, created_at
+             FROM products
+             WHERE deleted_at IS NULL
+               AND created_at BETWEEN ? AND ?
+             ORDER BY created_at DESC
+             LIMIT ${LIST_LIMIT}`,
+            rangeParams,
+            []
+        ),
+        safeQuery(
+            pool,
+            `SELECT p.id, p.name, p.sku,
+                    SUM(oi.quantity) AS units_sold,
+                    COALESCE(SUM(oi.total), 0) AS revenue
+             FROM order_items oi
+             JOIN orders o ON o.id = oi.order_id
+             LEFT JOIN products p ON p.id = oi.product_id
+             WHERE o.payment_status = 'paid'
+               AND o.created_at BETWEEN ? AND ?
+             GROUP BY p.id, p.name, p.sku
+             ORDER BY units_sold DESC
+             LIMIT ${TOP_PRODUCTS_LIMIT}`,
+            rangeParams,
+            []
+        ),
+    ]);
 
     const members = membersRows[0] || {};
     const rewards = rewardsRows[0] || {};
@@ -327,8 +468,38 @@ async function getBusinessReport(pool, query = {}) {
     const firstTimeBuyers = Number(firstTime.first_time_buyers) || 0;
     const uniqueBuyers = Number(orders.unique_buyers) || 0;
 
+    const mappedMembers = (recentMembers || []).map((u) => ({
+        id: u.id,
+        name: personName(u.first_name, u.last_name),
+        email: u.email || '',
+        createdAt: u.created_at,
+        tier: u.tier || null,
+        loyaltyEnrollment: u.loyalty_enrollment || null,
+        memberSince: u.member_since || null,
+    }));
+
+    const mappedOrders = (paidOrdersList || []).map((o) => {
+        const channel = String(o.sales_channel || 'online');
+        const normalized =
+            channel === 'pos' || channel === 'instore' || channel === 'in_store' ? 'in_store' : channel;
+        return {
+            id: o.id,
+            orderNumber: o.order_number || String(o.id),
+            customer: personName(
+                o.user_first_name || o.shipping_first_name,
+                o.user_last_name || o.shipping_last_name,
+                o.email || '—'
+            ),
+            email: o.email || '',
+            channel: normalized,
+            total: Number(o.total_amount) || 0,
+            createdAt: o.created_at,
+        };
+    });
+
     return {
         range: { from, to },
+        listLimit: LIST_LIMIT,
         totals: {
             customers: Number(totals.total_customers) || 0,
             newsletterSubscribers: Number(totals.total_newsletter_subscribers) || 0,
@@ -374,15 +545,8 @@ async function getBusinessReport(pool, query = {}) {
             productsAddedActive: Number(products.products_added_active) || 0,
         },
         daily,
-        recentMembers: (recentMembers || []).map((u) => ({
-            id: u.id,
-            name: [u.first_name, u.last_name].filter(Boolean).join(' ').trim() || '—',
-            email: u.email || '',
-            createdAt: u.created_at,
-            tier: u.tier || null,
-            loyaltyEnrollment: u.loyalty_enrollment || null,
-            memberSince: u.member_since || null,
-        })),
+        // Backward-compatible aliases
+        recentMembers: mappedMembers,
         topProducts: (topProducts || []).map((p) => ({
             id: p.id,
             name: p.name || 'Unknown product',
@@ -390,10 +554,84 @@ async function getBusinessReport(pool, query = {}) {
             unitsSold: Number(p.units_sold) || 0,
             revenue: Number(p.revenue) || 0,
         })),
+        lists: {
+            members: mappedMembers,
+            newsletter: (newsletterList || []).map((s) => ({
+                id: s.id,
+                email: s.email || '',
+                name: personName(s.first_name, s.last_name, ''),
+                status: s.status || '—',
+                source: s.subscription_source || '',
+                subscribedAt: s.subscribed_at,
+            })),
+            rewards: (rewardsList || []).map((t) => {
+                const amount = Number(t.cash_change) || 0;
+                return {
+                    id: t.id,
+                    customer: personName(t.first_name, t.last_name, t.email || '—'),
+                    email: t.email || '',
+                    amount,
+                    type: amount >= 0 ? 'earned' : 'redeemed',
+                    date: t.created_at,
+                    orderNumber: t.order_number || (t.order_id ? String(t.order_id) : ''),
+                    source: t.source || t.transaction_type || '',
+                    description: t.description || '',
+                };
+            }),
+            orders: mappedOrders,
+            buyers: (buyersList || []).map((b) => ({
+                buyerKey: b.buyer_key,
+                customer: String(b.customer_name || '').trim() || b.email || '—',
+                email: b.email || '',
+                buyerType: b.buyer_type === 'first-time' ? 'first-time' : 'returning',
+                orderCount: Number(b.order_count) || 0,
+                spendInRange: Number(b.spend_in_range) || 0,
+                firstPaidAt: b.first_paid_at,
+                firstOrderInRange: b.first_order_in_range,
+            })),
+            giftCards: (giftCardsList || []).map((g) => ({
+                id: g.id,
+                code: g.code || '',
+                cardType: g.card_type || '',
+                status: g.status || '',
+                initialBalance: Number(g.initial_balance) || 0,
+                currentBalance: Number(g.current_balance) || 0,
+                recipient: g.recipient_name || g.recipient_email || g.sender_name || '—',
+                email: g.recipient_email || '',
+                createdAt: g.created_at || g.issued_at,
+            })),
+            edsa: (edsaList || []).map((b) => ({
+                id: b.id,
+                name: personName(b.first_name, b.last_name),
+                email: b.email || '',
+                phone: b.phone || '',
+                status: b.status || '',
+                preferredDate: b.preferred_date,
+                preferredTime: b.preferred_time,
+                createdAt: b.created_at,
+            })),
+            catalog: (catalogList || []).map((p) => ({
+                id: p.id,
+                name: p.name || '—',
+                sku: p.sku || '',
+                active: Number(p.is_active) === 1,
+                inventory: p.inventory_quantity != null ? Number(p.inventory_quantity) : null,
+                createdAt: p.created_at,
+            })),
+            daily,
+            topProducts: (topProducts || []).map((p) => ({
+                id: p.id,
+                name: p.name || 'Unknown product',
+                sku: p.sku || '',
+                unitsSold: Number(p.units_sold) || 0,
+                revenue: Number(p.revenue) || 0,
+            })),
+        },
     };
 }
 
 module.exports = {
     parseRange,
     getBusinessReport,
+    LIST_LIMIT,
 };

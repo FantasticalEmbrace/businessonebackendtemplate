@@ -200,23 +200,21 @@
     let personnelTabsBound = false;
     let reportsTabsBound = false;
     let bizReportCache = null;
+    let bizExportState = null;
 
-    function money(n) {
-        return fmtMoney(n);
-    }
-
-    function num(n) {
-        return String(Number(n) || 0);
-    }
-
-    function fmtDay(d) {
-        if (!d) return '—';
-        try {
-            return new Date(d).toLocaleDateString();
-        } catch {
-            return String(d).slice(0, 10);
-        }
-    }
+    const BIZ_REPORT_LABELS = {
+        'new-members': 'New members',
+        newsletter: 'Newsletter signups',
+        rewards: 'Rewards earned / redeemed',
+        'paid-orders': 'Paid orders & revenue',
+        buyers: 'First-time vs returning buyers',
+        channel: 'Online vs in-store',
+        'gift-cards': 'Gift cards',
+        edsa: 'EDSA bookings',
+        catalog: 'Products & inventory',
+        daily: 'Day-by-day activity',
+        'top-products': 'Top products',
+    };
 
     function setBizPreset(days) {
         const toEl = document.getElementById('biz-report-to');
@@ -242,18 +240,218 @@
         return String(document.getElementById('biz-report-type')?.value || '').trim();
     }
 
-    function setBizSectionVisible(id, visible) {
+    function setBizElVisible(id, visible, display) {
         const el = document.getElementById(id);
-        if (el) el.style.display = visible ? '' : 'none';
+        if (!el) return;
+        el.style.display = visible ? display || '' : 'none';
+    }
+
+    function csvEscape(val) {
+        const s = String(val == null ? '' : val);
+        if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+        return s;
+    }
+
+    function downloadTextFile(filename, text, mime) {
+        const blob = new Blob([text], { type: mime || 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1500);
+    }
+
+    function buildBizTableHtml(headers, rows) {
+        if (!rows.length) {
+            return '<p style="color:var(--gray-500);padding:0.75rem;">No rows in this range.</p>';
+        }
+        return `<table class="table"><thead><tr>${headers
+            .map((h) => `<th>${esc(h)}</th>`)
+            .join('')}</tr></thead><tbody>${rows
+            .map((row) => `<tr>${row.map((cell) => `<td>${esc(cell)}</td>`).join('')}</tr>`)
+            .join('')}</tbody></table>`;
+    }
+
+    function getBizListBundle(type, report) {
+        const lists = report.lists || {};
+        const limit = Number(report.listLimit) || 2000;
+
+        if (type === 'new-members') {
+            const rows = (lists.members || report.recentMembers || []).map((u) => [
+                u.name || '—',
+                u.email || '',
+                fmtDay(u.createdAt),
+                u.tier || '—',
+            ]);
+            return {
+                title: 'New members in range',
+                headers: ['Name', 'Email', 'Joined', 'Tier'],
+                rows,
+                empty: 'No new members in this range.',
+                limit,
+            };
+        }
+        if (type === 'newsletter') {
+            const rows = (lists.newsletter || []).map((s) => [
+                s.email || '',
+                fmtDay(s.subscribedAt),
+                s.status || '—',
+                s.source || '—',
+            ]);
+            return {
+                title: 'Newsletter signups in range',
+                headers: ['Email', 'Subscribed', 'Status', 'Source'],
+                rows,
+                empty: 'No newsletter signups in this range.',
+                limit,
+            };
+        }
+        if (type === 'rewards') {
+            const rows = (lists.rewards || []).map((t) => [
+                t.customer || '—',
+                money(t.amount),
+                t.type || '—',
+                fmtDay(t.date),
+                t.orderNumber || '—',
+                t.source || '—',
+            ]);
+            return {
+                title: 'Rewards transactions in range',
+                headers: ['Customer', 'Amount', 'Type', 'Date', 'Order', 'Source'],
+                rows,
+                empty: 'No rewards activity in this range.',
+                limit,
+            };
+        }
+        if (type === 'paid-orders' || type === 'channel') {
+            const rows = (lists.orders || []).map((o) => [
+                o.orderNumber || '—',
+                o.customer || '—',
+                o.channel === 'in_store' ? 'In-store' : o.channel || 'online',
+                money(o.total),
+                fmtDay(o.createdAt),
+            ]);
+            return {
+                title: type === 'channel' ? 'Paid orders by channel' : 'Paid orders in range',
+                headers: ['Order #', 'Customer', 'Channel', 'Total', 'Date'],
+                rows,
+                empty: 'No paid orders in this range.',
+                limit,
+            };
+        }
+        if (type === 'buyers') {
+            const rows = (lists.buyers || []).map((b) => [
+                b.customer || '—',
+                b.email || '',
+                b.buyerType === 'first-time' ? 'First-time' : 'Returning',
+                num(b.orderCount),
+                money(b.spendInRange),
+                fmtDay(b.firstPaidAt),
+            ]);
+            return {
+                title: 'Buyers in range',
+                headers: ['Customer', 'Email', 'Type', 'Orders', 'Spend in range', 'First paid order'],
+                rows,
+                empty: 'No buyers in this range.',
+                limit,
+            };
+        }
+        if (type === 'gift-cards') {
+            const rows = (lists.giftCards || []).map((g) => [
+                g.code || '—',
+                g.cardType || '—',
+                g.status || '—',
+                money(g.initialBalance),
+                money(g.currentBalance),
+                g.recipient || '—',
+                fmtDay(g.createdAt),
+            ]);
+            return {
+                title: 'Gift cards issued in range',
+                headers: ['Code', 'Type', 'Status', 'Initial', 'Balance', 'Recipient', 'Issued'],
+                rows,
+                empty: 'No gift cards issued in this range.',
+                limit,
+            };
+        }
+        if (type === 'edsa') {
+            const rows = (lists.edsa || []).map((b) => [
+                b.name || '—',
+                b.email || '',
+                b.phone || '',
+                b.status || '—',
+                fmtDay(b.preferredDate),
+                fmtDay(b.createdAt),
+            ]);
+            return {
+                title: 'EDSA bookings in range',
+                headers: ['Name', 'Email', 'Phone', 'Status', 'Preferred date', 'Created'],
+                rows,
+                empty: 'No EDSA bookings in this range.',
+                limit,
+            };
+        }
+        if (type === 'catalog') {
+            const rows = (lists.catalog || []).map((p) => [
+                p.name || '—',
+                p.sku || '—',
+                p.active ? 'Active' : 'Inactive',
+                p.inventory != null ? num(p.inventory) : '—',
+                fmtDay(p.createdAt),
+            ]);
+            return {
+                title: 'Products added in range',
+                headers: ['Product', 'SKU', 'Status', 'Inventory', 'Created'],
+                rows,
+                empty: 'No products added in this range.',
+                limit,
+            };
+        }
+        if (type === 'daily') {
+            const rows = (lists.daily || report.daily || []).map((d) => [
+                d.day || '—',
+                num(d.newAccounts),
+                money(d.rewardsCashEarned),
+                num(d.paidOrders),
+                money(d.revenue),
+            ]);
+            return {
+                title: 'Day-by-day activity',
+                headers: ['Day', 'New members', 'Rewards earned', 'Orders', 'Revenue'],
+                rows,
+                empty: 'No daily activity in this range.',
+                limit,
+            };
+        }
+        if (type === 'top-products') {
+            const rows = (lists.topProducts || report.topProducts || []).map((p) => [
+                p.name || '—',
+                p.sku || '—',
+                num(p.unitsSold),
+                money(p.revenue),
+            ]);
+            return {
+                title: 'Top products (paid orders)',
+                headers: ['Product', 'SKU', 'Units', 'Revenue'],
+                rows,
+                empty: 'No paid product sales in this range.',
+                limit,
+            };
+        }
+        return null;
     }
 
     function renderBusinessReportView() {
         const status = document.getElementById('biz-report-status');
         const summary = document.getElementById('biz-report-summary');
         const empty = document.getElementById('biz-report-empty');
-        const dailyMount = document.getElementById('biz-report-daily');
-        const membersMount = document.getElementById('biz-report-members');
-        const productsMount = document.getElementById('biz-report-products');
+        const detail = document.getElementById('biz-report-detail');
+        const detailTitle = document.getElementById('biz-report-detail-title');
+        const detailMeta = document.getElementById('biz-report-detail-meta');
+        const detailTable = document.getElementById('biz-report-detail-table');
         if (!summary) return;
 
         const type = selectedBizReportType();
@@ -262,6 +460,7 @@
         const rw = r.rewards || {};
         const o = r.orders || {};
         const g = r.giftCards || {};
+        const e = r.edsa || {};
         const c = r.catalog || {};
         const t = r.totals || {};
         const rangeLabel = r.range ? `${r.range.from} → ${r.range.to}` : '';
@@ -273,12 +472,12 @@
         }
 
         summary.innerHTML = '';
-        if (dailyMount) dailyMount.innerHTML = '';
-        if (membersMount) membersMount.innerHTML = '';
-        if (productsMount) productsMount.innerHTML = '';
-        setBizSectionVisible('biz-report-section-daily', false);
-        setBizSectionVisible('biz-report-section-members', false);
-        setBizSectionVisible('biz-report-section-products', false);
+        bizExportState = null;
+        setBizElVisible('biz-report-export', false);
+        setBizElVisible('biz-report-detail', false);
+        if (detailTable) detailTable.innerHTML = '';
+        if (detailTitle) detailTitle.textContent = '';
+        if (detailMeta) detailMeta.textContent = '';
 
         if (!type) {
             if (empty) empty.style.display = '';
@@ -323,6 +522,13 @@
             'gift-cards': [
                 renderBizStat('Gift cards issued', num(g.issued), `${money(g.activeBalanceIssued)} active balance`),
             ],
+            edsa: [
+                renderBizStat(
+                    'EDSA bookings',
+                    num(e.bookings),
+                    `${num(e.confirmed)} confirmed · ${num(e.pending)} pending`
+                ),
+            ],
             catalog: [
                 renderBizStat('Products added', num(c.productsAdded), `${num(t.lowStockNow)} low stock now`),
             ],
@@ -332,56 +538,138 @@
 
         summary.innerHTML = (statsByType[type] || []).join('');
 
-        if (type === 'daily' && dailyMount) {
-            setBizSectionVisible('biz-report-section-daily', true);
-            const daily = r.daily || [];
-            dailyMount.innerHTML = daily.length
-                ? `<table class="table"><thead><tr><th>Day</th><th>New members</th><th>Rewards earned</th><th>Orders</th><th>Revenue</th></tr></thead><tbody>${daily
-                      .map(
-                          (d) => `<tr>
-                        <td>${esc(d.day)}</td>
-                        <td>${num(d.newAccounts)}</td>
-                        <td>${money(d.rewardsCashEarned)}</td>
-                        <td>${num(d.paidOrders)}</td>
-                        <td>${money(d.revenue)}</td>
-                    </tr>`
-                      )
-                      .join('')}</tbody></table>`
-                : '<p style="color:var(--gray-500);padding:0.75rem;">No daily activity in this range.</p>';
-        }
+        const bundle = getBizListBundle(type, r);
+        if (!bundle || !detail || !detailTable) return;
 
-        if (type === 'new-members' && membersMount) {
-            setBizSectionVisible('biz-report-section-members', true);
-            const members = r.recentMembers || [];
-            membersMount.innerHTML = members.length
-                ? `<table class="table"><thead><tr><th>Name</th><th>Email</th><th>Joined</th><th>Tier</th></tr></thead><tbody>${members
-                      .map(
-                          (u) => `<tr>
-                        <td>${esc(u.name)}</td>
-                        <td>${esc(u.email)}</td>
-                        <td>${esc(fmtDay(u.createdAt))}</td>
-                        <td>${esc(u.tier || '—')}</td>
-                    </tr>`
-                      )
-                      .join('')}</tbody></table>`
-                : '<p style="color:var(--gray-500);padding:0.75rem;">No new members in this range.</p>';
-        }
+        const rowCount = bundle.rows.length;
+        const truncated =
+            rowCount >= bundle.limit
+                ? ` Showing first ${bundle.limit} rows (raise date range filter if needed).`
+                : '';
+        detailTitle.textContent = bundle.title;
+        detailMeta.textContent = `${rowCount} row${rowCount === 1 ? '' : 's'}.${truncated}`;
+        detailTable.innerHTML = rowCount
+            ? buildBizTableHtml(bundle.headers, bundle.rows)
+            : `<p style="color:var(--gray-500);padding:0.75rem;">${esc(bundle.empty)}</p>`;
+        setBizElVisible('biz-report-detail', true);
+        setBizElVisible('biz-report-export', true, 'flex');
 
-        if (type === 'top-products' && productsMount) {
-            setBizSectionVisible('biz-report-section-products', true);
-            const products = r.topProducts || [];
-            productsMount.innerHTML = products.length
-                ? `<table class="table"><thead><tr><th>Product</th><th>SKU</th><th>Units</th><th>Revenue</th></tr></thead><tbody>${products
-                      .map(
-                          (p) => `<tr>
-                        <td>${esc(p.name)}</td>
-                        <td>${esc(p.sku || '—')}</td>
-                        <td>${num(p.unitsSold)}</td>
-                        <td>${money(p.revenue)}</td>
-                    </tr>`
-                      )
+        const label = BIZ_REPORT_LABELS[type] || bundle.title;
+        const from = r.range?.from || '';
+        const to = r.range?.to || '';
+        bizExportState = {
+            type,
+            label,
+            from,
+            to,
+            headers: bundle.headers,
+            rows: bundle.rows,
+            filenameBase: `business-report-${type}-${from || 'from'}-to-${to || 'to'}`,
+        };
+    }
+
+    function printBizReport() {
+        if (!bizExportState) {
+            window.adminApp?.showToast('Run a report first', 'error');
+            return;
+        }
+        const { label, from, to, headers, rows } = bizExportState;
+        const w = window.open('', '_blank');
+        if (!w) {
+            window.adminApp?.showToast('Allow popups to print this report.', 'error');
+            return;
+        }
+        const table =
+            rows.length > 0
+                ? `<table><thead><tr>${headers.map((h) => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows
+                      .map((row) => `<tr>${row.map((c) => `<td>${esc(c)}</td>`).join('')}</tr>`)
                       .join('')}</tbody></table>`
-                : '<p style="color:var(--gray-500);padding:0.75rem;">No paid product sales in this range.</p>';
+                : '<p>No rows in this range.</p>';
+        w.document.write(`<!DOCTYPE html><html><head><title>${esc(label)}</title>
+<style>
+  body{font-family:system-ui,Segoe UI,sans-serif;padding:24px;color:#111;font-size:12px}
+  h1{font-size:18px;margin:0 0 6px}
+  p{margin:0 0 14px;color:#444}
+  table{width:100%;border-collapse:collapse}
+  th,td{border:1px solid #ccc;padding:6px 8px;text-align:left;vertical-align:top}
+  th{background:#f3f3f3}
+  @media print{body{padding:0}}
+</style></head><body>
+  <h1>${esc(label)}</h1>
+  <p>${esc(from)} → ${esc(to)} · ${rows.length} row${rows.length === 1 ? '' : 's'}</p>
+  ${table}
+  <script>window.onload=function(){window.focus();window.print();}</script>
+</body></html>`);
+        w.document.close();
+    }
+
+    function downloadBizCsv() {
+        if (!bizExportState) {
+            window.adminApp?.showToast('Run a report first', 'error');
+            return;
+        }
+        const { headers, rows, filenameBase } = bizExportState;
+        const lines = [headers.map(csvEscape).join(',')].concat(
+            rows.map((row) => row.map(csvEscape).join(','))
+        );
+        downloadTextFile(filenameBase + '.csv', '\uFEFF' + lines.join('\r\n'), 'text/csv;charset=utf-8');
+    }
+
+    async function downloadBizPdf() {
+        if (!bizExportState) {
+            window.adminApp?.showToast('Run a report first', 'error');
+            return;
+        }
+        const { label, from, to, headers, rows, filenameBase } = bizExportState;
+        try {
+            if (typeof window.loadJsPdf !== 'function') {
+                throw new Error('PDF helper unavailable');
+            }
+            const mod = await window.loadJsPdf();
+            const JsPDF = mod.jsPDF || mod.default || window.jsPDF;
+            if (!JsPDF) throw new Error('jsPDF missing');
+            const doc = new JsPDF({ orientation: 'landscape', unit: 'pt', format: 'letter' });
+            const margin = 36;
+            let y = margin;
+            doc.setFontSize(14);
+            doc.text(label, margin, y);
+            y += 18;
+            doc.setFontSize(10);
+            doc.text(`${from} → ${to} · ${rows.length} rows`, margin, y);
+            y += 16;
+            const colCount = Math.max(headers.length, 1);
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const usable = pageWidth - margin * 2;
+            const colW = usable / colCount;
+            const lineH = 12;
+
+            const drawRow = (cells, bold) => {
+                if (y > doc.internal.pageSize.getHeight() - margin) {
+                    doc.addPage();
+                    y = margin;
+                }
+                doc.setFont(undefined, bold ? 'bold' : 'normal');
+                let maxLines = 1;
+                const wrapped = cells.map((cell) => {
+                    const lines = doc.splitTextToSize(String(cell == null ? '' : cell), colW - 4);
+                    maxLines = Math.max(maxLines, lines.length);
+                    return lines;
+                });
+                wrapped.forEach((lines, i) => {
+                    doc.text(lines, margin + i * colW, y);
+                });
+                y += maxLines * lineH + 4;
+            };
+
+            drawRow(headers, true);
+            rows.forEach((row) => drawRow(row, false));
+            doc.save(filenameBase + '.pdf');
+        } catch (err) {
+            window.adminApp?.showToast(
+                (err && err.message) || 'PDF failed — use Print → Save as PDF',
+                'error'
+            );
+            printBizReport();
         }
     }
 
@@ -403,11 +691,11 @@
             renderBusinessReportView();
         } catch (err) {
             bizReportCache = null;
+            bizExportState = null;
             if (status) status.textContent = err.message || 'Failed to load business report';
             summary.innerHTML = `<p style="color:var(--error);">${esc(err.message || 'Failed to load')}</p>`;
-            setBizSectionVisible('biz-report-section-daily', false);
-            setBizSectionVisible('biz-report-section-members', false);
-            setBizSectionVisible('biz-report-section-products', false);
+            setBizElVisible('biz-report-export', false);
+            setBizElVisible('biz-report-detail', false);
             const empty = document.getElementById('biz-report-empty');
             if (empty) empty.style.display = 'none';
         }
@@ -490,6 +778,11 @@
         document.getElementById('pos-send-daily-sales-btn')?.addEventListener('click', sendTestDailySalesEmail);
         document.getElementById('biz-report-refresh')?.addEventListener('click', loadBusinessReport);
         document.getElementById('biz-report-type')?.addEventListener('change', renderBusinessReportView);
+        document.getElementById('biz-report-print')?.addEventListener('click', printBizReport);
+        document.getElementById('biz-report-csv')?.addEventListener('click', downloadBizCsv);
+        document.getElementById('biz-report-pdf')?.addEventListener('click', () => {
+            downloadBizPdf();
+        });
         document.querySelectorAll('[data-biz-preset]').forEach((btn) => {
             btn.addEventListener('click', () => {
                 setBizPreset(Number(btn.getAttribute('data-biz-preset')) || 30);
