@@ -4666,6 +4666,17 @@ router.get('/email-subscribers/export', ...adminAuth, requirePermission('manager
 
 // ===== ANALYTICS AND MONITORING ENDPOINTS =====
 
+router.get('/reports/business', ...adminAuth, async (req, res) => {
+    try {
+        const { getBusinessReport } = require('../services/businessReports');
+        const report = await getBusinessReport(req.pool, req.query || {});
+        res.json({ ok: true, report });
+    } catch (error) {
+        logger.error('Business report error:', error);
+        res.status(500).json({ error: 'Failed to build business report' });
+    }
+});
+
 // Get comprehensive dashboard overview
 router.get('/analytics/dashboard', ...adminAuth, async (req, res) => {
     try {

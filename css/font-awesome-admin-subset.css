@@ -48,6 +48,7 @@
 .fa-bullhorn::before { content: "\f0a1"; }
 .fa-calendar::before { content: "\f133"; }
 .fa-cash-register::before { content: "\f788"; }
+.fa-chart-bar::before { content: "\f080"; }
 .fa-chart-line::before { content: "\f201"; }
 .fa-check::before { content: "\f00c"; }
 .fa-check-circle::before { content: "\f058"; }

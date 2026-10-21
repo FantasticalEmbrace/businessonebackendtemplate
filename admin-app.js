@@ -6789,6 +6789,11 @@ class AdminApp {
             }
             const ppd = document.getElementById('loyalty-tiers-points-per-dollar');
             if (ppd) ppd.value = s.pointsPerDollar ?? 1;
+            this._syncLoyaltyTierModeUi();
+            if (modeEl && !modeEl.dataset.loyaltyModeBound) {
+                modeEl.dataset.loyaltyModeBound = '1';
+                modeEl.addEventListener('change', () => this._syncLoyaltyTierModeUi());
+            }
             const near = document.getElementById('loyalty-tiers-near-threshold');
             if (near) near.value = s.nearThresholdPercent ?? s.nearTierThresholdPercent ?? 80;
             const win = document.getElementById('loyalty-tiers-winback-days');
@@ -6823,6 +6828,7 @@ class AdminApp {
                     </tr>`;
                 })
                 .join('');
+            this._syncLoyaltyTierModeUi();
 
             const custRes = await this.apiRequest('/admin/loyalty/customers?limit=25');
             const customers = Array.isArray(custRes.customers) ? custRes.customers : [];
@@ -6853,6 +6859,29 @@ class AdminApp {
             tiersBody.innerHTML =
                 '<tr><td colspan="9" style="padding:1rem;color:var(--error);">Failed to load loyalty settings.</td></tr>';
             console.error('loadLoyaltyTiers', err);
+        }
+    }
+
+    _syncLoyaltyTierModeUi() {
+        const modeEl = document.getElementById('loyalty-tiers-mode');
+        const isPoints = modeEl?.value === 'points';
+        const ppdWrap = document.getElementById('loyalty-tiers-points-per-dollar-wrap');
+        if (ppdWrap) ppdWrap.style.display = isPoints ? '' : 'none';
+        const table = document.querySelector('#loyalty-tiers-card .data-table');
+        if (table) {
+            const headerCells = table.querySelectorAll('thead th');
+            headerCells.forEach((th) => {
+                const title = String(th.getAttribute('title') || th.textContent || '');
+                if (/minimum points|min points/i.test(title) || /^Min points$/i.test(th.textContent.trim())) {
+                    th.style.display = isPoints ? '' : 'none';
+                }
+            });
+            table.querySelectorAll('tbody tr').forEach((tr) => {
+                const cells = tr.children;
+                if (cells && cells.length >= 4) {
+                    cells[3].style.display = isPoints ? '' : 'none';
+                }
+            });
         }
     }
 

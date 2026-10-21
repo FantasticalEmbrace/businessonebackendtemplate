@@ -198,6 +198,220 @@
     }
 
     let personnelTabsBound = false;
+    let reportsTabsBound = false;
+    let bizReportCache = null;
+
+    function money(n) {
+        return fmtMoney(n);
+    }
+
+    function num(n) {
+        return String(Number(n) || 0);
+    }
+
+    function fmtDay(d) {
+        if (!d) return '—';
+        try {
+            return new Date(d).toLocaleDateString();
+        } catch {
+            return String(d).slice(0, 10);
+        }
+    }
+
+    function setBizPreset(days) {
+        const toEl = document.getElementById('biz-report-to');
+        const fromEl = document.getElementById('biz-report-from');
+        if (!toEl || !fromEl) return;
+        const to = new Date();
+        const from = new Date(Date.now() - (Math.max(1, days) - 1) * 86400000);
+        toEl.value = to.toISOString().slice(0, 10);
+        fromEl.value = from.toISOString().slice(0, 10);
+    }
+
+    function renderBizStat(title, value, hint) {
+        return `<div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-title">${esc(title)}</div>
+            </div>
+            <div class="stat-value">${esc(value)}</div>
+            ${hint ? `<div class="stat-change">${esc(hint)}</div>` : ''}
+        </div>`;
+    }
+
+    function selectedBizReportType() {
+        return String(document.getElementById('biz-report-type')?.value || '').trim();
+    }
+
+    function setBizSectionVisible(id, visible) {
+        const el = document.getElementById(id);
+        if (el) el.style.display = visible ? '' : 'none';
+    }
+
+    function renderBusinessReportView() {
+        const status = document.getElementById('biz-report-status');
+        const summary = document.getElementById('biz-report-summary');
+        const empty = document.getElementById('biz-report-empty');
+        const dailyMount = document.getElementById('biz-report-daily');
+        const membersMount = document.getElementById('biz-report-members');
+        const productsMount = document.getElementById('biz-report-products');
+        if (!summary) return;
+
+        const type = selectedBizReportType();
+        const r = bizReportCache || {};
+        const m = r.members || {};
+        const rw = r.rewards || {};
+        const o = r.orders || {};
+        const g = r.giftCards || {};
+        const c = r.catalog || {};
+        const t = r.totals || {};
+        const rangeLabel = r.range ? `${r.range.from} → ${r.range.to}` : '';
+
+        if (status && bizReportCache) {
+            status.textContent = rangeLabel
+                ? `Showing ${rangeLabel}. Store totals: ${num(t.customers)} customers · ${money(t.outstandingCashCredit)} store credit outstanding · ${num(t.newsletterSubscribers)} newsletter.`
+                : 'Report loaded.';
+        }
+
+        summary.innerHTML = '';
+        if (dailyMount) dailyMount.innerHTML = '';
+        if (membersMount) membersMount.innerHTML = '';
+        if (productsMount) productsMount.innerHTML = '';
+        setBizSectionVisible('biz-report-section-daily', false);
+        setBizSectionVisible('biz-report-section-members', false);
+        setBizSectionVisible('biz-report-section-products', false);
+
+        if (!type) {
+            if (empty) empty.style.display = '';
+            return;
+        }
+        if (empty) empty.style.display = 'none';
+
+        if (!bizReportCache) {
+            summary.innerHTML =
+                '<p class="form-help" style="margin:0;">Run report to load data for the selected date range.</p>';
+            return;
+        }
+
+        const statsByType = {
+            'new-members': [renderBizStat('New members', num(m.newAccounts), 'Accounts created in range')],
+            newsletter: [
+                renderBizStat('Newsletter signups', num(m.newNewsletterSubscribers), 'Email list in range'),
+            ],
+            rewards: [
+                renderBizStat(
+                    'Rewards earned',
+                    money(rw.cashEarned),
+                    `${num(rw.earnEvents)} earn events · cash store credit`
+                ),
+                renderBizStat('Rewards redeemed', money(rw.cashRedeemed), `${num(rw.redeemEvents)} redemptions`),
+            ],
+            'paid-orders': [
+                renderBizStat('Paid orders', num(o.paidOrders), `${money(o.revenue)} revenue`),
+                renderBizStat('Avg order value', money(o.avgOrderValue), `${num(o.uniqueBuyers)} unique buyers`),
+            ],
+            buyers: [
+                renderBizStat('First-time buyers', num(o.firstTimeBuyers), `${num(o.returningBuyers)} returning`),
+                renderBizStat('Returning buyers', num(o.returningBuyers), `${num(o.uniqueBuyers)} unique buyers`),
+            ],
+            channel: [
+                renderBizStat(
+                    'Online / in-store',
+                    `${num(o.onlineOrders)} / ${num(o.inStoreOrders)}`,
+                    `${money(o.onlineRevenue)} online · ${money(o.inStoreRevenue)} in-store`
+                ),
+            ],
+            'gift-cards': [
+                renderBizStat('Gift cards issued', num(g.issued), `${money(g.activeBalanceIssued)} active balance`),
+            ],
+            catalog: [
+                renderBizStat('Products added', num(c.productsAdded), `${num(t.lowStockNow)} low stock now`),
+            ],
+            daily: [],
+            'top-products': [],
+        };
+
+        summary.innerHTML = (statsByType[type] || []).join('');
+
+        if (type === 'daily' && dailyMount) {
+            setBizSectionVisible('biz-report-section-daily', true);
+            const daily = r.daily || [];
+            dailyMount.innerHTML = daily.length
+                ? `<table class="table"><thead><tr><th>Day</th><th>New members</th><th>Rewards earned</th><th>Orders</th><th>Revenue</th></tr></thead><tbody>${daily
+                      .map(
+                          (d) => `<tr>
+                        <td>${esc(d.day)}</td>
+                        <td>${num(d.newAccounts)}</td>
+                        <td>${money(d.rewardsCashEarned)}</td>
+                        <td>${num(d.paidOrders)}</td>
+                        <td>${money(d.revenue)}</td>
+                    </tr>`
+                      )
+                      .join('')}</tbody></table>`
+                : '<p style="color:var(--gray-500);padding:0.75rem;">No daily activity in this range.</p>';
+        }
+
+        if (type === 'new-members' && membersMount) {
+            setBizSectionVisible('biz-report-section-members', true);
+            const members = r.recentMembers || [];
+            membersMount.innerHTML = members.length
+                ? `<table class="table"><thead><tr><th>Name</th><th>Email</th><th>Joined</th><th>Tier</th></tr></thead><tbody>${members
+                      .map(
+                          (u) => `<tr>
+                        <td>${esc(u.name)}</td>
+                        <td>${esc(u.email)}</td>
+                        <td>${esc(fmtDay(u.createdAt))}</td>
+                        <td>${esc(u.tier || '—')}</td>
+                    </tr>`
+                      )
+                      .join('')}</tbody></table>`
+                : '<p style="color:var(--gray-500);padding:0.75rem;">No new members in this range.</p>';
+        }
+
+        if (type === 'top-products' && productsMount) {
+            setBizSectionVisible('biz-report-section-products', true);
+            const products = r.topProducts || [];
+            productsMount.innerHTML = products.length
+                ? `<table class="table"><thead><tr><th>Product</th><th>SKU</th><th>Units</th><th>Revenue</th></tr></thead><tbody>${products
+                      .map(
+                          (p) => `<tr>
+                        <td>${esc(p.name)}</td>
+                        <td>${esc(p.sku || '—')}</td>
+                        <td>${num(p.unitsSold)}</td>
+                        <td>${money(p.revenue)}</td>
+                    </tr>`
+                      )
+                      .join('')}</tbody></table>`
+                : '<p style="color:var(--gray-500);padding:0.75rem;">No paid product sales in this range.</p>';
+        }
+    }
+
+    async function loadBusinessReport() {
+        const status = document.getElementById('biz-report-status');
+        const summary = document.getElementById('biz-report-summary');
+        if (!summary) return;
+
+        const from = document.getElementById('biz-report-from')?.value;
+        const to = document.getElementById('biz-report-to')?.value;
+        if (status) status.textContent = 'Loading…';
+
+        try {
+            const qs = new URLSearchParams();
+            if (from) qs.set('from', from);
+            if (to) qs.set('to', to);
+            const res = await window.adminApp.apiRequest('/admin/reports/business?' + qs.toString());
+            bizReportCache = res.report || {};
+            renderBusinessReportView();
+        } catch (err) {
+            bizReportCache = null;
+            if (status) status.textContent = err.message || 'Failed to load business report';
+            summary.innerHTML = `<p style="color:var(--error);">${esc(err.message || 'Failed to load')}</p>`;
+            setBizSectionVisible('biz-report-section-daily', false);
+            setBizSectionVisible('biz-report-section-members', false);
+            setBizSectionVisible('biz-report-section-products', false);
+            const empty = document.getElementById('biz-report-empty');
+            if (empty) empty.style.display = 'none';
+        }
+    }
 
     function bindPersonnelTabs() {
         if (personnelTabsBound) return;
@@ -243,19 +457,51 @@
             });
         }
 
+        document.getElementById('pos-timesheets-refresh')?.addEventListener('click', loadTimesheets);
+    }
+
+    function bindReportsTabs() {
+        if (reportsTabsBound) return;
+        reportsTabsBound = true;
+
+        document.querySelectorAll('[data-reports-tab]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const tab = btn.getAttribute('data-reports-tab');
+                document.querySelectorAll('[data-reports-tab]').forEach((b) => {
+                    b.classList.remove('active');
+                    b.setAttribute('aria-selected', 'false');
+                });
+                btn.classList.add('active');
+                btn.setAttribute('aria-selected', 'true');
+                document.querySelectorAll('[data-reports-panel]').forEach((p) => {
+                    p.style.display = p.getAttribute('data-reports-panel') === tab ? '' : 'none';
+                });
+                if (tab === 'view') loadShiftSessions();
+                if (tab === 'business') loadBusinessReport();
+            });
+        });
+
         document.getElementById('pos-reports-refresh')?.addEventListener('click', () => {
             loadTimesheets();
             loadShiftSessions();
         });
         document.getElementById('pos-shift-sessions-refresh')?.addEventListener('click', loadShiftSessions);
-        document.getElementById('pos-timesheets-refresh')?.addEventListener('click', loadTimesheets);
         document.getElementById('pos-day-summary-btn')?.addEventListener('click', loadDaySummary);
         document.getElementById('pos-send-daily-sales-btn')?.addEventListener('click', sendTestDailySalesEmail);
+        document.getElementById('biz-report-refresh')?.addEventListener('click', loadBusinessReport);
+        document.getElementById('biz-report-type')?.addEventListener('change', renderBusinessReportView);
+        document.querySelectorAll('[data-biz-preset]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                setBizPreset(Number(btn.getAttribute('data-biz-preset')) || 30);
+                loadBusinessReport();
+            });
+        });
     }
 
     window.AdminPersonnelPos = {
         init() {
             bindPersonnelTabs();
+            bindReportsTabs();
             const today = new Date();
             const weekAgo = new Date(Date.now() - 7 * 86400000);
             const fromEl = document.getElementById('pos-report-from');
@@ -264,7 +510,13 @@
             if (fromEl && !fromEl.value) fromEl.value = weekAgo.toISOString().slice(0, 10);
             if (toEl && !toEl.value) toEl.value = today.toISOString().slice(0, 10);
             if (dayEl && !dayEl.value) dayEl.value = today.toISOString().slice(0, 10);
-            if (document.getElementById('pos-shift-sessions-list')) {
+            const bizFrom = document.getElementById('biz-report-from');
+            const bizTo = document.getElementById('biz-report-to');
+            if (bizFrom && !bizFrom.value) setBizPreset(30);
+            if (bizTo && !bizTo.value) bizTo.value = today.toISOString().slice(0, 10);
+            if (document.getElementById('biz-report-summary')) {
+                loadBusinessReport();
+            } else if (document.getElementById('pos-shift-sessions-list')) {
                 loadShiftSessions();
             }
         },
@@ -272,5 +524,6 @@
         loadShiftSessions,
         loadScheduledShifts,
         loadShiftEmployeeSelect,
+        loadBusinessReport,
     };
 })();
