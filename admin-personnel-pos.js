@@ -353,11 +353,10 @@
                 u.name || '—',
                 u.email || '',
                 fmtDay(u.createdAt),
-                u.tier || '—',
             ]);
             return {
                 title: 'New members in range',
-                headers: ['Name', 'Email', 'Joined', 'Tier'],
+                headers: ['Name', 'Email', 'Joined'],
                 rows,
                 empty: 'No new members in this range.',
                 limit,
