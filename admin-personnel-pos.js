@@ -241,6 +241,74 @@
         return String(document.getElementById('biz-report-type')?.value || '').trim();
     }
 
+    function isSalesReportType(type) {
+        return type === 'sales' || type === 'paid-orders';
+    }
+
+    function selectedSalesChannelFilter() {
+        const v = String(document.getElementById('biz-report-channel')?.value || 'all').trim();
+        return v === 'online' || v === 'store' ? v : 'all';
+    }
+
+    function salesChannelFilterLabel(filter) {
+        if (filter === 'online') return 'Online';
+        if (filter === 'store') return 'In-store';
+        return 'All channels';
+    }
+
+    function isInStoreOrderChannel(channel) {
+        const c = String(channel || '').toLowerCase();
+        return c === 'in_store' || c === 'pos' || c === 'instore';
+    }
+
+    function filterOrdersBySalesChannel(orders, filter) {
+        const list = Array.isArray(orders) ? orders : [];
+        if (filter === 'online') return list.filter((o) => !isInStoreOrderChannel(o.channel));
+        if (filter === 'store') return list.filter((o) => isInStoreOrderChannel(o.channel));
+        return list;
+    }
+
+    function salesStatsFromOrders(orders) {
+        const list = Array.isArray(orders) ? orders : [];
+        let revenue = 0;
+        let onlineOrders = 0;
+        let inStoreOrders = 0;
+        let onlineRevenue = 0;
+        let inStoreRevenue = 0;
+        const buyers = new Set();
+        for (const o of list) {
+            const total = Number(o.total) || 0;
+            revenue += total;
+            if (isInStoreOrderChannel(o.channel)) {
+                inStoreOrders += 1;
+                inStoreRevenue += total;
+            } else {
+                onlineOrders += 1;
+                onlineRevenue += total;
+            }
+            const key = String(o.email || o.customer || o.id || '')
+                .trim()
+                .toLowerCase();
+            if (key) buyers.add(key);
+        }
+        const paidOrders = list.length;
+        return {
+            paidOrders,
+            revenue,
+            avgOrderValue: paidOrders ? revenue / paidOrders : 0,
+            onlineOrders,
+            inStoreOrders,
+            onlineRevenue,
+            inStoreRevenue,
+            uniqueBuyers: buyers.size,
+        };
+    }
+
+    function syncSalesChannelFilterVisibility() {
+        const show = isSalesReportType(selectedBizReportType());
+        setBizElVisible('biz-report-channel-wrap', show);
+    }
+
     function setBizElVisible(id, visible, display) {
         const el = document.getElementById(id);
         if (!el) return;
@@ -327,23 +395,38 @@
                 limit,
             };
         }
-        if (type === 'sales' || type === 'paid-orders') {
-            const rows = (lists.orders || []).map((o) => [
+        if (isSalesReportType(type)) {
+            const channelFilter = selectedSalesChannelFilter();
+            const orders = filterOrdersBySalesChannel(lists.orders || [], channelFilter);
+            const channelLabel = salesChannelFilterLabel(channelFilter);
+            const rows = orders.map((o) => [
                 o.orderNumber || '—',
                 fmtDay(o.createdAt),
                 o.customer || '—',
                 o.email || '',
-                o.channel === 'in_store' ? 'In-store' : o.channel === 'online' ? 'Online' : o.channel || 'Online',
+                isInStoreOrderChannel(o.channel)
+                    ? 'In-store'
+                    : o.channel === 'online'
+                      ? 'Online'
+                      : o.channel || 'Online',
                 o.status || o.paymentStatus || 'paid',
                 num(o.itemCount),
                 money(o.total),
             ]);
             return {
-                title: 'Sales (paid orders) in range',
+                title:
+                    channelFilter === 'all'
+                        ? 'Sales (paid orders) in range'
+                        : `Sales — ${channelLabel} in range`,
                 headers: ['Order #', 'Date', 'Customer', 'Email', 'Channel', 'Status', 'Items', 'Total'],
                 rows,
-                empty: 'No paid sales in this range.',
+                empty:
+                    channelFilter === 'all'
+                        ? 'No paid sales in this range.'
+                        : `No ${channelLabel.toLowerCase()} paid sales in this range.`,
                 limit,
+                channelFilter,
+                channelLabel,
             };
         }
         if (type === 'channel') {
@@ -495,6 +578,7 @@
         bizExportState = null;
         setBizElVisible('biz-report-export', false);
         setBizElVisible('biz-report-detail', false);
+        syncSalesChannelFilterVisibility();
         if (detailTable) detailTable.innerHTML = '';
         if (detailTitle) detailTitle.textContent = '';
         if (detailMeta) detailMeta.textContent = '';
@@ -511,6 +595,15 @@
             return;
         }
 
+        const salesChannelFilter = selectedSalesChannelFilter();
+        const salesChannelLabel = salesChannelFilterLabel(salesChannelFilter);
+        const salesOrdersFiltered = isSalesReportType(type)
+            ? filterOrdersBySalesChannel((r.lists && r.lists.orders) || [], salesChannelFilter)
+            : [];
+        const salesFiltered = isSalesReportType(type) ? salesStatsFromOrders(salesOrdersFiltered) : null;
+        const salesHint =
+            salesChannelFilter === 'all' ? 'Paid orders in range' : `${salesChannelLabel} paid orders in range`;
+
         const statsByType = {
             'new-members': [renderBizStat('New members', num(m.newAccounts), 'Accounts created in range')],
             newsletter: [
@@ -524,26 +617,38 @@
                 ),
                 renderBizStat('Rewards redeemed', money(rw.cashRedeemed), `${num(rw.redeemEvents)} redemptions`),
             ],
-            sales: [
-                renderBizStat('Orders', num(o.paidOrders), 'Paid orders in range'),
-                renderBizStat('Revenue', money(o.revenue), `${num(o.uniqueBuyers)} unique buyers`),
-                renderBizStat('Avg order value', money(o.avgOrderValue), 'AOV'),
-                renderBizStat(
-                    'Online / in-store',
-                    `${money(o.onlineRevenue)} / ${money(o.inStoreRevenue)}`,
-                    `${num(o.onlineOrders)} online · ${num(o.inStoreOrders)} in-store`
-                ),
-            ],
-            'paid-orders': [
-                renderBizStat('Orders', num(o.paidOrders), 'Paid orders in range'),
-                renderBizStat('Revenue', money(o.revenue), `${num(o.uniqueBuyers)} unique buyers`),
-                renderBizStat('Avg order value', money(o.avgOrderValue), 'AOV'),
-                renderBizStat(
-                    'Online / in-store',
-                    `${money(o.onlineRevenue)} / ${money(o.inStoreRevenue)}`,
-                    `${num(o.onlineOrders)} online · ${num(o.inStoreOrders)} in-store`
-                ),
-            ],
+            sales: salesFiltered
+                ? [
+                      renderBizStat('Orders', num(salesFiltered.paidOrders), salesHint),
+                      renderBizStat(
+                          'Revenue',
+                          money(salesFiltered.revenue),
+                          `${num(salesFiltered.uniqueBuyers)} unique buyers`
+                      ),
+                      renderBizStat('Avg order value', money(salesFiltered.avgOrderValue), 'AOV'),
+                      renderBizStat(
+                          'Online / in-store',
+                          `${money(salesFiltered.onlineRevenue)} / ${money(salesFiltered.inStoreRevenue)}`,
+                          `${num(salesFiltered.onlineOrders)} online · ${num(salesFiltered.inStoreOrders)} in-store`
+                      ),
+                  ]
+                : [],
+            'paid-orders': salesFiltered
+                ? [
+                      renderBizStat('Orders', num(salesFiltered.paidOrders), salesHint),
+                      renderBizStat(
+                          'Revenue',
+                          money(salesFiltered.revenue),
+                          `${num(salesFiltered.uniqueBuyers)} unique buyers`
+                      ),
+                      renderBizStat('Avg order value', money(salesFiltered.avgOrderValue), 'AOV'),
+                      renderBizStat(
+                          'Online / in-store',
+                          `${money(salesFiltered.onlineRevenue)} / ${money(salesFiltered.inStoreRevenue)}`,
+                          `${num(salesFiltered.onlineOrders)} online · ${num(salesFiltered.inStoreOrders)} in-store`
+                      ),
+                  ]
+                : [],
             buyers: [
                 renderBizStat('First-time buyers', num(o.firstTimeBuyers), `${num(o.returningBuyers)} returning`),
                 renderBizStat('Returning buyers', num(o.returningBuyers), `${num(o.uniqueBuyers)} unique buyers`),
@@ -593,14 +698,22 @@
         const label = BIZ_REPORT_LABELS[type] || bundle.title;
         const from = r.range?.from || '';
         const to = r.range?.to || '';
+        const channelSuffix =
+            isSalesReportType(type) && bundle.channelFilter && bundle.channelFilter !== 'all'
+                ? ` · ${bundle.channelLabel}`
+                : '';
+        const channelFile =
+            isSalesReportType(type) && bundle.channelFilter && bundle.channelFilter !== 'all'
+                ? `-${bundle.channelFilter}`
+                : '';
         bizExportState = {
             type,
-            label,
+            label: `${label}${channelSuffix}`,
             from,
             to,
             headers: bundle.headers,
             rows: bundle.rows,
-            filenameBase: `business-report-${type}-${from || 'from'}-to-${to || 'to'}`,
+            filenameBase: `business-report-${type}${channelFile}-${from || 'from'}-to-${to || 'to'}`,
         };
     }
 
@@ -814,6 +927,7 @@
         document.getElementById('pos-send-daily-sales-btn')?.addEventListener('click', sendTestDailySalesEmail);
         document.getElementById('biz-report-refresh')?.addEventListener('click', loadBusinessReport);
         document.getElementById('biz-report-type')?.addEventListener('change', renderBusinessReportView);
+        document.getElementById('biz-report-channel')?.addEventListener('change', renderBusinessReportView);
         document.getElementById('biz-report-print')?.addEventListener('click', printBizReport);
         document.getElementById('biz-report-csv')?.addEventListener('click', downloadBizCsv);
         document.getElementById('biz-report-pdf')?.addEventListener('click', () => {
