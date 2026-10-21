@@ -204,9 +204,10 @@
 
     const BIZ_REPORT_LABELS = {
         'new-members': 'New members',
+        sales: 'Sales',
+        'paid-orders': 'Sales', // legacy alias
         newsletter: 'Newsletter signups',
         rewards: 'Rewards earned / redeemed',
-        'paid-orders': 'Paid orders & revenue',
         buyers: 'First-time vs returning buyers',
         channel: 'Online vs in-store',
         'gift-cards': 'Gift cards',
@@ -326,7 +327,26 @@
                 limit,
             };
         }
-        if (type === 'paid-orders' || type === 'channel') {
+        if (type === 'sales' || type === 'paid-orders') {
+            const rows = (lists.orders || []).map((o) => [
+                o.orderNumber || '—',
+                fmtDay(o.createdAt),
+                o.customer || '—',
+                o.email || '',
+                o.channel === 'in_store' ? 'In-store' : o.channel === 'online' ? 'Online' : o.channel || 'Online',
+                o.status || o.paymentStatus || 'paid',
+                num(o.itemCount),
+                money(o.total),
+            ]);
+            return {
+                title: 'Sales (paid orders) in range',
+                headers: ['Order #', 'Date', 'Customer', 'Email', 'Channel', 'Status', 'Items', 'Total'],
+                rows,
+                empty: 'No paid sales in this range.',
+                limit,
+            };
+        }
+        if (type === 'channel') {
             const rows = (lists.orders || []).map((o) => [
                 o.orderNumber || '—',
                 o.customer || '—',
@@ -335,7 +355,7 @@
                 fmtDay(o.createdAt),
             ]);
             return {
-                title: type === 'channel' ? 'Paid orders by channel' : 'Paid orders in range',
+                title: 'Paid orders by channel',
                 headers: ['Order #', 'Customer', 'Channel', 'Total', 'Date'],
                 rows,
                 empty: 'No paid orders in this range.',
@@ -504,9 +524,25 @@
                 ),
                 renderBizStat('Rewards redeemed', money(rw.cashRedeemed), `${num(rw.redeemEvents)} redemptions`),
             ],
+            sales: [
+                renderBizStat('Orders', num(o.paidOrders), 'Paid orders in range'),
+                renderBizStat('Revenue', money(o.revenue), `${num(o.uniqueBuyers)} unique buyers`),
+                renderBizStat('Avg order value', money(o.avgOrderValue), 'AOV'),
+                renderBizStat(
+                    'Online / in-store',
+                    `${money(o.onlineRevenue)} / ${money(o.inStoreRevenue)}`,
+                    `${num(o.onlineOrders)} online · ${num(o.inStoreOrders)} in-store`
+                ),
+            ],
             'paid-orders': [
-                renderBizStat('Paid orders', num(o.paidOrders), `${money(o.revenue)} revenue`),
-                renderBizStat('Avg order value', money(o.avgOrderValue), `${num(o.uniqueBuyers)} unique buyers`),
+                renderBizStat('Orders', num(o.paidOrders), 'Paid orders in range'),
+                renderBizStat('Revenue', money(o.revenue), `${num(o.uniqueBuyers)} unique buyers`),
+                renderBizStat('Avg order value', money(o.avgOrderValue), 'AOV'),
+                renderBizStat(
+                    'Online / in-store',
+                    `${money(o.onlineRevenue)} / ${money(o.inStoreRevenue)}`,
+                    `${num(o.onlineOrders)} online · ${num(o.inStoreOrders)} in-store`
+                ),
             ],
             buyers: [
                 renderBizStat('First-time buyers', num(o.firstTimeBuyers), `${num(o.returningBuyers)} returning`),

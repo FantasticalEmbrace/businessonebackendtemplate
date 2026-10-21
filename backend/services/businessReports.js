@@ -343,9 +343,15 @@ async function getBusinessReport(pool, query = {}) {
         safeQuery(
             pool,
             `SELECT o.id, o.order_number, o.email, o.total_amount, o.created_at,
+                    o.status, o.payment_status, o.fulfillment_status,
                     COALESCE(o.sales_channel, 'online') AS sales_channel,
                     o.shipping_first_name, o.shipping_last_name,
-                    u.first_name AS user_first_name, u.last_name AS user_last_name
+                    u.first_name AS user_first_name, u.last_name AS user_last_name,
+                    COALESCE((
+                        SELECT SUM(oi.quantity)
+                        FROM order_items oi
+                        WHERE oi.order_id = o.id
+                    ), 0) AS item_count
              FROM orders o
              LEFT JOIN users u ON u.id = o.user_id
              WHERE o.payment_status = 'paid'
@@ -492,6 +498,10 @@ async function getBusinessReport(pool, query = {}) {
             ),
             email: o.email || '',
             channel: normalized,
+            status: o.status || o.payment_status || 'paid',
+            paymentStatus: o.payment_status || 'paid',
+            fulfillmentStatus: o.fulfillment_status || '',
+            itemCount: Number(o.item_count) || 0,
             total: Number(o.total_amount) || 0,
             createdAt: o.created_at,
         };
