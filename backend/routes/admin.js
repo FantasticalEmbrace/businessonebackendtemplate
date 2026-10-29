@@ -760,9 +760,26 @@ router.get('/products', ...adminAuth, async (req, res) => {
         whereConditions.push('p.deleted_at IS NULL');
 
         if (search) {
-            const searchTerm = `%${search}%`;
-            whereConditions.push('(p.name LIKE ? OR p.sku LIKE ? OR b.name LIKE ? OR b.slug LIKE ? OR pc.name LIKE ?)');
-            queryParams.push(searchTerm, searchTerm, searchTerm, searchTerm, searchTerm);
+            const {
+                tokenizeProductSearch,
+                searchTokenVariants
+            } = require('../utils/productSearchTokens');
+            const keywords = tokenizeProductSearch(search);
+            const terms = keywords.length ? keywords : [String(search).trim().toLowerCase()].filter(Boolean);
+            for (const keyword of terms) {
+                const variants = searchTokenVariants(keyword);
+                const clauseParts = [];
+                for (const variant of variants) {
+                    const like = `%${variant}%`;
+                    clauseParts.push(
+                        '(p.name LIKE ? OR p.sku LIKE ? OR b.name LIKE ? OR b.slug LIKE ? OR pc.name LIKE ?)'
+                    );
+                    queryParams.push(like, like, like, like, like);
+                }
+                if (clauseParts.length) {
+                    whereConditions.push(`(${clauseParts.join(' OR ')})`);
+                }
+            }
         }
 
         if (brand) {

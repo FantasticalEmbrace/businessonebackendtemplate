@@ -869,6 +869,33 @@
         }
 
         /* Products table — fit desktop content area without horizontal scroll */
+        /* Compact clear control inside search fields (must never go full-width on mobile). */
+        .btn.admin-search-clear-btn,
+        #clearProductsSearch {
+            position: absolute;
+            right: 0.4rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 2;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 2rem !important;
+            min-width: 2rem !important;
+            max-width: 2.25rem;
+            height: 2rem;
+            min-height: 2rem !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            line-height: 1;
+            border-radius: 999px;
+            font-size: 0.85rem;
+        }
+
+        #productsSearchInput {
+            padding-right: 2.75rem;
+        }
+
         .admin-products-table-wrap {
             overflow-x: auto;
             width: 100%;
@@ -3560,6 +3587,129 @@
             .section-header h2 {
                 font-size: 1.5rem;
             }
+
+            /* Products: full device width + horizontal side-scroll. */
+            .main-content:has(#products.content-section.active) {
+                padding-left: 0;
+                padding-right: 0;
+            }
+
+            #products.content-section.active {
+                padding: 0;
+            }
+
+            #products .content-header {
+                padding: 1rem 1rem 1rem 3.5rem;
+                margin-bottom: 0;
+                border-radius: 0;
+            }
+
+            #products .admin-products-bulk-bar {
+                position: static;
+                top: auto;
+                z-index: auto;
+                margin: 0 0.75rem 0.75rem;
+                width: auto;
+                max-width: none;
+            }
+
+            #products .card.card--table-scroll {
+                overflow: visible;
+                margin: 0;
+                width: 100%;
+                max-width: 100%;
+                border-radius: 0;
+                box-shadow: none;
+                border: none;
+                border-top: 1px solid var(--gray-200);
+                border-bottom: 1px solid var(--gray-200);
+            }
+
+            #products .card.card--table-scroll > .card-content {
+                overflow: visible;
+                padding: 0.75rem 0 1.25rem;
+            }
+
+            #products .admin-products-filters {
+                position: relative;
+                z-index: 2;
+                gap: 0.75rem;
+                margin: 0 0 1rem;
+                padding: 0 0.75rem 0.25rem;
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+
+            #products .admin-products-filters > div {
+                min-width: 0 !important;
+                max-width: none !important;
+                flex: 1 1 100%;
+                width: 100%;
+            }
+
+            #productsSearchInput {
+                max-width: none;
+            }
+
+            #productsTable {
+                position: relative;
+                z-index: 1;
+                width: 100%;
+                max-width: 100%;
+                scroll-margin-top: 4.5rem;
+                padding-bottom: max(2.5rem, env(safe-area-inset-bottom));
+            }
+
+            #products .admin-products-table-wrap,
+            #products .table-container.admin-products-table-wrap {
+                position: relative;
+                z-index: 1;
+                width: 100% !important;
+                max-width: 100% !important;
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch;
+                overscroll-behavior-x: contain;
+                margin: 0;
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+            }
+
+            #products .admin-products-table-wrap .table {
+                min-width: 52rem !important;
+                width: max-content !important;
+                max-width: none !important;
+                table-layout: auto !important;
+                font-size: 0.875rem;
+            }
+
+            #products .admin-products-table-wrap .table th,
+            #products .admin-products-table-wrap .table td {
+                width: auto;
+                overflow: visible;
+                white-space: nowrap;
+            }
+
+            #products .admin-products-table-wrap .product-name-cell {
+                min-width: 12rem;
+                max-width: 18rem;
+                white-space: normal;
+            }
+
+            #products .admin-products-table-wrap .product-name-primary,
+            #products .admin-products-table-wrap .product-name-meta {
+                white-space: nowrap;
+            }
+
+            #productsPagination {
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+                padding: 0 0.75rem;
+                overflow-x: auto;
+            }
+
         }
 
         @media (max-width: 480px) {
@@ -4229,20 +4379,19 @@
 
                 <div class="card card--table-scroll">
                     <div class="card-content">
-                        <div
+                        <div class="admin-products-filters"
                             style="margin-bottom: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
                             <div style="position: relative; flex: 1; min-width: 250px; max-width: 400px;">
                                 <label for="productsSearchInput" class="sr-only">Search products</label>
                                 <input type="text" id="productsSearchInput" name="product_search" class="form-input"
                                     placeholder="Search products by name, SKU, brand, or category..."
                                     autocomplete="off"
-                                    style="padding-left: 2.5rem; width: 100%;">
+                                    style="padding-left: 2.5rem; padding-right: 2.75rem; width: 100%;">
                                 <i class="fas fa-search"
                                     style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--gray-500); pointer-events: none;"></i>
-                                <button type="button" id="clearProductsSearch" class="btn btn-sm btn-secondary"
-                                    aria-label="Clear product search"
-                                    style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); display: none; padding: 0.25rem 0.5rem; min-width: auto;">
-                                    <i class="fas fa-times"></i>
+                                <button type="button" id="clearProductsSearch" class="btn btn-sm btn-secondary admin-search-clear-btn"
+                                    aria-label="Clear product search">
+                                    <i class="fas fa-times" aria-hidden="true"></i>
                                 </button>
                             </div>
                             <div style="min-width: 200px;">
@@ -4328,6 +4477,7 @@
                             Loading products...
                         </div>
                         <div id="productsPagination"></div>
+                    </div>
                 </div>
             </section>
 

@@ -11290,7 +11290,7 @@ ${bodies.join('\n')}
             if (!input) return;
             const searchTerm = input.value.trim();
             if (clearBtn) {
-                clearBtn.style.display = searchTerm ? 'block' : 'none';
+                clearBtn.style.display = searchTerm ? 'flex' : 'none';
             }
             this.updateClearFiltersButton();
             this._handleProductsSearchInput(input);
@@ -11610,22 +11610,50 @@ ${bodies.join('\n')}
             });
 
             if (searchTerms.length > 0) {
+                const tokenVariants = (token) => {
+                    const raw = String(token || '').toLowerCase().trim();
+                    const out = new Set();
+                    if (!raw) return [];
+                    out.add(raw);
+                    const clean = raw.replace(/[^a-z0-9]+/g, '');
+                    if (clean) out.add(clean);
+                    const add = (stem) => {
+                        if (stem && stem.length >= 2) {
+                            out.add(stem);
+                            const sc = stem.replace(/[^a-z0-9]+/g, '');
+                            if (sc) out.add(sc);
+                        }
+                    };
+                    if (clean.endsWith('ies') && clean.length > 4) add(`${clean.slice(0, -3)}y`);
+                    else if (clean.endsWith('es') && clean.length > 3) {
+                        add(clean.slice(0, -2));
+                        add(clean.slice(0, -1));
+                    } else if (clean.endsWith('s') && !clean.endsWith('ss') && clean.length > 3) {
+                        add(clean.slice(0, -1));
+                    }
+                    return [...out];
+                };
+
                 filtered = filtered.filter(product => {
                     const name = (product.name || '').toLowerCase();
                     const sku = (product.sku || '').toLowerCase();
                     const brand = (product.brand_name || '').toLowerCase();
                     const category = (product.category_name || '').toLowerCase();
-
-                    // Combine all searchable fields
                     const searchableText = `${name} ${sku} ${brand} ${category}`;
+                    const searchableClean = searchableText.replace(/[^a-z0-9]+/g, '');
 
-                    // Check if ALL search terms are found (AND logic)
-                    // This means "buried treasure" will match products containing both "buried" AND "treasure"
-                    const matches = searchTerms.every(term => searchableText.includes(term));
-                    return matches;
+                    // ALL terms must match (AND). Plural forms also try singular stems.
+                    return searchTerms.every((term) =>
+                        tokenVariants(term).some(
+                            (variant) =>
+                                searchableText.includes(variant) ||
+                                (variant.replace(/[^a-z0-9]+/g, '').length > 0 &&
+                                    searchableClean.includes(variant.replace(/[^a-z0-9]+/g, '')))
+                        )
+                    );
                 });
 
-                console.log('??? After search filter (FIRST):', {
+                console.log('After search filter (FIRST):', {
                     filteredCount: filtered.length,
                     sampleProducts: filtered.slice(0, 5).map(p => p.name)
                 });

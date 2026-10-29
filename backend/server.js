@@ -100,24 +100,10 @@ const {
 const { jsonSafeDeep } = require('./utils/jsonSafeMysql');
 const { buildDbConfig } = require('./utils/dbConfig');
 
-const SEARCH_STOPWORDS = new Set([
-    'a', 'an', 'the', 'of', 'and', 'or', 'for', 'to', 'in', 'on', 'with', 'by'
-]);
-
-/** Same tokenization as js/product-search-utils.js tokenizeSearchQuery. */
-function tokenizeProductSearch(search) {
-    const raw = String(search || '')
-        .toLowerCase()
-        .trim();
-    if (!raw) return [];
-    const tokens = raw.split(/\s+/).filter((word) => word.length > 0);
-    const meaningful = tokens.filter(
-        (word) => word.length >= 2 && !SEARCH_STOPWORDS.has(word)
-    );
-    if (meaningful.length > 0) return meaningful;
-    const collapsed = raw.replace(/[^a-z0-9]+/g, '');
-    return collapsed ? [collapsed] : tokens;
-}
+const {
+    tokenizeProductSearch,
+    searchTokenVariants
+} = require('./utils/productSearchTokens');
 
 const app = express();
 app.set('trust proxy', 1);
@@ -1507,28 +1493,32 @@ app.get('/api/products', async (req, res) => {
             const keywords = tokenizeProductSearch(search);
 
             keywords.forEach((keyword) => {
-                const searchTerm = `%${keyword}%`;
-                const cleanSearch = keyword.replace(/[^a-z0-9]/g, '');
-                const keywordClauses = [
-                    'p.name LIKE ?',
-                    'p.slug LIKE ?',
-                    'p.sku LIKE ?',
-                    'p.short_description LIKE ?',
-                    'b.name LIKE ?',
-                    'b.slug LIKE ?',
-                    'pc.name LIKE ?',
-                    'pc.slug LIKE ?',
-                ];
-                const params = [
-                    searchTerm, searchTerm, searchTerm, searchTerm,
-                    searchTerm, searchTerm, searchTerm, searchTerm,
-                ];
-                if (cleanSearch && cleanSearch !== keyword) {
+                const keywordClauses = [];
+                const params = [];
+                for (const variant of searchTokenVariants(keyword)) {
+                    const searchTerm = `%${variant}%`;
+                    const cleanSearch = variant.replace(/[^a-z0-9]/g, '');
                     keywordClauses.push(
-                        'REPLACE(REPLACE(LOWER(b.slug), \'-\', \'\'), \' \', \'\') LIKE ?',
-                        'REPLACE(REPLACE(LOWER(p.name), \'-\', \'\'), \' \', \'\') LIKE ?'
+                        'p.name LIKE ?',
+                        'p.slug LIKE ?',
+                        'p.sku LIKE ?',
+                        'p.short_description LIKE ?',
+                        'b.name LIKE ?',
+                        'b.slug LIKE ?',
+                        'pc.name LIKE ?',
+                        'pc.slug LIKE ?',
                     );
-                    params.push(`%${cleanSearch}%`, `%${cleanSearch}%`);
+                    params.push(
+                        searchTerm, searchTerm, searchTerm, searchTerm,
+                        searchTerm, searchTerm, searchTerm, searchTerm,
+                    );
+                    if (cleanSearch && cleanSearch !== variant) {
+                        keywordClauses.push(
+                            'REPLACE(REPLACE(LOWER(b.slug), \'-\', \'\'), \' \', \'\') LIKE ?',
+                            'REPLACE(REPLACE(LOWER(p.name), \'-\', \'\'), \' \', \'\') LIKE ?'
+                        );
+                        params.push(`%${cleanSearch}%`, `%${cleanSearch}%`);
+                    }
                 }
                 whereConditions.push(`(${keywordClauses.join(' OR ')})`);
                 queryParams.push(...params);

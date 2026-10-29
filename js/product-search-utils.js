@@ -96,6 +96,55 @@
         return collapsed ? [collapsed] : tokens;
     }
 
+    /** Light plural → singular variants so "enzymes" matches "enzyme". */
+    function searchTokenVariants(token) {
+        const raw = String(token || '').toLowerCase().trim();
+        const variants = new Set();
+        if (!raw) return [];
+        variants.add(raw);
+        const clean = cleanSearchToken(raw);
+        if (clean) variants.add(clean);
+        const addStem = (stem) => {
+            if (stem && stem.length >= 2) {
+                variants.add(stem);
+                const stemClean = cleanSearchToken(stem);
+                if (stemClean) variants.add(stemClean);
+            }
+        };
+        if (clean.endsWith('ies') && clean.length > 4) {
+            addStem(`${clean.slice(0, -3)}y`);
+        } else if (clean.endsWith('oes') && clean.length > 4) {
+            addStem(clean.slice(0, -2));
+        } else if (
+            clean.endsWith('ses') ||
+            clean.endsWith('xes') ||
+            clean.endsWith('zes') ||
+            clean.endsWith('ches') ||
+            clean.endsWith('shes')
+        ) {
+            if (clean.length > 4) addStem(clean.slice(0, -2));
+        } else if (clean.endsWith('es') && clean.length > 3) {
+            addStem(clean.slice(0, -2));
+            addStem(clean.slice(0, -1));
+        } else if (clean.endsWith('s') && !clean.endsWith('ss') && clean.length > 3) {
+            addStem(clean.slice(0, -1));
+        }
+        return [...variants];
+    }
+
+    function fieldMatchesKeyword(fields, keyword) {
+        const variants = searchTokenVariants(keyword);
+        return variants.some((variant) => {
+            const vClean = cleanSearchToken(variant);
+            return fields.some((field) => {
+                const text = String(field || '');
+                if (!text) return false;
+                if (text.includes(variant)) return true;
+                return vClean.length > 0 && cleanSearchToken(text).includes(vClean);
+            });
+        });
+    }
+
     function matchProducts(products, searchQuery) {
         const list = Array.isArray(products) ? products : [];
         const searchKeywords = tokenizeSearchQuery(searchQuery);
@@ -105,7 +154,6 @@
         return list.filter((product) => {
             const name = (product.name || '').toLowerCase();
             const slug = (product.slug || '').toLowerCase();
-            // Prefer short_description; fall back to description (products page map)
             const description = String(
                 product.short_description || product.description || ''
             ).toLowerCase();
@@ -113,35 +161,9 @@
             const brandSlug = (product.brand || '').toLowerCase();
             const brandName = (product.brandName || '').toLowerCase();
             const sku = String(product.sku || '').toLowerCase();
+            const fields = [name, slug, description, category, brandSlug, brandName, sku];
 
-            const nameClean = cleanSearchToken(name);
-            const slugClean = cleanSearchToken(slug);
-            const descriptionClean = cleanSearchToken(description);
-            const categoryClean = cleanSearchToken(category);
-            const brandSlugClean = cleanSearchToken(brandSlug);
-            const brandNameClean = cleanSearchToken(brandName);
-            const skuClean = cleanSearchToken(sku);
-
-            return searchKeywords.every((keyword) => {
-                const keywordClean = cleanSearchToken(keyword);
-                return (
-                    name.includes(keyword) ||
-                    slug.includes(keyword) ||
-                    description.includes(keyword) ||
-                    category.includes(keyword) ||
-                    brandSlug.includes(keyword) ||
-                    brandName.includes(keyword) ||
-                    (sku && sku.includes(keyword)) ||
-                    (keywordClean.length > 0 &&
-                        (nameClean.includes(keywordClean) ||
-                            slugClean.includes(keywordClean) ||
-                            descriptionClean.includes(keywordClean) ||
-                            categoryClean.includes(keywordClean) ||
-                            brandSlugClean.includes(keywordClean) ||
-                            brandNameClean.includes(keywordClean) ||
-                            skuClean.includes(keywordClean)))
-                );
-            });
+            return searchKeywords.every((keyword) => fieldMatchesKeyword(fields, keyword));
         });
     }
 
