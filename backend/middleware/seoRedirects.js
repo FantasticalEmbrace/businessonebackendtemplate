@@ -7,9 +7,11 @@
  *
  * Reloads periodically so you can update the CSV without restarting (production: every 120s).
  *
- * Magento/Concrete legacy product URLs (`/index.php/products/:slug`) always 301 somewhere:
+ * Magento/Concrete legacy product URLs (`/index.php/products/:slug` and clean
+ * `/products/:slug`) always 301 somewhere:
  * CSV hit → that target; else product-slug-aliases / DB slug / collapsed-slug fuzzy → product.html;
  * else search fallback. Never fall through to Express `Cannot GET`.
+ * Magento `/catalog/product/...` soft-lands on `/products` (no invented PDP).
  */
 
 const fs = require('fs');
@@ -18,6 +20,14 @@ const { STOREFRONT_VISIBLE_WHERE } = require('../utils/storefrontProductVisibili
 const { findProductSlugWithFallback } = require('../utils/productSlugResolution');
 
 const INDEXPHP_PRODUCT_RE = /^\/index\.php\/products\/([^/]+)$/i;
+/** Clean Concrete-style paths without index.php (not products.html). */
+const CLEAN_PRODUCT_PATH_RE = /^\/products\/([^/.]+)$/i;
+/** Singular Magento-ish /product/:slug (not product.html). */
+const SINGULAR_PRODUCT_PATH_RE = /^\/product\/([^/.]+)$/i;
+/** Magento catalog/view URLs — no safe PDP match without id map; soft-land on listing. */
+const MAGENTO_CATALOG_PRODUCT_RE = /^\/(?:index\.php\/)?catalog\/product(?:\/|$)/i;
+const MAGENTO_CATALOG_SEARCH_RE = /^\/(?:index\.php\/)?catalogsearch(?:\/|$)/i;
+const MAGENTO_CATALOG_CATEGORY_RE = /^\/(?:index\.php\/)?catalog\/category(?:\/|$)/i;
 
 function normalizePathname(p) {
     if (!p || p === '/') {
@@ -122,7 +132,7 @@ function productSlugAliasFile(rootPath) {
 }
 
 function productRedirectLocation(slug) {
-    return `/product.html?slug=${encodeURIComponent(slug)}`;
+    return `/product?slug=${encodeURIComponent(slug)}`;
 }
 
 function searchRedirectLocation(legacySlug) {
@@ -130,7 +140,7 @@ function searchRedirectLocation(legacySlug) {
         .replace(/-/g, ' ')
         .replace(/\s+/g, ' ')
         .trim();
-    return `/products.html?search=${encodeURIComponent(q || legacySlug)}`;
+    return `/products?search=${encodeURIComponent(q || legacySlug)}`;
 }
 
 /**
@@ -149,6 +159,13 @@ function resolveLegacyIndexPhpProductSlug(legacySlug, { productSlugAliases, prod
     if (stripped && stripped !== raw) candidates.push(stripped);
     const stripped2 = stripped.replace(/-\d+$/, '');
     if (stripped2 && stripped2 !== stripped) candidates.push(stripped2);
+
+    // A slug that is already live must not be rewritten to a shorter alias.
+    // Example: standard-enzyme-immu-c-sku-85000199 and standard-enzyme-immu-c
+    // are two different products; the alias CSV used to collapse them.
+    if (productSlugs.has(raw)) {
+        return productRedirectLocation(raw);
+    }
 
     for (const cand of candidates) {
         const aliased = productSlugAliases.get(cand);
@@ -377,7 +394,7 @@ function createSeoRedirectMiddleware({ rootPath, logger, reloadMs = 120000, pool
                         if (productSlugs.size === 0 || productSlugs.has(canonicalKey)) {
                             const qs = new URLSearchParams(req.query);
                             qs.set('slug', canonical);
-                            return res.redirect(301, `/product.html?${qs.toString()}`);
+                            return res.redirect(301, `/product?${qs.toString()}`);
                         }
                     }
 
@@ -394,7 +411,7 @@ function createSeoRedirectMiddleware({ rootPath, logger, reloadMs = 120000, pool
                             if (liveSlug && String(liveSlug).toLowerCase() !== rawKey) {
                                 const qs = new URLSearchParams(req.query);
                                 qs.set('slug', liveSlug);
-                                return res.redirect(301, `/product.html?${qs.toString()}`);
+                                return res.redirect(301, `/product?${qs.toString()}`);
                             }
                         } catch {
                             /* fall through to search */
@@ -413,6 +430,45 @@ function createSeoRedirectMiddleware({ rootPath, logger, reloadMs = 120000, pool
             }
         }
 
+        // Also rewrite slug aliases when the request already uses the clean /product path.
+        if (p === '/product') {
+            const rawKey = String(req.query.slug || '').trim().toLowerCase();
+            if (rawKey) {
+                const finishProductClean = async () => {
+                    // product.html is 301'd to /product before its own live-slug guard.
+                    // Never alias away from a slug that already exists in the catalog.
+                    if (productSlugs.size > 0 && productSlugs.has(rawKey)) {
+                        return next();
+                    }
+                    const canonical = productSlugAliases.get(rawKey);
+                    if (canonical && canonical !== rawKey) {
+                        if (
+                            canonical.startsWith('/') ||
+                            canonical.startsWith('http://') ||
+                            canonical.startsWith('https://')
+                        ) {
+                            return res.redirect(301, canonical);
+                        }
+                        const canonicalKey = String(canonical).trim().toLowerCase();
+                        if (productSlugs.size === 0 || productSlugs.has(canonicalKey)) {
+                            const qs = new URLSearchParams(req.query);
+                            qs.set('slug', canonical);
+                            return res.redirect(301, `/product?${qs.toString()}`);
+                        }
+                    }
+                    return next();
+                };
+                if (productSlugs.size === 0 && req.pool && typeof req.pool.query === 'function') {
+                    return loadProductSlugs(req.pool)
+                        .then(() => finishProductClean())
+                        .catch(() => finishProductClean());
+                }
+                return Promise.resolve()
+                    .then(() => finishProductClean())
+                    .catch(() => next());
+            }
+        }
+
         const key = normalizePathname(p);
         const target = map.get(key);
         if (target) {
@@ -422,11 +478,46 @@ function createSeoRedirectMiddleware({ rootPath, logger, reloadMs = 120000, pool
                     location = `/${location}`;
                 }
             }
+            // Prefer clean storefront paths when CSV still points at *.html shells.
+            location = String(location)
+                .replace(/\/product\.html(\?|#|$)/i, '/product$1')
+                .replace(/\/products\.html(\?|#|$)/i, '/products$1')
+                .replace(
+                    /\/(about|contact|checkout|brands|categories|edsa|edsa-confirmation|edsa-manage-appointment|gift-cards|account|coa|shipping-returns|privacy-policy|terms-and-conditions|ccpa-privacy-rights|order-confirmation|newsletter-subscribe|card|oauth-complete-profile|reset-password)\.html(\?|#|$)/i,
+                    '/$1$2'
+                );
+            // Skip no-op redirects (e.g. legacy CSV /products → /products.html → /products).
+            try {
+                const locPath = location.startsWith('http')
+                    ? new URL(location).pathname
+                    : String(location).split(/[?#]/)[0];
+                if (normalizePathname(locPath) === key) {
+                    return next();
+                }
+            } catch {
+                /* still redirect */
+            }
             return res.redirect(301, location);
         }
 
+        // Magento catalog/product URLs: prefer listing over inventing a PDP match.
+        if (MAGENTO_CATALOG_PRODUCT_RE.test(key)) {
+            return res.redirect(301, '/products');
+        }
+        if (MAGENTO_CATALOG_SEARCH_RE.test(key)) {
+            return res.redirect(301, '/products');
+        }
+        if (MAGENTO_CATALOG_CATEGORY_RE.test(key)) {
+            // Prefer listing over guessing a category slug from Magento path junk.
+            return res.redirect(301, '/products');
+        }
+
         // Durable Magento/Concrete product fallback — never Express Cannot GET.
-        const m = key.match(INDEXPHP_PRODUCT_RE);
+        // Covers /index.php/products/:slug, /products/:slug, and /product/:slug.
+        const m =
+            key.match(INDEXPHP_PRODUCT_RE) ||
+            key.match(CLEAN_PRODUCT_PATH_RE) ||
+            key.match(SINGULAR_PRODUCT_PATH_RE);
         if (m) {
             let legacySlug = m[1];
             try {
@@ -445,6 +536,7 @@ function createSeoRedirectMiddleware({ rootPath, logger, reloadMs = 120000, pool
                 // If legacy resolver only found search (or nothing), try global fuzzy → live PDP.
                 const isSearchOnly =
                     !location ||
+                    String(location).startsWith('/products?search=') ||
                     String(location).startsWith('/products.html?search=');
                 if (isSearchOnly && qPool && typeof qPool.query === 'function') {
                     try {
@@ -535,5 +627,7 @@ module.exports = {
     resolveRedirectFileList,
     resolveLegacyIndexPhpProductSlug,
     collapseSlug,
-    INDEXPHP_PRODUCT_RE
+    INDEXPHP_PRODUCT_RE,
+    CLEAN_PRODUCT_PATH_RE,
+    MAGENTO_CATALOG_PRODUCT_RE
 };
