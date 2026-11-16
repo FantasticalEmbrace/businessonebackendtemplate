@@ -343,14 +343,23 @@ class GoogleCalendarService {
         return Boolean(eventId);
     }
 
-    async getAvailableSlots(date, pool) {
+    async getAvailableSlots(date, pool, schedule = null, slotDuration = 60) {
         if (pool) await this.ensureInitialized(pool);
+        const dayYmd = normalizeDateYmd(date) || normalizeDateYmd(new Date());
+        let hoursSchedule = schedule;
+        if (!hoursSchedule && pool) {
+            try {
+                const { loadStoreHoursSchedule } = require('../utils/storeHoursSchedule');
+                hoursSchedule = await loadStoreHoursSchedule(pool);
+            } catch (_) {
+                hoursSchedule = null;
+            }
+        }
         if (!this.isAvailable()) {
-            return this.generateDefaultSlots();
+            return this.generateDefaultSlots(dayYmd, hoursSchedule, slotDuration);
         }
 
         try {
-            const dayYmd = normalizeDateYmd(date) || normalizeDateYmd(new Date());
             const { timeMin, timeMax } = getStoreDayBoundsRfc3339(dayYmd);
 
             const response = await this.calendar.events.list({
@@ -375,7 +384,7 @@ class GoogleCalendarService {
                 }
             }
 
-            const allSlots = this.generateDefaultSlots();
+            const allSlots = this.generateDefaultSlots(dayYmd, hoursSchedule, slotDuration);
 
             return allSlots.map((slot) => ({
                 time: slot.time,
@@ -387,13 +396,24 @@ class GoogleCalendarService {
             logger.error('[integration][google-calendar] Available slots error', {
                 error: error.message,
             });
-            return this.generateDefaultSlots();
+            return this.generateDefaultSlots(dayYmd, hoursSchedule, slotDuration);
         }
     }
 
-    generateDefaultSlots() {
+    generateDefaultSlots(dateYmd = null, schedule = null, slotDuration = 60) {
+        try {
+            const {
+                generateSlotsForSchedule,
+                DEFAULT_SCHEDULE,
+            } = require('../utils/storeHoursSchedule');
+            if (dateYmd) {
+                return generateSlotsForSchedule(schedule || DEFAULT_SCHEDULE, dateYmd, slotDuration);
+            }
+        } catch (_) {
+            /* fall through to legacy hourly window */
+        }
         const slots = [];
-        for (let hour = 10; hour < 18; hour++) {
+        for (let hour = 10; hour < 19; hour++) {
             slots.push({
                 time: `${String(hour).padStart(2, '0')}:00`,
                 available: true,

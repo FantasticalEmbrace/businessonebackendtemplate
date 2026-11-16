@@ -2,15 +2,29 @@
 
 const crypto = require('crypto');
 
-/** Match storefront / common complexity rules; specials limited to this set. */
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,128}$/;
+/**
+ * Admin password rules (must-change, reset, change-password):
+ * - 12–128 chars
+ * - upper + lower + digit + at least one special (any non-alphanumeric)
+ * - no whitespace / control characters
+ * Specials are intentionally broad so password managers (incl. ^ # () etc.) work.
+ */
+const ADMIN_PASSWORD_MIN = 12;
+const ADMIN_PASSWORD_MAX = 128;
+const ADMIN_PASSWORD_HINT =
+    'at least 12 characters with upper, lower, a number, and a special character (e.g. @$!%*?&#^)';
+
+/** Kept for callers that import PASSWORD_REGEX; prefer validateAdminPassword(). */
+const PASSWORD_REGEX =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])(?!.*\s)[\x21-\x7E]{12,128}$/;
 
 const ADMIN_PASSWORD_BCRYPT_ROUNDS = 12;
 
 const UPPER = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
 const LOWER = 'abcdefghijkmnopqrstuvwxyz';
 const DIGITS = '23456789';
-const SPECIAL = '@$!%*?&';
+/** Temp passwords stay on a conservative special set (still includes ^). */
+const SPECIAL = '@$!%*?&#^';
 const ALL = UPPER + LOWER + DIGITS + SPECIAL;
 
 function pick(chars) {
@@ -37,16 +51,35 @@ function generateTempAdminPassword() {
 
 function validateAdminPassword(password) {
     const pw = String(password || '');
-    if (pw.length < 12) {
+    if (pw.length < ADMIN_PASSWORD_MIN) {
         return {
             ok: false,
-            error: 'Password must be at least 12 characters and include upper, lower, a number, and a special character (@$!%*?&).'
+            error: `Password must be ${ADMIN_PASSWORD_HINT}.`
         };
     }
-    if (!PASSWORD_REGEX.test(pw)) {
+    if (pw.length > ADMIN_PASSWORD_MAX) {
         return {
             ok: false,
-            error: 'Password must include upper and lower case letters, a number, and a special character (@$!%*?&).'
+            error: `Password must be at most ${ADMIN_PASSWORD_MAX} characters.`
+        };
+    }
+    if (/\s/.test(pw) || /[\x00-\x1F\x7F]/.test(pw)) {
+        return {
+            ok: false,
+            error: 'Password cannot contain spaces or control characters.'
+        };
+    }
+    if (!/[a-z]/.test(pw) || !/[A-Z]/.test(pw) || !/\d/.test(pw) || !/[^A-Za-z0-9]/.test(pw)) {
+        return {
+            ok: false,
+            error: `Password must include upper and lower case letters, a number, and a special character (e.g. @$!%*?&#^).`
+        };
+    }
+    // Printable ASCII only (blocks unexpected unicode lookalikes from pastes).
+    if (!/^[\x21-\x7E]+$/.test(pw)) {
+        return {
+            ok: false,
+            error: 'Password may only use standard keyboard characters.'
         };
     }
     return { ok: true };
@@ -54,6 +87,9 @@ function validateAdminPassword(password) {
 
 module.exports = {
     ADMIN_PASSWORD_BCRYPT_ROUNDS,
+    ADMIN_PASSWORD_HINT,
+    ADMIN_PASSWORD_MAX,
+    ADMIN_PASSWORD_MIN,
     PASSWORD_REGEX,
     generateTempAdminPassword,
     validateAdminPassword

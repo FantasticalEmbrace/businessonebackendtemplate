@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="admin-chrome-brand" content="local-api-3011-2">
-    <title>Business One Merchant Admin</title>
+    <title>Business One Merchant Portal</title>
     <meta name="business-one-api-origin" content="">
     <meta name="business-one-pos-register-url" content="https://pos.businessonecomprehensive.com/">
     <link rel="icon" type="image/x-icon" href="/images/business-one/favicon.ico">
@@ -2192,6 +2192,183 @@
             margin-right: 0.5rem;
         }
 
+        /* Store hours editor: dedicated BO-style switches for all 7 days (skip HM enhancer) */
+        #store-hours-schedule-editor {
+            display: grid;
+            gap: 0.45rem;
+        }
+
+        #store-hours-schedule-editor .store-hours-copy-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.45rem 0.55rem;
+            margin: 0 0 0.35rem;
+            padding: 0.55rem 0.65rem;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            background: var(--gray-50, #f8fafc);
+        }
+
+        #store-hours-schedule-editor .store-hours-copy-bar .btn-sm {
+            white-space: nowrap;
+        }
+
+        #store-hours-schedule-editor .store-hours-copy-hint {
+            flex: 1 1 12rem;
+            color: var(--gray-600);
+            font-size: 0.8rem;
+            line-height: 1.35;
+        }
+
+        #store-hours-schedule-editor .store-hours-day-row {
+            display: grid;
+            grid-template-columns: 6.75rem minmax(7.5rem, max-content) minmax(7rem, 1fr) minmax(7rem, 1fr);
+            gap: 0.55rem 0.85rem;
+            align-items: center;
+        }
+
+        #store-hours-schedule-editor .store-hours-day-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        #store-hours-schedule-editor .store-hours-open-toggle {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            margin: 0;
+            font-size: 0.85rem;
+            line-height: 1.2;
+            cursor: pointer;
+            white-space: nowrap;
+            min-width: 7.25rem;
+            user-select: none;
+        }
+
+        #store-hours-schedule-editor .store-hours-open-toggle:has(.store-hours-open-checkbox:disabled) {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        #store-hours-schedule-editor .store-hours-open-checkbox,
+        #store-hours-schedule-editor input[type="checkbox"][data-hours-open] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 1px;
+            height: 1px;
+            margin: 0;
+            padding: 0;
+            opacity: 0;
+            overflow: hidden;
+            clip: rect(0 0 0 0);
+            clip-path: inset(50%);
+            white-space: nowrap;
+            border: 0;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        #store-hours-schedule-editor .store-hours-switch {
+            position: relative;
+            flex: 0 0 auto;
+            box-sizing: border-box;
+            width: 2.85rem;
+            height: 1.65rem;
+            border-radius: 999px;
+            background: linear-gradient(180deg, #dc2626 0%, #b91c1c 100%);
+            border: 2px solid #991b1b;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
+            transition: background 0.2s ease, border-color 0.2s ease;
+            pointer-events: none;
+            overflow: hidden;
+            -webkit-transform: none !important;
+            transform: none !important;
+        }
+
+        #store-hours-schedule-editor .store-hours-switch-knob {
+            position: absolute;
+            top: 50%;
+            left: 0.18rem;
+            width: 0.95rem;
+            height: 0.95rem;
+            margin-top: -0.475rem;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.22);
+            transition: left 0.2s ease;
+            -webkit-transform: none !important;
+            transform: none !important;
+        }
+
+        #store-hours-schedule-editor .store-hours-open-toggle:has(.store-hours-open-checkbox:checked) .store-hours-switch {
+            background: linear-gradient(180deg, var(--primary-green, #16a34a) 0%, var(--primary-green-dark, #15803d) 100%);
+            border-color: var(--primary-green-dark, #15803d);
+        }
+
+        #store-hours-schedule-editor .store-hours-open-toggle:has(.store-hours-open-checkbox:checked) .store-hours-switch-knob {
+            left: calc(100% - 0.18rem - 0.95rem);
+        }
+
+        #store-hours-schedule-editor .store-hours-open-toggle:has(.store-hours-open-checkbox:focus-visible) .store-hours-switch {
+            outline: 3px solid rgba(22, 163, 74, 0.35);
+            outline-offset: 2px;
+        }
+
+        #store-hours-schedule-editor .store-hours-open-text {
+            flex: 0 0 auto;
+            color: inherit;
+        }
+
+        /* Never let global choice enhancer pills leak into this grid */
+        #store-hours-schedule-editor .hm-choice-pill,
+        #store-hours-schedule-editor .hm-choice-toggle {
+            display: none !important;
+        }
+
+        #store-hours-schedule-editor .store-hours-time-field {
+            display: grid;
+            gap: 0.2rem;
+            margin: 0;
+            font-size: 0.75rem;
+            color: var(--gray-600);
+            min-width: 0;
+        }
+
+        #store-hours-schedule-editor .store-hours-time-field select:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 640px) {
+            #store-hours-schedule-editor .store-hours-day-row {
+                grid-template-columns: 1fr auto;
+                grid-template-areas:
+                    "day open"
+                    "opens closes";
+            }
+
+            #store-hours-schedule-editor .store-hours-day-label {
+                grid-area: day;
+            }
+
+            #store-hours-schedule-editor .store-hours-open-toggle {
+                grid-area: open;
+                justify-self: end;
+                min-width: 0;
+            }
+
+            #store-hours-schedule-editor .store-hours-time-field:has([data-hours-start]) {
+                grid-area: opens;
+            }
+
+            #store-hours-schedule-editor .store-hours-time-field:has([data-hours-end]) {
+                grid-area: closes;
+            }
+        }
+
         .form-actions {
             display: flex;
             justify-content: flex-end;
@@ -3878,9 +4055,9 @@
             <div class="login-header">
                 <div class="login-logo">
                     <i class="fas fa-store"></i>
-                    Business One Admin
+                    Merchant Portal
                 </div>
-                <p class="login-subtitle">Sign in to your admin account</p>
+                <p class="login-subtitle">Sign in to Merchant Portal</p>
             </div>
 
             <form id="loginForm">
@@ -3923,29 +4100,29 @@
             <div id="mustChangePasswordPanel" style="display: none;">
                 <p style="margin: 0 0 1rem; color: var(--gray-600); font-size: 0.9rem;">
                     For security, set a new password before using the admin panel.
-                    Use at least 12 characters with upper and lower case, a number, and a special character (@$!%*?&).
+                    Use at least 12 characters with upper and lower case, a number, and a special character (e.g. @$!%*?&#^).
                 </p>
                 <form id="mustChangePasswordForm">
                     <div class="form-group">
-                        <label>
-                            <span class="sr-only">Current temporary password</span>
-                            <input type="password" id="mustChangeCurrentPassword" name="current_password" class="form-input"
-                                placeholder="Temporary password" required autocomplete="current-password">
+                        <label for="mustChangeCurrentPassword" style="display:block; margin-bottom:0.35rem; font-size:0.875rem; color:var(--gray-700, #374151);">
+                            Temporary password
                         </label>
+                        <input type="password" id="mustChangeCurrentPassword" name="current_password" class="form-input"
+                            placeholder="Password from your welcome email" required autocomplete="current-password">
                     </div>
                     <div class="form-group">
-                        <label>
-                            <span class="sr-only">New password</span>
-                            <input type="password" id="mustChangeNewPassword" name="new_password" class="form-input"
-                                placeholder="New password" required minlength="12" autocomplete="new-password">
+                        <label for="mustChangeNewPassword" style="display:block; margin-bottom:0.35rem; font-size:0.875rem; color:var(--gray-700, #374151);">
+                            New password
                         </label>
+                        <input type="password" id="mustChangeNewPassword" name="new_password" class="form-input"
+                            placeholder="Choose a new password" required minlength="12" autocomplete="new-password">
                     </div>
                     <div class="form-group">
-                        <label>
-                            <span class="sr-only">Confirm new password</span>
-                            <input type="password" id="mustChangeConfirmPassword" name="confirm_password" class="form-input"
-                                placeholder="Confirm new password" required minlength="12" autocomplete="new-password">
+                        <label for="mustChangeConfirmPassword" style="display:block; margin-bottom:0.35rem; font-size:0.875rem; color:var(--gray-700, #374151);">
+                            Confirm new password
                         </label>
+                        <input type="password" id="mustChangeConfirmPassword" name="confirm_password" class="form-input"
+                            placeholder="Re-enter new password" required minlength="12" autocomplete="new-password">
                     </div>
                     <button type="submit" class="btn btn-primary btn-full-width" style="margin-top: 0.5rem;">
                         <i class="fas fa-key"></i>
@@ -6031,8 +6208,16 @@
                             <h3 style="margin:0 0 0.25rem 0;">Register display</h3>
                             <div class="form-group">
                                 <label for="pos-store-logo-url">Store logo URL (optional)</label>
-                                <input class="form-input" id="pos-store-logo-url" name="pos_store_logo_url" type="url" maxlength="500" placeholder="https://businessonecomprehensive.com/images/logo.png">
-                                <p style="margin:0.35rem 0 0;color:var(--gray-600);font-size:0.85rem;">Shown on the customer display. Business One branding stays on the register.</p>
+                                <div style="display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center;margin-bottom:0.5rem;">
+                                    <label for="pos-store-logo-file" class="sr-only">Upload POS store logo image</label>
+                                    <input type="file" id="pos-store-logo-file" accept="image/jpeg,image/png,image/gif,image/webp" style="max-width:100%;">
+                                    <button type="button" class="btn btn-secondary btn-sm" id="pos-store-logo-upload-btn">Upload</button>
+                                </div>
+                                <input class="form-input" id="pos-store-logo-url" name="pos_store_logo_url" type="text" maxlength="500" placeholder="https://example.com/logo.png or upload above" autocomplete="off" spellcheck="false">
+                                <div id="pos-store-logo-preview-wrap" style="display:none;margin-top:0.5rem;">
+                                    <img id="pos-store-logo-preview-img" alt="POS store logo preview" style="display:block;max-width:120px;max-height:120px;object-fit:contain;border:1px solid var(--gray-200);border-radius:8px;padding:6px;background:var(--gray-50);">
+                                </div>
+                                <p style="margin:0.35rem 0 0;color:var(--gray-600);font-size:0.85rem;">Shown on the customer display. Upload an image or paste a URL. Business One branding stays on the register.</p>
                             </div>
                             <div class="form-group">
                                 <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
@@ -6177,9 +6362,10 @@
                     <div class="card" id="pos-shop-verticals-card">
                         <div class="card-content">
                             <h3 style="margin:0 0 0.35rem 0;">Shop verticals</h3>
-                            <p style="margin:0 0 1rem;color:var(--gray-600);font-size:0.88rem;">Select shop types to unlock industry-specific job workflows on the register. Vehicle modes can combine (e.g. auto + tire). <strong>Contractor / renovation runs alone</strong> (not with vehicle shop modes).</p>
+                            <p style="margin:0 0 1rem;color:var(--gray-600);font-size:0.88rem;">Select shop types to unlock industry-specific job workflows on the register. Vehicle modes can combine (e.g. auto + tire). <strong>Contractor / renovation</strong> and <strong>Mobile Sales and Service</strong> each run alone (not with vehicle shop modes).</p>
                             <div style="display:grid;gap:0.55rem;margin-bottom:0.85rem;">
                                 <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;"><input type="checkbox" name="pos_shop_vertical" value="contractor"> <span><strong>Contractor / Renovation</strong> — job quotes, deposits, progress payments for GCs, handymen, and trades</span></label>
+                                <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;"><input type="checkbox" name="pos_shop_vertical" value="mobile_sales_and_service"> <span><strong>Mobile Sales and Service</strong> — in-home demos and service visits, multi-stop routing, no vehicle/VIN workflows</span></label>
                                 <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;"><input type="checkbox" name="pos_shop_vertical" value="auto"> <span><strong>Auto service</strong> — repair orders, bays, parts receiving, diagnostic workflow</span></label>
                                 <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;"><input type="checkbox" name="pos_shop_vertical" value="body"> <span><strong>Body shop</strong> — collision estimates, insurance/claim fields, paint workflow</span></label>
                                 <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;"><input type="checkbox" name="pos_shop_vertical" value="upholstery"> <span><strong>Upholstery</strong> — furniture &amp; vehicle pieces, deposits, materials tracked on each job (fabric/COM orders)</span></label>
@@ -6230,6 +6416,10 @@
                                         <label for="pos-shop-labor-rate-contractor">Contractor ($/hr)</label>
                                         <input class="form-input" id="pos-shop-labor-rate-contractor" name="pos_shop_labor_rate_contractor" type="number" min="0" step="0.01" placeholder="85.00">
                                     </div>
+                                    <div class="form-group" data-pos-labor-vertical="mobile_sales_and_service" style="margin:0;">
+                                        <label for="pos-shop-labor-rate-mobile">Mobile Sales and Service ($/hr)</label>
+                                        <input class="form-input" id="pos-shop-labor-rate-mobile" name="pos_shop_labor_rate_mobile_sales_and_service" type="number" min="0" step="0.01" placeholder="75.00">
+                                    </div>
                                 </div>
                             </div>
                             <div id="pos-shop-tire-alignment-prices" style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--gray-200);">
@@ -6245,6 +6435,43 @@
                                         <input class="form-input" id="pos-shop-alignment-4wheel-price" name="pos_shop_alignment_4wheel_price" type="number" min="0" step="0.01" placeholder="89.99">
                                     </div>
                                 </div>
+                            </div>
+                            <div id="pos-shop-mobile-sales-service" style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--gray-200);display:none;" data-pos-mobile-sales-panel>
+                                <h4 style="margin:0 0 0.35rem;font-size:0.95rem;">Mobile Sales and Service</h4>
+                                <p class="form-help" style="margin:0 0 0.75rem;">When service bookings are off, the website and register offer sales / demo visits only. Default is on (sales and service).</p>
+                                <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;">
+                                    <input type="checkbox" name="pos_mobile_sales_and_service_service_bookings_enabled" id="pos-mobile-service-bookings-enabled" checked>
+                                    <span><strong>Enable service bookings</strong> — allow customers to book service / repair visits (uncheck for sales-only)</span>
+                                </label>
+                                <h5 style="margin:1rem 0 0.35rem;font-size:0.88rem;">Website booking choices</h5>
+                                <p class="form-help" style="margin:0 0 0.55rem;">Configure product/model and service-concern options for <em>this</em> shop. Defaults are empty so Mobile Sales and Service stays trade-agnostic. Timing chips are shared; visit purposes stay sales/demo, service/repair, and ask a question.</p>
+                                <div style="display:grid;gap:0.85rem;">
+                                    <div>
+                                        <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:0.5rem;margin-bottom:0.35rem;">
+                                            <p style="margin:0;font-size:0.85rem;font-weight:600;">Product / model options</p>
+                                            <button type="button" class="btn btn-secondary btn-sm" id="pos-mobile-intent-add-model">Add option</button>
+                                        </div>
+                                        <div id="pos-mobile-intent-models" class="hm-choice-grid" style="display:grid;gap:0.45rem;"></div>
+                                        <p class="form-help" style="margin:0.35rem 0 0;">Shown on sales/service booking when the customer picks a model. Leave empty if your site does not ask.</p>
+                                    </div>
+                                    <div>
+                                        <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:0.5rem;margin-bottom:0.35rem;">
+                                            <p style="margin:0;font-size:0.85rem;font-weight:600;">Service concern options</p>
+                                            <button type="button" class="btn btn-secondary btn-sm" id="pos-mobile-intent-add-concern">Add option</button>
+                                        </div>
+                                        <div id="pos-mobile-intent-concerns" class="hm-choice-grid" style="display:grid;gap:0.45rem;"></div>
+                                        <p class="form-help" style="margin:0.35rem 0 0;">Shown on service booking when asking what is wrong. Leave empty if unused.</p>
+                                    </div>
+                                    <div>
+                                        <p style="margin:0 0 0.35rem;font-size:0.85rem;font-weight:600;">Timing preferences</p>
+                                        <div id="pos-mobile-intent-timing" class="hm-choice-grid" style="display:flex;flex-wrap:wrap;gap:0.45rem;"></div>
+                                    </div>
+                                    <div>
+                                        <button type="button" class="btn btn-secondary btn-sm" id="pos-mobile-intent-load-rainbow-examples">Add Rainbow vacuum examples</button>
+                                        <p class="form-help" style="margin:0.35rem 0 0;">Optional starter list (SRX, E-series, suction/HEPA concerns). Only adds missing options — does not replace your list or apply to other shops.</p>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="pos_mobile_booking_intent_options" id="pos-mobile-booking-intent-options" value="">
                             </div>
                             <div id="pos-shop-upholstery-deposit" style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--gray-200);">
                                 <h4 style="margin:0 0 0.35rem;font-size:0.95rem;">Upholstery — shop defaults</h4>
@@ -6345,7 +6572,7 @@
                                         <input class="form-input" id="pos-shop-warranty-days" name="pos_shop_warranty_days" type="number" min="1" step="1" placeholder="30">
                                     </div>
                                 </div>
-                                <p class="form-help" style="margin:0.75rem 0 0;">Shop hours, storage locations, and service intervals still use stored defaults (<code>pos_shop_hours</code>, <code>pos_shop_storage_locations</code>, <code>pos_shop_service_intervals</code>). Upholstery packages and templates are edited in the Upholstery panel above.</p>
+                                <p class="form-help" style="margin:0.75rem 0 0;">Store / booking hours are edited under <strong>Store info</strong> (day toggles + time selects) and sync into <code>pos_shop_hours</code>. Storage locations and service intervals still use stored defaults. Upholstery packages and templates are edited in the Upholstery panel above.</p>
                                 <label style="display:flex;align-items:flex-start;gap:0.5rem;cursor:pointer;margin-top:0.75rem;"><input type="checkbox" name="pos_shop_teardown_photo_required" value="true" checked> <span><strong>Require teardown photo</strong> before sharing insurance findings on body jobs.</span></label>
                             </div>
                         </div>
@@ -6357,12 +6584,14 @@
                             <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;margin:0 0 1rem;">
                                 <input type="checkbox" id="shop-wf-payment-link-enabled" checked> Allow customers to pay online via payment link (otherwise front desk only)
                             </label>
-                            <div style="display:flex;gap:0.45rem;flex-wrap:wrap;margin-bottom:1rem;">
+                            <div id="shop-wf-vertical-chips" style="display:flex;gap:0.45rem;flex-wrap:wrap;margin-bottom:0.55rem;">
                                 <button type="button" class="btn btn-primary btn-sm" data-shop-wf-vertical="auto">Auto</button>
                                 <button type="button" class="btn btn-secondary btn-sm" data-shop-wf-vertical="body">Body</button>
                                 <button type="button" class="btn btn-secondary btn-sm" data-shop-wf-vertical="tire">Tire</button>
                                 <button type="button" class="btn btn-secondary btn-sm" data-shop-wf-vertical="upholstery">Upholstery</button>
+                                <button type="button" class="btn btn-secondary btn-sm" data-shop-wf-vertical="mobile_sales_and_service">Mobile service</button>
                             </div>
+                            <p class="form-help" style="margin:0 0 1rem;">Mobile service is the status/payment timeline for <strong>service visits</strong> (no vehicle/VIN). Sales demos stay on the website booking calendar (<code>/book</code>).</p>
                             <div id="shop-wf-process-list"></div>
                             <p id="shop-wf-msg" style="min-height:1.25rem;font-size:0.9rem;margin:0.75rem 0 0;color:var(--gray-600);"></p>
                             <div style="display:flex;gap:0.65rem;flex-wrap:wrap;margin-top:0.75rem;">
@@ -6932,8 +7161,18 @@
                             </div>
                             <div class="form-group">
                                 <label for="store-info-store-logo-url">Store Logo URL</label>
-                                <input class="form-input" id="store-info-store-logo-url" name="store_logo_url" type="url" maxlength="500" placeholder="https://example.com/logo.png" autocomplete="off">
-                                <p class="form-help" style="margin-top:0.35rem;">Square or compact mark preferred. Used in the admin sidebar with your store name (replaces the default Business One Admin chrome).</p>
+                                <input class="form-input" id="store-info-store-logo-url" name="store_logo_url" type="text" maxlength="500" placeholder="https://example.com/logo.png or upload below" autocomplete="off" spellcheck="false">
+                                <div style="display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center;margin-top:0.5rem;">
+                                    <label for="store-info-store-logo-file" class="sr-only">Upload store logo image</label>
+                                    <input type="file" id="store-info-store-logo-file" accept="image/png,image/jpeg,image/webp,image/gif" style="max-width:100%;">
+                                    <button type="button" class="btn btn-secondary btn-sm" id="store-info-store-logo-upload-btn">Upload</button>
+                                    <button type="button" class="btn btn-secondary btn-sm" id="store-info-store-logo-clear-btn">Clear</button>
+                                </div>
+                                <div id="store-info-store-logo-preview-wrap" style="display:none;margin-top:0.5rem;">
+                                    <span style="font-size:0.85rem;color:var(--gray-600);">Preview</span>
+                                    <img id="store-info-store-logo-preview-img" alt="" style="display:block;margin-top:0.35rem;max-width:64px;max-height:64px;object-fit:contain;border:1px solid var(--gray-200);border-radius:6px;padding:2px;background:var(--gray-50);">
+                                </div>
+                                <p class="form-help" style="margin-top:0.35rem;">Square or compact mark preferred. Upload an image or paste a URL. Used in the admin sidebar with your store name (replaces the default Business One Admin chrome).</p>
                             </div>
                             <div class="form-group">
                                 <label for="store-info-store-phone">Phone</label>
@@ -6992,18 +7231,15 @@
                                 <span style="margin-left:0.35rem;color:var(--gray-600);">% off merchandise (max 15%)</span>
                             </div>
                             <div class="form-group">
-                                <label for="store-info-hours-weekdays">Weekday Hours</label>
-                                <input class="form-input" id="store-info-hours-weekdays" name="store_hours_weekdays" type="text" maxlength="120" placeholder="Mon-Fri: 10:00 AM - 5:00 PM">
-                            </div>
-                            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0.75rem;">
-                                <div class="form-group">
-                                    <label for="store-info-hours-saturday">Saturday Hours</label>
-                                    <input class="form-input" id="store-info-hours-saturday" name="store_hours_saturday" type="text" maxlength="120" placeholder="Sat: 10:00 AM - 1:00 PM">
-                                </div>
-                                <div class="form-group">
-                                    <label for="store-info-hours-sunday">Sunday Hours</label>
-                                    <input class="form-input" id="store-info-hours-sunday" name="store_hours_sunday" type="text" maxlength="120" placeholder="Sun: Closed">
-                                </div>
+                                <label>Store / booking hours</label>
+                                <p class="form-help" style="margin:0 0 0.65rem;">Toggle each day open or closed, set Opens/Closes once, then copy those times to other days. These drive website booking slots, footer hours, and Google Business sync.</p>
+                                <div id="store-hours-schedule-editor" class="hm-choice-skip" data-hm-choice-skip style="display:grid;gap:0.45rem;"></div>
+                                <input type="hidden" name="store_hours_schedule" id="store-hours-schedule" value="">
+                                <input type="hidden" name="store_hours_weekdays" id="store-info-hours-weekdays" value="">
+                                <input type="hidden" name="store_hours_saturday" id="store-info-hours-saturday" value="">
+                                <input type="hidden" name="store_hours_sunday" id="store-info-hours-sunday" value="">
+                                <input type="hidden" name="pos_shop_hours" id="store-pos-shop-hours" value="">
+                                <p id="store-hours-summary-preview" style="margin:0.65rem 0 0;color:var(--gray-600);font-size:0.88rem;"></p>
                             </div>
                     </div>
                 </div>
@@ -8150,7 +8386,7 @@
     };
     </script>
     <script src="js/hm-search-input.js?v=search-fix-2"></script>
-    <script src="js/hm-choice-toggles.js?v=loyalty-toggles-1"></script>
+    <script src="js/hm-choice-toggles.js?v=store-hours-switches-20261116"></script>
     <script src="js/phone-us-format.js"></script>
     <link rel="stylesheet" href="css/products.css">
     <link rel="stylesheet" href="css/admin-vendors.css">
@@ -8168,8 +8404,8 @@
     <script src="admin-pos-troubleshoot.js"></script>
     <script src="js/password-toggle.js?v=4"></script>
     <script src="js/admin-table-sort.js?v=sortable-inp-20260914a"></script>
-    <script src="js/admin-shop-workflows.js?v=1"></script>
-    <script src="admin-app.js?v=order-phone-ship-edit-20260922a"></script>
+    <script src="js/admin-shop-workflows.js?v=mss-chip-20261116"></script>
+    <script src="admin-app.js?v=store-hours-copy-20261116"></script>
     <script src="js/shop-calendar-widget.js?v=1"></script>
     <script src="admin-scheduling-calendar.js"></script>
     <script src="admin-shop-calendar.js?v=1"></script>

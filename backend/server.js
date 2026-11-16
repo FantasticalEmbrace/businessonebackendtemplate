@@ -300,8 +300,45 @@ const allowedOrigins = [
     'https://signup.businessonecomprehensive.com',
     'http://signup.businessonecomprehensive.com',
     'https://pos.businessonecomprehensive.com',
-    'http://pos.businessonecomprehensive.com'
+    'http://pos.businessonecomprehensive.com',
+    // Merchant marketing faces (cross-origin booking / storefront API)
+    'https://vanguardrainbowsalesandservice.com',
+    'https://www.vanguardrainbowsalesandservice.com'
 ];
+
+// Active merchant website_origin values (refreshed periodically for new tenants).
+let merchantWebsiteOrigins = new Set();
+let merchantWebsiteOriginsAt = 0;
+async function refreshMerchantWebsiteOrigins() {
+    const now = Date.now();
+    if (now - merchantWebsiteOriginsAt < 60_000 && merchantWebsiteOrigins.size) return;
+    try {
+        const [rows] = await pool.query(
+            `SELECT website_origin FROM platform_merchants
+              WHERE status = 'active' AND website_origin IS NOT NULL AND website_origin <> ''`
+        );
+        const next = new Set();
+        for (const row of rows || []) {
+            let origin = String(row.website_origin || '').trim().replace(/\/+$/, '');
+            if (!origin) continue;
+            if (!/^https?:\/\//i.test(origin)) origin = `https://${origin}`;
+            try {
+                const u = new URL(origin);
+                next.add(`${u.protocol}//${u.host}`);
+            } catch (_) {
+                /* ignore malformed */
+            }
+        }
+        merchantWebsiteOrigins = next;
+        merchantWebsiteOriginsAt = now;
+    } catch (e) {
+        logger.warn(`CORS merchant website_origin refresh failed: ${e.message}`);
+    }
+}
+void refreshMerchantWebsiteOrigins();
+setInterval(() => {
+    void refreshMerchantWebsiteOrigins();
+}, 60_000).unref?.();
 
 // Add production frontend URL if specified
 if (process.env.FRONTEND_URL && !allowedOrigins.includes(process.env.FRONTEND_URL)) {
@@ -362,16 +399,25 @@ app.use(cors({
         }
 
         if (allowedOrigins.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            // Only log CORS blocks for non-localhost origins to reduce noise
-            // Localhost CORS issues are usually development configuration issues, not security threats
-            if (!origin.includes('localhost') && !origin.includes('127.0.0.1')) {
-                secureLogger.logSecurityEvent('cors_blocked', 'medium', 'CORS blocked request', { origin });
-            }
-            // Don't throw error - just reject silently to prevent "Unhandled error" messages
-            callback(null, false);
+            return callback(null, true);
         }
+
+        void refreshMerchantWebsiteOrigins()
+            .then(() => {
+                if (merchantWebsiteOrigins.has(origin)) {
+                    return callback(null, true);
+                }
+                if (!origin.includes('localhost') && !origin.includes('127.0.0.1')) {
+                    secureLogger.logSecurityEvent('cors_blocked', 'medium', 'CORS blocked request', { origin });
+                }
+                callback(null, false);
+            })
+            .catch(() => {
+                if (!origin.includes('localhost') && !origin.includes('127.0.0.1')) {
+                    secureLogger.logSecurityEvent('cors_blocked', 'medium', 'CORS blocked request', { origin });
+                }
+                callback(null, false);
+            });
     },
     credentials: true
 }));

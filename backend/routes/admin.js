@@ -75,6 +75,35 @@ const uploadBrandLogo = multer({
     }
 });
 
+const storeLogoStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const uploadPath = path.join(__dirname, '..', 'uploads', 'store-logos');
+        fs.mkdir(uploadPath, { recursive: true }).then(() => {
+            cb(null, uploadPath);
+        }).catch(err => cb(err));
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const ext = path.extname(file.originalname).toLowerCase() || '.png';
+        cb(null, 'store-logo-' + uniqueSuffix + ext);
+    }
+});
+
+const uploadStoreLogo = multer({
+    storage: storeLogoStorage,
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = /jpeg|jpg|png|gif|webp/;
+        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = allowedTypes.test(file.mimetype);
+
+        if (mimetype && extname) {
+            return cb(null, true);
+        }
+        cb(new Error('Only image files are allowed (jpeg, jpg, png, gif, webp)'));
+    }
+});
+
 // Configure multer for product image uploads
 const productImageStorage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -312,6 +341,10 @@ const {
 } = require('../middleware/adminAuth');
 const { finishPasswordOrGoogleLogin } = require('../services/adminRememberBrowser');
 const { registerAdminTotpRoutes } = require('./admin-totp-auth');
+const {
+    ADMIN_PASSWORD_BCRYPT_ROUNDS,
+    validateAdminPassword
+} = require('../utils/adminPassword');
 
 // Rate limiting for admin authentication
 // Completely disabled in development mode to allow for testing
@@ -376,10 +409,22 @@ router.post('/auth/login', adminAuthLimiter, ...adminLoginValidation, async (req
             return res.status(400).json({ error: 'Email and password are required' });
         }
 
-        const [admins] = await req.pool.execute(
-            'SELECT id, email, password_hash, first_name, last_name, role, is_active FROM admin_users WHERE email = ?',
-            [email]
-        );
+        let admins;
+        try {
+            [admins] = await req.pool.execute(
+                'SELECT id, email, password_hash, first_name, last_name, role, is_active, must_change_password FROM admin_users WHERE email = ?',
+                [email]
+            );
+        } catch (err) {
+            if (err && (err.code === 'ER_BAD_FIELD_ERROR' || /must_change_password/i.test(String(err.message || '')))) {
+                [admins] = await req.pool.execute(
+                    'SELECT id, email, password_hash, first_name, last_name, role, is_active FROM admin_users WHERE email = ?',
+                    [email]
+                );
+            } else {
+                throw err;
+            }
+        }
 
         if (admins.length === 0) {
             return res.status(401).json({ error: 'Invalid credentials' });
@@ -512,6 +557,61 @@ router.post('/auth/forgot-password', adminAuthLimiter, rejectAdminPasswordReset)
 router.post('/auth/reset-password', adminAuthLimiter, rejectAdminPasswordReset);
 registerAdminTotpRoutes(router);
 
+// Authenticated password change (also used when must_change_password is set).
+router.post('/auth/change-password', adminAuthLimiter, ...adminAuth, async (req, res) => {
+    try {
+        if (!req.pool) {
+            return res.status(500).json({ error: 'Database connection not available.' });
+        }
+        const currentPassword = String(req.body?.currentPassword || '');
+        const newPassword = String(req.body?.newPassword || '');
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ error: 'Current password and new password are required.' });
+        }
+        const validated = validateAdminPassword(newPassword);
+        if (!validated.ok) {
+            return res.status(400).json({ error: validated.error });
+        }
+        if (currentPassword === newPassword) {
+            return res.status(400).json({ error: 'New password must be different from the current password.' });
+        }
+
+        const [rows] = await req.pool.execute(
+            'SELECT id, password_hash FROM admin_users WHERE id = ? AND is_active = 1',
+            [req.admin.id]
+        );
+        if (!rows.length || !rows[0].password_hash) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+        const ok = await bcrypt.compare(currentPassword, rows[0].password_hash);
+        if (!ok) {
+            return res.status(401).json({ error: 'Current password is incorrect.' });
+        }
+
+        const passwordHash = await bcrypt.hash(newPassword, ADMIN_PASSWORD_BCRYPT_ROUNDS);
+        try {
+            await req.pool.execute(
+                'UPDATE admin_users SET password_hash = ?, must_change_password = 0, updated_at = NOW() WHERE id = ?',
+                [passwordHash, req.admin.id]
+            );
+        } catch (err) {
+            if (err && (err.code === 'ER_BAD_FIELD_ERROR' || /must_change_password|updated_at/i.test(String(err.message || '')))) {
+                await req.pool.execute(
+                    'UPDATE admin_users SET password_hash = ? WHERE id = ?',
+                    [passwordHash, req.admin.id]
+                );
+            } else {
+                throw err;
+            }
+        }
+
+        return res.json({ message: 'Password updated successfully.' });
+    } catch (error) {
+        logger.error('Admin change-password error:', error);
+        return res.status(500).json({ error: 'Could not update password.' });
+    }
+});
+
 // Current session (used by admin panel on load)
 router.get('/auth/me', ...adminAuth, async (req, res) => {
     const role = normalizeAdminRole(req.admin.role);
@@ -541,6 +641,7 @@ router.get('/auth/me', ...adminAuth, async (req, res) => {
         ecommerceAccessReason: ecommerceAccess.reason,
         isPrincipalStore: principalStore,
         chromeBranding,
+        mustChangePassword: Boolean(req.admin.must_change_password),
     });
 });
 
@@ -1684,6 +1785,28 @@ router.delete('/products/:id', ...adminAuth, requirePermission('admin'), async (
         res.status(500).json({ error: 'Failed to delete product. Please try again.' });
     } finally {
         connection.release();
+    }
+});
+
+router.post('/settings/upload-store-logo', ...adminAuth, requirePermission('manager'), (req, res, next) => {
+    uploadStoreLogo.single('image')(req, res, (err) => {
+        if (err) return res.status(400).json({ error: err.message || 'Upload failed' });
+        next();
+    });
+}, async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+        const fileUrl = `/uploads/store-logos/${req.file.filename}`;
+        res.json({
+            success: true,
+            url: fileUrl,
+            filename: req.file.filename
+        });
+    } catch (error) {
+        logger.error('Store logo upload error:', error);
+        res.status(500).json({ error: 'Failed to upload store logo: ' + error.message });
     }
 });
 

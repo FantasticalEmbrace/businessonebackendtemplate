@@ -31,6 +31,8 @@ function isAdminJwtScopedApi(path) {
 
 function shouldSkipMerchantResolve(req) {
     const path = String(req.path || '');
+    // CORS preflight never sends X-Website-Api-Key; must reach cors() middleware.
+    if (String(req.method || '').toUpperCase() === 'OPTIONS') return true;
     if (path === '/api/health' || path.startsWith('/api/health/')) return true;
     if (path.startsWith('/api/platform/tenants') || path.startsWith('/api/platform/directory')) return true;
     // Customer portal + pay-by-link (token auth only)

@@ -102,10 +102,12 @@ function hasMinAdminRole(userRole, minRole) {
 
 /** Settings keys that control storefront footer hours and Google Business hour sync. */
 const STORE_HOUR_SETTING_KEYS = Object.freeze([
+    'store_hours_schedule',
     'store_hours_weekdays',
     'store_hours_saturday',
     'store_hours_sunday',
     'store_holiday_schedule',
+    'pos_shop_hours',
 ]);
 
 function canManageStoreHours(role) {

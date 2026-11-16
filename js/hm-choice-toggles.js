@@ -6,7 +6,7 @@
  */
 const HmChoiceToggles = {
     skipSelector:
-        '.payment-processor-option, .toggle-switch, .hm-choice-skip, [data-hm-choice-skip], .hm-choice-row, .hm-choice-segment, .hm-choice-toggle, .checkout-shipping-option, .checkout-shipping-options',
+        '#store-hours-schedule-editor, .store-hours-day-row, .store-hours-open-toggle, .payment-processor-option, .toggle-switch, .hm-choice-skip, [data-hm-choice-skip], .hm-choice-row, .hm-choice-segment, .hm-choice-toggle, .checkout-shipping-option, .checkout-shipping-options',
 
     inferSize(input) {
         const key = `${input.name || ''} ${input.id || ''}`.toLowerCase();
@@ -26,6 +26,11 @@ const HmChoiceToggles = {
     shouldSkip(input) {
         if (!input || input.dataset.hmChoiceEnhanced) return true;
         if (input.type !== 'checkbox' && input.type !== 'radio') return true;
+        // Store hours Open controls use dedicated .store-hours-switch markup in admin;
+        // never wrap them with hm-choice pills (avoids mixed checkbox/switch rows).
+        if (input.hasAttribute('data-hours-open') || input.classList.contains('store-hours-open-checkbox')) {
+            return true;
+        }
         return Boolean(input.closest(this.skipSelector));
     },
 

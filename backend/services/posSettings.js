@@ -63,6 +63,13 @@ const POS_SETTING_KEYS = Object.freeze([
     'pos_card_display_mode',
     'pos_shop_verticals',
     'pos_shop_contractor',
+    'pos_shop_labor_rate_auto',
+    'pos_shop_labor_rate_body',
+    'pos_shop_labor_rate_upholstery',
+    'pos_shop_labor_rate_tire',
+    'pos_shop_labor_rate_contractor',
+    'pos_shop_labor_rate_mobile_sales_and_service',
+    'pos_mobile_sales_and_service_service_bookings_enabled',
     'pos_shop_alignment_2wheel_price',
     'pos_shop_alignment_4wheel_price',
     'pos_addon_warehouse',
@@ -141,10 +148,17 @@ const POS_SETTING_META = Object.freeze({
     pos_poi_device_id: { description: 'NMI POI device ID for A3700', type: 'string' },
     pos_card_display_mode: { description: 'Card checkout mode (NMI NMI terminal)', type: 'string' },
     pos_shop_verticals: {
-        description: 'JSON array of shop verticals: contractor, auto, body, upholstery, tire',
+        description: 'JSON array of shop verticals: contractor, mobile_sales_and_service, auto, body, upholstery, tire',
         type: 'string'
     },
     pos_shop_contractor: { description: 'Contractor / estimate mode enabled', type: 'boolean' },
+    pos_shop_labor_rate_auto: { description: 'Auto service labor hourly rate', type: 'number' },
+    pos_shop_labor_rate_body: { description: 'Body shop labor hourly rate', type: 'number' },
+    pos_shop_labor_rate_upholstery: { description: 'Upholstery labor hourly rate', type: 'number' },
+    pos_shop_labor_rate_tire: { description: 'Tire shop labor hourly rate', type: 'number' },
+    pos_shop_labor_rate_contractor: { description: 'Contractor labor hourly rate', type: 'number' },
+    pos_shop_labor_rate_mobile_sales_and_service: { description: 'Mobile Sales and Service labor hourly rate', type: 'number' },
+    pos_mobile_sales_and_service_service_bookings_enabled: { description: 'Allow service bookings for Mobile Sales and Service (default on; off = sales only)', type: 'boolean' },
     pos_shop_alignment_2wheel_price: { description: '2-wheel alignment price', type: 'number' },
     pos_shop_alignment_4wheel_price: { description: '4-wheel alignment price', type: 'number' },
     pos_addon_warehouse: { description: 'POS add-on: live warehouse inventory', type: 'boolean' },
@@ -205,9 +219,18 @@ async function loadPosSettings(pool, options = {}) {
         } catch {
             verts = [];
         }
+        // Field modes run alone (not with vehicle shop modes or each other)
+        if (verts.includes('mobile_sales_and_service') && verts.length > 1) {
+            verts = ['mobile_sales_and_service'];
+            out.pos_shop_verticals = JSON.stringify(verts);
+        } else if (verts.includes('contractor') && verts.length > 1) {
+            verts = ['contractor'];
+            out.pos_shop_verticals = JSON.stringify(verts);
+        }
         if (
             String(out.pos_shop_contractor || '').toLowerCase() === 'true' &&
-            !verts.includes('contractor')
+            !verts.includes('contractor') &&
+            !verts.includes('mobile_sales_and_service')
         ) {
             verts = verts.concat(['contractor']);
             out.pos_shop_verticals = JSON.stringify(verts);
@@ -232,16 +255,28 @@ async function syncMerchantShopConfigFromSettings(pool, merchantId, settingsRows
         verticals = [];
     }
     verticals = verticals.map((v) => String(v).toLowerCase().trim()).filter(Boolean);
+    if (verticals.includes('mobile_sales_and_service') && verticals.length > 1) {
+        verticals = ['mobile_sales_and_service'];
+    } else if (verticals.includes('contractor') && verticals.length > 1) {
+        verticals = ['contractor'];
+    }
     if (
         String(map.get('pos_shop_contractor') || '').toLowerCase() === 'true' &&
-        !verticals.includes('contractor')
+        !verticals.includes('contractor') &&
+        !verticals.includes('mobile_sales_and_service')
     ) {
         verticals.push('contractor');
     }
     const tirePro = String(map.get('pos_addon_tire_pro') || '').toLowerCase() === 'true';
+    const serviceBookingsRaw = map.get('pos_mobile_sales_and_service_service_bookings_enabled');
+    const serviceBookingsEnabled =
+        serviceBookingsRaw == null || serviceBookingsRaw === ''
+            ? true
+            : !['false', '0', 'no', 'off'].includes(String(serviceBookingsRaw).toLowerCase());
     const shopConfig = {
         storeType: verticals.length ? 'shop' : 'retail',
         shopVerticals: verticals,
+        serviceBookingsEnabled,
         addons: {
             warehouse:
                 String(map.get('pos_addon_warehouse') || '').toLowerCase() === 'true' || tirePro,

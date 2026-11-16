@@ -244,7 +244,17 @@ function jobVertical(job) {
     const v = String(job?.jobType || job?.mode || 'auto')
         .trim()
         .toLowerCase();
-    if (v === 'tire' || v === 'body' || v === 'upholstery' || v === 'auto') return v;
+    if (
+        v === 'tire' ||
+        v === 'body' ||
+        v === 'upholstery' ||
+        v === 'auto' ||
+        v === 'contractor' ||
+        v === 'mobile_sales_and_service'
+    ) {
+        return v;
+    }
+    if (v === 'mobile_sales' || v === 'mss' || v === 'mobile') return 'mobile_sales_and_service';
     return 'auto';
 }
 
@@ -1122,6 +1132,94 @@ const DEFAULT_WORKFLOWS = {
                 serviceKinds: ['*']
             }
         ]
+    },
+    /**
+     * Mobile Sales and Service — customer status/payment timeline for **service** jobs.
+     * No vehicle/VIN steps. Sales/demo visits use the website /book calendar, not this portal.
+     */
+    mobile_sales_and_service: {
+        paymentLinkEnabled: true,
+        processes: [
+            {
+                id: 'intake',
+                key: 'intake',
+                type: 'waiting',
+                label: 'Service request received',
+                description: 'We have your service request and will confirm scheduling shortly.',
+                sortOrder: 0,
+                icon: 'clipboard-list',
+                productIds: [],
+                skus: [],
+                customerCanAct: false,
+                serviceKinds: ['*']
+            },
+            {
+                id: 'scheduled',
+                key: 'scheduled',
+                type: 'waiting',
+                label: 'Visit scheduled',
+                description: 'Your service visit is on the calendar. We will come to the address on file.',
+                sortOrder: 1,
+                icon: 'clock',
+                productIds: [],
+                skus: [],
+                customerCanAct: false,
+                serviceKinds: ['*']
+            },
+            {
+                id: 'decision',
+                key: 'decision',
+                type: 'decision',
+                label: 'Approve service estimate',
+                description: 'Review parts and labor on the estimate, then approve so we can begin work.',
+                sortOrder: 2,
+                icon: 'clipboard-check',
+                productIds: [],
+                skus: ['DEPOSIT'],
+                customerCanAct: true,
+                serviceKinds: ['*']
+            },
+            {
+                id: 'work_service',
+                key: 'work_service',
+                type: 'work',
+                label: 'Service in progress',
+                description:
+                    'We are completing your service — on site, or at our shop with pickup and return.',
+                sortOrder: 3,
+                icon: 'wrench',
+                productIds: [],
+                skus: ['LABOR-SVC', 'LABOR-MAINT', 'PICKUP', 'TRAVEL', 'FILTER-KIT'],
+                customerCanAct: false,
+                serviceKinds: ['*']
+            },
+            {
+                id: 'complete',
+                key: 'complete',
+                type: 'complete',
+                label: 'Service complete',
+                description: 'Your service visit is finished. Thank you for choosing us.',
+                sortOrder: 4,
+                icon: 'check-circle',
+                productIds: [],
+                skus: [],
+                customerCanAct: false,
+                serviceKinds: ['*']
+            },
+            {
+                id: 'payment',
+                key: 'payment',
+                type: 'payment',
+                label: 'Payment',
+                description: 'Pay any remaining balance online or when we complete delivery.',
+                sortOrder: 5,
+                icon: 'credit-card',
+                productIds: [],
+                skus: [],
+                customerCanAct: true,
+                serviceKinds: ['*']
+            }
+        ]
     }
 };
 
@@ -1647,21 +1745,37 @@ function inferCurrentProcessKey(job, processes) {
             const idx = workKeys.indexOf('work_align');
             if (idx >= 0 && idx < workKeys.length - 1) return workKeys[idx + 1];
         }
-        return workKeys[0] || pick('work_repair') || pick('work_body') || pick('work_fabrication') || pick('work_mount');
+        return (
+            workKeys[0] ||
+            pick('work_service') ||
+            pick('work_repair') ||
+            pick('work_body') ||
+            pick('work_fabrication') ||
+            pick('work_mount')
+        );
     }
     if (status === 'waiting_parts') {
         const matStatus = materialsStatusOf(job);
         if (['ordered', 'needed', 'partial'].includes(matStatus) && keys.includes('materials_ordered')) {
             return pick('materials_ordered');
         }
-        return pick('work_parts') || pick('work_prep') || pick('waiting');
+        return pick('work_parts') || pick('work_prep') || pick('scheduled') || pick('waiting');
     }
     if (status === 'waiting_parts' || approved) {
         if (isExpressServiceJob(job)) {
             const expressWork = processes.find((p) => p.type === 'work' && p.key !== 'work_qc');
             return expressWork?.key || pick('waiting');
         }
-        return pick('decision') || pick('work_parts') || pick('work_body') || pick('work_fabrication');
+        return (
+            pick('decision') ||
+            pick('work_service') ||
+            pick('work_parts') ||
+            pick('work_body') ||
+            pick('work_fabrication')
+        );
+    }
+    if (status === 'needs_estimate') {
+        return pick('scheduled') || pick('intake') || pick('waiting');
     }
     if (status === 'estimate' && job?.lines?.length) {
         if (isExpressServiceJob(job)) {
@@ -1672,9 +1786,9 @@ function inferCurrentProcessKey(job, processes) {
     }
     if (status === 'estimate') {
         if (isExpressServiceJob(job)) return pick('waiting');
-        return pick('inspection');
+        return pick('scheduled') || pick('intake') || pick('inspection') || pick('waiting');
     }
-    return pick('waiting');
+    return pick('intake') || pick('waiting');
 }
 
 function lineStableId(line, index = 0) {

@@ -41,6 +41,17 @@ const {
     isNmiWalletsDisabled
 } = require('../utils/nmiEnv');
 const { withTimeout } = require('../utils/withTimeout');
+const { loadPosShopSettings } = require('../services/posShopSettings');
+const {
+    loadStoreHoursSchedule,
+    publicHoursPayload,
+    timingHintsFromSchedule,
+    DEFAULT_SLOT_DURATION,
+} = require('../utils/storeHoursSchedule');
+const {
+    loadMobileBookingIntent,
+    publicBookingIntent,
+} = require('../utils/mobileBookingIntent');
 
 function isSchedulingPaymentConfigured() {
     return Boolean(getNmiPrivateApiKey() && getNmiPublicTokenizationKey());
@@ -373,31 +384,29 @@ function bookingEmailPayload(row) {
 // Get business hours for Scheduling service
 router.get('/hours', async (req, res) => {
     try {
-        // Return default business hours
+        const schedule = await loadStoreHoursSchedule(req.pool);
+        const payload = publicHoursPayload(schedule, DEFAULT_SLOT_DURATION);
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
         res.json({
-            hours: {
-                monday: { open: '10:00', close: '17:00', closed: false },
-                tuesday: { open: '10:00', close: '17:00', closed: false },
-                wednesday: { open: '10:00', close: '17:00', closed: false },
-                thursday: { open: '10:00', close: '17:00', closed: false },
-                friday: { open: '10:00', close: '17:00', closed: false },
-                saturday: { open: '10:00', close: '13:00', closed: false },
-                sunday: { open: '00:00', close: '00:00', closed: true }
-            }
+            hours: payload.hours,
+            schedule: payload.schedule,
+            hoursSummary: payload.hoursSummary,
+            closedSummary: payload.closedSummary,
+            openDays: payload.openDays,
+            displayLines: payload.displayLines,
+            slotDuration: payload.slotDuration,
         });
     } catch (error) {
         logger.error('Scheduling hours fetch error:', error);
-        // Return default hours even on error
+        const payload = publicHoursPayload(null, DEFAULT_SLOT_DURATION);
         res.json({
-            hours: {
-                monday: { open: '10:00', close: '17:00', closed: false },
-                tuesday: { open: '10:00', close: '17:00', closed: false },
-                wednesday: { open: '10:00', close: '17:00', closed: false },
-                thursday: { open: '10:00', close: '17:00', closed: false },
-                friday: { open: '10:00', close: '17:00', closed: false },
-                saturday: { open: '10:00', close: '13:00', closed: false },
-                sunday: { open: '00:00', close: '00:00', closed: true }
-            }
+            hours: payload.hours,
+            schedule: payload.schedule,
+            hoursSummary: payload.hoursSummary,
+            closedSummary: payload.closedSummary,
+            openDays: payload.openDays,
+            displayLines: payload.displayLines,
+            slotDuration: payload.slotDuration,
         });
     }
 });
@@ -445,6 +454,33 @@ router.get('/booking-context', async (req, res) => {
             }
         }
 
+        let shopVerticals = [];
+        let serviceBookingsEnabled = true;
+        try {
+            const shop = await loadPosShopSettings(req.pool);
+            shopVerticals = Array.isArray(shop.shopVerticals) ? shop.shopVerticals : [];
+            serviceBookingsEnabled = shop.serviceBookingsEnabled !== false;
+        } catch (shopErr) {
+            logger.warn('Scheduling booking-context shop settings:', shopErr.message);
+        }
+
+        let hoursPayload = publicHoursPayload(null, DEFAULT_SLOT_DURATION);
+        try {
+            const schedule = await loadStoreHoursSchedule(req.pool);
+            hoursPayload = publicHoursPayload(schedule, DEFAULT_SLOT_DURATION);
+        } catch (hoursErr) {
+            logger.warn('Scheduling booking-context hours:', hoursErr.message);
+        }
+
+        let bookingIntent = null;
+        try {
+            const intentOpts = await loadMobileBookingIntent(req.pool);
+            const hints = timingHintsFromSchedule(hoursPayload.schedule);
+            bookingIntent = publicBookingIntent(intentOpts, hints);
+        } catch (intentErr) {
+            logger.warn('Scheduling booking-context intent options:', intentErr.message);
+        }
+
         res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
         res.json({
             storeTimezone: STORE_TIMEZONE,
@@ -455,6 +491,17 @@ router.get('/booking-context', async (req, res) => {
             paymentEnabled: paymentConfigured,
             isLoggedIn: Boolean(authUser),
             savedCards,
+            shopVerticals,
+            serviceBookingsEnabled,
+            bookingKinds: serviceBookingsEnabled ? ['demo', 'service'] : ['demo'],
+            hours: hoursPayload.hours,
+            schedule: hoursPayload.schedule,
+            hoursSummary: hoursPayload.hoursSummary,
+            closedSummary: hoursPayload.closedSummary,
+            openDays: hoursPayload.openDays,
+            displayLines: hoursPayload.displayLines,
+            slotDuration: hoursPayload.slotDuration,
+            bookingIntent,
             paymentConfig: paymentConfigured
                 ? {
                       tokenizationKey: getNmiPublicTokenizationKey(),
@@ -495,16 +542,47 @@ router.get('/available-slots', async (req, res) => {
             return res.json({ slots: [] });
         }
 
-        const dbBooked = await getActiveBookedTimesForDate(
-            req.pool,
-            dateYmd,
-            excludeBookingId || null
-        );
+        let dbBooked = new Set();
+        try {
+            dbBooked = await getActiveBookedTimesForDate(
+                req.pool,
+                dateYmd,
+                excludeBookingId || null
+            );
+        } catch (bookedErr) {
+            logger.warn('Available slots: database booked times unavailable', {
+                error: bookedErr.message,
+            });
+        }
 
-        await googleCalendar.ensureInitialized(req.pool);
-        const slots = await googleCalendar.getAvailableSlots(dateYmd, req.pool);
+        let hoursSchedule = null;
+        try {
+            hoursSchedule = await loadStoreHoursSchedule(req.pool);
+        } catch (_) {
+            hoursSchedule = null;
+        }
 
-        const merged = slots.map((slot) => ({
+        let slots = [];
+        try {
+            await googleCalendar.ensureInitialized(req.pool);
+            slots = await googleCalendar.getAvailableSlots(
+                dateYmd,
+                req.pool,
+                hoursSchedule,
+                DEFAULT_SLOT_DURATION
+            );
+        } catch (calErr) {
+            logger.warn('Available slots: calendar unavailable, using defaults', {
+                error: calErr.message,
+            });
+            slots = googleCalendar.generateDefaultSlots(
+                dateYmd,
+                hoursSchedule,
+                DEFAULT_SLOT_DURATION
+            );
+        }
+
+        const merged = (Array.isArray(slots) ? slots : []).map((slot) => ({
             ...slot,
             available:
                 Boolean(slot.available) && !dbBooked.has(String(slot.time).slice(0, 5)),

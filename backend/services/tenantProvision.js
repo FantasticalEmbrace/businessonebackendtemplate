@@ -96,6 +96,29 @@ async function resolveByKey(pool, { websiteApiKey, deviceKey, slug } = {}) {
     return null;
 }
 
+async function setAdminTempPassword(pool, adminId) {
+    const tempPassword = generateTempAdminPassword();
+    const passwordHash = await bcrypt.hash(tempPassword, ADMIN_PASSWORD_BCRYPT_ROUNDS);
+    try {
+        await pool.execute(
+            `UPDATE admin_users
+             SET password_hash = ?, must_change_password = 1, updated_at = NOW()
+             WHERE id = ?`,
+            [passwordHash, adminId]
+        );
+    } catch (err) {
+        if (err && (err.code === 'ER_BAD_FIELD_ERROR' || /must_change_password/i.test(String(err.message || '')))) {
+            await pool.execute(
+                `UPDATE admin_users SET password_hash = ?, updated_at = NOW() WHERE id = ?`,
+                [passwordHash, adminId]
+            );
+        } else {
+            throw err;
+        }
+    }
+    return tempPassword;
+}
+
 async function ensureOwnerAdmin(pool, merchantId, billingEmail, businessName) {
     const email = String(billingEmail || '').trim().toLowerCase();
     if (!email || !email.includes('@')) return null;
@@ -108,7 +131,10 @@ async function ensureOwnerAdmin(pool, merchantId, billingEmail, businessName) {
         await pool
             .execute(`UPDATE admin_users SET merchant_id = ? WHERE id = ?`, [merchantId, existing[0].id])
             .catch(() => {});
-        return { adminId: existing[0].id, tempPassword: null };
+        // Existing row had no one-time password to email — mint a fresh temp password
+        // so provision / resend can deliver credentials for a brand-new shop.
+        const tempPassword = await setAdminTempPassword(pool, existing[0].id);
+        return { adminId: existing[0].id, tempPassword };
     }
 
     const tempPassword = generateTempAdminPassword();
@@ -133,6 +159,75 @@ async function ensureOwnerAdmin(pool, merchantId, billingEmail, businessName) {
         }
     }
     return { adminId: result.insertId, tempPassword };
+}
+
+/**
+ * Rotate owner admin password for an existing merchant (credentials resend).
+ * findById returns a raw DB row (snake_case). Optional fallbackEmail is used when
+ * platform_merchants.billing_email is empty (Ops project contact / billing email).
+ * @returns {Promise<{ merchant: object, email: string, tempPassword: string }>}
+ */
+async function resetOwnerAdminCredentials(pool, merchantId, fallbackEmail = null) {
+    const row = await findById(pool, merchantId);
+    if (!row || row.status === 'deleted') {
+        const err = new Error('Shop account not found');
+        err.code = 'NOT_FOUND';
+        throw err;
+    }
+    let email = String(row.billing_email || row.billingEmail || '')
+        .trim()
+        .toLowerCase();
+    const fallback = String(fallbackEmail || '')
+        .trim()
+        .toLowerCase();
+    if ((!email || !email.includes('@')) && fallback.includes('@')) {
+        email = fallback.slice(0, 255);
+        await pool.execute(`UPDATE platform_merchants SET billing_email = ? WHERE id = ?`, [
+            email,
+            merchantId
+        ]);
+        row.billing_email = email;
+    }
+    if (!email || !email.includes('@')) {
+        const err = new Error('Merchant billing email is missing');
+        err.code = 'VALIDATION';
+        throw err;
+    }
+
+    const businessName = String(row.business_name || row.businessName || 'Owner');
+    const [rows] = await pool.execute(
+        `SELECT id FROM admin_users
+         WHERE email = ? AND (merchant_id = ? OR merchant_id IS NULL)
+         ORDER BY CASE WHEN merchant_id = ? THEN 0 ELSE 1 END, id ASC
+         LIMIT 1`,
+        [email, merchantId, merchantId]
+    );
+    let adminId = rows[0]?.id || null;
+    if (!adminId) {
+        const created = await ensureOwnerAdmin(pool, merchantId, email, businessName);
+        adminId = created?.adminId || null;
+        if (created?.tempPassword) {
+            return {
+                merchant: publicMerchant(row),
+                email,
+                tempPassword: created.tempPassword
+            };
+        }
+    }
+    if (!adminId) {
+        const err = new Error('Owner admin user not found');
+        err.code = 'NOT_FOUND';
+        throw err;
+    }
+    await pool
+        .execute(`UPDATE admin_users SET merchant_id = ? WHERE id = ?`, [merchantId, adminId])
+        .catch(() => {});
+    const tempPassword = await setAdminTempPassword(pool, adminId);
+    return {
+        merchant: publicMerchant(row),
+        email,
+        tempPassword
+    };
 }
 
 function normalizeSignupAddons(raw) {
@@ -436,6 +531,68 @@ async function registerDeviceKey(pool, merchantId, deviceKey, label = '') {
     return { ok: true, merchantId, keyPrefix: key.slice(0, 16) };
 }
 
+/**
+ * Issue a new website API key (invalidates the previous hash).
+ * Plaintext is returned once for Ops / face-site env.
+ */
+async function rotateWebsiteKey(pool, merchantId) {
+    if (!tenancyShared()) {
+        const err = new Error('Shared tenancy is not enabled');
+        err.code = 'TENANCY_DISABLED';
+        throw err;
+    }
+    const id = String(merchantId || '').trim();
+    if (!id) {
+        const err = new Error('Shop account id is required');
+        err.code = 'VALIDATION';
+        throw err;
+    }
+    const merchant = await findById(pool, id);
+    if (!merchant || merchant.status !== 'active') {
+        const err = new Error('Shop account not found');
+        err.code = 'NOT_FOUND';
+        throw err;
+    }
+
+    const websiteApiKey = `web_${require('crypto').randomBytes(24).toString('hex')}`;
+    const websiteHash = hashTenantSecret(websiteApiKey);
+    const websitePrefix = websiteApiKey.slice(0, 12);
+
+    const [existing] = await pool.execute(
+        `SELECT id FROM platform_merchant_keys
+         WHERE merchant_id = ? AND kind = 'website_key'
+         ORDER BY id ASC
+         LIMIT 1`,
+        [id]
+    );
+    if (existing[0]?.id) {
+        await pool.execute(
+            `UPDATE platform_merchant_keys
+             SET key_hash = ?, key_prefix = ?, label = 'Primary website key'
+             WHERE id = ?`,
+            [websiteHash, websitePrefix, existing[0].id]
+        );
+    } else {
+        await pool.execute(
+            `INSERT INTO platform_merchant_keys
+             (merchant_id, kind, key_hash, key_prefix, label)
+             VALUES (?, 'website_key', ?, ?, 'Primary website key')`,
+            [id, websiteHash, websitePrefix]
+        );
+    }
+
+    return {
+        merchant: publicMerchant(merchant),
+        websiteApiKey,
+        websiteApiKeyPrefix: websitePrefix,
+        sharedPosApiOrigin: String(
+            process.env.SHARED_POS_PUBLIC_ORIGIN || process.env.FRONTEND_URL || 'http://127.0.0.1:3011'
+        )
+            .trim()
+            .replace(/\/+$/, '')
+    };
+}
+
 module.exports = {
     publicMerchant,
     findByBillingEmail,
@@ -444,7 +601,9 @@ module.exports = {
     resolveByKey,
     provisionTenant,
     registerDeviceKey,
+    rotateWebsiteKey,
     ensureOwnerAdmin,
+    resetOwnerAdminCredentials,
     applySignupShopConfig,
     normalizeSignupAddons,
     normalizeSignupVerticals

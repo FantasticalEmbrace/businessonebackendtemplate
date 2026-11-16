@@ -37,7 +37,7 @@ function normalizeBuildTier(raw) {
 }
 
 function normalizeVerticals(raw) {
-    const allowed = new Set(['auto', 'body', 'upholstery', 'tire', 'contractor']);
+    const allowed = new Set(['auto', 'body', 'upholstery', 'tire', 'contractor', 'mobile_sales_and_service']);
     const list = Array.isArray(raw) ? raw : [];
     const out = [];
     for (const item of list) {
@@ -47,6 +47,7 @@ function normalizeVerticals(raw) {
         if (allowed.has(v) && !out.includes(v)) out.push(v);
     }
     if (out.includes('contractor') && out.length > 1) return ['contractor'];
+    if (out.includes('mobile_sales_and_service') && out.length > 1) return ['mobile_sales_and_service'];
     return out;
 }
 
@@ -70,7 +71,7 @@ function resolveEntitlements(shopConfig, options = {}) {
         return {
             fullAccess: true,
             storeType: 'shop',
-            shopVerticals: ['auto', 'body', 'upholstery', 'tire', 'contractor'],
+            shopVerticals: ['auto', 'body', 'upholstery', 'tire', 'contractor', 'mobile_sales_and_service'],
             hostingTier: 'growth',
             buildTier: 'growth',
             hasWebsite: true,

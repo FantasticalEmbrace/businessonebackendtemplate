@@ -83,8 +83,11 @@ function matchTotp(secret, token, window = 1, nowMs = Date.now()) {
 
 function otpauthUrl(email, secret) {
     const account = String(email || 'admin').trim();
-    const label = encodeURIComponent(`HM Herbs:${account}`);
-    const issuer = encodeURIComponent('HM Herbs');
+    const storeName = String(
+        process.env.STORE_NAME || process.env.POS_STORE_NAME || 'Business One'
+    ).trim() || 'Business One';
+    const label = encodeURIComponent(`${storeName}:${account}`);
+    const issuer = encodeURIComponent(storeName);
     return `otpauth://totp/${label}?secret=${encodeURIComponent(secret)}&issuer=${issuer}&algorithm=SHA1&digits=${DIGITS}&period=${STEP_SECONDS}`;
 }
 

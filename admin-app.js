@@ -86,6 +86,8 @@ class AdminApp {
         this.selectedProductIds = new Set();
         this.selectedOrderIds = new Set();
         this.holidaySchedule = [];
+        this.storeHoursSchedule = null;
+        this.mobileBookingIntentOptions = null;
         this.productsPagination = {
             currentPage: 1,
             itemsPerPage: 50,
@@ -1927,6 +1929,7 @@ class AdminApp {
         this.canManageStoreHours = Boolean(data.canManageStoreHours);
         this.canManageStoreHoursDelegation = Boolean(data.canManageStoreHoursDelegation);
         this.defaultSection = data.defaultSection || 'dashboard';
+        this.mustChangePassword = Boolean(data.mustChangePassword);
         localStorage.setItem('adminToken', this.authToken);
         const returnTo = String(this._admin2faReturn || '').replace(/^\/+/, '');
         this._admin2faChallenge = null;
@@ -1937,6 +1940,10 @@ class AdminApp {
         }
         const card = document.getElementById('admin2faCard');
         if (card) card.style.display = 'none';
+        if (this.mustChangePassword) {
+            this.showMustChangePasswordPanel();
+            return;
+        }
         await this.applyDeveloperSignupUnlock();
         await this.loadDashboard();
     }
@@ -2082,9 +2089,17 @@ class AdminApp {
         const forgotLink = document.getElementById('forgotPasswordLink');
         if (panel) panel.style.display = 'none';
         if (loginForm) loginForm.style.display = 'block';
-        if (subtitle) subtitle.textContent = 'Sign in to your admin account';
+        if (subtitle) subtitle.textContent = 'Sign in to Merchant Portal';
         if (oauthBlock) oauthBlock.style.display = '';
         if (forgotLink && forgotLink.parentElement) forgotLink.parentElement.style.display = '';
+    }
+
+    isStrongAdminPassword(password) {
+        const pw = String(password || '');
+        if (pw.length < 12 || pw.length > 128) return false;
+        if (/\s/.test(pw) || /[\x00-\x1F\x7F]/.test(pw)) return false;
+        if (!/[a-z]/.test(pw) || !/[A-Z]/.test(pw) || !/\d/.test(pw) || !/[^A-Za-z0-9]/.test(pw)) return false;
+        return /^[\x21-\x7E]+$/.test(pw);
     }
 
     async handleMustChangePassword(e) {
@@ -2107,16 +2122,21 @@ class AdminApp {
             errorDiv.style.display = 'none';
             errorDiv.classList.remove('show');
         }
+        // Current/temporary password: required for auth only — never complexity-checked here.
         if (!currentPassword || !newPassword) {
             showErr('Enter your temporary password and a new password.');
+            return;
+        }
+        if (!confirmPassword) {
+            showErr('Confirm your new password.');
             return;
         }
         if (newPassword !== confirmPassword) {
             showErr('New passwords do not match.');
             return;
         }
-        if (newPassword.length < 12 || !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/.test(newPassword)) {
-            showErr('Password must be at least 12 characters and include upper, lower, a number, and a special character (@$!%*?&).');
+        if (!this.isStrongAdminPassword(newPassword)) {
+            showErr('New password must be at least 12 characters and include upper, lower, a number, and a special character (e.g. @$!%*?&#^).');
             return;
         }
         try {
@@ -2329,6 +2349,10 @@ class AdminApp {
         if (tireAlign) tireAlign.style.display = verts.has('tire') ? '' : 'none';
         const upholstery = document.getElementById('pos-shop-upholstery-deposit');
         if (upholstery) upholstery.style.display = verts.has('upholstery') ? '' : 'none';
+        const mobilePanel = document.getElementById('pos-shop-mobile-sales-service');
+        if (mobilePanel) {
+            mobilePanel.style.display = verts.has('mobile_sales_and_service') ? '' : 'none';
+        }
 
         const gcalCard = document.getElementById('gcal-connection-card');
         if (gcalCard) gcalCard.style.display = ent.hasCalendar ? '' : 'none';
@@ -2352,29 +2376,33 @@ class AdminApp {
 
     _applyStoreHoursFieldAccess() {
         const allowed = Boolean(this.canManageStoreHours);
-        ['store_hours_weekdays', 'store_hours_saturday', 'store_hours_sunday'].forEach((name) => {
-            const el = document.querySelector(`[name="${name}"]`);
-            if (!el) return;
-            el.readOnly = !allowed;
-            el.disabled = false;
-            el.classList.toggle('store-hours-readonly', !allowed);
-            if (!allowed && !el.dataset.hoursGuardBound) {
-                el.dataset.hoursGuardBound = '1';
-                const guard = (e) => {
-                    if (this.canManageStoreHours) return;
-                    e.preventDefault();
-                    el.blur();
-                    this._showStoreHoursPermissionAlert();
-                };
-                el.addEventListener('focus', guard);
-                el.addEventListener('mousedown', guard);
-                el.addEventListener('keydown', (e) => {
-                    if (!this.canManageStoreHours && !e.ctrlKey && !e.metaKey && e.key.length === 1) {
-                        guard(e);
-                    }
-                });
+        const editor = document.getElementById('store-hours-schedule-editor');
+        if (editor) {
+            editor.querySelectorAll('input, select').forEach((el) => {
+                if (el.matches('[data-hours-start], [data-hours-end]')) {
+                    const key = el.getAttribute('data-hours-start') || el.getAttribute('data-hours-end');
+                    const openChk = editor.querySelector(`[data-hours-open="${key}"]`);
+                    el.disabled = !allowed || !(openChk && openChk.checked);
+                } else {
+                    el.disabled = !allowed;
+                }
+            });
+            if (!editor.dataset.hoursGuardBoundAccess) {
+                editor.dataset.hoursGuardBoundAccess = '1';
+                editor.addEventListener(
+                    'click',
+                    (e) => {
+                        if (this.canManageStoreHours) return;
+                        const interactive = e.target.closest('input, select, button');
+                        if (!interactive) return;
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this._showStoreHoursPermissionAlert();
+                    },
+                    true
+                );
             }
-        });
+        }
         const holidayCard = document.getElementById('holiday-schedule-card');
         if (holidayCard) {
             holidayCard.querySelectorAll('input, select, button').forEach((el) => {
@@ -3548,7 +3576,15 @@ class AdminApp {
             pos_display_store_hours_idle: 'Show store hours on idle customer display',
             pos_show_cost_in_cart: 'Show product cost in POS cart for manual discounts',
             pos_personnel_mode: 'Personnel mode: time_clock_only or time_clock_and_pos',
-            pos_shop_verticals: 'JSON array of shop verticals: contractor, auto, body, upholstery, tire (contractor alone; vehicle modes may combine)',
+            pos_shop_verticals: 'JSON array of shop verticals: contractor, mobile_sales_and_service, auto, body, upholstery, tire (field modes alone; vehicle modes may combine)',
+            pos_mobile_sales_and_service_service_bookings_enabled: 'Mobile Sales and Service: enable service bookings (default on; off = sales only)',
+            pos_mobile_booking_intent_options: 'Mobile Sales booking intent option IDs (models, concerns, timing)',
+            pos_shop_labor_rate_auto: 'Auto service shop labor hourly rate on POS estimates',
+            pos_shop_labor_rate_body: 'Body shop labor hourly rate on POS estimates',
+            pos_shop_labor_rate_upholstery: 'Upholstery shop labor hourly rate on POS estimates',
+            pos_shop_labor_rate_tire: 'Tire shop labor hourly rate on POS estimates',
+            pos_shop_labor_rate_contractor: 'Contractor labor hourly rate on job estimates',
+            pos_shop_labor_rate_mobile_sales_and_service: 'Mobile Sales and Service labor hourly rate',
             pos_shop_alignment_2wheel_price: 'Tire shop 2-wheel alignment price on POS estimates',
             pos_shop_alignment_4wheel_price: 'Tire shop 4-wheel alignment price on POS estimates',
             pos_display_card_checkout: 'NMI terminal card checkout enabled',
@@ -3570,11 +3606,903 @@ class AdminApp {
             tax_rate: 'Store sales tax rate (decimal)',
             store_cash_discount_enabled: 'Enable website/host cash discount (card price vs lower cash price)',
             store_cash_discount_percent: 'Website cash discount percent off merchandise (max 15)',
-            store_hours_weekdays: 'Operating hours for weekdays',
-            store_hours_saturday: 'Operating hours for Saturday',
-            store_hours_sunday: 'Operating hours for Sunday',
+            store_hours_schedule: 'Structured weekly store/booking hours (JSON)',
+            store_hours_weekdays: 'Operating hours for weekdays (derived display)',
+            store_hours_saturday: 'Operating hours for Saturday (derived display)',
+            store_hours_sunday: 'Operating hours for Sunday (derived display)',
+            pos_shop_hours: 'POS / shop structured hours (synced from store hours schedule)',
             store_holiday_schedule: 'Structured holiday schedule for closures/special hours',
         };
+    }
+
+    _storeHoursDayDefs() {
+        return [
+            { key: 'sun', label: 'Sunday' },
+            { key: 'mon', label: 'Monday' },
+            { key: 'tue', label: 'Tuesday' },
+            { key: 'wed', label: 'Wednesday' },
+            { key: 'thu', label: 'Thursday' },
+            { key: 'fri', label: 'Friday' },
+            { key: 'sat', label: 'Saturday' },
+        ];
+    }
+
+    _storeHoursTimeOptions() {
+        const opts = [];
+        for (let h = 6; h <= 21; h++) {
+            for (const m of [0, 30]) {
+                if (h === 21 && m > 0) break;
+                const value = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+                const d = new Date();
+                d.setHours(h, m, 0, 0);
+                const label = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                opts.push({ value, label });
+            }
+        }
+        return opts;
+    }
+
+    _defaultStoreHoursSchedule() {
+        return {
+            mon: { open: '10:00', close: '17:00' },
+            tue: { open: '10:00', close: '17:00' },
+            wed: { open: '10:00', close: '17:00' },
+            thu: { open: '10:00', close: '17:00' },
+            fri: { open: '10:00', close: '17:00' },
+            sat: { open: '10:00', close: '13:00' },
+            sun: { open: '', close: '' },
+        };
+    }
+
+    _parseHm(raw) {
+        const s = String(raw || '').trim();
+        const m24 = s.match(/^(\d{1,2}):(\d{2})$/);
+        if (m24) {
+            const h = Number(m24[1]);
+            const min = Number(m24[2]);
+            if (h >= 0 && h <= 23 && min >= 0 && min <= 59) {
+                return `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
+            }
+        }
+        const m12 = s.match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)$/i);
+        if (m12) {
+            let h = Number(m12[1]);
+            const min = Number(m12[2] || 0);
+            const ap = m12[3].toLowerCase();
+            if (h >= 1 && h <= 12 && min >= 0 && min <= 59) {
+                if (ap === 'am') {
+                    if (h === 12) h = 0;
+                } else if (h !== 12) {
+                    h += 12;
+                }
+                return `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
+            }
+        }
+        return '';
+    }
+
+    _normalizeStoreHoursSchedule(raw) {
+        const base = this._defaultStoreHoursSchedule();
+        const src = raw && typeof raw === 'object' ? raw : {};
+        this._storeHoursDayDefs().forEach(({ key }) => {
+            const day = src[key] || {};
+            const open = this._parseHm(day.open);
+            const close = this._parseHm(day.close);
+            base[key] = open && close ? { open, close } : { open: '', close: '' };
+        });
+        return base;
+    }
+
+    _parseHoursRangeText(text) {
+        const raw = String(text || '').trim();
+        if (!raw || /closed/i.test(raw)) return null;
+        const twelve = raw.match(
+            /(\d{1,2}(?::\d{2})?\s*(?:am|pm))\s*[-–]\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm))/i
+        );
+        if (twelve) {
+            const open = this._parseHm(twelve[1]);
+            const close = this._parseHm(twelve[2]);
+            if (open && close) return { open, close };
+        }
+        const twentyFour = raw.match(/(\d{1,2}:\d{2})\s*[-–]\s*(\d{1,2}:\d{2})/);
+        if (twentyFour) {
+            const open = this._parseHm(twentyFour[1]);
+            const close = this._parseHm(twentyFour[2]);
+            if (open && close) return { open, close };
+        }
+        return null;
+    }
+
+    _scheduleFromLegacyDisplayLines(weekdays, saturday, sunday) {
+        const schedule = this._normalizeStoreHoursSchedule({
+            mon: { open: '', close: '' },
+            tue: { open: '', close: '' },
+            wed: { open: '', close: '' },
+            thu: { open: '', close: '' },
+            fri: { open: '', close: '' },
+            sat: { open: '', close: '' },
+            sun: { open: '', close: '' },
+        });
+        const wd = this._parseHoursRangeText(weekdays);
+        if (wd) {
+            ['mon', 'tue', 'wed', 'thu', 'fri'].forEach((k) => {
+                schedule[k] = { ...wd };
+            });
+        }
+        schedule.sat = this._parseHoursRangeText(saturday) || { open: '', close: '' };
+        schedule.sun = this._parseHoursRangeText(sunday) || { open: '', close: '' };
+        return schedule;
+    }
+
+    _formatHmDisplay(hm) {
+        const [h, m] = String(hm || '')
+            .slice(0, 5)
+            .split(':')
+            .map(Number);
+        if (!Number.isFinite(h)) return String(hm || '');
+        const d = new Date();
+        d.setHours(h, m || 0, 0, 0);
+        return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    }
+
+    _scheduleToDisplayLines(scheduleInput) {
+        const schedule = this._normalizeStoreHoursSchedule(scheduleInput);
+        const weekdayKeys = ['mon', 'tue', 'wed', 'thu', 'fri'];
+        const openWeekdays = weekdayKeys.filter((k) => schedule[k].open && schedule[k].close);
+        let weekdays = 'Mon-Fri: Closed';
+        if (openWeekdays.length) {
+            const first = schedule[openWeekdays[0]];
+            const same = openWeekdays.every(
+                (k) => schedule[k].open === first.open && schedule[k].close === first.close
+            );
+            if (same && openWeekdays.length === 5) {
+                weekdays = `Mon-Fri: ${this._formatHmDisplay(first.open)} - ${this._formatHmDisplay(first.close)}`;
+            } else {
+                const short = { mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu', fri: 'Fri' };
+                weekdays = openWeekdays
+                    .map(
+                        (k) =>
+                            `${short[k]}: ${this._formatHmDisplay(schedule[k].open)} - ${this._formatHmDisplay(schedule[k].close)}`
+                    )
+                    .join(', ');
+            }
+        }
+        const saturday =
+            schedule.sat.open && schedule.sat.close
+                ? `Sat: ${this._formatHmDisplay(schedule.sat.open)} - ${this._formatHmDisplay(schedule.sat.close)}`
+                : 'Sat: Closed';
+        const sunday =
+            schedule.sun.open && schedule.sun.close
+                ? `Sun: ${this._formatHmDisplay(schedule.sun.open)} - ${this._formatHmDisplay(schedule.sun.close)}`
+                : 'Sun: Closed';
+        return { weekdays, saturday, sunday };
+    }
+
+    _scheduleSummaryText(scheduleInput) {
+        const schedule = this._normalizeStoreHoursSchedule(scheduleInput);
+        const labels = {
+            sun: 'Sunday',
+            mon: 'Monday',
+            tue: 'Tuesday',
+            wed: 'Wednesday',
+            thu: 'Thursday',
+            fri: 'Friday',
+            sat: 'Saturday',
+        };
+        const open = this._storeHoursDayDefs()
+            .filter(({ key }) => schedule[key].open && schedule[key].close)
+            .map(({ key }) => key);
+        const closed = this._storeHoursDayDefs()
+            .filter(({ key }) => !(schedule[key].open && schedule[key].close))
+            .map(({ key }) => labels[key]);
+        if (!open.length) return 'All days closed';
+        const parts = [];
+        let group = [open[0]];
+        const flush = () => {
+            const first = schedule[group[0]];
+            const label =
+                group.length === 1
+                    ? labels[group[0]]
+                    : `${labels[group[0]]} through ${labels[group[group.length - 1]]}`;
+            parts.push(
+                `${label}, ${this._formatHmDisplay(first.open)}–${this._formatHmDisplay(first.close)}`
+            );
+        };
+        for (let i = 1; i < open.length; i++) {
+            const prevIdx = this._storeHoursDayDefs().findIndex((d) => d.key === group[group.length - 1]);
+            const nextIdx = this._storeHoursDayDefs().findIndex((d) => d.key === open[i]);
+            const same =
+                schedule[open[i]].open === schedule[group[0]].open &&
+                schedule[open[i]].close === schedule[group[0]].close;
+            if (nextIdx === prevIdx + 1 && same) group.push(open[i]);
+            else {
+                flush();
+                group = [open[i]];
+            }
+        }
+        flush();
+        const closedBit = closed.length ? ` Closed ${closed.join(' and ')}.` : '';
+        return `${parts.join('; ')}.${closedBit}`;
+    }
+
+    _syncStoreHoursHiddenFields(scheduleInput) {
+        const schedule = this._normalizeStoreHoursSchedule(scheduleInput);
+        const lines = this._scheduleToDisplayLines(schedule);
+        const scheduleEl = document.getElementById('store-hours-schedule');
+        const weekdaysEl = document.getElementById('store-info-hours-weekdays');
+        const saturdayEl = document.getElementById('store-info-hours-saturday');
+        const sundayEl = document.getElementById('store-info-hours-sunday');
+        const posEl = document.getElementById('store-pos-shop-hours');
+        const preview = document.getElementById('store-hours-summary-preview');
+        if (scheduleEl) scheduleEl.value = JSON.stringify(schedule);
+        if (weekdaysEl) weekdaysEl.value = lines.weekdays;
+        if (saturdayEl) saturdayEl.value = lines.saturday;
+        if (sundayEl) sundayEl.value = lines.sunday;
+        if (posEl) posEl.value = JSON.stringify(schedule);
+        if (preview) preview.textContent = this._scheduleSummaryText(schedule);
+        this.storeHoursSchedule = schedule;
+    }
+
+    _collectStoreHoursScheduleFromEditor() {
+        const root = document.getElementById('store-hours-schedule-editor');
+        const schedule = this._defaultStoreHoursSchedule();
+        if (!root) return this._normalizeStoreHoursSchedule(this.storeHoursSchedule || schedule);
+        this._storeHoursDayDefs().forEach(({ key }) => {
+            const openChk = root.querySelector(`[data-hours-open="${key}"]`);
+            const openSel = root.querySelector(`[data-hours-start="${key}"]`);
+            const closeSel = root.querySelector(`[data-hours-end="${key}"]`);
+            if (openChk && openChk.checked) {
+                schedule[key] = {
+                    open: this._parseHm(openSel?.value) || '10:00',
+                    close: this._parseHm(closeSel?.value) || '17:00',
+                };
+            } else {
+                schedule[key] = { open: '', close: '' };
+            }
+        });
+        return this._normalizeStoreHoursSchedule(schedule);
+    }
+
+    _resolveStoreHoursCopySource(root) {
+        const defs = this._storeHoursDayDefs();
+        const readDay = (key) => {
+            const openChk = root.querySelector(`[data-hours-open="${key}"]`);
+            const openSel = root.querySelector(`[data-hours-start="${key}"]`);
+            const closeSel = root.querySelector(`[data-hours-end="${key}"]`);
+            if (!openChk?.checked) return null;
+            const open = this._parseHm(openSel?.value) || '';
+            const close = this._parseHm(closeSel?.value) || '';
+            if (!open || !close) return null;
+            return { key, open, close };
+        };
+        const lastKey = this._storeHoursLastEditedDay;
+        if (lastKey) {
+            const fromLast = readDay(lastKey);
+            if (fromLast) return fromLast;
+        }
+        for (const { key } of defs) {
+            const day = readDay(key);
+            if (day) return day;
+        }
+        return { key: 'mon', open: '10:00', close: '17:00' };
+    }
+
+    _applyStoreHoursTimesToDays(root, keys, open, close) {
+        const openHm = this._parseHm(open) || '10:00';
+        const closeHm = this._parseHm(close) || '17:00';
+        keys.forEach((key) => {
+            const openChk = root.querySelector(`[data-hours-open="${key}"]`);
+            const openSel = root.querySelector(`[data-hours-start="${key}"]`);
+            const closeSel = root.querySelector(`[data-hours-end="${key}"]`);
+            if (openChk) openChk.checked = true;
+            if (openSel) {
+                openSel.disabled = false;
+                openSel.value = openHm;
+            }
+            if (closeSel) {
+                closeSel.disabled = false;
+                closeSel.value = closeHm;
+            }
+        });
+        this._syncStoreHoursHiddenFields(this._collectStoreHoursScheduleFromEditor());
+    }
+
+    _copyStoreHoursFromSource(mode) {
+        if (!this.canManageStoreHours) {
+            this._showStoreHoursPermissionAlert();
+            return;
+        }
+        const root = document.getElementById('store-hours-schedule-editor');
+        if (!root) return;
+        const source = this._resolveStoreHoursCopySource(root);
+        let keys = [];
+        if (mode === 'weekdays') {
+            keys = ['mon', 'tue', 'wed', 'thu', 'fri'];
+        } else if (mode === 'all-days') {
+            keys = this._storeHoursDayDefs().map((d) => d.key);
+        } else {
+            // open-days: keep closed days closed; copy times onto every day currently Open
+            keys = this._storeHoursDayDefs()
+                .map((d) => d.key)
+                .filter((key) => root.querySelector(`[data-hours-open="${key}"]`)?.checked);
+            if (!keys.length) {
+                keys = [source.key];
+            }
+        }
+        this._applyStoreHoursTimesToDays(root, keys, source.open, source.close);
+        const msg = document.querySelector('[data-store-info-save-msg]');
+        if (msg) {
+            const label =
+                this._storeHoursDayDefs().find((d) => d.key === source.key)?.label || source.key;
+            const target =
+                mode === 'weekdays'
+                    ? 'Mon–Fri'
+                    : mode === 'all-days'
+                      ? 'all days'
+                      : 'all open days';
+            msg.textContent = `Copied ${label} hours (${source.open}–${source.close}) to ${target}. Save store info to keep.`;
+            msg.style.color = 'var(--primary-green, #16a34a)';
+        }
+    }
+
+    /**
+     * Guarantee the structured hours editor exists. Production sometimes still has
+     * legacy Weekday/Saturday/Sunday text inputs — replace those so selects are the only UI.
+     */
+    _ensureStoreHoursScheduleEditorMount() {
+        const form = document.getElementById('store-info-settings-form');
+        if (!form) return null;
+
+        const weekdaysEl = document.getElementById('store-info-hours-weekdays');
+        const saturdayEl = document.getElementById('store-info-hours-saturday');
+        const sundayEl = document.getElementById('store-info-hours-sunday');
+        const legacyText =
+            (weekdaysEl && weekdaysEl.type === 'text') ||
+            (saturdayEl && saturdayEl.type === 'text') ||
+            (sundayEl && sundayEl.type === 'text');
+
+        let root = document.getElementById('store-hours-schedule-editor');
+        if (root && !legacyText) {
+            this._ensureStoreHoursHiddenCompanions(root);
+            return root;
+        }
+
+        const legacyWeekdays = weekdaysEl?.value || '';
+        const legacySaturday = saturdayEl?.value || '';
+        const legacySunday = sundayEl?.value || '';
+
+        const weekdayGroup = weekdaysEl?.closest('.form-group');
+        const satGroup = saturdayEl?.closest('.form-group');
+        const sunGroup = sundayEl?.closest('.form-group');
+        const satSunGrid =
+            satGroup?.parentElement &&
+            satGroup.parentElement !== weekdayGroup &&
+            satGroup.parentElement.contains(sunGroup)
+                ? satGroup.parentElement
+                : null;
+
+        const mount = document.createElement('div');
+        mount.className = 'form-group';
+        mount.innerHTML = `
+            <label>Store / booking hours</label>
+            <p class="form-help" style="margin:0 0 0.65rem;">Toggle each day open or closed, set Opens/Closes once, then copy those times to other days. These drive website booking slots, footer hours, and Google Business sync.</p>
+            <div id="store-hours-schedule-editor" class="hm-choice-skip" data-hm-choice-skip style="display:grid;gap:0.45rem;"></div>
+            <input type="hidden" name="store_hours_schedule" id="store-hours-schedule" value="">
+            <input type="hidden" name="store_hours_weekdays" id="store-info-hours-weekdays" value="">
+            <input type="hidden" name="store_hours_saturday" id="store-info-hours-saturday" value="">
+            <input type="hidden" name="store_hours_sunday" id="store-info-hours-sunday" value="">
+            <input type="hidden" name="pos_shop_hours" id="store-pos-shop-hours" value="">
+            <p id="store-hours-summary-preview" style="margin:0.65rem 0 0;color:var(--gray-600);font-size:0.88rem;"></p>
+        `;
+
+        const insertBefore =
+            weekdayGroup ||
+            satSunGrid ||
+            satGroup ||
+            form.querySelector('#google-account-connection-card') ||
+            form.querySelector('[data-store-info-save-msg]')?.closest('.form-group') ||
+            null;
+
+        if (insertBefore && insertBefore.parentNode) {
+            insertBefore.parentNode.insertBefore(mount, insertBefore);
+        } else {
+            const cardContent =
+                form.querySelector('#store-info-settings-form .card-content') ||
+                document.querySelector('#store-info-card .card-content') ||
+                form;
+            cardContent.appendChild(mount);
+        }
+
+        [weekdayGroup, satSunGrid, satGroup, sunGroup].forEach((node) => {
+            if (node && node.parentNode && node !== mount) node.parentNode.removeChild(node);
+        });
+
+        // Remove any leftover labeled free-text hour fields by id
+        ['store-info-hours-weekdays', 'store-info-hours-saturday', 'store-info-hours-sunday'].forEach((id) => {
+            const el = document.getElementById(id);
+            if (el && el.type === 'text') {
+                const group = el.closest('.form-group');
+                if (group && group !== mount) group.remove();
+                else el.remove();
+            }
+        });
+
+        root = document.getElementById('store-hours-schedule-editor');
+        if (legacyWeekdays || legacySaturday || legacySunday) {
+            const migrated = this._scheduleFromLegacyDisplayLines(
+                legacyWeekdays,
+                legacySaturday,
+                legacySunday
+            );
+            if (!this.storeHoursSchedule) this.storeHoursSchedule = migrated;
+        }
+        this._ensureStoreHoursHiddenCompanions(root);
+        return root;
+    }
+
+    _ensureStoreHoursHiddenCompanions(root) {
+        const host = root?.closest('.form-group') || root?.parentElement;
+        if (!host) return;
+        const specs = [
+            ['store_hours_schedule', 'store-hours-schedule'],
+            ['store_hours_weekdays', 'store-info-hours-weekdays'],
+            ['store_hours_saturday', 'store-info-hours-saturday'],
+            ['store_hours_sunday', 'store-info-hours-sunday'],
+            ['pos_shop_hours', 'store-pos-shop-hours'],
+        ];
+        specs.forEach(([name, id]) => {
+            let el = document.getElementById(id) || host.querySelector(`[name="${name}"]`);
+            if (el && el.type === 'text') {
+                el.type = 'hidden';
+                el.removeAttribute('maxlength');
+                el.removeAttribute('placeholder');
+                const label = host.querySelector(`label[for="${id}"]`);
+                if (label) label.remove();
+            }
+            if (!el) {
+                el = document.createElement('input');
+                el.type = 'hidden';
+                el.name = name;
+                el.id = id;
+                host.appendChild(el);
+            } else {
+                el.type = 'hidden';
+                el.name = name;
+                el.id = id;
+            }
+        });
+        if (!document.getElementById('store-hours-summary-preview')) {
+            const preview = document.createElement('p');
+            preview.id = 'store-hours-summary-preview';
+            preview.style.cssText = 'margin:0.65rem 0 0;color:var(--gray-600);font-size:0.88rem;';
+            host.appendChild(preview);
+        }
+    }
+
+    _renderStoreHoursScheduleEditor(scheduleInput) {
+        const root = this._ensureStoreHoursScheduleEditorMount();
+        if (!root) return;
+        const schedule = this._normalizeStoreHoursSchedule(scheduleInput || this.storeHoursSchedule);
+        const timeOpts = this._storeHoursTimeOptions();
+        const allowed = Boolean(this.canManageStoreHours);
+        const dayRows = this._storeHoursDayDefs()
+            .map(({ key, label }) => {
+                const day = schedule[key] || { open: '', close: '' };
+                const isOpen = Boolean(day.open && day.close);
+                const openVal = day.open || '10:00';
+                const closeVal = day.close || '17:00';
+                const options = (selected) =>
+                    timeOpts
+                        .map(
+                            (o) =>
+                                `<option value="${o.value}" ${o.value === selected ? 'selected' : ''}>${o.label}</option>`
+                        )
+                        .join('');
+                return `
+                    <div class="store-hours-day-row hm-choice-skip" data-hours-day="${key}" data-hm-choice-skip>
+                        <span class="store-hours-day-label">${label}</span>
+                        <label class="store-hours-open-toggle hm-choice-skip" data-hm-choice-skip>
+                            <input type="checkbox" class="store-hours-open-checkbox" data-hours-open="${key}" data-hm-choice-skip ${isOpen ? 'checked' : ''} ${allowed ? '' : 'disabled'}>
+                            <span class="store-hours-switch" aria-hidden="true"><span class="store-hours-switch-knob"></span></span>
+                            <span class="store-hours-open-text">Open</span>
+                        </label>
+                        <label class="store-hours-time-field">
+                            <span>Opens</span>
+                            <select class="form-input" data-hours-start="${key}" aria-label="${label} opens" ${isOpen && allowed ? '' : 'disabled'}>${options(openVal)}</select>
+                        </label>
+                        <label class="store-hours-time-field">
+                            <span>Closes</span>
+                            <select class="form-input" data-hours-end="${key}" aria-label="${label} closes" ${isOpen && allowed ? '' : 'disabled'}>${options(closeVal)}</select>
+                        </label>
+                    </div>
+                `;
+            })
+            .join('');
+        root.innerHTML = `
+            <div class="store-hours-copy-bar">
+                <button type="button" class="btn btn-secondary btn-sm" data-hours-copy="open-days" ${allowed ? '' : 'disabled'}>Copy times to all open days</button>
+                <button type="button" class="btn btn-secondary btn-sm" data-hours-copy="weekdays" ${allowed ? '' : 'disabled'}>Copy times to Mon–Fri</button>
+                <button type="button" class="btn btn-secondary btn-sm" data-hours-copy="all-days" ${allowed ? '' : 'disabled'}>Copy times to every day</button>
+                <span class="store-hours-copy-hint">Uses the last day you edited (or the first open day).</span>
+            </div>
+            ${dayRows}
+        `;
+        // Strip any leftover free-text hour editors (stale cached admin.html).
+        const hoursForm = document.getElementById('store-info-settings-form');
+        if (hoursForm) {
+            hoursForm
+                .querySelectorAll(
+                    'input[type="text"][name="store_hours_weekdays"], input[type="text"][name="store_hours_saturday"], input[type="text"][name="store_hours_sunday"]'
+                )
+                .forEach((el) => {
+                    const group = el.closest('.form-group');
+                    if (group && !group.contains(root)) group.remove();
+                    else {
+                        el.type = 'hidden';
+                        el.removeAttribute('placeholder');
+                    }
+                });
+            hoursForm
+                .querySelectorAll(
+                    'label[for="store-info-hours-weekdays"], label[for="store-info-hours-saturday"], label[for="store-info-hours-sunday"]'
+                )
+                .forEach((lab) => {
+                    if (/weekday|saturday|sunday/i.test(lab.textContent || '')) lab.remove();
+                });
+        }
+        if (!root.dataset.hoursEditorBound) {
+            root.dataset.hoursEditorBound = '1';
+            root.addEventListener('change', (e) => {
+                if (!this.canManageStoreHours) {
+                    e.preventDefault();
+                    this._showStoreHoursPermissionAlert();
+                    this._renderStoreHoursScheduleEditor(this.storeHoursSchedule);
+                    return;
+                }
+                const target = e.target;
+                if (target && target.matches('[data-hours-open], [data-hours-start], [data-hours-end]')) {
+                    const key =
+                        target.getAttribute('data-hours-open') ||
+                        target.getAttribute('data-hours-start') ||
+                        target.getAttribute('data-hours-end');
+                    if (key) this._storeHoursLastEditedDay = key;
+                }
+                if (target && target.matches('[data-hours-open]')) {
+                    const key = target.getAttribute('data-hours-open');
+                    const start = root.querySelector(`[data-hours-start="${key}"]`);
+                    const end = root.querySelector(`[data-hours-end="${key}"]`);
+                    if (start) start.disabled = !target.checked;
+                    if (end) end.disabled = !target.checked;
+                    if (target.checked) {
+                        if (start && !start.value) start.value = '10:00';
+                        if (end && !end.value) end.value = '17:00';
+                    }
+                }
+                this._syncStoreHoursHiddenFields(this._collectStoreHoursScheduleFromEditor());
+            });
+            root.addEventListener('click', (e) => {
+                const btn = e.target?.closest?.('[data-hours-copy]');
+                if (!btn || !root.contains(btn)) return;
+                e.preventDefault();
+                this._copyStoreHoursFromSource(btn.getAttribute('data-hours-copy') || 'open-days');
+            });
+        }
+        this._syncStoreHoursHiddenFields(schedule);
+    }
+
+    _mobileBookingIntentExampleRainbow() {
+        return {
+            models: [
+                { id: 'srx', label: 'SRX' },
+                { id: 'e-series', label: 'E2 or E-series' },
+                { id: 'd-series', label: 'D-series or older' },
+                { id: 'not-sure', label: 'Not sure' },
+            ],
+            concerns: [
+                { id: 'weak-suction', label: 'Weak suction' },
+                { id: 'leaking-water', label: 'Leaking water' },
+                { id: 'will-not-start', label: 'Will not start' },
+                { id: 'brush-will-not-turn', label: 'Brush will not turn' },
+                { id: 'noise-or-hot-smell', label: 'Noise or a hot smell' },
+                { id: 'hose-or-cord', label: 'Hose or cord' },
+                { id: 'hepa-neutralizer', label: 'HEPA neutralizer' },
+                { id: 'full-service', label: 'Full Service' },
+                { id: 'something-else', label: 'Something else' },
+            ],
+        };
+    }
+
+    _mobileBookingIntentKnownLabels() {
+        const map = {};
+        const ex = this._mobileBookingIntentExampleRainbow();
+        [...ex.models, ...ex.concerns].forEach((o) => {
+            map[o.id] = o.label;
+        });
+        return map;
+    }
+
+    _mobileBookingIntentTimingCatalog() {
+        return [
+            { id: 'morning', label: 'Morning' },
+            { id: 'afternoon', label: 'Afternoon' },
+            { id: 'either', label: 'Either' },
+        ];
+    }
+
+    _slugifyMobileIntentLabel(label) {
+        return String(label || '')
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '')
+            .slice(0, 48);
+    }
+
+    _coerceMobileIntentOption(item, knownLabels) {
+        const labels = knownLabels || this._mobileBookingIntentKnownLabels();
+        if (item == null) return null;
+        if (typeof item === 'string' || typeof item === 'number') {
+            const id = String(item).trim().toLowerCase();
+            if (!id) return null;
+            return { id, label: labels[id] || String(item).trim() };
+        }
+        if (typeof item !== 'object') return null;
+        const label = String(item.label || item.title || item.name || '').trim();
+        let id = String(item.id || item.value || '')
+            .trim()
+            .toLowerCase();
+        if (!id && label) id = this._slugifyMobileIntentLabel(label);
+        if (!id) return null;
+        return { id, label: label || labels[id] || id };
+    }
+
+    _defaultMobileBookingIntentOptions() {
+        return {
+            models: [],
+            concerns: [],
+            timing: this._mobileBookingIntentTimingCatalog().map((o) => o.id),
+            purposes: ['demo', 'service', 'question'],
+        };
+    }
+
+    _normalizeMobileBookingIntentOptions(raw) {
+        const defaults = this._defaultMobileBookingIntentOptions();
+        const known = this._mobileBookingIntentKnownLabels();
+        let obj = raw;
+        if (typeof raw === 'string' && raw.trim()) {
+            try {
+                obj = JSON.parse(raw);
+            } catch (_) {
+                obj = null;
+            }
+        }
+        if (!obj || typeof obj !== 'object') return defaults;
+
+        const parseOptions = (list) => {
+            const out = [];
+            const seen = new Set();
+            (Array.isArray(list) ? list : []).forEach((item) => {
+                const opt = this._coerceMobileIntentOption(item, known);
+                if (!opt || seen.has(opt.id)) return;
+                seen.add(opt.id);
+                out.push(opt);
+            });
+            return out;
+        };
+
+        const timingAllow = new Set(this._mobileBookingIntentTimingCatalog().map((o) => o.id));
+        const timing = [];
+        const timingSeen = new Set();
+        (Array.isArray(obj.timing) ? obj.timing : []).forEach((id) => {
+            const key =
+                typeof id === 'object' && id
+                    ? String(id.id || '')
+                          .trim()
+                          .toLowerCase()
+                    : String(id || '')
+                          .trim()
+                          .toLowerCase();
+            if (!timingAllow.has(key) || timingSeen.has(key)) return;
+            timingSeen.add(key);
+            timing.push(key);
+        });
+
+        const purposeAllow = new Set(['demo', 'service', 'question']);
+        const purposes = [];
+        const purposeSeen = new Set();
+        (Array.isArray(obj.purposes) ? obj.purposes : []).forEach((id) => {
+            const key = String(id || '')
+                .trim()
+                .toLowerCase();
+            if (!purposeAllow.has(key) || purposeSeen.has(key)) return;
+            purposeSeen.add(key);
+            purposes.push(key);
+        });
+
+        return {
+            models: parseOptions(obj.models),
+            concerns: parseOptions(obj.concerns),
+            timing: timing.length ? timing : defaults.timing,
+            purposes: purposes.length ? purposes : defaults.purposes,
+        };
+    }
+
+    _renderMobileBookingIntentOptionRows(containerId, field, options) {
+        const root = document.getElementById(containerId);
+        if (!root) return;
+        const list = Array.isArray(options) ? options : [];
+        if (!list.length) {
+            root.innerHTML =
+                '<p class="form-help" style="margin:0;">No options yet — add your own, or use the Rainbow vacuum examples below if that is your trade.</p>';
+            return;
+        }
+        root.innerHTML = list
+            .map(
+                (item, index) => `
+                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:0.45rem;" data-intent-row="${field}" data-intent-index="${index}">
+                    <input type="text" class="form-input" data-intent-field="${field}" data-intent-prop="label" data-intent-index="${index}" value="${String(item.label || '').replace(/"/g, '&quot;')}" placeholder="Option label" style="flex:1;min-width:10rem;max-width:22rem;">
+                    <button type="button" class="btn btn-secondary btn-sm" data-intent-remove="${field}" data-intent-index="${index}">Remove</button>
+                </div>
+            `
+            )
+            .join('');
+    }
+
+    _renderMobileBookingIntentOptions(raw) {
+        const options = this._normalizeMobileBookingIntentOptions(raw);
+        const timingCat = this._mobileBookingIntentTimingCatalog();
+        this._renderMobileBookingIntentOptionRows('pos-mobile-intent-models', 'models', options.models);
+        this._renderMobileBookingIntentOptionRows(
+            'pos-mobile-intent-concerns',
+            'concerns',
+            options.concerns
+        );
+        const timingRoot = document.getElementById('pos-mobile-intent-timing');
+        if (timingRoot) {
+            const selected = new Set(options.timing || []);
+            timingRoot.innerHTML = timingCat
+                .map(
+                    (item) => `
+                    <label style="display:inline-flex;align-items:center;gap:0.35rem;padding:0.35rem 0.65rem;border:1px solid var(--gray-300);border-radius:999px;background:${selected.has(item.id) ? 'var(--gray-100)' : '#fff'};cursor:pointer;font-size:0.85rem;">
+                        <input type="checkbox" data-intent-field="timing" value="${item.id}" ${selected.has(item.id) ? 'checked' : ''}>
+                        ${item.label}
+                    </label>
+                `
+                )
+                .join('');
+        }
+        const hidden = document.getElementById('pos-mobile-booking-intent-options');
+        if (hidden) hidden.value = JSON.stringify(options);
+        const panel = document.getElementById('pos-shop-mobile-sales-service');
+        if (panel && !panel.dataset.intentBound) {
+            panel.dataset.intentBound = '1';
+            panel.addEventListener('change', (e) => {
+                if (!e.target.matches('[data-intent-field]')) return;
+                this._syncMobileBookingIntentHidden();
+            });
+            panel.addEventListener('input', (e) => {
+                if (!e.target.matches('[data-intent-field][data-intent-prop="label"]')) return;
+                this._syncMobileBookingIntentHidden();
+            });
+            panel.addEventListener('click', (e) => {
+                const removeBtn = e.target.closest('[data-intent-remove]');
+                if (removeBtn) {
+                    e.preventDefault();
+                    const field = removeBtn.getAttribute('data-intent-remove');
+                    const index = Number(removeBtn.getAttribute('data-intent-index'));
+                    this._removeMobileBookingIntentOption(field, index);
+                    return;
+                }
+            });
+            const addModel = document.getElementById('pos-mobile-intent-add-model');
+            if (addModel) {
+                addModel.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this._addMobileBookingIntentOption('models');
+                });
+            }
+            const addConcern = document.getElementById('pos-mobile-intent-add-concern');
+            if (addConcern) {
+                addConcern.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this._addMobileBookingIntentOption('concerns');
+                });
+            }
+            const loadRainbow = document.getElementById('pos-mobile-intent-load-rainbow-examples');
+            if (loadRainbow) {
+                loadRainbow.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this._loadMobileBookingIntentRainbowExamples();
+                });
+            }
+        }
+        this.mobileBookingIntentOptions = options;
+    }
+
+    _addMobileBookingIntentOption(field) {
+        const options = this._syncMobileBookingIntentHidden();
+        const list = Array.isArray(options[field]) ? options[field].slice() : [];
+        const stamp = Date.now().toString(36);
+        list.push({ id: `custom-${stamp}`, label: '' });
+        options[field] = list;
+        this._renderMobileBookingIntentOptions(options);
+        const root = document.getElementById(
+            field === 'models' ? 'pos-mobile-intent-models' : 'pos-mobile-intent-concerns'
+        );
+        const input = root?.querySelector('input[data-intent-prop="label"]:last-of-type');
+        if (input) input.focus();
+    }
+
+    _removeMobileBookingIntentOption(field, index) {
+        const options = this._syncMobileBookingIntentHidden();
+        const list = Array.isArray(options[field]) ? options[field].slice() : [];
+        if (index < 0 || index >= list.length) return;
+        list.splice(index, 1);
+        options[field] = list;
+        this._renderMobileBookingIntentOptions(options);
+    }
+
+    _loadMobileBookingIntentRainbowExamples() {
+        const options = this._syncMobileBookingIntentHidden();
+        const examples = this._mobileBookingIntentExampleRainbow();
+        const merge = (current, extras) => {
+            const out = Array.isArray(current) ? current.slice() : [];
+            const seen = new Set(out.map((o) => o.id));
+            extras.forEach((item) => {
+                if (seen.has(item.id)) return;
+                seen.add(item.id);
+                out.push({ id: item.id, label: item.label });
+            });
+            return out;
+        };
+        options.models = merge(options.models, examples.models);
+        options.concerns = merge(options.concerns, examples.concerns);
+        this._renderMobileBookingIntentOptions(options);
+    }
+
+    _syncMobileBookingIntentHidden() {
+        const timingCat = this._mobileBookingIntentTimingCatalog();
+        const current = this.mobileBookingIntentOptions || this._defaultMobileBookingIntentOptions();
+        const readEditable = (field) => {
+            const inputs = Array.from(
+                document.querySelectorAll(
+                    `[data-intent-field="${field}"][data-intent-prop="label"]`
+                )
+            );
+            // Panel not mounted yet — keep in-memory / loaded options.
+            if (!inputs.length) {
+                return Array.isArray(current[field]) ? current[field].slice() : [];
+            }
+            const out = [];
+            const seen = new Set();
+            inputs.forEach((input, index) => {
+                const label = String(input.value || '').trim();
+                const prior = (current[field] || [])[index];
+                let id = prior && prior.id ? String(prior.id).toLowerCase() : '';
+                if (!id) id = this._slugifyMobileIntentLabel(label) || `custom-${index + 1}`;
+                if (seen.has(id)) id = `${id}-${index + 1}`;
+                seen.add(id);
+                out.push({ id, label: label || id });
+            });
+            return out;
+        };
+        const timingChecked = Array.from(
+            document.querySelectorAll('[data-intent-field="timing"]:checked')
+        ).map((el) => el.value);
+        const options = {
+            models: readEditable('models'),
+            concerns: readEditable('concerns'),
+            timing: timingChecked.length
+                ? timingChecked
+                : timingCat.map((o) => o.id),
+            purposes: current.purposes?.length
+                ? current.purposes
+                : this._defaultMobileBookingIntentOptions().purposes,
+        };
+        const hidden = document.getElementById('pos-mobile-booking-intent-options');
+        if (hidden) hidden.value = JSON.stringify(options);
+        this.mobileBookingIntentOptions = options;
+        return options;
     }
 
     _nthWeekdayOfMonth(year, monthIndex, weekday, nth) {
@@ -3865,6 +4793,138 @@ class AdminApp {
         this._refreshPromoIconPreview();
     }
 
+    _storeLogoAssetBase() {
+        return (this.apiBaseUrl || '').replace(/\/api\/?$/, '');
+    }
+
+    _absoluteUploadUrl(pathOrUrl) {
+        const raw = String(pathOrUrl || '').trim();
+        if (!raw) return '';
+        if (/^https?:\/\//i.test(raw) || raw.startsWith('data:')) return raw;
+        const path = raw.startsWith('/') ? raw : `/${raw}`;
+        return `${this._storeLogoAssetBase()}${path}`;
+    }
+
+    _refreshLogoPreview(urlInputId, wrapId, imgId) {
+        const url = document.getElementById(urlInputId)?.value?.trim();
+        const wrap = document.getElementById(wrapId);
+        const img = document.getElementById(imgId);
+        if (!wrap || !img) return;
+        if (!url) {
+            wrap.style.display = 'none';
+            img.removeAttribute('src');
+            return;
+        }
+        const src = this._absoluteUploadUrl(url);
+        img.onerror = () => {
+            wrap.style.display = 'none';
+            img.removeAttribute('src');
+            img.onerror = null;
+        };
+        img.src = src;
+        wrap.style.display = 'block';
+    }
+
+    _refreshStoreLogoPreview() {
+        this._refreshLogoPreview(
+            'store-info-store-logo-url',
+            'store-info-store-logo-preview-wrap',
+            'store-info-store-logo-preview-img'
+        );
+    }
+
+    _refreshPosStoreLogoPreview() {
+        this._refreshLogoPreview(
+            'pos-store-logo-url',
+            'pos-store-logo-preview-wrap',
+            'pos-store-logo-preview-img'
+        );
+    }
+
+    async uploadStoreLogoToUrl({
+        fileInputId = 'store-info-store-logo-file',
+        urlInputId = 'store-info-store-logo-url',
+        uploadBtnId = 'store-info-store-logo-upload-btn',
+        refresh,
+        successToast = 'Store logo uploaded — save to apply',
+        silentIfEmpty = false
+    } = {}) {
+        const input = document.getElementById(fileInputId);
+        const urlInput = document.getElementById(urlInputId);
+        if (!input?.files?.length) {
+            if (!silentIfEmpty) this.showToast('Choose an image file first', 'warning');
+            return;
+        }
+        if (!this.authToken) {
+            this.showToast('Please log in to upload images', 'error');
+            return;
+        }
+        const fd = new FormData();
+        fd.append('image', input.files[0]);
+        const uploadUrl = `${this.apiBaseUrl}/admin/settings/upload-store-logo`;
+        const btn = document.getElementById(uploadBtnId);
+        const prevLabel = btn?.textContent;
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'Uploading...';
+        }
+        try {
+            const res = await fetch(uploadUrl, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${this.authToken}` },
+                body: fd,
+            });
+            if (res.status === 401) {
+                this.logout();
+                throw new Error('Authentication required');
+            }
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                throw new Error(data.error || 'Upload failed');
+            }
+            const stored = String(data.url || '').trim();
+            const absolute = this._absoluteUploadUrl(stored);
+            if (!absolute) {
+                throw new Error('Upload succeeded but no URL returned');
+            }
+            if (urlInput) urlInput.value = stored.startsWith('/') ? stored : absolute;
+            input.value = '';
+            if (typeof refresh === 'function') refresh.call(this);
+            this.showToast(successToast, 'success');
+        } catch (e) {
+            this.showToast(e.message || 'Upload failed', 'error');
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = prevLabel || 'Upload';
+            }
+        }
+    }
+
+    async uploadStoreLogo() {
+        return this.uploadStoreLogoToUrl({
+            refresh: this._refreshStoreLogoPreview
+        });
+    }
+
+    async uploadPosStoreLogo() {
+        return this.uploadStoreLogoToUrl({
+            fileInputId: 'pos-store-logo-file',
+            urlInputId: 'pos-store-logo-url',
+            uploadBtnId: 'pos-store-logo-upload-btn',
+            refresh: this._refreshPosStoreLogoPreview,
+            successToast: 'POS store logo uploaded — save POS settings to apply'
+        });
+    }
+
+    clearStoreLogoUpload() {
+        const urlInput = document.getElementById('store-info-store-logo-url');
+        const file = document.getElementById('store-info-store-logo-file');
+        if (urlInput) urlInput.value = '';
+        if (file) file.value = '';
+        this._refreshStoreLogoPreview();
+    }
+
     bindPromoProductLinkSearch() {
         const input = document.getElementById('promo-product-link-search');
         const results = document.getElementById('promo-product-link-results');
@@ -4129,12 +5189,18 @@ class AdminApp {
 
     _buildStoreInfoSettingsPayload(form, { includePromoBanner = false } = {}) {
         const meta = this._storeInfoSettingMeta();
+        if (this.canManageStoreHours) {
+            this._syncStoreHoursHiddenFields(this._collectStoreHoursScheduleFromEditor());
+        }
         const hourKeys = new Set([
+            'store_hours_schedule',
             'store_hours_weekdays',
             'store_hours_saturday',
             'store_hours_sunday',
+            'pos_shop_hours',
             'store_holiday_schedule',
         ]);
+        const jsonHourKeys = new Set(['store_hours_schedule', 'pos_shop_hours', 'store_holiday_schedule']);
         const rows = Object.keys(meta)
             .filter((key) => this.canManageStoreHours || !hourKeys.has(key))
             .map((key) => {
@@ -4172,7 +5238,7 @@ class AdminApp {
                 key_name: key,
                 value,
                 description: meta[key],
-                type: key === 'store_holiday_schedule' ? 'json' : (key === 'tax_rate' ? 'number' : 'string'),
+                type: jsonHourKeys.has(key) ? 'json' : (key === 'tax_rate' ? 'number' : 'string'),
             };
         });
         if (includePromoBanner) {
@@ -4500,6 +5566,43 @@ class AdminApp {
         form.querySelectorAll('[name="pos_shop_vertical"]').forEach((el) => {
             el.checked = shopVerts.includes(el.value);
         });
+        const svcBook = form.querySelector('[name="pos_mobile_sales_and_service_service_bookings_enabled"]');
+        if (svcBook) {
+            const raw = String(map.get('pos_mobile_sales_and_service_service_bookings_enabled') ?? 'true').toLowerCase();
+            svcBook.checked = raw === 'true' || raw === '1' || raw === '';
+        }
+        const mobileLabor = form.querySelector('[name="pos_shop_labor_rate_mobile_sales_and_service"]');
+        if (mobileLabor) mobileLabor.value = String(map.get('pos_shop_labor_rate_mobile_sales_and_service') ?? '75');
+        const mobilePanelLoad = document.getElementById('pos-shop-mobile-sales-service');
+        if (mobilePanelLoad) {
+            mobilePanelLoad.style.display = shopVerts.includes('mobile_sales_and_service') ? '' : 'none';
+        }
+        const laborDefaults = {
+            auto: '95',
+            body: '85',
+            upholstery: '95',
+            tire: '89',
+            contractor: '85',
+            mobile_sales_and_service: '75',
+        };
+        Object.entries(laborDefaults).forEach(([vertical, fallback]) => {
+            const key =
+                vertical === 'mobile_sales_and_service'
+                    ? 'pos_shop_labor_rate_mobile_sales_and_service'
+                    : `pos_shop_labor_rate_${vertical}`;
+            const el = form.querySelector(`[name="${key}"]`);
+            if (el) el.value = String(map.get(key) ?? fallback);
+        });
+        const mobileSvc = form.querySelector('[name="pos_mobile_sales_and_service_service_bookings_enabled"]');
+        if (mobileSvc) {
+            const raw = String(map.get('pos_mobile_sales_and_service_service_bookings_enabled') ?? 'true').toLowerCase();
+            mobileSvc.checked = raw === 'true' || raw === '1' || raw === '';
+        }
+        const mobilePanel = document.getElementById('pos-shop-mobile-sales-service');
+        if (mobilePanel) {
+            mobilePanel.style.display = shopVerts.includes('mobile_sales_and_service') ? '' : 'none';
+        }
+        this._renderMobileBookingIntentOptions(map.get('pos_mobile_booking_intent_options') || '');
         const align2 = form.querySelector('[name="pos_shop_alignment_2wheel_price"]');
         if (align2) align2.value = String(map.get('pos_shop_alignment_2wheel_price') ?? '59.99');
         const align4 = form.querySelector('[name="pos_shop_alignment_4wheel_price"]');
@@ -4825,7 +5928,9 @@ class AdminApp {
                 let selected = Array.from(form.querySelectorAll('[name="pos_shop_vertical"]:checked')).map(
                     (el) => el.value
                 );
-                if (selected.includes('contractor') && selected.length > 1) {
+                if (selected.includes('mobile_sales_and_service') && selected.length > 1) {
+                    selected = ['mobile_sales_and_service'];
+                } else if (selected.includes('contractor') && selected.length > 1) {
                     selected = ['contractor'];
                 }
                 return {
@@ -4834,6 +5939,47 @@ class AdminApp {
                     description: meta[key],
                     type: 'string'
                 };
+            }
+            if (key === 'pos_mobile_sales_and_service_service_bookings_enabled') {
+                const el = form.querySelector(`[name="${key}"]`);
+                // Default ON when the control is missing (sales + service)
+                const enabled = el ? Boolean(el.checked) : true;
+                return {
+                    key_name: key,
+                    value: enabled ? 'true' : 'false',
+                    description: meta[key],
+                    type: 'boolean',
+                };
+            }
+            if (key === 'pos_mobile_booking_intent_options') {
+                const options = this._syncMobileBookingIntentHidden();
+                return {
+                    key_name: key,
+                    value: JSON.stringify(options),
+                    description: meta[key],
+                    type: 'json',
+                };
+            }
+            if (
+                key === 'pos_shop_labor_rate_auto' ||
+                key === 'pos_shop_labor_rate_body' ||
+                key === 'pos_shop_labor_rate_upholstery' ||
+                key === 'pos_shop_labor_rate_tire' ||
+                key === 'pos_shop_labor_rate_contractor' ||
+                key === 'pos_shop_labor_rate_mobile_sales_and_service'
+            ) {
+                const defaults = {
+                    pos_shop_labor_rate_auto: 95,
+                    pos_shop_labor_rate_body: 85,
+                    pos_shop_labor_rate_upholstery: 95,
+                    pos_shop_labor_rate_tire: 89,
+                    pos_shop_labor_rate_contractor: 85,
+                    pos_shop_labor_rate_mobile_sales_and_service: 75,
+                };
+                let price = Number(form.querySelector(`[name="${key}"]`)?.value);
+                if (!Number.isFinite(price) || price < 0) price = defaults[key] ?? 95;
+                price = Math.round(price * 100) / 100;
+                return { key_name: key, value: String(price), description: meta[key], type: 'number' };
             }
             if (key === 'pos_shop_alignment_2wheel_price' || key === 'pos_shop_alignment_4wheel_price') {
                 let price = Number(form.querySelector(`[name="${key}"]`)?.value);
@@ -4923,6 +6069,7 @@ class AdminApp {
             const settings = Array.isArray(res?.settings) ? res.settings : [];
             const map = new Map(settings.map((item) => [item.key_name, item.value || '']));
             this._applyPosSettingsToForm(map);
+            this._refreshPosStoreLogoPreview();
             await this.loadPosDevices();
         } catch (err) {
             if (msg) {
@@ -6052,9 +7199,21 @@ class AdminApp {
             const map = new Map(settings.map((item) => [item.key_name, item.value || '']));
             this._applyEmployeeDiscountToForm(map);
             this._applyInventorySettingsToForm(map);
+            // Upgrade legacy Weekday/Sat/Sun text boxes before filling the form.
+            this._ensureStoreHoursScheduleEditorMount();
+            const derivedHourKeys = new Set([
+                'store_hours_schedule',
+                'store_hours_weekdays',
+                'store_hours_saturday',
+                'store_hours_sunday',
+                'pos_shop_hours',
+                'store_holiday_schedule',
+            ]);
             Object.keys(this._storeInfoSettingMeta()).forEach((key) => {
                 const input = form.querySelector(`[name="${key}"]`);
-                if (!input || key === 'store_holiday_schedule') return;
+                if (!input || derivedHourKeys.has(key)) {
+                    return;
+                }
                 let v = map.get(key) || '';
                 if (key === 'store_phone' && (window.STORE_PHONE_US || window.HMHERBS_PHONE_US) && v) {
                     const d = (window.STORE_PHONE_US || window.HMHERBS_PHONE_US).digitsOnly(v);
@@ -6080,6 +7239,25 @@ class AdminApp {
                 const p = Number(map.get('store_cash_discount_percent'));
                 storeCashPercentEl.value = Number.isFinite(p) ? String(p) : '0';
             }
+            let hoursSchedule = null;
+            const scheduleRaw = map.get('store_hours_schedule') || map.get('pos_shop_hours') || '';
+            if (scheduleRaw) {
+                try {
+                    const parsed = JSON.parse(scheduleRaw);
+                    if (parsed && typeof parsed === 'object') hoursSchedule = parsed;
+                } catch (_) {
+                    hoursSchedule = null;
+                }
+            }
+            if (!hoursSchedule) {
+                hoursSchedule = this._scheduleFromLegacyDisplayLines(
+                    map.get('store_hours_weekdays') || '',
+                    map.get('store_hours_saturday') || '',
+                    map.get('store_hours_sunday') || ''
+                );
+            }
+            this.storeHoursSchedule = this._normalizeStoreHoursSchedule(hoursSchedule);
+            this._renderStoreHoursScheduleEditor(this.storeHoursSchedule);
             const holidayRaw = map.get('store_holiday_schedule') || '[]';
             try {
                 const parsed = JSON.parse(holidayRaw);
@@ -6090,6 +7268,7 @@ class AdminApp {
             this._renderHolidayTemplateOptions();
             this._toggleCustomHolidayFields();
             this._renderHolidayScheduleList();
+            this._refreshStoreLogoPreview();
             await this.loadGoogleBusinessStatus();
             await this.loadGoogleCalendarStatus();
             await this.loadIntegrationLogs();
@@ -17378,22 +18557,42 @@ document.addEventListener('DOMContentLoaded', () => {
     if (posSettingsForm && window.adminApp) {
         posSettingsForm.addEventListener('submit', (ev) => window.adminApp.savePosSettings(ev));
         const vehicleShops = new Set(['auto', 'tire', 'body', 'upholstery']);
+        const fieldAlone = new Set(['contractor', 'mobile_sales_and_service']);
+        const syncMobilePanel = () => {
+            const mobileOn = Boolean(
+                posSettingsForm.querySelector(
+                    '[name="pos_shop_vertical"][value="mobile_sales_and_service"]'
+                )?.checked
+            );
+            const mobilePanel = document.getElementById('pos-shop-mobile-sales-service');
+            if (mobilePanel) mobilePanel.style.display = mobileOn ? '' : 'none';
+            document.querySelectorAll('[data-pos-labor-vertical]').forEach((el) => {
+                const v = el.getAttribute('data-pos-labor-vertical');
+                if (!v) return;
+                const checked = Boolean(
+                    posSettingsForm.querySelector(`[name="pos_shop_vertical"][value="${v}"]`)?.checked
+                );
+                el.style.display = checked ? '' : 'none';
+            });
+        };
         posSettingsForm.querySelectorAll('[name="pos_shop_vertical"]').forEach((input) => {
             input.addEventListener('change', () => {
                 const value = String(input.value || '').toLowerCase();
-                if (!input.checked) return;
-                if (value === 'contractor') {
-                    posSettingsForm.querySelectorAll('[name="pos_shop_vertical"]').forEach((el) => {
-                        if (el !== input) el.checked = false;
-                    });
-                } else if (vehicleShops.has(value)) {
-                    const contractor = posSettingsForm.querySelector(
-                        '[name="pos_shop_vertical"][value="contractor"]'
-                    );
-                    if (contractor) contractor.checked = false;
+                if (input.checked) {
+                    if (fieldAlone.has(value)) {
+                        posSettingsForm.querySelectorAll('[name="pos_shop_vertical"]').forEach((el) => {
+                            if (el !== input) el.checked = false;
+                        });
+                    } else if (vehicleShops.has(value)) {
+                        posSettingsForm.querySelectorAll('[name="pos_shop_vertical"]').forEach((el) => {
+                            if (fieldAlone.has(String(el.value || '').toLowerCase())) el.checked = false;
+                        });
+                    }
                 }
+                syncMobilePanel();
             });
         });
+        syncMobilePanel();
     }
     const posSettingsReloadBtn = document.getElementById('pos-settings-reload-btn');
     if (posSettingsReloadBtn && window.adminApp) {
@@ -17422,6 +18621,47 @@ document.addEventListener('DOMContentLoaded', () => {
     const storeInfoReloadBtn = document.getElementById('store-info-reload-btn');
     if (storeInfoReloadBtn && window.adminApp) {
         storeInfoReloadBtn.addEventListener('click', () => window.adminApp.loadStoreInfoSettings());
+    }
+    const storeLogoUploadBtn = document.getElementById('store-info-store-logo-upload-btn');
+    if (storeLogoUploadBtn && window.adminApp) {
+        storeLogoUploadBtn.addEventListener('click', () => window.adminApp.uploadStoreLogo());
+    }
+    const storeLogoClearBtn = document.getElementById('store-info-store-logo-clear-btn');
+    if (storeLogoClearBtn && window.adminApp) {
+        storeLogoClearBtn.addEventListener('click', () => window.adminApp.clearStoreLogoUpload());
+    }
+    const storeLogoUrlInput = document.getElementById('store-info-store-logo-url');
+    if (storeLogoUrlInput && window.adminApp) {
+        storeLogoUrlInput.addEventListener('input', () => window.adminApp._refreshStoreLogoPreview());
+        storeLogoUrlInput.addEventListener('change', () => window.adminApp._refreshStoreLogoPreview());
+    }
+    const storeLogoFileInput = document.getElementById('store-info-store-logo-file');
+    if (storeLogoFileInput && window.adminApp) {
+        storeLogoFileInput.addEventListener('change', () => {
+            if (storeLogoFileInput.files?.length) {
+                window.adminApp.uploadStoreLogoToUrl({
+                    refresh: window.adminApp._refreshStoreLogoPreview,
+                    silentIfEmpty: true
+                });
+            }
+        });
+    }
+    const posStoreLogoUploadBtn = document.getElementById('pos-store-logo-upload-btn');
+    if (posStoreLogoUploadBtn && window.adminApp) {
+        posStoreLogoUploadBtn.addEventListener('click', () => window.adminApp.uploadPosStoreLogo());
+    }
+    const posStoreLogoUrlInput = document.getElementById('pos-store-logo-url');
+    if (posStoreLogoUrlInput && window.adminApp) {
+        posStoreLogoUrlInput.addEventListener('input', () => window.adminApp._refreshPosStoreLogoPreview());
+        posStoreLogoUrlInput.addEventListener('change', () => window.adminApp._refreshPosStoreLogoPreview());
+    }
+    const posStoreLogoFileInput = document.getElementById('pos-store-logo-file');
+    if (posStoreLogoFileInput && window.adminApp) {
+        posStoreLogoFileInput.addEventListener('change', () => {
+            if (posStoreLogoFileInput.files?.length) {
+                window.adminApp.uploadPosStoreLogo();
+            }
+        });
     }
     const storeHoursSyncGoogleBtn = document.getElementById('store-hours-sync-google-btn');
     if (storeHoursSyncGoogleBtn && window.adminApp) {

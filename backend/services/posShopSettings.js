@@ -12,6 +12,8 @@ const SETTING_LABOR_RATE_BODY = 'pos_shop_labor_rate_body';
 const SETTING_LABOR_RATE_UPHOLSTERY = 'pos_shop_labor_rate_upholstery';
 const SETTING_LABOR_RATE_TIRE = 'pos_shop_labor_rate_tire';
 const SETTING_LABOR_RATE_CONTRACTOR = 'pos_shop_labor_rate_contractor';
+const SETTING_LABOR_RATE_MOBILE = 'pos_shop_labor_rate_mobile_sales_and_service';
+const SETTING_MOBILE_SERVICE_BOOKINGS = 'pos_mobile_sales_and_service_service_bookings_enabled';
 const SETTING_UPHOLSTERY_DEPOSIT_PERCENT = 'pos_shop_upholstery_deposit_percent';
 const SETTING_UPHOLSTERY_DEPOSIT_MIN = 'pos_shop_upholstery_deposit_min';
 const SETTING_PACKAGES = 'pos_shop_packages';
@@ -36,7 +38,7 @@ const SETTING_ADDON_TIRE_PRO = 'pos_addon_tire_pro';
 const SETTING_ADDON_EXTRA_DISTRIBUTORS = 'pos_addon_extra_distributors';
 const SETTING_SHOP_CONTRACTOR = 'pos_shop_contractor';
 
-const SHOP_VERTICALS = Object.freeze(['auto', 'body', 'upholstery', 'tire', 'contractor']);
+const SHOP_VERTICALS = Object.freeze(['auto', 'body', 'upholstery', 'tire', 'contractor', 'mobile_sales_and_service']);
 
 const DEFAULT_ALIGNMENT_PRICES = Object.freeze({ twoWheel: 59.99, fourWheel: 89.99 });
 const DEFAULT_UPHOLSTERY_DEPOSIT = Object.freeze({ percent: 30, minAmount: 150 });
@@ -45,7 +47,8 @@ const DEFAULT_LABOR_RATES = Object.freeze({
     body: 85,
     upholstery: 95,
     tire: 89,
-    contractor: 85
+    contractor: 85,
+    mobile_sales_and_service: 75
 });
 const DEFAULT_EXPRESS_MINUTES = 45;
 const DEFAULT_WARRANTY_DAYS = 30;
@@ -110,6 +113,44 @@ const DEFAULT_PACKAGES = Object.freeze({
                 { sku: 'DEPOSIT', name: 'Job Deposit', qty: 1, price: 150 }
             ]
         }
+    ],
+    contractor: [
+        {
+            id: 'pkg-gc-walkthrough',
+            name: 'Site walkthrough / estimate',
+            lines: [
+                { sku: 'LABOR-VISIT', name: 'On-site estimate visit', qty: 1, price: 85 },
+                { sku: 'DEPOSIT', name: 'Job Deposit', qty: 1, price: 150 }
+            ]
+        }
+    ],
+    mobile_sales_and_service: [
+        {
+            id: 'pkg-mss-demo',
+            name: 'In-home sales demo',
+            lines: [
+                { sku: 'LABOR-DEMO', name: 'In-home demonstration', qty: 1, price: 0 },
+                { sku: 'TRAVEL', name: 'Travel / zone fee', qty: 1, price: 25 }
+            ]
+        },
+        {
+            id: 'pkg-mss-service',
+            name: 'Service pickup & return',
+            lines: [
+                { sku: 'LABOR-SVC', name: 'Service labor (1 hr)', qty: 1, price: 75 },
+                { sku: 'PICKUP', name: 'Pickup and return', qty: 1, price: 45 },
+                { sku: 'DEPOSIT', name: 'Service deposit', qty: 1, price: 50 }
+            ]
+        },
+        {
+            id: 'pkg-mss-maint',
+            name: 'On-site maintenance visit',
+            lines: [
+                { sku: 'LABOR-MAINT', name: 'Maintenance labor (1 hr)', qty: 1, price: 75 },
+                { sku: 'TRAVEL', name: 'Travel / zone fee', qty: 1, price: 25 },
+                { sku: 'FILTER-KIT', name: 'Filter / consumables kit', qty: 1, price: 39 }
+            ]
+        }
     ]
 });
 
@@ -137,14 +178,18 @@ const DEFAULT_BAYS = Object.freeze({
     auto: ['Bay 1', 'Bay 2', 'Bay 3'],
     body: ['Booth A', 'Booth B', 'Prep bay'],
     tire: ['Rack 1', 'Rack 2', 'Mount bay'],
-    upholstery: ['Bench 1', 'Bench 2', 'Pickup staging']
+    upholstery: ['Bench 1', 'Bench 2', 'Pickup staging'],
+    contractor: ['Slot 1', 'Slot 2', 'Slot 3'],
+    mobile_sales_and_service: ['Slot 1', 'Slot 2', 'Slot 3']
 });
 
 const DEFAULT_BAY_LABELS = Object.freeze({
     auto: 'Bay',
     body: 'Booth / bay',
     tire: 'Bay / rack',
-    upholstery: 'Bench'
+    upholstery: 'Bench',
+    contractor: 'Route slot',
+    mobile_sales_and_service: 'Route slot'
 });
 
 const DEFAULT_SERVICE_INTERVALS = Object.freeze([
@@ -169,7 +214,8 @@ const LABOR_RATE_SETTING_BY_VERTICAL = Object.freeze({
     body: SETTING_LABOR_RATE_BODY,
     upholstery: SETTING_LABOR_RATE_UPHOLSTERY,
     tire: SETTING_LABOR_RATE_TIRE,
-    contractor: SETTING_LABOR_RATE_CONTRACTOR
+    contractor: SETTING_LABOR_RATE_CONTRACTOR,
+    mobile_sales_and_service: SETTING_LABOR_RATE_MOBILE
 });
 
 function parseShopVerticals(value) {
@@ -356,6 +402,8 @@ async function loadPosShopSettings(pool, options = {}) {
         SETTING_LABOR_RATE_UPHOLSTERY,
         SETTING_LABOR_RATE_TIRE,
         SETTING_LABOR_RATE_CONTRACTOR,
+        SETTING_LABOR_RATE_MOBILE,
+        SETTING_MOBILE_SERVICE_BOOKINGS,
         SETTING_UPHOLSTERY_DEPOSIT_PERCENT,
         SETTING_UPHOLSTERY_DEPOSIT_MIN,
         SETTING_PACKAGES,
@@ -463,10 +511,13 @@ async function loadPosShopSettings(pool, options = {}) {
         bayLabels
     };
 
+    const serviceBookingsEnabled = parseBool(map.get(SETTING_MOBILE_SERVICE_BOOKINGS), true);
+
     return {
         shopVerticals: verticals,
         shopVertical: verticals[0] || null,
         shopJobsEnabled: verticals.length > 0,
+        serviceBookingsEnabled,
         addons,
         alignment,
         upholsteryDeposit,
@@ -482,6 +533,7 @@ async function loadPosShopSettings(pool, options = {}) {
         teardownPhotoRequired,
         ...shopExtras,
         shop: {
+            serviceBookingsEnabled,
             alignment,
             diagnostics,
             laborRates,
@@ -511,6 +563,8 @@ module.exports = {
     SETTING_LABOR_RATE_UPHOLSTERY,
     SETTING_LABOR_RATE_TIRE,
     SETTING_LABOR_RATE_CONTRACTOR,
+    SETTING_LABOR_RATE_MOBILE,
+    SETTING_MOBILE_SERVICE_BOOKINGS,
     SETTING_UPHOLSTERY_DEPOSIT_PERCENT,
     SETTING_UPHOLSTERY_DEPOSIT_MIN,
     SETTING_PACKAGES,

@@ -1,11 +1,17 @@
 'use strict';
 
 const { loadHolidaySchedule } = require('./storeHolidaySchedule');
+const {
+    loadStoreHoursSchedule,
+    scheduleToDisplayLines,
+    publicHoursPayload,
+} = require('./storeHoursSchedule');
 
 const STORE_HOUR_KEYS = {
     weekdays: 'store_hours_weekdays',
     saturday: 'store_hours_saturday',
     sunday: 'store_hours_sunday',
+    schedule: 'store_hours_schedule',
 };
 
 const DEFAULT_FOOTER_HOURS = {
@@ -15,27 +21,13 @@ const DEFAULT_FOOTER_HOURS = {
 };
 
 async function loadStoreHours(pool) {
-    const keys = Object.values(STORE_HOUR_KEYS);
-    const map = new Map();
-
-    if (pool) {
-        const placeholders = keys.map(() => '?').join(', ');
-        const [rows] = await pool.execute(
-            `SELECT key_name, value FROM settings WHERE key_name IN (${placeholders})`,
-            keys
-        );
-        (rows || []).forEach((row) => map.set(row.key_name, row.value));
-    }
-
-    const pick = (key, fallback) => {
-        const raw = String(map.get(key) || '').trim();
-        return raw || fallback;
-    };
-
+    const schedule = await loadStoreHoursSchedule(pool);
+    const derived = scheduleToDisplayLines(schedule);
     return {
-        weekdays: pick(STORE_HOUR_KEYS.weekdays, DEFAULT_FOOTER_HOURS.weekdays),
-        saturday: pick(STORE_HOUR_KEYS.saturday, DEFAULT_FOOTER_HOURS.saturday),
-        sunday: pick(STORE_HOUR_KEYS.sunday, DEFAULT_FOOTER_HOURS.sunday),
+        weekdays: derived.weekdays || DEFAULT_FOOTER_HOURS.weekdays,
+        saturday: derived.saturday || DEFAULT_FOOTER_HOURS.saturday,
+        sunday: derived.sunday || DEFAULT_FOOTER_HOURS.sunday,
+        schedule,
     };
 }
 
@@ -50,12 +42,17 @@ function storefrontFooterLines(hours) {
 }
 
 function publicStoreInfoPayload(hours) {
+    const schedulePayload = hours.schedule ? publicHoursPayload(hours.schedule) : null;
     return {
         hours: {
             weekdays: hours.weekdays,
             saturday: hours.saturday,
             sunday: hours.sunday,
         },
+        schedule: schedulePayload?.schedule || null,
+        hoursSummary: schedulePayload?.hoursSummary || null,
+        closedSummary: schedulePayload?.closedSummary || null,
+        openDays: schedulePayload?.openDays || null,
         footerLines: storefrontFooterLines(hours),
         // Kept empty so older cached site-store-info.js never paints holiday rows.
         upcomingHolidays: [],

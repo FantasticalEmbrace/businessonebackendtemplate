@@ -11,7 +11,9 @@ function isPasswordChangeAllowedPath(req) {
     const url = String(req.originalUrl || req.url || '').split('?')[0];
     return (
         /\/admin\/auth\/me\/?$/i.test(url) ||
-        /\/admin\/auth\/change-password\/?$/i.test(url)
+        /\/admin\/auth\/change-password\/?$/i.test(url) ||
+        // Allow chrome branding so the force-change panel can render without 403 spam.
+        /\/admin\/chrome-branding\/?$/i.test(url)
     );
 }
 

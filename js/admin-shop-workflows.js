@@ -10,7 +10,8 @@
         { key: 'auto', label: 'Auto service' },
         { key: 'body', label: 'Body shop' },
         { key: 'tire', label: 'Tire shop' },
-        { key: 'upholstery', label: 'Upholstery' }
+        { key: 'upholstery', label: 'Upholstery' },
+        { key: 'mobile_sales_and_service', label: 'Mobile service' }
     ];
 
     const PROCESS_TYPES = ['waiting', 'inspection', 'decision', 'work', 'complete', 'payment'];

@@ -173,6 +173,7 @@ router.get('/config', async (req, res) => {
             currency: 'USD',
             shopVertical: shopSettings.shopVertical,
             shopVerticals: shopSettings.shopVerticals,
+            serviceBookingsEnabled: shopSettings.serviceBookingsEnabled !== false,
             addons: shopSettings.addons || { warehouse: false, vinFitment: false, tirePro: false, extraDistributors: 0 },
             shopJobsEnabled: shopSettings.shopJobsEnabled,
             shop: shopSettings.shop,

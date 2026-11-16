@@ -23,7 +23,50 @@ async function columnExists(pool, columnName) {
 async function ensureSchedulingBookingSchema(pool) {
     try {
         if (!(await tableExists(pool))) {
-            logger.warn('Database: scheduling_bookings table not found; skipping Scheduling column patches');
+            await pool.query(`
+                CREATE TABLE IF NOT EXISTS scheduling_bookings (
+                    id INT PRIMARY KEY AUTO_INCREMENT,
+                    user_id INT NULL,
+                    first_name VARCHAR(100) NOT NULL,
+                    last_name VARCHAR(100) NOT NULL,
+                    email VARCHAR(255) NOT NULL,
+                    phone VARCHAR(20) NOT NULL,
+                    preferred_date DATE NOT NULL,
+                    preferred_time TIME NOT NULL,
+                    alternative_date DATE NULL,
+                    alternative_time TIME NULL,
+                    status ENUM('pending', 'confirmed', 'completed', 'cancelled') DEFAULT 'pending',
+                    notes TEXT NULL,
+                    admin_notes TEXT NULL,
+                    confirmed_date DATE NULL,
+                    confirmed_time TIME NULL,
+                    customer_request_type VARCHAR(20) NOT NULL DEFAULT 'none',
+                    customer_request_notes TEXT NULL,
+                    requested_date DATE NULL,
+                    requested_time TIME NULL,
+                    customer_request_at TIMESTAMP NULL,
+                    google_calendar_event_id VARCHAR(255) NULL,
+                    payment_status ENUM('pending', 'paid', 'failed', 'refunded') NOT NULL DEFAULT 'pending',
+                    payment_reference VARCHAR(128) NULL,
+                    amount_charged DECIMAL(10,2) NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    INDEX idx_user_id (user_id),
+                    INDEX idx_status (status),
+                    INDEX idx_preferred_date (preferred_date),
+                    INDEX idx_email (email)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            `);
+            logger.info('Database: created scheduling_bookings table');
+        }
+    } catch (e) {
+        logger.warn(`Database: could not ensure scheduling_bookings — ${logger.formatMysqlError(e)}`);
+        return;
+    }
+
+    try {
+        if (!(await tableExists(pool))) {
+            logger.warn('Database: scheduling_bookings still missing after create attempt');
             return;
         }
     } catch (e) {
